@@ -1,0 +1,41 @@
+# Secrets
+.credentials.json
+
+# Fichiers générés / backups
+settings.json.bak
+hooks/rtk-rewrite.sh
+
+# Données d'usage / caches locaux
+history.jsonl
+stats-cache.json
+mcp-needs-auth-cache.json
+cache/
+backups/
+file-history/
+paste-cache/
+shell-snapshots/
+
+# État runtime du daemon
+daemon/
+daemon.log
+daemon.lock
+daemon.status.json
+
+# Sessions / exécution, spécifiques à la machine
+sessions/
+projects/
+session-env/
+ide/
+jobs/
+debug/
+downloads/
+
+# Télémétrie
+telemetry/
+
+# État transitoire
+.caveman-active
+.last-cleanup
+.last-update-result.json
+plugins/marketplaces/
+tasks/

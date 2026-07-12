@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "plugins": {
+    "rust-analyzer-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/home/Benoit/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-20T13:35:28.832Z",
+        "lastUpdated": "2026-03-20T13:35:28.832Z",
+        "gitCommitSha": "d53f6ca4cdb000c671dfdc1c181b021e97c25505"
+      }
+    ],
+    "caveman@caveman": [
+      {
+        "scope": "user",
+        "installPath": "/home/Benoit/.claude/plugins/cache/caveman/caveman/24e6ee9ea827",
+        "version": "24e6ee9ea827",
+        "installedAt": "2026-04-11T14:19:41.257Z",
+        "lastUpdated": "2026-04-11T14:19:41.257Z",
+        "gitCommitSha": "24e6ee9ea827c0a9b5339744ae42e190b7434310"
+      }
+    ]
+  }
+}

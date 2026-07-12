@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:neovim.io)",
+      "WebFetch(domain:vonheikemen.github.io)",
+      "WebFetch(domain:fossies.org)",
+      "Bash(grep -r Snacks.scratch /home/Benoit/.local/share/nvim/lazy/snacks.nvim/docs --include=*.md)"
+    ],
+    "defaultMode": "default",
+    "additionalDirectories": [
+      "~/.local/share/nvim/lazy",
+      "~/projects/nvim-plugins"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/Benoit/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "python3 $HOME/.claude/statusline-command.py"
+  },
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "caveman@caveman": true
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
+  },
+  "language": "Francais",
+  "effortLevel": "medium",
+  "tui": "fullscreen",
+  "editorMode": "normal",
+  "verbose": false,
+  "autoCompactEnabled": true,
+  "voiceEnabled": true
+}
