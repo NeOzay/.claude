@@ -8,6 +8,9 @@ description: >
   pour les fichiers en cours. Déclencher aussi si l'utilisateur dit "commit tout", "commit ce que j'ai fait",
   "crée un commit avec mes changements", ou toute variante. Cette skill observe le diff complet,
   catégorise les changements, et produit un message de commit suivant la convention Conventional Commits.
+  Gère aussi l'aplatissement d'une branche d'implémentation (ex. clôture d'un chantier via
+  implementation-tracker) : tous les commits de la branche sont réunis en un seul commit sur la
+  branche principale, avec confirmation explicite avant toute réécriture.
 model: Sonnet
 ---
 
@@ -172,6 +175,13 @@ thématiques plutôt qu'un seul commit monolithique.
 git status | grep -E "^(UU|AA|DD)"
 ```
 Si des conflits existent, avertir l'utilisateur et ne pas committer.
+
+### Aplatissement d'une branche d'implémentation (ex. clôture d'implémentation)
+
+Cas déclenché explicitement (pas par simple mention de "commit"), typiquement par
+`implementation-tracker` en fin de chantier. Réunit tous les commits de la branche `<slug>` en un seul
+commit sur la branche principale, puis supprime la branche — procédure dédiée : voir
+[`references/squash.md`](references/squash.md).
 
 ---
 
