@@ -3,9 +3,10 @@ name: implementation-tracker
 description: >
   Définit et suit une implémentation en cours sur plusieurs discussions. Maintient un fichier
   de suivi versionné par feature (objectif, périmètre, étapes, état courant, journal de décisions)
-  dans .claude/implementation/. À invoquer UNIQUEMENT sur demande explicite de l'utilisateur
-  (/implementation-tracker), typiquement en début de discussion. Ne jamais déclencher
-  spontanément au milieu d'une session.
+  dans .claude/implementation/. Skill exclusivement manuelle : elle s'invoque uniquement via
+  /implementation-tracker, typiquement en début de discussion.
+disable-model-invocation: true
+argument-hint: "[@chemin/vers/suivi.md]"
 ---
 
 # Implementation Tracker
@@ -77,6 +78,12 @@ Aucun fichier existant → proposer directement la création.
 
 ## Étape 2 — Création (nouvelle implémentation)
 
+**Prérequis : arbre de travail propre.** Si `git status --short` (Étape 0) n'est pas vide, **ne pas
+créer** de nouvelle implémentation. Arrêter et indiquer qu'il ne doit y avoir aucune modification en
+cours avant de démarrer un nouveau chantier — sinon les premiers commits de session mélangeraient des
+changements étrangers à l'implémentation. Laisser l'utilisateur traiter ces modifications (les
+committer ou les mettre de côté) avant de relancer.
+
 1. **Entrer en plan mode** (`EnterPlanMode`). Explorer le code, discuter, construire le plan
    normalement. C'est le flux natif qui fait le travail : ne pas réinventer un questionnaire.
 2. À la validation (`ExitPlanMode`), le plan est persisté dans `~/.claude/plans/<slug>-<mots>.md`.
@@ -101,12 +108,6 @@ Aucun fichier existant → proposer directement la création.
 
    Tous les commits de session/étape se feront désormais sur `<slug>` ; ils seront aplatis en un seul
    commit sur `base:` à la clôture (Étape 5). Ne jamais committer sans accord explicite (règle globale).
-
-**Prérequis : arbre de travail propre.** Si `git status --short` (Étape 0) n'est pas vide, **ne pas
-créer** de nouvelle implémentation. Arrêter et indiquer qu'il ne doit y avoir aucune modification en
-cours avant de démarrer un nouveau chantier — sinon les premiers commits de session mélangeraient des
-changements étrangers à l'implémentation. Laisser l'utilisateur traiter ces modifications (les
-committer ou les mettre de côté) avant de relancer.
 
 ---
 
