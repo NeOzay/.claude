@@ -6,7 +6,12 @@
       "WebFetch(domain:neovim.io)",
       "WebFetch(domain:vonheikemen.github.io)",
       "WebFetch(domain:fossies.org)",
-      "Bash(grep -r Snacks.scratch /home/Benoit/.local/share/nvim/lazy/snacks.nvim/docs --include=*.md)"
+      "Bash(grep -r Snacks.scratch /home/Benoit/.local/share/nvim/lazy/snacks.nvim/docs --include=*.md)",
+      "Bash(rtk read *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk proxy *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk gh *)"
     ],
     "defaultMode": "default",
     "additionalDirectories": [
@@ -14,6 +19,7 @@
       "~/projects/nvim-plugins"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {

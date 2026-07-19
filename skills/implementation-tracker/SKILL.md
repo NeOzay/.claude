@@ -27,7 +27,7 @@ Invocation manuelle uniquement :
 <repo>/.claude/implementation/
   <slug>.md                      # actifs — commités avec le code
   done/
-    <AAAA-MM>-<slug>.md          # archivés à la clôture
+    <AAAA-MM-DD>-<slug>.md          # archivés à la clôture
 ```
 
 ---
@@ -197,7 +197,7 @@ Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implément
    **Déplacement du fichier de suivi** : une fois placé sur `base:` avec le `git merge --squash`
    appliqué, mais **avant le commit unique**, déplacer le fichier vers `done/` pour que le renommage
    soit inclus dans l'aplatissement :
-   `git mv .claude/implementation/<slug>.md .claude/implementation/done/<AAAA-MM>-<slug>.md`
+   `git mv .claude/implementation/<slug>.md .claude/implementation/done/<AAAA-MM-DD>-<slug>.md`
 4. Produire un **résumé prêt à coller dans la PR** : objectif, ce qui a changé, décisions notables,
    points laissés de côté.
 

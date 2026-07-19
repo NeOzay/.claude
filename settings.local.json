@@ -1,8 +1,16 @@
 {
   "permissions": {
     "allow": [
+      "Bash(uv run *)",
+      "Bash(rtk grep *)",
       "Bash(rtk read *)",
-      "Bash(rtk grep *)"
+      "Bash(rtk ls *)",
+      "Bash(rtk pytest *)",
+      "Bash(uv add *)",
+      "Bash(sqlite3 *)",
+      "Bash(rtk find *)",
+      "Bash(rtk wc *)",
+      "Bash(rtk proxy *)"
     ]
   }
 }
