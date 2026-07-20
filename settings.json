@@ -49,6 +49,7 @@
       }
     }
   },
+  "plansDirectory": ".claude/plans",
   "language": "Francais",
   "effortLevel": "medium",
   "tui": "fullscreen",
