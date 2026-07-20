@@ -20,19 +20,6 @@
     ]
   },
   "model": "sonnet",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/Benoit/.claude/hooks/rtk-rewrite.sh"
-          }
-        ]
-      }
-    ]
-  },
   "statusLine": {
     "type": "command",
     "command": "python3 $HOME/.claude/statusline-command.py"
@@ -56,5 +43,18 @@
   "editorMode": "normal",
   "verbose": false,
   "autoCompactEnabled": true,
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ]
+  }
 }
