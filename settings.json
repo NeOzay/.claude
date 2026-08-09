@@ -1,5 +1,70 @@
 {
+  "autoCompactEnabled": true,
+  "editorMode": "normal",
+  "effortLevel": "medium",
+  "enabledPlugins": {
+    "caveman@caveman": true,
+    "rust-analyzer-lsp@claude-plugins-official": false
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "repo": "JuliusBrussee/caveman",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "rtk hook claude",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ]
+  },
+  "language": "Francais",
+  "model": "opus",
   "permissions": {
+    "additionalDirectories": [
+      "~/.local/share/nvim/lazy",
+      "~/projects/nvim-plugins"
+    ],
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
@@ -13,48 +78,14 @@
       "Bash(rtk ls *)",
       "Bash(rtk gh *)"
     ],
-    "defaultMode": "default",
-    "additionalDirectories": [
-      "~/.local/share/nvim/lazy",
-      "~/projects/nvim-plugins"
-    ]
-  },
-  "model": "sonnet",
-  "statusLine": {
-    "type": "command",
-    "command": "python3 $HOME/.claude/statusline-command.py"
-  },
-  "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "caveman@caveman": true
-  },
-  "extraKnownMarketplaces": {
-    "caveman": {
-      "source": {
-        "source": "github",
-        "repo": "JuliusBrussee/caveman"
-      }
-    }
+    "defaultMode": "auto"
   },
   "plansDirectory": ".claude/plans",
-  "language": "Francais",
-  "effortLevel": "medium",
+  "statusLine": {
+    "command": "python3 $HOME/.claude/statusline-command.py",
+    "type": "command"
+  },
   "tui": "fullscreen",
-  "editorMode": "normal",
   "verbose": false,
-  "autoCompactEnabled": true,
-  "voiceEnabled": true,
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "rtk hook claude"
-          }
-        ]
-      }
-    ]
-  }
+  "voiceEnabled": true
 }
