@@ -55,6 +55,15 @@
           }
         ],
         "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "command": "$HOME/.claude/hooks/intent-brief-gate.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "EnterPlanMode"
       }
     ]
   },
