@@ -2,7 +2,7 @@
 .credentials.json
 
 # Fichiers générés / backups
-settings.json.bak
+settings.json.bak*
 hooks/rtk-rewrite.sh
 
 # Données d'usage / caches locaux
@@ -38,4 +38,5 @@ telemetry/
 .last-cleanup
 .last-update-result.json
 plugins/marketplaces/
+plugins/known_marketplaces.json
 tasks/
