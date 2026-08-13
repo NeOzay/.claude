@@ -41,7 +41,7 @@ paths:
 
 ## Callbacks
 
-- Typer les callbacks avec `fun(...)`. Créer un `@alias` pour les signatures de callback réutilisées.
+- Typer les callbacks avec `fun(...):...`. Créer un `@alias` pour les signatures de callback réutilisées.
 
 ## Diagnostics
 
