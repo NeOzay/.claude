@@ -6,7 +6,7 @@ description: >
   dans .claude/implementation/. Skill exclusivement manuelle : elle s'invoque uniquement via
   /implementation-tracker, typiquement en début de discussion.
 disable-model-invocation: true
-argument-hint: "[@chemin/vers/suivi.md]"
+argument-hint: "[@chemin/vers/suivi.md | close]"
 ---
 
 # Implementation Tracker
@@ -18,6 +18,8 @@ Invocation manuelle uniquement :
 
 - `/implementation-tracker` → liste les implémentations, propose reprise ou création
 - `/implementation-tracker @chemin/vers/fichier.md` → charge directement ce fichier de suivi
+- `/implementation-tracker close` → clôture l'implémentation en cours (Étape 5)
+- `/implementation-tracker abandon` → abandonne un chantier sans le livrer (Étape 6)
 
 ---
 
@@ -57,11 +59,18 @@ Dans les deux cas : poser la question, attendre la réponse, ne pas supposer.
 
 ## Étape 1 — Router
 
-### Cas A : un chemin est passé en argument
+### Cas A : l'argument est `close` ou `abandon`
 
-Lire ce fichier, aller directement à l'étape 3 (reprise).
+Lister les implémentations comme au Cas C et **faire choisir, même s'il n'y en a qu'une** : ces
+deux opérations suppriment une branche, elles ne se déclenchent pas sur une déduction. Aller
+ensuite à l'Étape 5 (`close`) ou 6 (`abandon`). Aucune implémentation en cours → le dire et
+s'arrêter.
 
-### Cas B : aucun argument
+### Cas B : un chemin est passé en argument
+
+Lire ce fichier, aller directement à l'Étape 3 (reprise).
+
+### Cas C : aucun argument
 
 Lire **uniquement les frontmatters** des fichiers de suivi (pas les fichiers entiers). Les
 `*.brief.md` ne sont **pas** des fichiers de suivi : les exclure du listing.
@@ -104,6 +113,11 @@ committer ou les mettre de côté) avant de relancer.
 
    Un brief validé existe déjà pour ce chantier → le lire et passer directement au point 2.
 
+   **Pas de brief** (cadrage jugé inutile, cf. « Quand ne pas cadrer » d'`intent-brief`) →
+   `brief:` omis et **`execution: direct` imposé** : sans hors-périmètre ni signaux de dérive
+   écrits, un exécutant isolé n'a aucune borne. Remplir `## Objectif et périmètre` avec
+   l'utilisateur, en une passe.
+
 2. **Entrer en plan mode** (`EnterPlanMode`), avec le brief comme cadre : rappeler
    explicitement au plan les critères de réussite, le hors-périmètre et les incertitudes à
    lever. Explorer le code et construire le plan normalement — c'est le flux natif qui fait
@@ -113,20 +127,48 @@ committer ou les mettre de côté) avant de relancer.
    déclenchés, incertitudes tranchées. Tout écart se dit ; il se règle avec l'utilisateur, pas
    en silence.
 
-   Le plan est persisté dans `.claude/plans/<slug>-<mots>.md` (voir `plansDirectory`).
-   Récupérer ce chemin :
+   **Le chantier arrive d'`intent-brief`** (cas normal : c'est lui qui renvoie ici) → ses Étapes
+   6 et 7 ont déjà fait le plan et la confrontation. Ne pas les refaire : passer au point 4.
+
+   Le plan est persisté dans `.claude/plans/<slug>-<mots>.md` (voir `plansDirectory`). **Prendre
+   son chemin dans la sortie d'`ExitPlanMode`**, pas par `ls -t` : dès qu'un second plan existe,
+   la date de modification désigne le mauvais fichier.
+
+   **Le plan doit être versionné.** C'est lui qui porte le contenu des étapes — le suivi n'en a
+   que les intitulés, et `step-implementer` va y lire la description de son étape. Vérifier qu'il
+   n'est pas ignoré :
 
    ```bash
-   ls -t .claude/plans/*.md | head -1
+   git check-ignore -q .claude/plans/<fichier>.md && echo "IGNORÉ — le signaler"
    ```
 
-4. **Figer le plan** dans le fichier de suivi : les étapes du plan deviennent la section `## Étapes`,
-   et le chemin du plan va dans le champ `plan:` du frontmatter.
+   S'il est ignoré, le dire à l'utilisateur : sans lui, la reprise en session 3 et toute
+   délégation perdent la description des étapes. Sinon, le committer avec le fichier de suivi.
+
+4. **Figer le plan** dans le fichier de suivi (gabarit : `references/gabarit-suivi.md`) : les étapes
+   du plan deviennent la section `## Étapes`, et le chemin du plan va dans le champ `plan:` du
+   frontmatter.
+
+   Chaque étape porte **le ou les fichiers visés et sa commande de vérification** :
+
+   ```
+   - [ ] 2. Brancher le middleware — `src/mw/auth.rs` — vérif: `cargo test mw::auth`
+   ```
+
+   Une étape sans vérification n'est pas délégable. C'est tout ce que l'appelant transmettra de
+   l'étape à `step-implementer` — le reste, l'exécutant va le chercher dans le plan : le suivi ne
+   porte que l'intitulé et l'état, **le contenu de l'étape reste dans le plan**.
+
+   Chaque étape doit tenir en **un seul tour d'exécution**. Une étape qui déborderait sur
+   plusieurs sessions se découpe ici, pas en cours de route : un appel de sous-agent est
+   atomique et ne se reprend pas.
 5. Slug = titre en kebab-case, court (`auth-refactor`, pas `refonte-complete-du-systeme-dauth`).
    **Reprendre exactement le slug du brief** — c'est lui qui apparie les deux fichiers.
 6. **Reprendre `## Objectif et périmètre` du brief**, ne pas le réinventer : symptôme, but,
    critères de réussite, hors-périmètre **et signaux de dérive** viennent du brief, tels qu'ils
-   ont été validés. Renseigner `brief:` dans le frontmatter.
+   ont été validés. Renseigner `brief:` dans le frontmatter, ainsi que `execution:` — repris tel
+   quel du frontmatter du brief. **`direct` à défaut d'indication** : une valeur absente signifie
+   que la délégabilité n'a pas été jugée, pas qu'elle est acquise.
 
    Le **symptôme** est ce qui permet, trois sessions plus tard, de voir qu'on a construit la
    bonne solution au mauvais problème. Les **signaux de dérive** deviennent un déclencheur
@@ -180,26 +222,92 @@ Déclencheurs d'écriture :
 
 | Événement | Action |
 |---|---|
+| Étape passée en `[>]` | Si `execution: délégué` et l'étape est substantielle : déléguer à `step-implementer` (voir ci-dessous) |
 | Étape terminée | Cocher `[x]`, passer la suivante en `[>]`, **proposer un commit** (voir ci-dessous) |
 | Blocage | Passer l'étape en `[!]` + raison, `statut: bloqué` |
 | Déblocage | Repasser en `[>]`, `statut: en-cours` |
 | Décision d'architecture arrêtée | Ligne dans le journal (voir règle ci-dessous) |
 | Le plan ne colle plus au réel | **Modifier les étapes** et le dire. Ne jamais bricoler en silence |
 | **Signal de dérive du brief déclenché** | **S'arrêter**, le nommer, en reparler avant de continuer |
-| Demande hors-périmètre | Le signaler, proposer soit d'élargir le périmètre, soit une nouvelle impl |
+| Demande hors-périmètre | Le signaler, proposer soit d'élargir le périmètre (voir ci-dessous), soit une nouvelle impl |
+
+### Quand le périmètre change
+
+Le brief est figé, le suivi vit : **en cas de divergence, le suivi fait foi**, le brief reste le
+témoin de l'intention d'origine. Un élargissement accepté par l'utilisateur s'écrit donc dans
+`## Objectif et périmètre` du suivi — daté, avec une entrée au journal — et non dans le brief.
+C'est la seule exception au « repris du brief, pas reformulé » ; sans elle, un chantier qui évolue
+n'a plus de périmètre écrit nulle part, et l'exécutant refuse en `ÉCART` un travail pourtant validé.
+
+### Délégation d'étape
+
+Quand `execution: délégué` et que l'étape passée en `[>]` est substantielle, elle **est** confiée
+au sous-agent `step-implementer` (Sonnet, contexte isolé). Deux bénéfices distincts : les lectures
+de fichiers et les diffs restent dans l'agent au lieu de gonfler la session, et l'exécution sort
+du modèle de cadrage.
+
+Lui transmettre : chemins du suivi et du brief, numéro et intitulé de l'étape, commande de
+vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même le suivi, le plan (via
+`plan:`) et le brief.
+
+**Ne pas déléguer** :
+
+- une étape qui tient en un ou deux fichiers évidents — l'amorçage d'un agent froid coûte alors
+  plus que le travail lui-même ;
+- une étape exploratoire, ou qui dépend d'un arbitrage encore ouvert ;
+- une étape **sans commande de vérification** — l'exécutant n'aurait aucun moyen de conclure ;
+- une étape **déjà entamée** et interrompue par une fin de session : la terminer en direct. Un
+  appel d'agent est atomique ; ré-déléguer enverrait un agent froid sur un travail à moitié fait,
+  qu'il rapporterait en `ÉCART`. Si le cas se répète, les étapes sont trop grosses : les découper.
+
+Dans le doute sur un chantier entier, basculer `execution:` à `direct` et le noter au journal.
+
+**L'appelant reste responsable au retour.** L'agent ne commit pas et ne touche à aucun fichier
+de suivi. Relire le fichier de suivi avant d'y écrire — il a pu vieillir pendant l'exécution.
+
+**Premier réflexe, quel que soit le `RÉSULTAT` : regarder le diff.** Le travail a été produit hors
+session — ni `git-smart-commit` (court-circuité pour les commits d'étape) ni l'utilisateur ne l'ont
+vu passer. Afficher `git status --short` et `git diff --stat`, les confronter à `FICHIERS` : un
+fichier touché qui n'y figure pas est un écart, pas un oubli. C'est le seul regard porté sur ce
+diff, et il vient **avant** toute autre action.
+
+| `RÉSULTAT` | Action |
+|---|---|
+| `TERMINÉ` | Cocher `[x]`, actualiser `maj:`, consigner les `DÉCISIONS`, proposer le commit |
+| `ÉCART` | Remonter à l'utilisateur sans rien corriger d'office, comme toute divergence plan/réel |
+| `DÉRIVE` | S'arrêter, nommer le signal déclenché, en reparler avant de continuer |
+| `BLOQUÉ` | Passer l'étape en `[!]` + raison, `statut: bloqué` |
+
+**Sur `ÉCART`, `DÉRIVE` ou `BLOQUÉ`, l'agent a laissé du travail partiel dans l'arbre** — c'est
+voulu, il n'a pas les commandes pour revenir en arrière. Trancher son sort avec l'utilisateur
+**avant de faire quoi que ce soit d'autre** : garder en l'état, ou annuler (`git restore`). Sans
+cet arbitrage, le prochain commit de session le ramasserait en silence — exactement ce que ce
+dispositif existe pour empêcher.
+
+Dans tous les cas : **`À SIGNALER` non vide se remonte à l'utilisateur**, sans rien corriger
+d'office ; si l'anomalie relève du périmètre, elle devient une étape.
+
+Ne jamais cocher une étape sur la seule foi du rapport si `VÉRIFICATION` n'a pas de verdict
+réel : relancer la commande soi-même.
+
+**Rendre la main après chaque étape déléguée.** Ne pas enchaîner la suivante sans accord : c'est
+le point de contrôle de l'utilisateur sur une exécution qu'il n'a pas vue, et la coupure naturelle
+entre deux sessions.
 
 ### Commits de session
 
-Une étape peut s'étaler sur **plusieurs sessions** (plusieurs discussions successives). Le compteur
-de commit se cale donc sur la **session**, pas sur l'étape :
+Une étape peut se retrouver **à cheval sur deux sessions** — interruption, ou exécution en `direct`.
+Le compteur de commit se cale donc sur la **session**, pas sur l'étape :
 
 - Le frontmatter porte un champ `session: N`, incrémenté à chaque reprise (Étape 3).
 - Message de commit : `<slug>: session N — <étape en cours>`.
-- **Quand une étape passe en `[x]`** : proposer un commit dédié (même si un commit de session a déjà
-  été fait juste avant), et noter sa référence courte à côté de la case dans le fichier de suivi,
-  par ex. `[x] 2. Brancher le middleware (commit: a1b2c3d)`.
-- Commit simple et direct (`git add -u && git commit -m "..."`), pas besoin de `git-smart-commit`
-  pour ces commits de suivi — ils ont un message prédéterminé, pas d'analyse de diff nécessaire.
+- **Quand une étape passe en `[x]`** : proposer un commit dédié, même si un commit de session a déjà
+  été fait juste avant.
+- Commit simple et direct, pas besoin de `git-smart-commit` pour ces commits de suivi — ils ont un
+  message prédéterminé, pas d'analyse de diff nécessaire. **Stager les chemins, jamais `-A` :**
+  `git add <chemins> && git commit -m "..."` — les fichiers de `FICHIERS` pour une étape déléguée,
+  le fichier de suivi, et rien d'autre. `-A` ramasserait ce qui traîne dans l'arbre ; `-u` raterait
+  les fichiers créés.
 - **Toujours proposer, jamais committer sans confirmation explicite** (règle globale, `CLAUDE.md`).
 
 ### Règle du journal de décisions
@@ -214,91 +322,25 @@ n'en garder que celle qui contraint réellement la suite.
 
 Format : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`
 
-**Compaction** : garder les **5 dernières** décisions en clair. Les plus anciennes sont condensées à
-une ligne chacune sous `### Décisions antérieures`, en ne conservant que la décision et le pourquoi.
-
 ---
 
 ## Étape 5 — Clôture
 
 Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée :
+lire `references/cloture.md`, section « Clôture », et suivre la procédure — contrôle des étapes
+**et confrontation du résultat aux critères de réussite**, finalisation du suivi, aplatissement
+via `git-smart-commit`, archivage en `done/`, résumé.
 
-1. Vérifier que toutes les étapes sont cochées — sinon demander quoi faire des restantes.
-2. **Sur la branche `<slug>`**, finaliser le fichier de suivi : `statut: terminé`, compacter le journal
-   en entier. Le committer (commit de suivi direct) pour que ces derniers changements entrent dans
-   l'aplatissement.
-3. **Aplatir la branche d'implémentation dans la branche principale** : passer la main à
-   `git-smart-commit` (cas « aplatissement d'une branche d'implémentation », voir ce skill). Tous les
-   commits de la branche `<slug>` sont réunis en **un seul commit posé sur `base:`**, puis la branche
-   `<slug>` est supprimée. Ce n'est **pas** un commit de suivi ordinaire — c'est une réécriture
-   d'historique, donc elle suit le workflow de vérification et de confirmation complet de
-   `git-smart-commit`, pas le commit direct utilisé pour les sessions/étapes.
-   **Déplacement du fichier de suivi** : une fois placé sur `base:` avec le `git merge --squash`
-   appliqué, mais **avant le commit unique**, déplacer le fichier vers `done/` pour que le renommage
-   soit inclus dans l'aplatissement :
-   `git mv .claude/implementation/<slug>.md .claude/implementation/done/<AAAA-MM-DD>-<slug>.md`
+## Étape 6 — Abandon
 
-   **Archiver aussi le brief** au même moment, s'il existe — il documente l'intention d'origine et
-   n'a d'intérêt qu'à côté de son suivi. Il peut ne pas être suivi par git (créé avant le premier
-   commit du chantier) : `git mv` échouerait alors en plein squash. Replier sur `mv` :
-
-   ```bash
-   b=.claude/implementation/<slug>.brief.md
-   d=.claude/implementation/done/<AAAA-MM-DD>-<slug>.brief.md
-   [ -e "$b" ] && { git mv "$b" "$d" 2>/dev/null || mv "$b" "$d"; }
-   ```
-4. Produire un **résumé prêt à coller dans la PR** : objectif, ce qui a changé, décisions notables,
-   points laissés de côté.
+Sur `/implementation-tracker abandon`, ou quand l'utilisateur renonce au chantier : lire
+`references/cloture.md`, section « Abandon ». Un chantier abandonné n'est **jamais** aplati dans
+`base:` ; il est archivé avec sa raison, et le sort de sa branche se décide avec l'utilisateur.
 
 ---
 
 ## Gabarit du fichier de suivi
 
-```markdown
----
-slug: auth-refactor
-titre: Refonte de l'authentification
-branche: auth-refactor      # branche d'implémentation = <slug>
-base: main                  # branche principale, cible de l'aplatissement final (Étape 5)
-statut: en-cours            # en-cours | bloqué | terminé
-session: 3                  # incrémenté à chaque reprise (Étape 3)
-plan: .claude/plans/refonte-auth-lucky-beaver.md
-brief: .claude/implementation/auth-refactor.brief.md
-créé: 2026-07-12
-maj: 2026-07-12
----
-
-## Objectif et périmètre
-
-Repris du brief (`brief:`), pas réinventé.
-
-**Symptôme** : … (ce qui était vécu à l'origine — sert à détecter la bonne solution au mauvais problème)
-**But** : …
-**Critères de réussite** : … (mesurables : tests qui passent, comportement observable)
-**Hors-périmètre** : … (explicite — ce qu'on ne fait PAS dans ce chantier)
-**Signaux de dérive** : … (déclencheurs d'arrêt pendant l'implémentation, cf. Étape 4)
-
-## Étapes
-
-- [x] 1. Extraire `TokenStore` — `src/auth/token.rs` (commit: a1b2c3d)
-- [>] 2. Brancher le middleware — `src/mw/auth.rs`
-- [ ] 3. Migrer les tests
-- [!] 4. Rotation des clés — BLOQUÉ : attente décision infra
-
-## État courant
-
-**Prochaine action** : …
-**Vérification** : `cargo test auth`
-**Notes** : …
-
-## Journal de décisions
-
-- **2026-07-12** — JWT plutôt que sessions serveur. *Pourquoi* : scale horizontal sans état partagé.
-  *Rejeté* : sessions Redis (dépendance d'infra supplémentaire).
-
-### Décisions antérieures
-
-- Argon2id pour le hash — résistance GPU.
-```
+Voir `references/gabarit-suivi.md` — à lire au moment de créer le fichier (Étape 2), pas avant.
 
 Légende des cases : `[ ]` à faire · `[>]` en cours · `[x]` fait · `[!]` bloqué

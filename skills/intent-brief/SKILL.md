@@ -128,26 +128,17 @@ une question fermée récolte un « oui » poli, une ouverte récolte la correct
 **Contrainte de vérification** : la restitution doit citer au moins un fait concret du dépôt — un
 commit, un fichier, un test, une fonction. Sans citation, l'Étape 1 n'a pas eu lieu : la refaire.
 
-Puis **créer le brief en `statut: brouillon`** (gabarit : `references/gabarit-brief.md`), rempli de
-ce qui est déjà établi. Il sert de registre à partir d'ici.
+Puis **arrêter le slug** — court, en kebab-case (`auth-refactor`, pas
+`refonte-complete-du-systeme-dauth`), tiré de l'argument ou du sujet. Il nomme le fichier et ne
+change plus : **le brief fait autorité**, le fichier de suivi le reprendra tel quel.
+
+**Créer le brief en `statut: brouillon`** (gabarit : `references/gabarit-brief.md`), rempli de ce
+qui est déjà établi. Il sert de registre à partir d'ici.
 
 ## Étape 3 — Questions ouvertes, une par tour
 
 Puiser dans `references/grille-questions.md`. **Réservoir, pas checklist** : n'en tirer que les
 axes que l'Étape 1 n'a pas couverts.
-
-Précéder chaque question d'une ligne d'état, trois lignes maximum :
-
-```
-[<slug>] couvert: intention, hors-périmètre, historique
-         ouvert: signaux de dérive, réutiliser
-         ambiguïtés: 2 en suspens
-
-L'historique montre TokenStore réécrit deux fois en juin. Qu'est-ce qui avait cassé ?
-```
-
-`ouvert` liste les axes qui méritent encore une question **pour ce chantier**, pas les neuf de la
-grille. `ambiguïtés` = entrées non encore levées ni tranchées dans le brief.
 
 - **Une seule question par tour.** Une salve récolte des réponses bâclées.
 - Ancrer dans le concret observé : « j'ai vu `TokenStore` réécrit deux fois — qu'est-ce qui a
@@ -176,8 +167,14 @@ Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à tran
 
 Puis :
 
-1. Slug court en kebab-case (`auth-refactor`, pas `refonte-complete-du-systeme-dauth`). **Le brief
-   fait autorité** : le fichier de suivi reprendra ce slug.
+1. **Trancher la délégabilité** et l'écrire dans `execution:`, au frontmatter du brief. Jamais
+   omettre le champ : le fichier de suivi le reprend tel quel, et une valeur absente y sera lue
+   comme `direct`.
+
+   `délégué` si les étapes prévisibles se borneront à des fichiers nommés, avec une commande de
+   vérification chacune. `direct` sinon — et `direct` dès qu'il reste une incertitude reportée ou
+   que `## Signaux de dérive` est vide : un exécutant en sous-agent n'a personne à qui poser la
+   question, il tranchera seul, et sans signaux il n'a rien qui l'arrête.
 2. Restituer les trois sections décisives — intention, hors-périmètre, incertitudes — et pointer
    le fichier pour le reste. Ne pas recopier le brief entier.
 3. Sur validation : `statut: validé`. Le brief est figé.
@@ -209,6 +206,15 @@ Sortie en trois lignes, pas un rapport. **Tout écart se dit**, même mineur : c
 l'information qui manquait jusqu'ici. Un plan qui sort du périmètre n'est pas corrigé d'office —
 le signaler et laisser l'utilisateur trancher entre élargir le brief et resserrer le plan.
 
+## Étape 8 — Passage au suivi
+
+Le plan est validé et confronté : il faut maintenant un fichier de suivi, sinon tout ce travail
+vit dans une conversation qui se fermera. **Le proposer explicitement** — `implementation-tracker`
+ne s'invoque qu'à la main, le modèle ne peut pas l'appeler :
+
+> Plan validé et conforme au brief. Ouvre le suivi avec `/implementation-tracker` pour figer les
+> étapes et démarrer — il reprendra ce brief et ce plan.
+
 ---
 
 ## Articulation avec implementation-tracker
@@ -221,6 +227,9 @@ le suivi porte les étapes et leur avancement, mis à jour en continu.
 - `## Objectif et périmètre` du suivi est **repris du brief** — symptôme, but, critères,
   hors-périmètre et signaux de dérive. Ces derniers deviennent un déclencheur d'arrêt pendant
   l'implémentation.
-- Ajouter `brief: .claude/implementation/<slug>.brief.md` au frontmatter du suivi.
-- Le brief n'est plus modifié. Si l'intention change réellement en cours de route, le noter dans le
-  journal de décisions — la divergence entre brief et réel est une information, l'effacer la détruit.
+- Ajouter `brief: .claude/implementation/<slug>.brief.md` au frontmatter du suivi, et y reporter
+  `execution:`.
+- Le brief n'est plus modifié. **En cas de divergence, le suivi fait foi** ; le brief reste le
+  témoin de l'intention d'origine. Un périmètre qui change réellement s'amende dans le suivi, daté,
+  avec une entrée au journal — la divergence entre brief et réel est une information, l'effacer la
+  détruit.

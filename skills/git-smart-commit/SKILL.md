@@ -11,7 +11,6 @@ description: >
   Gère aussi l'aplatissement d'une branche d'implémentation (ex. clôture d'un chantier via
   implementation-tracker) : tous les commits de la branche sont réunis en un seul commit sur la
   branche principale, avec confirmation explicite avant toute réécriture.
-model: Sonnet
 ---
 
 # Git Smart Commit

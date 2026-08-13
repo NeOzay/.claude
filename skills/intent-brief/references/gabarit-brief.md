@@ -11,10 +11,8 @@ Contraintes de forme :
 - **Une page maximum.** Au-delà, c'est un plan déguisé — le plan mode fait ce travail après.
 - Rédigé **avec les mots de l'utilisateur**. La reformulation est le canal par lequel l'intention
   se perd.
-- **Chaque puce de contrainte porte sa source** : `(dit)` ou `(dépôt: <chemin ou sha>)`. Sans
-  marqueur, c'est une supposition : la retirer.
-- Aucune section inventée, aucun trou comblé par plausibilité — même quand la réponse paraît
-  évidente. Un axe non abordé s'écrit `— non abordé`.
+- Marqueurs de source et interdiction de combler par plausibilité : voir « Règle du sourçage »
+  du skill. Un axe non abordé s'écrit `— non abordé`.
 - Date obtenue par `date +%F` (Étape 0), jamais devinée.
 
 ---
@@ -24,6 +22,7 @@ Contraintes de forme :
 slug: auth-refactor
 titre: Refonte de l'authentification
 statut: brouillon         # brouillon | validé
+execution: délégué        # délégué | direct — évalué en Étape 5, repris par le fichier de suivi
 créé: 2026-08-10
 ---
 
@@ -88,3 +87,6 @@ dilue le reste.
 
 **Incertitudes** — une section vide n'est crédible que si le registre l'était : un cadrage qui ne
 laisse rien d'ouvert a plus probablement effacé ses zones d'ombre que résolu.
+
+**`execution:`** — seul champ du brief qui soit un jugement de l'assistant et non une affirmation
+sourcée : la règle du sourçage ne s'y applique pas. Comment le trancher : Étape 5 du skill.
