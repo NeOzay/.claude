@@ -340,7 +340,7 @@ Format : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`
 Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée :
 lire `references/cloture.md`, section « Clôture », et suivre la procédure — **audit par
 `implementation-auditor`**, contrôle des étapes, finalisation du suivi, aplatissement via
-`git-smart-commit`, archivage en `done/`, résumé.
+`git-smart-commit`, archivage en `done/`. **Pas de résumé prêt à coller** en fin de clôture.
 
 **Une clôture sans avis favorable ne va pas au bout** : l'audit est le premier point de la
 procédure, pas une formalité de fin (`references/audit.md`).

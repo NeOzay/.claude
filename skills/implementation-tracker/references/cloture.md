@@ -111,13 +111,15 @@ Le plan est archivé avec le reste : il porte le contenu des étapes, et n'a de 
 suivi qu'il a produit. Le rapport d'audit de même — c'est la trace de ce qui a été constaté au
 moment de clore, et elle ne vaut qu'accompagnée de ce qu'elle jugeait.
 
-### 5. Résumé
+### 5. Rendre la main
 
-Produire un **résumé prêt à coller** : objectif, ce qui a changé, décisions notables, points
-laissés de côté. Utile pour une PR, un message d'équipe ou simplement la trace du chantier.
+**Pas de résumé prêt à coller.** Tout ce qu'il contiendrait est déjà écrit et versionné : l'objectif
+dans le brief, ce qui a changé dans le diff du commit unique, les décisions au journal du suivi, les
+points laissés de côté dans le registre de dette. Le réécrire en fin de clôture produit une copie
+qui vieillit sans que rien ne la mette à jour.
 
-Les points laissés de côté y sont **rappelés, pas déposés** : ils vivent déjà dans le registre
-(point 2). Un résumé est une conversation, et une conversation se ferme.
+Dire ce qui a été fait en deux ou trois lignes — commit produit, branche supprimée, ce qui reste à
+la main de l'utilisateur (le push, typiquement) — et s'arrêter là.
 
 ---
 
