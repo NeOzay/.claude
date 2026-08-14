@@ -68,6 +68,11 @@ Puis, dans tous les cas, **inscrire dans le suivi** :
 Le raisonnement reste dans `<slug>.audit.md` : le suivi porte le verdict, le fichier d'audit porte
 le pourquoi.
 
+**Rien ne part dans le registre de dette au retour de l'audit.** Les constats y sont versés à la
+clôture, en une seule passe — un audit intermédiaire qui alimenterait le registre ferait écrire deux
+fois le même constat, puisque l'audit de clôture rejuge le diff entier depuis le début. Le
+raisonnement complet : `dette.md`, « Un état, pas un journal ».
+
 | Verdict | Suite |
 |---|---|
 | `FAVORABLE` | La clôture continue. |

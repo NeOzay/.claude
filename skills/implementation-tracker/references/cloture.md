@@ -22,12 +22,45 @@ pour laquelle ce regard est confié à un agent qui n'a pas écrit le code.
 journal, rendre la main. `RÉSERVES` → l'utilisateur tranche entre clore avec, ou traiter d'abord ;
 ne pas décider à sa place, et ne pas requalifier une réserve en détail pour pouvoir continuer.
 
-### 2. Finaliser le fichier de suivi
+### 2. Alimenter le registre de dette
 
-**Sur la branche `<slug>`** : `statut: terminé`, compacter le journal. Le committer (commit de
-suivi direct) pour que ces derniers changements entrent dans l'aplatissement.
+Ce que le chantier laisse derrière lui part dans `.claude/implementation/todo/technical-debt.md` —
+procédure, gabarit d'entrée et règle de solde : `references/dette.md`.
 
-### 3. Aplatir la branche d'implémentation
+**Ici et pas ailleurs.** Après l'audit, parce que c'est lui qui produit les constats et que les
+arbitrages qu'il déclenche (« clore avec ces réserves ») en font partie. Avant l'archivage, pour que
+l'écriture entre dans l'aplatissement de la branche. Et **une seule fois par chantier** : un audit
+intermédiaire ne l'alimente pas, sinon l'audit de clôture, qui rejuge le diff entier, y réécrirait
+les mêmes constats.
+
+C'est l'orchestrateur qui écrit, jamais l'auditeur (pourquoi : `references/dette.md`, « Un état, pas
+un journal »).
+
+Un chantier qui **solde** une entrée du registre la déplace vers `technical-debt-solde.md`, avec la
+commande exécutée qui l'établit. Sans cette sortie réelle, l'entrée reste.
+
+**Mettre le registre à l'index dès qu'il est écrit** :
+
+```bash
+git add .claude/implementation/todo/
+```
+
+Au premier usage, ces fichiers ne sont **pas suivis** par git. Le commit du point 3 ne stage que le
+fichier de suivi et l'aplatissement du point 4 ne reprend que ce qui est déjà commité : sans ce
+`git add`, le registre reste dans l'arbre de travail, la clôture se déroule sans une seule erreur, et
+l'écriture est perdue. C'est un chemin d'échec silencieux — le seul type qui ne se rattrape pas.
+
+### 3. Finaliser le fichier de suivi
+
+**Sur la branche `<slug>`** : `statut: terminé`, compacter le journal. Le committer avec le registre
+mis à l'index au point 2 (commit de suivi direct), pour que ces derniers changements entrent dans
+l'aplatissement.
+
+```bash
+git add .claude/implementation/<slug>.md .claude/implementation/todo/
+```
+
+### 4. Aplatir la branche d'implémentation
 
 Passer la main à `git-smart-commit` (cas « aplatissement d'une branche d'implémentation »,
 voir ce skill). Tous les commits de la branche `<slug>` sont réunis en **un seul commit posé
@@ -47,25 +80,44 @@ appliqué, mais **avant le commit unique**, déplacer suivi, brief, rapport d'au
 suivis par git (créés avant le premier commit du chantier) : `git mv` échouerait en plein squash,
 d'où le repli `mv` **suivi d'un `git add`** — sans lui, le fichier resterait hors du commit.
 
+**Le plan est renommé d'après le slug**, `<AAAA-MM-DD>-<slug>.plan.md`, et non d'après son nom
+généré. Ces noms (`linked-toasting-graham.md`…) sont réattribués par le harness d'un chantier à
+l'autre : archivé sous son propre nom, un plan écrase celui d'un chantier précédent, et le repli
+`mv` de la boucle le fait **sans erreur**. C'est arrivé à la clôture de `dette-technique`, sur le
+plan d'`audit-integre`.
+
 ```bash
 d=.claude/implementation/done
+set -e
 git mv .claude/implementation/<slug>.md $d/<AAAA-MM-DD>-<slug>.md
 
-for f in .claude/implementation/<slug>.brief.md .claude/implementation/<slug>.audit.md <chemin-du-plan>; do
+for f in .claude/implementation/<slug>.brief.md .claude/implementation/<slug>.audit.md; do
   [ -e "$f" ] || continue
   t=$d/<AAAA-MM-DD>-$(basename "$f")
+  [ -e "$t" ] && { echo "REFUS : $t existe déjà"; exit 1; }
   git mv "$f" "$t" 2>/dev/null || { mv "$f" "$t"; git add "$t"; }
 done
+
+p=<chemin-du-plan>
+t=$d/<AAAA-MM-DD>-<slug>.plan.md
+[ -e "$t" ] && { echo "REFUS : $t existe déjà"; exit 1; }
+git mv "$p" "$t" 2>/dev/null || { mv "$p" "$t"; git add "$t"; }
 ```
+
+Le test `[ -e "$t" ]` avant chaque déplacement est ce qui transforme un écrasement silencieux en
+arrêt. Sur un `REFUS`, s'arrêter et rendre la main : ne rien committer.
 
 Le plan est archivé avec le reste : il porte le contenu des étapes, et n'a de sens qu'à côté du
 suivi qu'il a produit. Le rapport d'audit de même — c'est la trace de ce qui a été constaté au
 moment de clore, et elle ne vaut qu'accompagnée de ce qu'elle jugeait.
 
-### 4. Résumé
+### 5. Résumé
 
 Produire un **résumé prêt à coller** : objectif, ce qui a changé, décisions notables, points
 laissés de côté. Utile pour une PR, un message d'équipe ou simplement la trace du chantier.
+
+Les points laissés de côté y sont **rappelés, pas déposés** : ils vivent déjà dans le registre
+(point 2). Un résumé est une conversation, et une conversation se ferme.
 
 ---
 
@@ -78,8 +130,30 @@ tous les listings suivants.
 1. **Demander la raison** et l'écrire au journal — c'est la seule information que l'abandon
    produit, et celle qui évitera de rouvrir le même chantier dans trois mois.
 2. `statut: abandonné`, `maj:` à jour. Committer sur la branche `<slug>`.
-3. **Décider du sort du travail avec l'utilisateur**, sans rien supposer :
+3. **Proposer** de verser au registre de dette ce que l'abandon laisse ouvert — le problème qui
+   restait à traiter, la raison de l'abandon à l'appui (`references/dette.md`). Proposer, jamais
+   imposer : un chantier abandonné parce que le besoin a disparu ne laisse aucune dette, et une
+   entrée écrite d'office serait exactement le bruit que le registre doit éviter.
+
+   On décide **ici**, on écrit au point 4. Même raison qu'au point 2 de la clôture : le registre
+   n'a de valeur que sur `base:`, et l'abandon n'y passe qu'au point suivant.
+4. **Décider du sort du travail avec l'utilisateur**, sans rien supposer :
    - *tout jeter* → archiver le suivi, le brief et le rapport d'audit éventuel en `done/` sur
      `base:` (commit direct), puis supprimer la branche : `git branch -D <slug>` ;
    - *garder la branche* → ne rien supprimer, archiver seulement le suivi ; le dire clairement.
-4. Ne **jamais** aplatir un chantier abandonné dans `base:` : il n'a pas vocation à y entrer.
+
+   Les **deux** branches de ce choix passent sur `base:` — *tout jeter* pour y archiver, *garder la
+   branche* pour y déposer le suivi. C'est là, et seulement là, qu'on écrit l'entrée décidée au
+   point 3 :
+
+   ```bash
+   git add .claude/implementation/todo/
+   ```
+
+   puis on la joint au commit direct d'archivage. Si *garder la branche* n'avait rien d'autre à
+   committer, ce commit existe quand même : il porte l'entrée.
+
+   Écrite sur `<slug>`, elle n'atteindrait jamais `base:` : la branche est soit supprimée, soit
+   conservée sans jamais être aplatie (point 5). C'est le même chemin d'échec silencieux qu'au
+   point 2 de la clôture, et il se ferme de la même façon.
+5. Ne **jamais** aplatir un chantier abandonné dans `base:` : il n'a pas vocation à y entrer.

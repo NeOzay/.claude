@@ -34,7 +34,14 @@ Invocation manuelle uniquement :
     <AAAA-MM-DD>-<slug>.md          # archivés à la clôture
     <AAAA-MM-DD>-<slug>.brief.md
     <AAAA-MM-DD>-<slug>.audit.md
+  todo/
+    README.md                      # ce que le répertoire recueille
+    technical-debt.md              # registre de dette, alimenté à la clôture (references/dette.md)
+    technical-debt-solde.md        # ce qui a été soldé, avec la commande qui l'établit
 ```
+
+`todo/` est l'inverse de `done/` : ses fichiers sont **vivants** — relus, complétés, élagués — et
+ne sont jamais archivés. Le pipeline les alimente sans jamais les lire de lui-même.
 
 ---
 
@@ -233,6 +240,7 @@ Déclencheurs d'écriture :
 | **Signal de dérive du brief déclenché** | **S'arrêter**, le nommer, en reparler avant de continuer |
 | Diff `base:`↔`<slug>` au-delà de 400 lignes | **Proposer** un audit intermédiaire, étapes restantes à l'appui (`references/audit.md`) |
 | Demande hors-périmètre | Le signaler, proposer soit d'élargir le périmètre (voir ci-dessous), soit une nouvelle impl |
+| Problème constaté hors du périmètre | Le noter au journal — il ira au registre de dette à la clôture (`references/dette.md`) |
 
 ### Quand le périmètre change
 
