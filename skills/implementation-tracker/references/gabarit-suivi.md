@@ -7,11 +7,12 @@ Créé à l'Étape 2 une fois le plan validé, maintenu en continu pendant l'imp
 
 Contraintes de forme :
 
-- **Le slug vient du brief**, jamais réinventé : c'est lui qui apparie les deux fichiers.
+- **Le slug vient du brief**, jamais réinventé : [Arborescence et nommage](contrat.md#arborescence-et-nommage).
 - `## Objectif et périmètre` est **repris du brief**, pas reformulé.
-- Format d'étape : `- [état] N. Intitulé — <fichier> — vérif: <commande>` (règles de granularité
-  et de délégabilité : Étape 2, point 4 du skill).
-- Date obtenue par `date +%F`, jamais devinée.
+- Champs du frontmatter, valeurs admises et défauts : [Frontmatter](contrat.md#frontmatter).
+- Format d'étape, granularité, délégabilité :
+  [Format d'étape et délégabilité](contrat.md#format-détape-et-délégabilité).
+- Date obtenue par `date +%F` : [Dates et listing](contrat.md#dates-et-listing).
 
 ---
 
@@ -21,9 +22,9 @@ slug: auth-refactor
 titre: Refonte de l'authentification
 branche: auth-refactor      # branche d'implémentation = <slug>
 base: main                  # branche principale, cible de l'aplatissement final (Étape 5)
-statut: en-cours            # en-cours | bloqué | terminé
+statut: en-cours
 session: 3                  # incrémenté à chaque reprise (Étape 3)
-execution: délégué          # délégué | direct — repris du brief, cf. Étape 4
+execution: délégué          # repris tel quel du brief
 plan: .claude/plans/refonte-auth-lucky-beaver.md
 brief: .claude/implementation/auth-refactor.brief.md
 audit: .claude/implementation/auth-refactor.audit.md   # créé au premier audit, cf. references/audit.md
@@ -69,8 +70,8 @@ Repris du brief (`brief:`), pas réinventé.
 bonne solution au mauvais problème. Une section `## Objectif et périmètre` sans symptôme a
 perdu le lien avec l'intention d'origine.
 
-**Étapes** — l'intitulé seul ne suffit pas à exécuter : c'est le plan (`plan:`) qui décrit
-l'étape. Le suivi porte l'état, le plan porte le contenu.
+**Étapes** — le suivi porte l'état, le plan porte le contenu :
+[Format d'étape et délégabilité](contrat.md#format-détape-et-délégabilité).
 
 **État courant** — écrit pour la reprise à froid, en début de session suivante. « Prochaine
 action » se lit sans avoir à relire le plan.

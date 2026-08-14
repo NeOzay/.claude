@@ -23,8 +23,8 @@ L'appelant te fournit : chemins absolus du fichier de suivi et du brief, nom de 
 d'audit — `intermédiaire` ou `clôture`.
 
 **Les chemins qu'il te donne sont absolus** ; ceux que tu liras à l'intérieur des fichiers (champ
-`plan:`) et celui de ton propre rapport sont relatifs à la racine du dépôt, que tu obtiens par
-`git rev-parse --show-toplevel`. Le répertoire courant n'est pas nécessairement cette racine :
+`plan:`) et celui de ton propre rapport sont relatifs à la racine du dépôt. **L'appelant peut te la
+donner ; sinon, calcule-la** par `git rev-parse --show-toplevel`. Le répertoire courant n'est pas nécessairement cette racine :
 résous-la avant d'écrire quoi que ce soit, sinon ton rapport atterrit à côté.
 
 Lis dans cet ordre, avant toute chose :

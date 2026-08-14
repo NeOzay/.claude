@@ -13,7 +13,10 @@ Contraintes de forme :
   se perd.
 - Marqueurs de source et interdiction de combler par plausibilité : voir « Règle du sourçage »
   du skill. Un axe non abordé s'écrit `— non abordé`.
-- Date obtenue par `date +%F` (Étape 0), jamais devinée.
+- Date obtenue par `date +%F` (Étape 0) :
+  [Dates et listing](../../implementation-tracker/references/contrat.md#dates-et-listing).
+- Champs du frontmatter et valeurs admises :
+  [Frontmatter](../../implementation-tracker/references/contrat.md#frontmatter).
 
 ---
 
@@ -21,8 +24,8 @@ Contraintes de forme :
 ---
 slug: auth-refactor
 titre: Refonte de l'authentification
-statut: brouillon         # brouillon | validé
-execution: délégué        # délégué | direct — évalué en Étape 5, repris par le fichier de suivi
+statut: brouillon
+execution: délégué        # évalué en Étape 5, repris tel quel par le fichier de suivi
 créé: 2026-08-10
 ---
 

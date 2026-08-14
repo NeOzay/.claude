@@ -89,7 +89,8 @@ git branch --show-current
 ls .claude/implementation/*.brief.md 2>/dev/null
 ```
 
-Utiliser la date renvoyée par `date` — ne jamais l'inventer.
+Utiliser la date renvoyée par `date`, jamais l'inventer :
+[Dates et listing](../implementation-tracker/references/contrat.md#dates-et-listing).
 
 - `NON_GIT` → demander si l'utilisateur veut quand même un brief (non versionné). Attendre la réponse.
 - `.claude/implementation/` absent → demander confirmation avant de créer l'arborescence.
@@ -128,9 +129,9 @@ une question fermée récolte un « oui » poli, une ouverte récolte la correct
 **Contrainte de vérification** : la restitution doit citer au moins un fait concret du dépôt — un
 commit, un fichier, un test, une fonction. Sans citation, l'Étape 1 n'a pas eu lieu : la refaire.
 
-Puis **arrêter le slug** — court, en kebab-case (`auth-refactor`, pas
-`refonte-complete-du-systeme-dauth`), tiré de l'argument ou du sujet. Il nomme le fichier et ne
-change plus : **le brief fait autorité**, le fichier de suivi le reprendra tel quel.
+Puis **arrêter le slug**, tiré de l'argument ou du sujet. Il nomme le fichier et ne change plus :
+**le brief fait autorité**, le fichier de suivi le reprendra tel quel. Forme et conséquence :
+[Arborescence et nommage](../implementation-tracker/references/contrat.md#arborescence-et-nommage).
 
 **Créer le brief en `statut: brouillon`** (gabarit : `references/gabarit-brief.md`), rempli de ce
 qui est déjà établi. Il sert de registre à partir d'ici.
@@ -167,9 +168,9 @@ Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à tran
 
 Puis :
 
-1. **Trancher la délégabilité** et l'écrire dans `execution:`, au frontmatter du brief. Jamais
-   omettre le champ : le fichier de suivi le reprend tel quel, et une valeur absente y sera lue
-   comme `direct`.
+1. **Trancher la délégabilité** et l'écrire dans `execution:`, au frontmatter du brief — champ,
+   valeurs et défaut :
+   [Frontmatter](../implementation-tracker/references/contrat.md#frontmatter).
 
    `délégué` si les étapes prévisibles se borneront à des fichiers nommés, avec une commande de
    vérification chacune. `direct` sinon — et `direct` dès qu'il reste une incertitude reportée ou
@@ -220,16 +221,10 @@ ne s'invoque qu'à la main, le modèle ne peut pas l'appeler :
 ## Articulation avec implementation-tracker
 
 Le brief précède le suivi et ne le remplace pas : le brief porte l'intention et ses bornes, figées ;
-le suivi porte les étapes et leur avancement, mis à jour en continu.
+le suivi porte les étapes et leur avancement, mis à jour en continu. Ce qui fait foi en cas de
+divergence, et où s'écrit un périmètre qui change réellement :
+[Autorité et divergence](../implementation-tracker/references/contrat.md#autorité-et-divergence).
 
-À la création du fichier de suivi (Étape 2 d'`implementation-tracker`) :
-
-- `## Objectif et périmètre` du suivi est **repris du brief** — symptôme, but, critères,
-  hors-périmètre et signaux de dérive. Ces derniers deviennent un déclencheur d'arrêt pendant
-  l'implémentation.
-- Ajouter `brief: .claude/implementation/<slug>.brief.md` au frontmatter du suivi, et y reporter
-  `execution:`.
-- Le brief n'est plus modifié. **En cas de divergence, le suivi fait foi** ; le brief reste le
-  témoin de l'intention d'origine. Un périmètre qui change réellement s'amende dans le suivi, daté,
-  avec une entrée au journal — la divergence entre brief et réel est une information, l'effacer la
-  détruit.
+Ce que le suivi reprend du brief à sa création (Étape 2 d'`implementation-tracker`) :
+`## Objectif et périmètre` — symptôme, but, critères, hors-périmètre et **signaux de dérive**, ces
+derniers devenant un déclencheur d'arrêt pendant l'implémentation.

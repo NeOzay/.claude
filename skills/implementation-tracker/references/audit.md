@@ -37,19 +37,15 @@ fois, si le diff a de nouveau doublé.
 
 ## Lancer l'audit
 
-Transmettre à l'agent, et **rien d'autre** — il lit le plan, le diff et le code lui-même :
+Transmettre à l'agent, et **rien d'autre** — il lit le plan, le diff et le code lui-même. Règles
+générales de l'appel — chemins absolus, racine du dépôt, ce qu'on ne recopie jamais :
+[Contrat des sous-agents](contrat.md#contrat-des-sous-agents).
 
-- chemins **absolus** du fichier de suivi et du brief,
-- **racine du dépôt** (`git rev-parse --show-toplevel`) — c'est par rapport à elle qu'il résoudra
-  `plan:` et le chemin d'écriture de son rapport ; sans elle, sur un dépôt où le répertoire courant
-  n'est pas la racine, le rapport atterrit à côté,
+Propre à l'audit, en plus des chemins du suivi et du brief :
+
 - `base:` et `<slug>` (nom de la branche de chantier),
 - SHA de `HEAD` sur la branche (`git rev-parse HEAD`),
 - le type d'audit : `intermédiaire` ou `clôture`.
-
-L'appelant ne recopie ni le diff, ni les critères, ni les étapes : tout est dans les fichiers, et le
-recopier reviendrait à lui transmettre sa propre lecture — exactement ce que l'audit existe pour
-éviter.
 
 ---
 

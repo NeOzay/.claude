@@ -118,8 +118,8 @@ grossièrement, ou ne pas l'écrire.
 3. **Lire le registre avant d'écrire.** Un constat déjà présent ne se duplique pas : le compléter,
    en gardant sa date d'origine. C'est le seul contrôle qui empêche le registre de gonfler.
 4. Appender les nouvelles entrées en fin de fichier, dans l'ordre où elles ont été constatées.
-5. **Actualiser la ligne de dernière vérification** avec la date du jour (`date +%F`, jamais
-   devinée) et le slug du chantier — y compris quand le chantier n'a rien eu à verser : le registre
+5. **Actualiser la ligne de dernière vérification** avec la date du jour
+   ([Dates et listing](contrat.md#dates-et-listing)) et le slug du chantier — y compris quand le chantier n'a rien eu à verser : le registre
    a quand même été relu, et c'est cette information-là qu'elle porte.
 
 Le fichier n'existe pas encore → le créer avec son préambule, qui dit ce qu'il recense et ce qu'il

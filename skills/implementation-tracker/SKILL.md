@@ -25,23 +25,11 @@ Invocation manuelle uniquement :
 
 ## Emplacement
 
-```
-<repo>/.claude/implementation/
-  <slug>.md                      # suivi actif — commité avec le code
-  <slug>.brief.md                # brief d'intention (skill intent-brief), figé après validation
-  <slug>.audit.md                # rapports d'audit successifs (agent implementation-auditor)
-  done/
-    <AAAA-MM-DD>-<slug>.md          # archivés à la clôture
-    <AAAA-MM-DD>-<slug>.brief.md
-    <AAAA-MM-DD>-<slug>.audit.md
-  todo/
-    README.md                      # ce que le répertoire recueille
-    technical-debt.md              # registre de dette, alimenté à la clôture (references/dette.md)
-    technical-debt-solde.md        # ce qui a été soldé, avec la commande qui l'établit
-```
+Arborescence, nommage des fichiers et règle du slug :
+[Arborescence et nommage](references/contrat.md#arborescence-et-nommage).
 
-`todo/` est l'inverse de `done/` : ses fichiers sont **vivants** — relus, complétés, élagués — et
-ne sont jamais archivés. Le pipeline les alimente sans jamais les lire de lui-même.
+Ce qui s'y joue pour ce skill : `done/` porte des archives figées, `todo/` des registres vivants
+que le pipeline **alimente sans jamais les lire de lui-même**.
 
 ---
 
@@ -51,11 +39,11 @@ ne sont jamais archivés. Le pipeline les alimente sans jamais les lire de lui-m
 git rev-parse --is-inside-work-tree 2>/dev/null || echo "NON_GIT"
 git branch --show-current
 git status --short
-ls .claude/implementation/*.md 2>/dev/null | grep -vE '\.(brief|audit)\.md$'
+bash "$HOME/.claude/skills/implementation-tracker/scripts/impl-list.sh" .claude/implementation
 ```
 
-Les `*.brief.md` (skill `intent-brief`) et les `*.audit.md` (agent `implementation-auditor`) ne
-sont **pas** des fichiers de suivi : les exclure partout où l'on énumère les implémentations.
+Le script ne remonte que les fichiers de suivi. **Ne jamais réécrire ce filtre en ligne** — pourquoi :
+[Dates et listing](references/contrat.md#dates-et-listing).
 
 **Ne rien créer sans confirmation** dans ces deux cas :
 
@@ -81,11 +69,10 @@ Lire ce fichier, aller directement à l'Étape 3 (reprise).
 
 ### Cas C : aucun argument
 
-Lire **uniquement les frontmatters** des fichiers de suivi (pas les fichiers entiers). Les
-`*.brief.md` et `*.audit.md` ne sont **pas** des fichiers de suivi : les exclure du listing.
+Lire **uniquement les frontmatters** des fichiers de suivi (pas les fichiers entiers).
 
 ```bash
-ls .claude/implementation/*.md 2>/dev/null | grep -vE '\.(brief|audit)\.md$'
+bash "$HOME/.claude/skills/implementation-tracker/scripts/impl-list.sh" .claude/implementation
 ```
 
 Compter ensuite les cases cochées de la section `## Étapes`. Afficher :
@@ -158,45 +145,35 @@ committer ou les mettre de côté) avant de relancer.
    du plan deviennent la section `## Étapes`, et le chemin du plan va dans le champ `plan:` du
    frontmatter.
 
-   Chaque étape porte **le ou les fichiers visés et sa commande de vérification** :
+   Format d'une étape, granularité, conditions de délégabilité :
+   [Format d'étape et délégabilité](references/contrat.md#format-détape-et-délégabilité).
 
-   ```
-   - [ ] 2. Brancher le middleware — `src/mw/auth.rs` — vérif: `cargo test mw::auth`
-   ```
-
-   Une étape sans vérification n'est pas délégable. C'est tout ce que l'appelant transmettra de
-   l'étape à `step-implementer` — le reste, l'exécutant va le chercher dans le plan : le suivi ne
-   porte que l'intitulé et l'état, **le contenu de l'étape reste dans le plan**.
-
-   Chaque étape doit tenir en **un seul tour d'exécution**. Une étape qui déborderait sur
-   plusieurs sessions se découpe ici, pas en cours de route : un appel de sous-agent est
-   atomique et ne se reprend pas.
-5. Slug = titre en kebab-case, court (`auth-refactor`, pas `refonte-complete-du-systeme-dauth`).
-   **Reprendre exactement le slug du brief** — c'est lui qui apparie les deux fichiers.
+   **C'est ici que les étapes trop grosses se découpent**, pas en cours de route : un appel de
+   sous-agent est atomique et ne se reprend pas.
+5. **Reprendre exactement le slug du brief**, jamais le réinventer — règle et conséquence :
+   [Arborescence et nommage](references/contrat.md#arborescence-et-nommage).
 6. **Reprendre `## Objectif et périmètre` du brief**, ne pas le réinventer : symptôme, but,
    critères de réussite, hors-périmètre **et signaux de dérive** viennent du brief, tels qu'ils
    ont été validés. Renseigner `brief:` dans le frontmatter, ainsi que `execution:` — repris tel
-   quel du frontmatter du brief. **`direct` à défaut d'indication** : une valeur absente signifie
-   que la délégabilité n'a pas été jugée, pas qu'elle est acquise.
+   quel du brief. Champs, valeurs et défauts : [Frontmatter](references/contrat.md#frontmatter).
 
    Le **symptôme** est ce qui permet, trois sessions plus tard, de voir qu'on a construit la
    bonne solution au mauvais problème. Les **signaux de dérive** deviennent un déclencheur
    d'arrêt pendant l'implémentation (Étape 4). C'est ce point de jonction qui attache le chantier à
    l'intention initiale et empêche le scope creep entre deux discussions.
 
-   Le brief n'est plus modifié ensuite. Si l'intention change réellement en cours de route, le
-   noter dans le journal de décisions — la divergence entre brief et réel est une information,
-   l'effacer la détruit.
+   Le brief n'est plus modifié ensuite — ce qu'on fait d'une intention qui change en cours de
+   route : [Autorité et divergence](references/contrat.md#autorité-et-divergence).
 7. **Créer la branche d'implémentation** nommée exactement `<slug>`, à partir de la branche courante.
-   Cette branche courante est la **branche principale**, cible de l'aplatissement final : la noter dans
-   le champ `base:` du frontmatter, et `<slug>` dans `branche:`.
+   Cette branche courante est la **branche principale** : la noter dans le champ `base:` du
+   frontmatter, et `<slug>` dans `branche:`.
 
    ```bash
    git checkout -b <slug>
    ```
 
-   Tous les commits de session/étape se feront désormais sur `<slug>` ; ils seront aplatis en un seul
-   commit sur `base:` à la clôture (Étape 5). Ne jamais committer sans accord explicite (règle globale).
+   Conventions de branche, de messages et de staging :
+   [Branche et commits](references/contrat.md#branche-et-commits).
 
 ---
 
@@ -216,9 +193,8 @@ Incrémenter `session:` de 1 dans le frontmatter — c'est ce compteur qui sert 
 de session (voir Étape 4).
 
 **Modifications non commitées détectées** (`git status --short` non vide, Étape 0) → le signaler en
-tout début de conversation et proposer un commit de session avant de continuer (voir « Commits de
-session », Étape 4, pour le format du message et la méthode : commit simple et direct, pas de passage
-par `git-smart-commit`). Ne jamais committer sans accord explicite (règle globale, `CLAUDE.md`).
+tout début de conversation et **proposer** un commit de session avant de continuer — format du
+message et méthode : [Branche et commits](references/contrat.md#branche-et-commits).
 
 ---
 
@@ -244,11 +220,9 @@ Déclencheurs d'écriture :
 
 ### Quand le périmètre change
 
-Le brief est figé, le suivi vit : **en cas de divergence, le suivi fait foi**, le brief reste le
-témoin de l'intention d'origine. Un élargissement accepté par l'utilisateur s'écrit donc dans
-`## Objectif et périmètre` du suivi — daté, avec une entrée au journal — et non dans le brief.
-C'est la seule exception au « repris du brief, pas reformulé » ; sans elle, un chantier qui évolue
-n'a plus de périmètre écrit nulle part, et l'exécutant refuse en `ÉCART` un travail pourtant validé.
+Un élargissement accepté par l'utilisateur s'écrit dans `## Objectif et périmètre` du **suivi** —
+daté, avec une entrée au journal — et jamais dans le brief. C'est la seule exception au « repris du
+brief, pas reformulé » : [Autorité et divergence](references/contrat.md#autorité-et-divergence).
 
 ### Délégation d'étape
 
@@ -257,9 +231,9 @@ au sous-agent `step-implementer` (Sonnet, contexte isolé). Deux bénéfices dis
 de fichiers et les diffs restent dans l'agent au lieu de gonfler la session, et l'exécution sort
 du modèle de cadrage.
 
-Lui transmettre : chemins du suivi et du brief, numéro et intitulé de l'étape, commande de
-vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même le suivi, le plan (via
-`plan:`) et le brief.
+Lui transmettre : chemins **absolus** du suivi et du brief, numéro et intitulé de l'étape, commande
+de vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même le suivi, le plan (via
+`plan:`) et le brief : [Contrat des sous-agents](references/contrat.md#contrat-des-sous-agents).
 
 **Ne pas déléguer** :
 
@@ -273,8 +247,8 @@ vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même le 
 
 Dans le doute sur un chantier entier, basculer `execution:` à `direct` et le noter au journal.
 
-**L'appelant reste responsable au retour.** L'agent ne commit pas et ne touche à aucun fichier
-de suivi. Relire le fichier de suivi avant d'y écrire — il a pu vieillir pendant l'exécution.
+**L'appelant reste responsable au retour.** Relire le fichier de suivi avant d'y écrire — il a pu
+vieillir pendant l'exécution.
 
 **Premier réflexe, quel que soit le `RÉSULTAT` : regarder le diff.** Le travail a été produit hors
 session — ni `git-smart-commit` (court-circuité pour les commits d'étape) ni l'utilisateur ne l'ont
@@ -308,18 +282,11 @@ entre deux sessions.
 ### Commits de session
 
 Une étape peut se retrouver **à cheval sur deux sessions** — interruption, ou exécution en `direct`.
-Le compteur de commit se cale donc sur la **session**, pas sur l'étape :
+Le compteur se cale donc sur la **session**, pas sur l'étape. Format du message, cadence et règle de
+staging : [Branche et commits](references/contrat.md#branche-et-commits).
 
-- Le frontmatter porte un champ `session: N`, incrémenté à chaque reprise (Étape 3).
-- Message de commit : `<slug>: session N — <étape en cours>`.
-- **Quand une étape passe en `[x]`** : proposer un commit dédié, même si un commit de session a déjà
-  été fait juste avant.
-- Commit simple et direct, pas besoin de `git-smart-commit` pour ces commits de suivi — ils ont un
-  message prédéterminé, pas d'analyse de diff nécessaire. **Stager les chemins, jamais `-A` :**
-  `git add <chemins> && git commit -m "..."` — les fichiers de `FICHIERS` pour une étape déléguée,
-  le fichier de suivi, et rien d'autre. `-A` ramasserait ce qui traîne dans l'arbre ; `-u` raterait
-  les fichiers créés.
-- **Toujours proposer, jamais committer sans confirmation explicite** (règle globale, `CLAUDE.md`).
+Propre à ce skill : pour une étape déléguée, ne stager que les fichiers de `FICHIERS` rapportés par
+l'agent et le fichier de suivi — rien d'autre.
 
 ### Règle du journal de décisions
 

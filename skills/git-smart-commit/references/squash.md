@@ -3,9 +3,11 @@
 Cas déclenché explicitement (ex. par `implementation-tracker` en fin de chantier), pas par simple
 mention de "commit".
 
-Le chantier a été mené sur une **branche d'implémentation nommée `<slug>`** (voir
-`implementation-tracker`, Étape 2). La clôture réunit tous ses commits en **un seul commit posé sur la
-branche principale** (`base:` du fichier de suivi). La branche `<slug>` étant locale et jetable, et
+Le chantier a été mené sur une **branche d'implémentation nommée `<slug>`** — conventions de branche
+et de commits du pipeline :
+[Branche et commits](../../implementation-tracker/references/contrat.md#branche-et-commits).
+La clôture réunit tous ses commits en **un seul commit posé sur la branche principale**
+(`base:` du fichier de suivi). La branche `<slug>` étant locale et jetable, et
 l'aplatissement n'ajoutant qu'un commit ordinaire sur la principale (aucune réécriture de la
 principale), il n'y a pas de force-push à craindre.
 

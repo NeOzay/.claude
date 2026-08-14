@@ -6,9 +6,9 @@ base: master
 statut: terminé
 session: 1
 execution: direct
-plan: .claude/plans/linked-toasting-graham.md
-brief: .claude/implementation/dette-technique.brief.md
-audit: .claude/implementation/dette-technique.audit.md
+plan: .claude/implementation/done/2026-08-14-dette-technique.plan.md
+brief: .claude/implementation/done/2026-08-14-dette-technique.brief.md
+audit: .claude/implementation/done/2026-08-14-dette-technique.audit.md
 créé: 2026-08-14
 maj: 2026-08-14
 ---

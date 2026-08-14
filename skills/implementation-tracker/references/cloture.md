@@ -7,7 +7,20 @@ terminée.
 
 ### 1. Audit — obligatoire, et bloquant
 
-Vérifier d'abord que toutes les étapes sont cochées — sinon demander quoi faire des restantes ;
+**Si le dépôt porte un garde-fou de pipeline, le lancer d'abord.** Il n'existe que dans les dépôts
+qui hébergent le pipeline lui-même — ailleurs, ce contrôle n'a pas d'objet et se saute :
+
+```bash
+if [ -f scripts/check-pipeline.sh ]; then bash scripts/check-pipeline.sh; fi
+```
+
+C'est un contrôle **mécanique**, pas un jugement : il constate que chaque règle partagée reste
+définie à un seul endroit et que les renvois y menant résolvent encore. Il passe avant l'audit
+parce qu'il coûte une seconde là où l'audit coûte un agent, et qu'auditer la conformité à une
+intention n'a guère de sens si le contrat qui la porte est déjà incohérent. Sortie ≠ 0 → traiter
+avant d'auditer.
+
+Vérifier ensuite que toutes les étapes sont cochées — sinon demander quoi faire des restantes ;
 auditer un chantier inachevé fait juger du travail que personne n'a fini.
 
 Puis lancer l'audit de clôture : voir `audit.md` — sous-agent `implementation-auditor`, ce qu'on
@@ -67,8 +80,8 @@ voir ce skill). Tous les commits de la branche `<slug>` sont réunis en **un seu
 sur `base:`**, puis la branche `<slug>` est supprimée.
 
 Ce n'est **pas** un commit de suivi ordinaire — c'est une réécriture d'historique, donc elle
-suit le workflow de vérification et de confirmation complet de `git-smart-commit`, pas le
-commit direct utilisé pour les sessions/étapes.
+suit le workflow de vérification et de confirmation complet de `git-smart-commit` :
+[Branche et commits](contrat.md#branche-et-commits).
 
 **Conflit sur le `git merge --squash`** (`base:` a avancé pendant le chantier) → **s'arrêter net** :
 ne rien committer, ne rien déplacer, ne pas supprimer la branche. Rendre la main à l'utilisateur
@@ -80,11 +93,13 @@ appliqué, mais **avant le commit unique**, déplacer suivi, brief, rapport d'au
 suivis par git (créés avant le premier commit du chantier) : `git mv` échouerait en plein squash,
 d'où le repli `mv` **suivi d'un `git add`** — sans lui, le fichier resterait hors du commit.
 
-**Le plan est renommé d'après le slug**, `<AAAA-MM-DD>-<slug>.plan.md`, et non d'après son nom
-généré. Ces noms (`linked-toasting-graham.md`…) sont réattribués par le harness d'un chantier à
-l'autre : archivé sous son propre nom, un plan écrase celui d'un chantier précédent, et le repli
-`mv` de la boucle le fait **sans erreur**. C'est arrivé à la clôture de `dette-technique`, sur le
-plan d'`audit-integre`.
+**Le plan est renommé d'après le slug**, `<AAAA-MM-DD>-<slug>.plan.md`, jamais d'après son nom
+généré — pourquoi, et ce que l'oubli a déjà coûté :
+[Arborescence et nommage](contrat.md#arborescence-et-nommage).
+
+**Les champs `plan:`, `brief:` et `audit:` du suivi sont réécrits** vers leurs chemins `done/` dans
+la même passe. Sans cela ils désignent des fichiers qui n'existent plus, et le champ `plan:` peut
+même résoudre vers le plan d'un **autre** chantier — ce qui a l'air de fonctionner.
 
 ```bash
 d=.claude/implementation/done
@@ -102,6 +117,16 @@ p=<chemin-du-plan>
 t=$d/<AAAA-MM-DD>-<slug>.plan.md
 [ -e "$t" ] && { echo "REFUS : $t existe déjà"; exit 1; }
 git mv "$p" "$t" 2>/dev/null || { mv "$p" "$t"; git add "$t"; }
+
+# Réécrire les chemins du frontmatter vers leurs cibles définitives. Un champ dont la
+# cible n'existe pas est laissé tel quel : le garde-fou le signalera plutôt que de le
+# remplacer par un autre chemin mort.
+s=$d/<AAAA-MM-DD>-<slug>.md
+for champ in plan brief audit; do
+  cible=$d/<AAAA-MM-DD>-<slug>.$champ.md
+  [ -e "$cible" ] && sed -i "s|^$champ: .*|$champ: $cible|" "$s"
+done
+git add "$s"
 ```
 
 Le test `[ -e "$t" ]` avant chaque déplacement est ce qui transforme un écrasement silencieux en
