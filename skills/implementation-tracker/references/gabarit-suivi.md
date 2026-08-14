@@ -26,6 +26,7 @@ session: 3                  # incrémenté à chaque reprise (Étape 3)
 execution: délégué          # délégué | direct — repris du brief, cf. Étape 4
 plan: .claude/plans/refonte-auth-lucky-beaver.md
 brief: .claude/implementation/auth-refactor.brief.md
+audit: .claude/implementation/auth-refactor.audit.md   # créé au premier audit, cf. references/audit.md
 créé: 2026-07-12
 maj: 2026-07-12
 ---
@@ -51,6 +52,7 @@ Repris du brief (`brief:`), pas réinventé.
 
 **Prochaine action** : …
 **Vérification** : `cargo test auth`   (vérification d'ensemble, distincte de celles par étape)
+**Dernier audit** : `a1b2c3d` — RÉSERVES — 2026-07-20   (« aucun » tant qu'il n'y en a pas eu)
 **Notes** : …
 
 ## Journal de décisions
@@ -73,4 +75,8 @@ l'étape. Le suivi porte l'état, le plan porte le contenu.
 **État courant** — écrit pour la reprise à froid, en début de session suivante. « Prochaine
 action » se lit sans avoir à relire le plan.
 
-**Journal** — que ce qui contraint le futur. Les micro-choix n'y entrent pas.
+**Dernier audit** — le suivi porte le verdict et le commit audité ; le raisonnement, lui, vit dans
+`<slug>.audit.md`. Un verdict sans SHA ne se rattache à rien : le code a bougé depuis.
+
+**Journal** — que ce qui contraint le futur. Les micro-choix n'y entrent pas. Un verdict d'audit
+`DÉFAVORABLE` y entre, lui : il contraint la clôture.

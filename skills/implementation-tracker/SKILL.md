@@ -29,9 +29,11 @@ Invocation manuelle uniquement :
 <repo>/.claude/implementation/
   <slug>.md                      # suivi actif — commité avec le code
   <slug>.brief.md                # brief d'intention (skill intent-brief), figé après validation
+  <slug>.audit.md                # rapports d'audit successifs (agent implementation-auditor)
   done/
     <AAAA-MM-DD>-<slug>.md          # archivés à la clôture
     <AAAA-MM-DD>-<slug>.brief.md
+    <AAAA-MM-DD>-<slug>.audit.md
 ```
 
 ---
@@ -42,11 +44,11 @@ Invocation manuelle uniquement :
 git rev-parse --is-inside-work-tree 2>/dev/null || echo "NON_GIT"
 git branch --show-current
 git status --short
-ls .claude/implementation/*.md 2>/dev/null | grep -v '\.brief\.md$'
+ls .claude/implementation/*.md 2>/dev/null | grep -vE '\.(brief|audit)\.md$'
 ```
 
-Les `*.brief.md` (skill `intent-brief`) ne sont **pas** des fichiers de suivi : les exclure
-partout où l'on énumère les implémentations.
+Les `*.brief.md` (skill `intent-brief`) et les `*.audit.md` (agent `implementation-auditor`) ne
+sont **pas** des fichiers de suivi : les exclure partout où l'on énumère les implémentations.
 
 **Ne rien créer sans confirmation** dans ces deux cas :
 
@@ -73,10 +75,10 @@ Lire ce fichier, aller directement à l'Étape 3 (reprise).
 ### Cas C : aucun argument
 
 Lire **uniquement les frontmatters** des fichiers de suivi (pas les fichiers entiers). Les
-`*.brief.md` ne sont **pas** des fichiers de suivi : les exclure du listing.
+`*.brief.md` et `*.audit.md` ne sont **pas** des fichiers de suivi : les exclure du listing.
 
 ```bash
-ls .claude/implementation/*.md 2>/dev/null | grep -v '\.brief\.md$'
+ls .claude/implementation/*.md 2>/dev/null | grep -vE '\.(brief|audit)\.md$'
 ```
 
 Compter ensuite les cases cochées de la section `## Étapes`. Afficher :
@@ -229,6 +231,7 @@ Déclencheurs d'écriture :
 | Décision d'architecture arrêtée | Ligne dans le journal (voir règle ci-dessous) |
 | Le plan ne colle plus au réel | **Modifier les étapes** et le dire. Ne jamais bricoler en silence |
 | **Signal de dérive du brief déclenché** | **S'arrêter**, le nommer, en reparler avant de continuer |
+| Diff `base:`↔`<slug>` au-delà de 400 lignes | **Proposer** un audit intermédiaire, étapes restantes à l'appui (`references/audit.md`) |
 | Demande hors-périmètre | Le signaler, proposer soit d'élargir le périmètre (voir ci-dessous), soit une nouvelle impl |
 
 ### Quand le périmètre change
@@ -327,9 +330,12 @@ Format : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`
 ## Étape 5 — Clôture
 
 Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée :
-lire `references/cloture.md`, section « Clôture », et suivre la procédure — contrôle des étapes
-**et confrontation du résultat aux critères de réussite**, finalisation du suivi, aplatissement
-via `git-smart-commit`, archivage en `done/`, résumé.
+lire `references/cloture.md`, section « Clôture », et suivre la procédure — **audit par
+`implementation-auditor`**, contrôle des étapes, finalisation du suivi, aplatissement via
+`git-smart-commit`, archivage en `done/`, résumé.
+
+**Une clôture sans avis favorable ne va pas au bout** : l'audit est le premier point de la
+procédure, pas une formalité de fin (`references/audit.md`).
 
 ## Étape 6 — Abandon
 
