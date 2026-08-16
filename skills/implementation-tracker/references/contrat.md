@@ -15,11 +15,11 @@ Une règle déplacée ici laisse, à son ancien emplacement, **une ligne d'appel
 conséquence** — jamais un vide. `« Interdits git : lecture seule — [Contrat des sous-agents](contrat.md#contrat-des-sous-agents) »`
 se lit ; l'absence, non.
 
-**Les deux agents sont hors de ce dispositif.** `agents/step-implementer.md` et
-`agents/implementation-auditor.md` dupliquent volontairement les règles qui les concernent : ils se
-chargent dans leur propre fenêtre, où cette redondance ne coûte rien, et un agent en isolation qui
-ne suivrait pas un renvoi perdrait le garde-fou. Cette section 5 est leur **référence de contrôle**,
-pas une cible de renvoi.
+**Les trois agents sont hors de ce dispositif.** `agents/step-implementer.md`,
+`agents/implementation-auditor.md` et `agents/plan-reviewer.md` dupliquent volontairement les règles
+qui les concernent : ils se chargent dans leur propre fenêtre, où cette redondance ne coûte rien, et
+un agent en isolation qui ne suivrait pas un renvoi perdrait le garde-fou. Cette section 5 est leur
+**référence de contrôle**, pas une cible de renvoi.
 
 Chaque règle porte **son mode de défaillance**. Sans le pourquoi, un contrat devient un schéma, et
 un schéma se survole.
@@ -119,7 +119,7 @@ l'exécutant va le chercher, via le champ `plan`.
 
 ## Contrat des sous-agents
 
-Vaut pour `step-implementer` et `implementation-auditor`.
+Vaut pour `step-implementer`, `implementation-auditor` et `plan-reviewer`.
 
 **Entrée** — l'appelant transmet des **chemins absolus**. Les chemins lus *à l'intérieur* des
 fichiers (champ `plan`, fichiers d'une étape) sont relatifs à la **racine du dépôt** : l'appelant

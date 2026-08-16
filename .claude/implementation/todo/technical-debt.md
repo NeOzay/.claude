@@ -10,7 +10,7 @@ plus récente. Une entrée soldée est retirée d'ici et déplacée dans
 
 Procédure, gabarit et règle de solde : `skills/implementation-tracker/references/dette.md`.
 
-> Dernière vérification : 2026-08-15 (chantier `contrat-pipeline`)
+> Dernière vérification : 2026-08-16 (chantier `revue-plan-deleguee`)
 
 ---
 
@@ -33,28 +33,6 @@ vérifiée, et n'est plus appelée par rien.
 l'auditeur, soit comme skill séparé de pré-commit.
 
 *Identifié par `audit-integre`, hors-périmètre assumé au brief.*
-
----
-
-## 2026-08-14 — La confrontation plan ↔ brief reste auto-jugée et sans trace
-
-**Constat** — `skills/intent-brief/SKILL.md:193` (Étape 7) fait confronter le plan au brief par la
-session qui vient de produire ce plan, et sa sortie tient « en trois lignes, pas un rapport »
-(`:205`). Aucune trace versionnée n'en subsiste.
-
-**Assumé** : le brief du chantier `audit-integre` nommait trois points de contrôle auto-jugés ; deux
-ont été traités (la clôture, et le bloc `VÉRIFICATION` de `step-implementer` désormais rejoué). Le
-« But » du brief bornait explicitement le chantier à la clôture — celui-ci n'était couvert par aucun
-critère de réussite.
-
-**Pourquoi c'est gênant** — c'est le tiers restant du symptôme d'origine : un point de contrôle
-rendu par l'auteur du travail, sans trace. Le dispositif d'audit démontre qu'un juge indépendant y
-change le résultat.
-
-**Pour solder** — porter le même principe sur la confrontation : soit un rapport versionné, soit un
-regard extérieur. À cadrer, l'Étape 7 étant beaucoup plus légère qu'un audit de clôture.
-
-*Identifié par `audit-integre`, R7 du rapport d'audit.*
 
 ---
 
@@ -317,3 +295,23 @@ auteur.
 6 ne produit ni faux positif ni faux négatif.
 
 *Identifié par `contrat-pipeline`, décision de clôture.*
+
+---
+
+## 2026-08-16 — Le point 3 du tracker repose sur une prémisse de harness sans repli écrit
+
+**Constat** — `skills/implementation-tracker/SKILL.md:124-126` fait relire le plan par
+`plan-reviewer` avant `ExitPlanMode`, en s'appuyant sur le fait que le harness assigne un fichier de
+plan dès l'entrée en plan mode et en autorise l'écriture. C'est vrai aujourd'hui, vérifié pendant ce
+chantier, mais aucun repli n'est écrit si le harness change.
+
+**Assumé** : la prémisse a été constatée empiriquement, et le brief l'avait justement notée comme
+incertitude à lever.
+
+**Pourquoi c'est gênant** — sans fichier de plan à lire, l'appel n'a plus d'entrée et le point 3
+devient inexécutable, sans que rien n'indique quoi faire à la place.
+
+**Pour solder** — écrire le repli en une phrase : relancer `plan-reviewer` après `ExitPlanMode` sur
+le fichier de plan persisté, au prix d'un aller-retour si le verdict est défavorable.
+
+*Identifié par `revue-plan-deleguee`, R4 du rapport d'audit.*

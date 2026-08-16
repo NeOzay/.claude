@@ -118,17 +118,40 @@ committer ou les mettre de côté) avant de relancer.
    explicitement au plan les critères de réussite, le hors-périmètre et les incertitudes à
    lever. Explorer le code et construire le plan normalement — c'est le flux natif qui fait
    le travail.
-3. À la validation (`ExitPlanMode`), **confronter le plan au brief** (Étape 7 d'`intent-brief`)
-   avant toute écriture : critères servis, hors-périmètre respecté, signaux de dérive non
-   déclenchés, incertitudes tranchées. Tout écart se dit ; il se règle avec l'utilisateur, pas
-   en silence.
 
-   **Le chantier arrive d'`intent-brief`** (cas normal : c'est lui qui renvoie ici) → ses Étapes
-   6 et 7 ont déjà fait le plan et la confrontation. Ne pas les refaire : passer au point 4.
+   **C'est ici que le plan se construit, et nulle part ailleurs.** `intent-brief` s'arrête au
+   brief validé : il ne planifie pas et ne confronte pas.
+3. **Faire relire le plan avant de le présenter.** Le harness assigne un fichier de plan dès
+   l'entrée en plan mode et en autorise l'écriture : y écrire le plan, puis lancer le sous-agent
+   `plan-reviewer` **avant `ExitPlanMode`**.
 
-   Le plan est persisté dans `.claude/plans/<slug>-<mots>.md` (voir `plansDirectory`). **Prendre
-   son chemin dans la sortie d'`ExitPlanMode`**, pas par `ls -t` : dès qu'un second plan existe,
-   la date de modification désigne le mauvais fichier.
+   Lui transmettre trois chemins **absolus** — racine du dépôt, fichier de plan, brief — et **rien
+   d'autre** : il lit tout lui-même.
+   [Contrat des sous-agents](references/contrat.md#contrat-des-sous-agents).
+
+   **Pas de brief** → le lui dire explicitement : il ne jugera alors que la qualité du plan.
+
+   Pourquoi avant, et non après : celui qui vient d'écrire le plan est le plus mal placé pour
+   juger sa propre conformité — il relit son intention, pas son texte. Et un plan approuvé par
+   l'utilisateur puis contredit dans la foulée coûte un aller-retour entier. `ExitPlanMode`
+   présente donc **le plan et le verdict ensemble**.
+
+   | `VERDICT` | Action |
+   |---|---|
+   | `CONFORME` | Présenter le plan |
+   | `RÉSERVES` | Présenter le plan **avec** les constats — l'utilisateur valide en les connaissant |
+   | `NON CONFORME` | Présenter le plan avec le verdict, et laisser l'utilisateur trancher entre corriger le plan et élargir le brief |
+
+   **Ne jamais corriger le plan d'office** sur un verdict, quel qu'il soit. L'écart entre le plan
+   et le brief est précisément l'information qu'on paie en lançant l'agent : l'effacer avant que
+   l'utilisateur l'ait vue détruit ce qu'on cherchait. Seuls les défauts de rédaction relevés en
+   `QUALITÉ` — une citation fausse, une commande de vérification inopérante — se corrigent sans
+   arbitrage, et se disent quand même.
+
+   Le plan est persisté dans `.claude/plans/` (voir `plansDirectory`), sous un nom **généré par le
+   harness**, sans rapport avec le slug. Son chemin est donné à l'entrée en plan mode et confirmé
+   dans la sortie d'`ExitPlanMode` : le prendre là, jamais par `ls -t` — dès qu'un second plan
+   existe, la date de modification désigne le mauvais fichier.
 
    **Le plan doit être versionné.** C'est lui qui porte le contenu des étapes — le suivi n'en a
    que les intitulés, et `step-implementer` va y lire la description de son étape. Vérifier qu'il

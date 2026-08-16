@@ -44,7 +44,7 @@ printf '\n1. Renvois vers le contrat\n'
 anchors=$(grep '^## ' "$CONTRAT" | sed 's/^## //' | while IFS= read -r t; do slugify "$t"; done)
 [ -n "$anchors" ] || ko "aucune section dans le contrat — le fichier a été vidé ou restructuré"
 
-total=$(grep -roh '](\([^)]*\)contrat\.md#[a-zà-ÿ0-9-]*' --include='*.md' skills | wc -l)
+total=$(grep -roh '](\([^)]*\)contrat\.md#[^)]*' --include='*.md' skills | wc -l)
 if [ "$total" -eq 0 ]; then
   ko "aucun renvoi trouvé — le contrat n'est cité nulle part, ou le motif ne matche plus"
 fi
@@ -62,7 +62,7 @@ while IFS= read -r file; do
       printf '  ✗ %s → ancre morte : #%s\n' "$file" "$anchor"
       bad=$((bad + 1))
     fi
-  done < <(grep -o '](\([^)]*\)contrat\.md#[a-zà-ÿ0-9-]*' "$file" | sed 's/^](//')
+  done < <(grep -o '](\([^)]*\)contrat\.md#[^)]*' "$file" | sed 's/^](//')
 done < <(grep -rl 'contrat\.md#' --include='*.md' skills)
 
 if [ "$bad" -gt 0 ]; then

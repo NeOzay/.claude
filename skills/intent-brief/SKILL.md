@@ -3,10 +3,9 @@ name: intent-brief
 description: >
   Cadre l'intention de l'utilisateur AVANT le mode plan et produit un brief persistant
   (.claude/implementation/<slug>.brief.md) : intention réelle, critères de réussite,
-  hors-périmètre, contraintes non devinables, signaux de dérive. Confronte ensuite le plan
-  produit au brief. Se déclenche sur "cadrer", "brief", "avant de planifier", "aligner
-  l'intention", ou quand une demande de planification/refonte arrive sans brief existant.
-  Alimente implementation-tracker.
+  hors-périmètre, contraintes non devinables, signaux de dérive. Se déclenche sur "cadrer",
+  "brief", "avant de planifier", "aligner l'intention", ou quand une demande de
+  planification/refonte arrive sans brief existant. Alimente implementation-tracker.
 argument-hint: "[sujet du chantier]"
 ---
 
@@ -16,8 +15,9 @@ Le mode plan produit un bon plan **pour la demande telle qu'il l'a comprise**. L
 naît en amont — intention floue ou reformulée de travers, contraintes que seul l'utilisateur connaît,
 périmètre jamais borné — et se constate en aval, quand le plan ne défend plus rien.
 
-Ce skill couvre les deux bouts : il cadre avant, et il confronte après (Étape 7).
-Sortie : `.claude/implementation/<slug>.brief.md`, apparié par slug au fichier de suivi
+Ce skill cadre l'amont, et rien d'autre. Il ne planifie pas et ne relit pas le plan : le plan se
+construit dans `implementation-tracker`, qui le fait relire par `plan-reviewer` avant de le
+présenter. Sortie : `.claude/implementation/<slug>.brief.md`, apparié par slug au fichier de suivi
 d'`implementation-tracker`.
 
 Argument éventuel = sujet du chantier : il amorce le slug et oriente la reconnaissance.
@@ -40,9 +40,10 @@ Le cadrage a un coût. Il ne se justifie pas pour :
 - un correctif de bug déjà reproduit,
 - une tâche que l'utilisateur a déjà décrite avec ses critères.
 
-Dans ces cas : le dire en une ligne et passer directement au plan. **Sortie anticipée** également
-si, après l'Étape 2, l'utilisateur valide la restitution sans correction et qu'aucune ambiguïté
-n'est ouverte : proposer un brief minimal (intention + hors-périmètre) et enchaîner.
+Dans ces cas : le dire en une ligne et renvoyer directement à `/implementation-tracker`, qui sait
+ouvrir un chantier sans brief. **Sortie anticipée** également si, après l'Étape 2, l'utilisateur
+valide la restitution sans correction et qu'aucune ambiguïté n'est ouverte : proposer un brief
+minimal (intention + hors-périmètre) et passer à l'Étape 6.
 
 ## Règle du sourçage
 
@@ -182,47 +183,33 @@ Puis :
 
 Le brief tient en une page. S'il déborde, c'est un plan déguisé.
 
-## Étape 6 — Passage au plan
+## Étape 6 — Passage au suivi
 
-**Proposer**, jamais enchaîner d'office :
+Le brief est figé : il lui faut maintenant un fichier de suivi, sinon tout ce travail vit dans une
+conversation qui se fermera. **Le proposer explicitement** — `implementation-tracker` ne s'invoque
+qu'à la main, le modèle ne peut pas l'appeler :
 
-> Brief écrit dans `.claude/implementation/<slug>.brief.md`. On passe en mode plan avec ça comme cadre ?
+> Brief validé dans `.claude/implementation/<slug>.brief.md`.
+>
+> Ouvre le suivi avec `/implementation-tracker` pour figer les étapes et démarrer — il reprendra
+> ce brief.
 
-Sur accord : `EnterPlanMode`, en rappelant les critères de réussite, le hors-périmètre, les
-signaux de dérive et les incertitudes à lever.
-
-## Étape 7 — Confrontation plan ↔ brief
-
-**Obligatoire, juste après `ExitPlanMode`.** C'est ici que le brief cesse d'être documentaire et
-devient contraignant — sans cette étape, tout ce qui précède n'améliore que des probabilités.
-
-Relire le brief et confronter point par point :
-
-- **Critères de réussite** → chacun est servi par au moins une étape du plan ?
-- **Hors-périmètre** → aucune étape ne l'entame ?
-- **Signaux de dérive** → le plan en déclenche-t-il un ?
-- **Incertitudes** → chacune tranchée par le plan, ou toujours ouverte ?
-
-Sortie en trois lignes, pas un rapport. **Tout écart se dit**, même mineur : c'est exactement
-l'information qui manquait jusqu'ici. Un plan qui sort du périmètre n'est pas corrigé d'office —
-le signaler et laisser l'utilisateur trancher entre élargir le brief et resserrer le plan.
-
-## Étape 8 — Passage au suivi
-
-Le plan est validé et confronté : il faut maintenant un fichier de suivi, sinon tout ce travail
-vit dans une conversation qui se fermera. **Le proposer explicitement** — `implementation-tracker`
-ne s'invoque qu'à la main, le modèle ne peut pas l'appeler :
-
-> Plan validé et conforme au brief. Ouvre le suivi avec `/implementation-tracker` pour figer les
-> étapes et démarrer — il reprendra ce brief et ce plan.
+C'est la sortie unique de ce skill. Le plan se construit dans le tracker, qui le fait relire par
+`plan-reviewer` avant de le présenter : ni l'un ni l'autre ne se fait ici.
 
 ---
 
 ## Articulation avec implementation-tracker
 
 Le brief précède le suivi et ne le remplace pas : le brief porte l'intention et ses bornes, figées ;
-le suivi porte les étapes et leur avancement, mis à jour en continu. Ce qui fait foi en cas de
-divergence, et où s'écrit un périmètre qui change réellement :
+le suivi porte les étapes et leur avancement, mis à jour en continu.
+
+La coupure est nette : **ce skill s'arrête au brief validé.** Le plan, sa relecture par
+`plan-reviewer` et le figeage des étapes appartiennent tous à l'Étape 2 d'`implementation-tracker`.
+Un brief qui déborde sur le plan reprend le travail que le tracker refera — et deux versions d'une
+même chose ne peuvent que diverger.
+
+Ce qui fait foi en cas de divergence, et où s'écrit un périmètre qui change réellement :
 [Autorité et divergence](../implementation-tracker/references/contrat.md#autorité-et-divergence).
 
 Ce que le suivi reprend du brief à sa création (Étape 2 d'`implementation-tracker`) :

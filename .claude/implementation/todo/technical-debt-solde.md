@@ -125,3 +125,56 @@ nommage est au contrat, section « Arborescence et nommage ».
 Établi par : `ls .claude/implementation/done/ | grep plan` → `2026-08-14-audit-integre.plan.md` et
 `2026-08-14-dette-technique.plan.md` ; `grep -h '^plan:' .claude/implementation/done/*.md` → deux
 chemins distincts, chacun vers le plan de son chantier.
+
+---
+
+## 2026-08-14 — La confrontation plan ↔ brief reste auto-jugée et sans trace
+
+**Constat** — `skills/intent-brief/SKILL.md:193` (Étape 7) fait confronter le plan au brief par la
+session qui vient de produire ce plan, et sa sortie tient « en trois lignes, pas un rapport »
+(`:205`). Aucune trace versionnée n'en subsiste.
+
+**Assumé** : le brief du chantier `audit-integre` nommait trois points de contrôle auto-jugés ; deux
+ont été traités (la clôture, et le bloc `VÉRIFICATION` de `step-implementer` désormais rejoué). Le
+« But » du brief bornait explicitement le chantier à la clôture — celui-ci n'était couvert par aucun
+critère de réussite.
+
+**Pourquoi c'est gênant** — c'est le tiers restant du symptôme d'origine : un point de contrôle
+rendu par l'auteur du travail, sans trace. Le dispositif d'audit démontre qu'un juge indépendant y
+change le résultat.
+
+*Identifié par `audit-integre`, R7 du rapport d'audit.*
+
+**Soldé le 2026-08-16 par le chantier `revue-plan-deleguee`** — l'option « regard extérieur » a été
+retenue : l'Étape 7 d'`intent-brief` est supprimée, et la confrontation est rendue par le sous-agent
+`plan-reviewer` (contexte isolé, lecture seule), appelé par le tracker **avant** que le plan ne soit
+présenté à l'utilisateur. L'option « rapport versionné » a été écartée : un plan pas encore accepté
+peut changer plusieurs fois, un historique de verdicts sur des versions mortes n'aiderait personne.
+Établi par : `grep -c 'Confrontation plan' skills/intent-brief/SKILL.md` → `0` et ses étapes
+s'arrêtent à `## Étape 6 — Passage au suivi` ; `grep -n 'plan-reviewer'
+skills/implementation-tracker/SKILL.md` → `126:` l'appel avant `ExitPlanMode` ; `agents/plan-reviewer.md`
+existe, `tools: Read, Grep, Glob, Bash` sans droit d'écriture.
+
+---
+
+## 2026-08-16 — Le contrôle 1 du garde-fou de pipeline n'a jamais rien testé
+
+**Constat** — `scripts/check-pipeline.sh:47` et `:65` comptaient les renvois vers le contrat avec la
+classe `[a-zà-ÿ0-9-]`. Le range `à-ÿ` est une collation invalide : `/usr/bin/grep` échouait sur
+`Invalid collation character`, `total` valait `0`, et le script concluait « aucun renvoi trouvé — le
+contrat n'est cité nulle part », en sortant systématiquement en code 1.
+
+**Pourquoi c'était gênant** — le contrôle 1 détecte les ancres mortes vers `contrat.md`, soit la
+dérive que la centralisation des règles existe pour empêcher. Il ne produisait pas un faux positif :
+il rapportait une anomalie constante, indistinguable d'une vraie, et faisait échouer chaque clôture.
+Un contrôle qui crie toujours ne se lit plus.
+
+*Identifié par `revue-plan-deleguee`, constaté au point 1 de sa clôture. Anomalie préexistante,
+reproduite à l'identique sur `master`.*
+
+**Soldé le 2026-08-16 par le chantier `revue-plan-deleguee`** — range remplacé par `[^)]` aux deux
+endroits. Le correctif évident `[a-z0-9-]` a été **écarté** : il tronquait les ancres accentuées du
+contrat (`#format-détape-et-délégabilité`, `#autorité-et-divergence`), transformant un contrôle mort
+en faux « ancre morte ». `[^)]` ne dépend d'aucune collation et capture l'ancre entière.
+Établi par : `bash scripts/check-pipeline.sh` → « 1. Renvois vers le contrat ✓ 29 renvois, tous
+résolvent », « Pipeline conforme. », `EXIT=0` ; les six contrôles passent.
