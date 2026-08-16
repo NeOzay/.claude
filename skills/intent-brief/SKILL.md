@@ -13,7 +13,7 @@ argument-hint: "[sujet du chantier]"
 # Intent Brief
 
 Le mode plan produit un bon plan **pour la demande telle qu'il l'a comprise**. Le désalignement
-naît en amont — intention reformulée de travers, contraintes que seul l'utilisateur connaît,
+naît en amont — intention floue ou reformulée de travers, contraintes que seul l'utilisateur connaît,
 périmètre jamais borné — et se constate en aval, quand le plan ne défend plus rien.
 
 Ce skill couvre les deux bouts : il cadre avant, et il confronte après (Étape 7).
