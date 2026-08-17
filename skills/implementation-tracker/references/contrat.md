@@ -38,14 +38,26 @@ un schéma se survole.
     <AAAA-MM-DD>-<slug>.brief.md
     <AAAA-MM-DD>-<slug>.audit.md
     <AAAA-MM-DD>-<slug>.plan.md
+    revues/
+      <AAAA-MM-DD>-revue.md      # rapports de revue du registre, un par passage
   todo/
     README.md
     technical-debt.md            # registre de dette, alimenté à la clôture
     technical-debt-solde.md      # ce qui a été soldé, avec la commande qui l'établit
+    technical-debt-ecarte.md     # ce qui en est sorti sans avoir été payé, avec son motif
 ```
 
 `done/` porte des **archives figées** ; `todo/` des registres **vivants**, relus et élagués, jamais
-archivés. Le pipeline alimente `todo/` sans jamais le lire de lui-même.
+archivés. Le pipeline alimente `todo/` à la clôture et ne l'ouvre à aucun autre moment ; seul
+`debt-review`, invoqué à la main, le relit et le met à jour.
+
+Un rapport de revue est daté, non slugué : il ne se rattache à aucun chantier. Le
+**sous-répertoire** `done/revues/` n'est pas cosmétique — il le tient hors de portée du listing
+des suivis, qui ne descend qu'à un niveau.
+
+> *Mode de défaillance* — posé à plat dans `done/`, un rapport de revue serait remonté comme un
+> fichier de suivi : le contrôle des chemins de frontmatter y chercherait des champs `plan`, `brief`
+> et `audit` qu'il n'a pas, et le listing lui-même compterait un chantier qui n'existe pas.
 
 **Slug** : kebab-case, court (`auth-refactor`, pas `refonte-complete-du-systeme-dauth`). Arrêté au
 brief, il ne change plus — le suivi le reprend **exactement**.

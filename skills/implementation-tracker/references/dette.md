@@ -1,7 +1,7 @@
 # Registre de dette technique
 
-Fichiers : `.claude/implementation/todo/technical-debt.md`, et `technical-debt-solde.md` pour ce qui
-a été soldé.
+Fichiers : `.claude/implementation/todo/technical-debt.md`, `technical-debt-solde.md` pour ce qui
+a été soldé, et `technical-debt-ecarte.md` pour ce qui est sorti du registre sans avoir été payé.
 
 Le pipeline produisait déjà des constats de dette — l'auditeur en fait un axe de jugement — mais
 n'avait nulle part où les déposer : ils vivaient dans `<slug>.audit.md`, archivé en `done/` à la
@@ -101,6 +101,16 @@ patterns de sécurité.
 Une entrée sans **Pour solder** est un regret, pas une dette : dire ce qu'il faudrait faire, même
 grossièrement, ou ne pas l'écrire.
 
+**Désigner sans numéro de ligne.** Une entrée cite un fichier, une section, une phrase — jamais
+`fichier.md:42`. Le repère se périme au premier commit qui insère une ligne au-dessus, sans qu'une
+commande échoue et sans que rien ne le signale. Écrire plutôt `` `cloture.md`, « toutes les étapes
+sont cochées » `` : la citation reste vraie tant que la règle existe, et devient introuvable
+exactement quand elle disparaît — ce qui est précisément l'information cherchée.
+
+> *Mode de défaillance* — un numéro de ligne périmé ne casse rien de visible : il fait classer
+> `non-pertinent` une dette vivante dont la relecture n'a pas retrouvé la cible. C'est la sortie de
+> registre la plus facile à obtenir sur une preuve fausse.
+
 ---
 
 ## Alimenter — à la clôture
@@ -150,8 +160,78 @@ mis à jour — daté de la mise à jour, pas de l'origine.
 
 ---
 
+## Écarter
+
+Une entrée peut cesser d'avoir sa place au registre sans qu'un correctif y soit pour quelque chose :
+ce qu'elle cite n'existe plus, une autre entrée dit déjà la même chose, ou le constat n'était pas
+une dette. Elle est alors **écartée** : retirée du registre et déplacée en fin de
+`technical-debt-ecarte.md`, complétée par son motif.
+
+```markdown
+**Écartée le 2026-09-02 — non pertinent** — le hook `rtk` ne réécrit plus les `ls`, la colonne de
+taille a disparu.
+Établi par : `git log -1 --format=%H -- hooks/rtk.sh` → aucun commit, le hook a été supprimé.
+```
+
+Motifs admis, et rien d'autre : **non pertinent**, **doublon**, **pas une dette**. Pour un doublon,
+la ligne `Établi par` cite l'**intitulé de l'entrée conservée** au lieu d'une commande — c'est la
+seule dispense, et l'entrée conservée est la plus ancienne des deux.
+
+**Écarter exige la même preuve que solder** : une commande lancée et sa sortie réelle. Sans elle,
+l'entrée reste au registre. Le registre des écartés n'est pas une corbeille — c'est là qu'on
+retrouve, deux ans plus tard, pourquoi un problème a arrêté d'en être un.
+
+Le fichier n'existe pas encore → le créer avec son préambule, qui dit ce qu'il recense et pourquoi
+il n'est pas le registre des soldes.
+
+---
+
+## Corriger une entrée
+
+Une entrée peut être **vraie et mal écrite** : un chiffre sous-mesuré dès l'origine, un **Pour
+solder** qui échouerait à son premier lancement, un **Assumé** devenu faux, un repère périmé. Ce
+n'est ni un solde, ni une mise à l'écart, ni une aggravation — le problème n'a pas bougé, c'est sa
+description qui est fautive. Elle se corrige **sur place**, sans changer de destination.
+
+Ce qui se corrige : le **Constat**, le **Pourquoi c'est gênant**, l'**Assumé**, le **Pour solder**.
+
+Ce qui ne bouge pas : la **date** du titre — elle dit depuis quand le problème est connu, pas depuis
+quand il est bien décrit — et l'**intitulé**, clé de référence et de dédoublonnage (« Marqueur d'une
+entrée relue »). L'intitulé porte lui-même le chiffre faux → il reste tel quel, et le **Constat**
+énonce l'écart. Le réécrire ferait revenir l'entrée comme neuve au point 3 d'*Alimenter*, ce qui
+coûte plus cher que l'imprécision d'un titre.
+
+**La correction exige la même preuve que le solde** : la commande qui établit le bon chiffre, citée
+dans l'entrée. Sans elle, on remplace une erreur par une autre — et celle-là aura l'air vérifiée.
+
+## Marqueur d'une entrée relue
+
+Une entrée peut être **relue et laissée en place**, avec une information sur cette relecture. Elle
+porte alors, sur une ligne seule **sous son titre**, la mention `(catégorie) date` :
+
+```markdown
+## 2026-08-14 — Les correctifs de l'étape 9 n'ont jamais été audités
+
+(invérifiable en revue) 2026-08-16
+```
+
+**L'intitulé, lui, ne bouge jamais** — pas de suffixe, pas de mention ajoutée. C'est par lui qu'une
+entrée se référence (« Gabarit d'entrée ») et sur lui que le point 3 d'*Alimenter* dédoublonne
+avant d'écrire : le modifier ferait revenir le même constat comme s'il était neuf, et le registre
+porterait deux fois la même dette.
+
+Les catégories qui marquent, et ce que chaque marqueur engage :
+`../../debt-review/references/categories.md`.
+
+---
+
 ## Lecture
 
 Le pipeline n'ouvre jamais le registre de lui-même : ni `intent-brief` au cadrage, ni le tracker à
 l'Étape 0. Il l'alimente, l'utilisateur le consulte — typiquement quand il cherche un sujet de
 chantier.
+
+**Une exception, et elle est manuelle** : le skill `debt-review` ouvre le registre pour le relire
+entrée par entrée, le confronter au dépôt et le faire arbitrer. Il ne s'invoque jamais de lui-même,
+et il ne corrige aucun code — il instruit un verdict, l'utilisateur tranche, puis les registres et
+la ligne de dernière vérification sont écrits.
