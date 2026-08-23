@@ -1,79 +1,5 @@
 {
-  "autoCompactEnabled": true,
-  "editorMode": "normal",
-  "effortLevel": "medium",
-  "enabledPlugins": {
-    "caveman@caveman": true,
-    "rust-analyzer-lsp@claude-plugins-official": false
-  },
-  "extraKnownMarketplaces": {
-    "caveman": {
-      "source": {
-        "repo": "JuliusBrussee/caveman",
-        "source": "github"
-      }
-    }
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "atuin hook claude-code",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "command": "atuin hook claude-code",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      }
-    ],
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "rtk hook claude",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      },
-      {
-        "hooks": [
-          {
-            "command": "atuin hook claude-code",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      },
-      {
-        "hooks": [
-          {
-            "command": "$HOME/.claude/hooks/intent-brief-gate.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "EnterPlanMode"
-      }
-    ]
-  },
-  "language": "Francais",
-  "model": "opus",
   "permissions": {
-    "additionalDirectories": [
-      "~/.local/share/nvim/lazy",
-      "~/projects/nvim-plugins"
-    ],
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
@@ -87,14 +13,89 @@
       "Bash(rtk ls *)",
       "Bash(rtk gh *)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "~/.local/share/nvim/lazy",
+      "~/projects/nvim-plugins"
+    ]
   },
-  "plansDirectory": ".claude/plans",
+  "model": "opus",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "atuin hook claude-code"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "atuin hook claude-code"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "atuin hook claude-code"
+          }
+        ]
+      },
+      {
+        "matcher": "EnterPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/intent-brief-gate.sh"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
-    "command": "python3 $HOME/.claude/statusline-command.py",
-    "type": "command"
+    "type": "command",
+    "command": "python3 $HOME/.claude/statusline-command.py"
   },
+  "enabledPlugins": {
+    "caveman@caveman": true,
+    "rust-analyzer-lsp@claude-plugins-official": false
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
+  },
+  "outputStyle": "Concise",
+  "language": "Francais",
+  "effortLevel": "medium",
+  "plansDirectory": ".claude/plans",
   "tui": "fullscreen",
+  "editorMode": "normal",
   "verbose": false,
+  "autoCompactEnabled": true,
   "voiceEnabled": true
 }
