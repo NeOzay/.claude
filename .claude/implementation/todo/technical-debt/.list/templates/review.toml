@@ -1,0 +1,42 @@
+# Contrat de la liste de revue engendrée par `derive <src> <dst> --template review`.
+#
+# Une fiche par entrée du registre, et rien de la prose de l'entrée : la fiche ne
+# porte que du jugement, qui n'existe nulle part ailleurs. C'est ce qui la rend
+# légitimement éditable sans faire double emploi avec la dette qu'elle instruit.
+
+name = "revue"
+description = "Revue du registre de dette — une fiche par entrée, un verdict par fiche"
+
+[fields.id]
+type = "slug"
+
+[fields.title]
+type = "text"
+required = true
+from = "title"
+description = "l'intitulé de l'entrée, reporté — c'est la clé qui rattache la fiche au registre"
+
+[fields.date]
+type = "date"
+required = true
+from = "date"
+description = "date du constat au registre, reportée — jamais celle de la revue"
+
+[fields.reviewed]
+type = "date"
+required = true
+description = "date de CETTE revue, celle qui sera reportée au registre"
+
+[fields.category]
+type = "enum"
+required = true
+description = "le verdict, une des sept catégories de references/categories.md"
+values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
+          "aggravee", "pertinent", "inverifiable"]
+
+# `category` et `reviewed` n'ont pas de `from` : ils sont posés au marqueur, et
+# c'est au modèle de trancher. Un champ reporté d'office serait un script qui juge.
+
+[sections]
+required = ["Vérifié par", "Verdict", "Action"]
+optional = ["Arbitrage"]

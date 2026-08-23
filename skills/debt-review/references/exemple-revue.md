@@ -1,92 +1,155 @@
-# Exemple de rapport de revue — jeu de test du script de tri
+# Sept fiches instruites, une par catégorie
 
-**Huit blocs pour sept catégories** : la pile `pertinent` en porte deux, de dates différentes, sans
-quoi le tri par date **à l'intérieur** d'une pile ne serait couvert par aucun test. Catégories et
-dates sont volontairement mêlées, et les deux blocs `pertinent` apparaissent ici **du plus récent au
-plus ancien** — le tri doit les inverser. Ne pas ranger ce fichier.
+Ce que le modèle écrit dans une fiche, une fois `derive` passé : les deux champs et les trois
+sections requises, sur les sept verdicts possibles. La huitième fiche montre une section
+`Arbitrage` remplie — le seul ajout de l'Étape 4.
 
-Ce fichier est le jeu de test permanent de `../scripts/trier-revue.sh`. Le modifier sans relancer le
-script est le meilleur moyen de casser le tri en silence.
+Ce qui est reproduit ici est le **corps** d'une fiche, tel qu'il apparaîtrait dans
+`done/revues/<AAAA-MM-DD>/<id>.md`. Le front matter est écrit par `derive` : `id`, `title` et `date`
+sont reportés de l'entrée, seuls `category` et `reviewed` sont à remplir.
 
 > **Les entrées ci-dessous sont fictives**, ainsi que le dépôt qu'elles décrivent — un service de
 > commandes en Python qui n'existe pas. C'est délibéré : un exemple bâti sur une vraie entrée du
 > registre livre un verdict pré-mâché sur une dette que le relecteur va rencontrer, et le pousse à
 > recopier ce verdict au lieu d'exécuter sa commande. Aucun intitulé d'ici ne doit figurer dans
-> `technical-debt.md`.
+> `technical-debt`.
 
-## pertinent | 2025-06-19 | Le client HTTP ne fixe aucun timeout
+---
 
-**Vérifié par** — `grep -rn 'requests.get\|requests.post' orders/ | grep -vc timeout` → 7 appels sur
-7 sans timeout.
+## `a-solder` — Le cache de sessions n'expire jamais
 
-**Verdict** — inchangé depuis le constat d'origine.
+```markdown
+category = "a-solder"
+reviewed = 2026-09-02
 
-**Action** — laisser au registre.
+## Vérifié par
 
-## aggravee | 2025-02-11 | Trois vues dupliquent la règle de remise
+`grep -n 'ttl' orders/cache.py` → `ttl=1800` passé au constructeur, depuis le commit `4f1c9ab`.
 
-**Vérifié par** — `grep -rln 'discount_rate' orders/views/` → 5 fichiers, là où l'entrée en
-décrivait 3.
+## Verdict
 
-**Verdict** — toujours vrai, et deux vues de plus qu'à l'origine.
+La dette a été payée : les entrées de cache expirent, le problème décrit ne se reproduit plus.
 
-**Action** — laisser au registre, réécrire le **Constat**, marquer `(aggravée) <date>` sous le
-titre.
+## Action
 
-## pertinent | 2025-01-08 | Les migrations ne sont pas rejouables
+`move` vers `technical-debt-solde`, puis section `## Soldé le` portant la commande ci-dessus.
+```
 
-**Vérifié par** — `grep -c 'def downgrade' orders/migrations/*.py | grep -c ':0$'` → 12 migrations
-sans `downgrade`.
+## `non-pertinent` — Le module `legacy/xmlrpc.py` n'a aucun test
 
-**Verdict** — inchangé. Second bloc `pertinent` du jeu de test, et le plus ancien des deux : c'est
-lui qui couvre le tri par date au sein d'une pile. Le retirer rend la régression d'ordonnancement
-invisible.
+```markdown
+## Vérifié par
 
-**Action** — laisser au registre.
+`ls orders/legacy/xmlrpc.py` → `No such file or directory`, code de sortie 2.
 
-## non-pertinent | 2025-04-23 | Le module `legacy/xmlrpc.py` n'a aucun test
+## Verdict
 
-**Vérifié par** — `ls orders/legacy/xmlrpc.py` → `No such file or directory`, code de sortie 2.
+L'élément cité n'existe plus : le module a été supprimé, pas testé. Rien n'a été réparé, d'où
+`non-pertinent` et non `a-solder`.
 
-**Verdict** — l'élément cité n'existe plus : le module a été supprimé, pas testé. Rien n'a été
-réparé, d'où `non-pertinent` et non `a-solder`.
+## Action
 
-**Action** — écarter, motif `non pertinent`.
+`move` vers `technical-debt-ecarte`, motif `non pertinent`.
+```
 
-## inverifiable | 2025-02-11 | La migration 0042 n'a jamais été rejouée sur une copie de production
+## `doublon` — Le timeout du client HTTP n'est pas configurable
 
-**Vérifié par** — sans objet : le constat porte un fait historique, pas un état du code. Aucune
-lecture du dépôt ne peut établir qu'une opération n'a pas eu lieu ailleurs.
+```markdown
+## Vérifié par
 
-**Verdict** — restera vrai indéfiniment ; seul un usage réel peut le solder.
+Sans objet : la preuve est l'`id` de l'entrée conservée.
 
-**Action** — laisser au registre, marquer `(invérifiable en revue) <date>` sous le titre.
+## Verdict
 
-## a-solder | 2025-03-04 | Le cache de sessions n'expire jamais
+Dit la même chose que `client-http-sans-timeout`, datée du 2025-06-19, qui est **la plus ancienne
+des deux** et donc celle qui est conservée.
 
-**Vérifié par** — `grep -n 'ttl' orders/cache.py` → `ttl=1800` passé au constructeur depuis le
-commit `4f1c9ab`.
+## Action
 
-**Verdict** — la dette a été payée : les entrées de cache expirent, le problème décrit ne se
-reproduit plus.
+`move` vers `technical-debt-ecarte`, motif `doublon`, en nommant `client-http-sans-timeout`.
+```
 
-**Action** — déplacer en fin de `technical-debt-solde.md` avec la commande ci-dessus.
+## `pas-une-dette` — Les noms de variables du module de facturation sont abrégés
 
-## doublon | 2025-07-02 | Le timeout du client HTTP n'est pas configurable
+```markdown
+## Vérifié par
 
-**Vérifié par** — sans objet : la preuve est l'intitulé de l'entrée conservée.
+`grep -rnc '\bqty\b\|\bamt\b' orders/billing.py` → 23 occurrences, le constat tient toujours.
 
-**Verdict** — dit la même chose que « Le client HTTP ne fixe aucun timeout », datée du 2025-06-19,
-qui est **la plus ancienne des deux** et donc celle qui est conservée.
+## Verdict
 
-**Action** — écarter, motif `doublon`, en nommant l'entrée conservée.
+Exact, mais c'est une préférence de style qu'aucun critère ne porte — exclue du registre par
+construction.
 
-## pas-une-dette | 2025-01-08 | Les noms de variables du module de facturation sont abrégés
+## Action
 
-**Vérifié par** — `grep -rnc '\bqty\b\|\bamt\b' orders/billing.py` → 23 occurrences, le constat
-tient toujours.
+`move` vers `technical-debt-ecarte`, motif `pas une dette`.
+```
 
-**Verdict** — exact, mais c'est une préférence de style qu'aucun critère ne porte — exclue du
-registre par construction.
+## `aggravee` — Trois vues dupliquent la règle de remise
 
-**Action** — écarter, motif `pas une dette`.
+```markdown
+## Vérifié par
+
+`grep -rln 'discount_rate' orders/views/` → 5 fichiers, là où l'entrée en décrivait 3.
+
+## Verdict
+
+Toujours vrai, et deux vues de plus qu'à l'origine.
+
+## Action
+
+L'entrée ne bouge pas : réécrire son **Constat**, daté du jour, et écrire `category` et `reviewed`.
+```
+
+## `pertinent` — Le client HTTP ne fixe aucun timeout
+
+```markdown
+## Vérifié par
+
+`grep -rn 'requests.get\|requests.post' orders/ | grep -vc timeout` → 7 appels sur 7 sans timeout.
+
+## Verdict
+
+Inchangé depuis le constat d'origine.
+
+## Action
+
+Rien à déplacer ; seuls `category` et `reviewed` sont écrits sur l'entrée.
+```
+
+## `inverifiable` — La migration 0042 n'a jamais été rejouée sur une copie de production
+
+```markdown
+## Vérifié par
+
+Sans objet : le constat porte un fait historique, pas un état du code. Aucune lecture du dépôt ne
+peut établir qu'une opération n'a pas eu lieu ailleurs.
+
+## Verdict
+
+Restera vrai indéfiniment ; seul un usage réel peut le solder.
+
+## Action
+
+Rien à déplacer ; `category = "inverifiable"` et `reviewed` à la date du jour.
+```
+
+---
+
+## Une fiche arbitrée
+
+La section `Arbitrage` est écrite à l'Étape 4, après que l'utilisateur a tranché — et par elle
+seule. Ici, un verdict **renversé** : `category` et le **Verdict** ont été corrigés en même temps,
+pour que la fiche ne dise pas le contraire de ce qu'elle porte.
+
+```markdown
+## Arbitrage
+
+Renversé le 2026-09-02 : classée `pas-une-dette` à l'instruction, l'utilisateur la maintient au
+registre — l'abréviation gêne la relecture d'un module facturé au client, ce qui est un critère.
+`category` passe à `pertinent`, le **Verdict** est réécrit en conséquence.
+```
+
+Laissée au marqueur, la section n'apparaît pas dans le rapport aggloméré : une fiche que personne
+n'a discutée n'a pas de ligne d'arbitrage vide à montrer.

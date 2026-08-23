@@ -1,103 +1,151 @@
-# Gabarit du rapport de revue
+# La fiche de revue et le rapport aggloméré
 
-Fichier : `.claude/implementation/done/revues/<AAAA-MM-DD>-revue.md`, écrit **directement à sa place
-définitive** — pas de fichier de travail à déplacer ensuite, donc pas d'archivage à oublier. Le
-sous-répertoire le tient hors de portée de `impl-list.sh`, qui ne descend qu'à un niveau.
+Deux objets, et un seul est écrit à la main.
 
-Le modèle **étiquette**, le script **regroupe** : ce fichier définit la seule chose que les deux
-doivent respecter à l'identique, la ligne d'en-tête d'un bloc.
+| | Qui l'écrit | Où |
+|---|---|---|
+| **la fiche** — un verdict sur une entrée | le modèle, dans un fichier créé par `derive` | `done/revues/<AAAA-MM-DD>/<id>.md` |
+| **le rapport** — l'aggloméré de toutes les fiches | `merge`, jamais à la main | `done/revues/<AAAA-MM-DD>-revue.md` |
+
+Le modèle **instruit**, la commande **agglomère**. Rien de ce qui suit n'est un format à respecter
+en écrivant du texte : la structure vient du contrat
+`.claude/implementation/todo/technical-debt/.list/templates/review.toml`, lu par `derive`, et
+`validate` la fait respecter.
 
 ---
 
-## Le préambule
+## La fiche
 
-En tête du fichier, avant le premier bloc : la date de la revue, le registre relu, et le **compte**
-des entrées instruites face au compte du registre.
-
-```markdown
-# Revue du registre — 2026-08-17
-
-Registre : `.claude/implementation/todo/technical-debt.md`
-**Entrées au registre : 14 — blocs instruits : 14.**
-```
-
-**Le tri conserve le préambule et ne le redécoupe pas** : c'est le seul endroit du rapport où écrire
-quelque chose qui n'est pas un bloc. Un rapport archivé porte ainsi lui-même la preuve qu'aucune
-entrée n'a été omise.
-
-> *Mode de défaillance* — **`## ` est réservé aux en-têtes de bloc**, partout dans le fichier. C'est
-> le séparateur du script, pas un niveau de titre : un `## Comptes` ou un `## ` de pile vide part au
-> découpage et fait échouer le tri en « en-tête mal formé », message qui n'explique pas ce qui gêne.
-> Les titres du préambule s'écrivent en `#`.
-
-## La ligne d'en-tête
+`derive` la crée déjà remplie de sa structure : `id`, `title` et `date` reportés de l'entrée, tout
+le reste au marqueur. Il ne reste qu'à écrire.
 
 ```markdown
-## <catégorie> | <AAAA-MM-DD> | <intitulé exact de l'entrée>
++++
+id = "cache-sessions-sans-ttl"
+title = "Le cache de sessions n'expire jamais"
+date = 2025-03-04
+reviewed = "<À REMPLIR>"
+category = "<À REMPLIR>"
++++
+
+## Vérifié par
+
+<À REMPLIR>
+
+## Verdict
+
+<À REMPLIR>
+
+## Action
+
+<À REMPLIR>
+
+## Arbitrage
+
+<OPTIONNEL>
 ```
 
-Trois champs séparés par ` | `, dans cet ordre, sur une seule ligne.
+**Les deux champs à écrire :**
 
-- **catégorie** — un des sept identifiants ci-dessous, en ASCII kebab-case.
-- **date** — celle de l'entrée dans le registre, **pas** celle de la revue. C'est elle qui ordonne
-  chaque pile.
-- **intitulé** — recopié **caractère pour caractère** depuis le registre, marqueur de catégorie
-  exclu s'il y en a déjà un. C'est la clé qui rattache le bloc à son entrée
-  (`../../implementation-tracker/references/dette.md`, « Gabarit d'entrée »).
+- `category` — un des sept identifiants de `categories.md`, en ASCII kebab-case. Le contrat refuse
+  toute valeur hors de la liste, donc une faute de frappe échoue à `validate` au lieu de se ranger
+  dans une pile fantôme.
+- `reviewed` — la date de **cette** revue, jamais celle du constat. `date` porte déjà celle-là, et
+  elle est reportée sans être touchée : c'est elle qui ordonne l'intérieur d'une pile.
 
-| Identifiant | Pile rendue par le script |
+**Ce qui n'est jamais écrit dans une fiche** : la prose de l'entrée. La fiche ne porte que du
+jugement, qui n'existe nulle part ailleurs — c'est ce qui la rend légitimement éditable sans faire
+double emploi avec le registre. `show` va lire l'entrée quand il faut la relire.
+
+**Les trois sections requises :**
+
+- **Vérifié par** — la commande lancée et sa **sortie réelle**, dans un bloc de code. Elle doit se
+  rejouer seule, sans contexte : c'est elle qui sera recopiée au registre au moment du solde ou de
+  la mise à l'écart. Coller la sortie telle quelle est sûr — un `## ` qui s'y trouverait n'ouvre pas
+  de section, le découpage comme le recomptage ignorent ce qui est entre fences.
+  Sans commande exécutée, le verdict est `pertinent`. Deux catégories en sont dispensées, et
+  seulement elles : `inverifiable`, où il n'y a rien à exécuter, et `doublon`, où la preuve est
+  l'`id` de l'entrée conservée. Dans ces deux cas, la section dit **pourquoi** rien n'est
+  exécutable — c'est ce qui la distingue d'un classement paresseux.
+- **Verdict** — ce que la commande établit, et pourquoi cette catégorie plutôt que la voisine.
+- **Action** — ce qu'il faudra écrire au registre une fois l'arbitrage rendu : la liste de
+  destination pour une entrée qui sort, le **Constat** réécrit pour une `aggravee`, rien pour un
+  `pertinent`.
+
+**La section facultative :**
+
+- **Arbitrage** — écrite à l'Étape 4, après que l'utilisateur a tranché : décision suivie,
+  renversée, différée, ou élargie en règle. Laissée au marqueur, elle est **omise** du rapport.
+
+> *Mode de défaillance* — le corps d'une section vaut « à remplir » **exactement** tant qu'il est le
+> marqueur seul. Y ajouter une consigne, un rappel ou un « TODO » suffit à faire passer la fiche
+> pour instruite auprès de `validate --filled`, et le rapport partira à l'arbitrage avec un verdict
+> qui n'existe pas.
+
+## Le rapport
+
+Rendu par `merge`, et par rien d'autre :
+
+```bash
+python3 "$HOME/.claude/skills/list-dir/scripts/list-dir.py" \
+        merge .claude/implementation/done/revues/<AAAA-MM-DD> \
+        --out .claude/implementation/done/revues/<AAAA-MM-DD>-revue.md
+```
+
+Sa forme est fixée par la commande et vaut pour toute liste :
+
+| Niveau | Contenu |
 |---|---|
-| `a-solder` | À solder |
-| `non-pertinent` | Non pertinent |
-| `doublon` | Doublon |
-| `pas-une-dette` | Pas une dette |
-| `aggravee` | Aggravée |
-| `pertinent` | Pertinent |
-| `inverifiable` | Invérifiable en revue |
-
-> *Mode de défaillance* — les identifiants sont en ASCII parce qu'ils sont comparés par le script.
-> Un libellé accentué se serait cassé au premier fichier réencodé, sans qu'une commande n'échoue :
-> le bloc serait tombé dans « catégorie inconnue » et le script se serait arrêté — visible, mais
-> pour la mauvaise raison. Les libellés accentués n'apparaissent que dans la sortie, où rien ne les
-> compare.
-
-L'ordre des piles est celui du tableau : ce qui **sort** du registre d'abord, ce qui y **reste**
-ensuite. Il est fixé dans le script, pas ici — le rapport brut peut mêler les catégories.
-
-## Le corps d'un bloc
+| `# ` | le préambule : nom de la liste, date, **compte des blocs face au compte du répertoire** |
+| `## ` | une fiche — son `title` |
+| `### ` | les sections de la fiche, décalées d'un niveau |
 
 ```markdown
-## non-pertinent | 2025-04-23 | Le module `legacy/xmlrpc.py` n'a aucun test
+# revue
 
-**Vérifié par** — `ls orders/legacy/xmlrpc.py` → `No such file or directory`, code de sortie 2.
+2026-09-02 — 17 élément(s) aggloméré(s), 17 fichier(s) dans le répertoire.
 
-**Verdict** — l'élément cité n'existe plus : le module a été supprimé, pas testé. Rien n'a été
-réparé, d'où `non-pertinent` et non `a-solder`.
+## Le cache de sessions n'expire jamais
 
-**Action** — écarter vers `technical-debt-ecarte.md`, motif `non pertinent`.
+### Vérifié par
+
+`grep -n 'ttl' orders/cache.py` → `ttl=1800` passé au constructeur depuis le commit `4f1c9ab`.
+
+### Verdict
+
+La dette a été payée : les entrées de cache expirent, le problème décrit ne se reproduit plus.
+
+### Action
+
+Déplacer vers `technical-debt-solde` avec la commande ci-dessus.
 ```
 
-> *Mode de défaillance* — **cet exemple est fictif, et doit le rester.** Bâti sur une vraie entrée
-> du registre, il livrerait un verdict tout fait sur une dette que le relecteur va rencontrer :
-> celui-ci recopie l'exemple au lieu d'exécuter sa commande, et écarte une dette vivante sur une
-> preuve périmée. Le dépôt d'exemple — un service de commandes en Python — n'existe pas, et aucun
-> intitulé de `technical-debt.md` ne doit apparaître dans ce répertoire.
+Le décalage d'un niveau n'est pas cosmétique : les sections d'une fiche sont des `## ` dans son
+fichier. Sans lui, le recomptage verrait les sections en plus des blocs, et le compte du préambule
+ne voudrait plus rien dire.
 
-**`Vérifié par` porte une commande lancée et sa sortie réelle.** C'est la règle du solde
-(`../../implementation-tracker/references/dette.md`, « Solder »), étendue ici à toute sortie du
-registre : sans preuve exécutée, l'entrée
-ne sort pas et le bloc se classe `pertinent`.
+> **Ne pas recompter à la main.** `merge` compte hors blocs de code ; un `grep -c '^## '` lancé sur
+> l'aggloméré compte en plus les `## ` que porte une sortie de commande collée — c'est-à-dire
+> exactement le contenu que ce skill demande d'écrire. Le compte qui fait foi est celui du
+> préambule.
 
-Deux catégories en sont dispensées, et seulement elles :
+**Le préambule dit ce que `merge` a pu vérifier, et rien de plus** : les blocs rendus face aux
+fichiers **présents dans la liste de revue**. Les deux comptes divergent si un `title` ouvre un faux
+bloc — jamais si une fiche a disparu, puisqu'elle manque des deux côtés. Un préambule « 16 — 16 »
+sur un registre de 17 est parfaitement cohérent et parfaitement faux.
 
-- `inverifiable` — par définition, il n'y a rien à exécuter ; le bloc dit pourquoi ;
-- `doublon` — la preuve est l'intitulé de l'entrée conservée, qui doit être cité dans `Verdict`.
+La complétude se contrôle donc **contre le registre**, avant d'agglomérer (`SKILL.md`, Étape 3).
+C'est le seul contrôle de la revue qui ne tienne pas dans une commande : la liste générique ne
+connaît pas le registre dont elle dérive, et c'est précisément ce qui la garde générique.
+
+**Le rapport ne s'édite pas.** Une correction se fait dans la fiche, et `merge` se relance — c'est
+la même règle que partout : une vue dérivée qui devient éditable fait perdre la source unique.
 
 ## Ce que le rapport n'est pas
 
-Ce n'est **pas** un journal : un rapport par revue, archivé tel quel, jamais appendu. Le journal
-des soldes vit dans `technical-debt-solde.md`, celui des sorties sèches dans
-`technical-debt-ecarte.md`.
+Ce n'est **pas** un journal : un rapport par revue, un répertoire par revue, archivés tels quels et
+jamais appendus. Le journal des soldes est la liste `technical-debt-solde`, celui des sorties sèches
+`technical-debt-ecarte`.
 
-Ce n'est **pas** une décision : le rapport trié est présenté, l'utilisateur tranche, l'écriture
-suit. Un rapport archivé sans arbitrage écrit à côté est un rapport qui n'a servi à rien.
+Ce n'est **pas** une décision : le rapport est présenté, l'utilisateur tranche, l'écriture suit. Un
+rapport archivé sans arbitrage écrit à côté est un rapport qui n'a servi à rien.

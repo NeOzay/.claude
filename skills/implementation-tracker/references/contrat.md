@@ -42,14 +42,26 @@ un schéma se survole.
       <AAAA-MM-DD>-revue.md      # rapports de revue du registre, un par passage
   todo/
     README.md
-    technical-debt.md            # registre de dette, alimenté à la clôture
-    technical-debt-solde.md      # ce qui a été soldé, avec la commande qui l'établit
-    technical-debt-ecarte.md     # ce qui en est sorti sans avoir été payé, avec son motif
+    technical-debt/              # registre de dette, alimenté à la clôture
+      .list/contract.toml        #   le contrat : ce qu'une entrée doit porter
+      <id>.md                    #   une entrée = un fichier
+    technical-debt-solde/        # ce qui a été soldé, avec la commande qui l'établit
+    technical-debt-ecarte/       # ce qui en est sorti sans avoir été payé, avec son motif
 ```
 
 `done/` porte des **archives figées** ; `todo/` des registres **vivants**, relus et élagués, jamais
 archivés. Le pipeline alimente `todo/` à la clôture et ne l'ouvre à aucun autre moment ; seul
 `debt-review`, invoqué à la main, le relit et le met à jour.
+
+Les trois registres sont des **répertoires-listes** : un répertoire = une liste, un fichier = une
+entrée, un `.list/contract.toml` qui déclare la structure. Ils ne s'éditent jamais à la main — les
+commandes du skill `list-dir` créent, valident, déplacent et agglomèrent. Contrat des entrées et
+gestes autorisés : `dette.md`.
+
+> *Mode de défaillance* — ces trois listes ont d'abord été trois fichiers Markdown uniques.
+> Solder une entrée revenait à découper trente lignes de prose et à les recoller ailleurs, sans
+> qu'aucune commande ne signale une perte. Un `mv` ou une édition de front matter à la main
+> ramène exactement ce mode d'échec.
 
 Un rapport de revue est daté, non slugué : il ne se rattache à aucun chantier. Le
 **sous-répertoire** `done/revues/` n'est pas cosmétique — il le tient hors de portée du listing
@@ -206,3 +218,36 @@ légitimement local au dépôt.
 > ligne, ce qui empêche toute ancre `$` de matcher : un `grep -vE '\.(brief|audit)\.md$'` écrit en
 > ligne n'exclut plus rien, et les trois copies du filtre ont cassé ensemble. Un script échappe à
 > cette réécriture, qui ne s'applique qu'aux appels Bash du modèle.
+
+## Dépendances
+
+Le pipeline dépend d'un skill et d'un interpréteur, et de rien d'autre :
+
+| Dépendance | Ce qui en dépend | Contrôle |
+|---|---|---|
+| `list-dir` (`skills/list-dir/scripts/list-dir.py`) | les trois registres de `todo/`, `debt-review` | `test -f "$HOME/.claude/skills/list-dir/scripts/list-dir.py"` |
+| Python ≥ 3.12 | `list-dir` (syntaxe PEP 695) | `list-dir.py` sort non nul en nommant la version trouvée |
+| `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
+| `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx basedpyright` |
+
+> *Mode de défaillance* — les deux linters n'étant pas installés, un audit qui les appelle par leur
+> nom les rapporte « non exécutés » et rend un verdict amputé sans que rien n'échoue. C'est arrivé
+> à l'audit du 2026-08-23. Le lanceur fait partie de la dépendance : l'écrire ici est ce qui la rend
+> exécutable par quelqu'un d'autre.
+
+**Une dépendance se déclare, elle ne se suppose pas.** Une commande de `list-dir` nomme les outils
+externes dont elle a besoin dans son `REQUIRES`, et le chargeur les cherche dans le `PATH` **avant**
+d'appeler la commande : outil absent → sortie non nulle qui le nomme, jamais un travail à moitié
+fait.
+
+> *Mode de défaillance* — `hooks/intent-brief-gate.sh` gardait sur `jq`. Absent, la garde sortait
+> **0** en silence : le hook laissait passer ce qu'il existait pour bloquer, et rien ne le disait.
+> C'est ce précédent qui a fait de la déclaration de dépendance une règle plutôt qu'un usage.
+
+`list-dir` ne connaît en revanche **aucun de ses consommateurs** : le registre de dette est un
+répertoire-liste comme un autre, et le skill ignore jusqu'au mot « dette ». C'est ce qui le rend
+déployable ailleurs, et c'est mécaniquement vérifiable :
+
+```bash
+grep -ril 'dette\|debt' "$HOME/.claude/skills/list-dir/" ; echo "attendu : aucune sortie"
+```

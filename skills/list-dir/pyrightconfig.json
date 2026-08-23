@@ -1,0 +1,16 @@
+{
+  "typeCheckingMode": "all",
+  "pythonVersion": "3.12",
+  "include": [
+    "scripts"
+  ],
+  "exclude": [
+    "**/__pycache__"
+  ],
+  "extraPaths": [
+    "scripts"
+  ],
+  "reportImplicitStringConcatenation": false,
+  "reportUnusedCallResult": false,
+  "reportImportCycles": false
+}

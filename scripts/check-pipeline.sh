@@ -177,6 +177,16 @@ printf '\n6. Portabilité des appels de script\n'
 # résultat, pas comme une erreur. Les scripts d'un skill s'appellent donc par chemin
 # absolu ancré dans la skill. Ce contrôle existe parce que l'audit du 2026-08-14 a
 # bloqué la clôture sur exactement ce défaut.
+#
+# DEUX INTERPRÉTEURS, `bash …*.sh` et `python3 …*.py`. Le contrôle n'a longtemps connu
+# que le premier : `skills/list-dir/` a rendu le second aussi courant, et un appel
+# `python3 scripts/list-dir.py` échouerait exactement de la même façon — 127 et rien
+# sur stdout. Un contrôle qui ne couvre qu'une moitié de ce qu'il protège finit par
+# donner l'assurance qu'il n'a plus.
+#
+# `python3 -c`, `python3 - <<'PY'` et `python3 "$L"` ne sont pas concernés : aucun ne
+# porte un chemin de fichier `.py` en clair. La variable est résolue à l'exécution, et
+# c'est sa définition — non cet appel — qui doit être absolue.
 mds=$(grep -rl '' --include='*.md' skills 2>/dev/null | wc -l)
 if [ "$mds" -eq 0 ]; then
   ko "aucun fichier examiné dans skills/ — contrôle sans objet"
@@ -190,7 +200,8 @@ else
   while IFS= read -r hit; do
     file=${hit%%:*}
     line=${hit#*:}; line=${line#*:}
-    for call in $(printf '%s\n' "$line" | grep -o 'bash "\?[^" ;)]*\.sh' | sed 's/^bash "\?//'); do
+    for call in $(printf '%s\n' "$line" | grep -oE '(bash|python3) "?[^" ;)]*\.(sh|py)' \
+                    | sed -E 's/^(bash|python3) "?//'); do
       # Toutes les écritures d'un chemin absolu, sinon le contrôle crie à tort — et un
       # contrôle qui crie à tort se fait désactiver, ce qui tue le garde-fou entier.
       case "$call" in
@@ -199,7 +210,7 @@ else
       printf '%s\n' "$line" | grep -q "\[ -f \"\?$call" && continue
       relatives="$relatives$file → $call"$'\n'
     done
-  done < <(grep -rn 'bash [^ ]*\.sh' --include='*.md' skills 2>/dev/null)
+  done < <(grep -rnE '(bash|python3) [^ ]*\.(sh|py)' --include='*.md' skills 2>/dev/null)
 
   if [ -n "$relatives" ]; then
     while IFS= read -r l; do

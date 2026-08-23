@@ -1,0 +1,36 @@
+name = "technical-debt-ecarte"
+description = "Sorti du registre sans avoir été payé, avec son motif"
+
+[fields.id]
+type = "slug"
+
+[fields.title]
+type = "text"
+required = true
+description = "Sorti du registre sans avoir été payé, avec son motif"
+
+[fields.date]
+type = "date"
+required = true
+description = "Sorti du registre sans avoir été payé, avec son motif"
+
+[fields.source]
+type = "text"
+required = false
+description = "Sorti du registre sans avoir été payé, avec son motif"
+
+[fields.reviewed]
+type = "date"
+required = false
+description = "date de la dernière revue qui a statué sur cette entrée"
+
+[fields.category]
+type = "enum"
+required = false
+description = "Sorti du registre sans avoir été payé, avec son motif"
+values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
+          "aggravee", "pertinent", "inverifiable"]
+
+[sections]
+required = ["Constat", "Écartée le"]
+optional = ["Pourquoi c'est gênant", "Pour solder", "Assumé"]

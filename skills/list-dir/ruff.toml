@@ -1,0 +1,19 @@
+# Configuration ruff du skill list-dir.
+#
+# Elle vit ici, et non à la racine du dépôt, parce que ce skill est destiné à être
+# déployé ailleurs : sa configuration doit voyager avec lui.
+#
+# line-length = 100 : le code a été écrit à cette largeur, et les messages d'erreur
+# en français — qui nomment le chemin fautif et la cause — dépassent régulièrement
+# 88 colonnes. Les couper en trois lignes rendrait le message moins lisible que la
+# ligne longue qu'il remplace.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+# E402 est explicitement sélectionné, et list-dir.py y échappe sans `noqa` : ruff
+# tolère les imports placés après une garde de version ou une retouche de sys.path,
+# ce que ce fichier fait dans les deux cas. Le sélectionner garde la règle active
+# pour tous les autres modules, où un import tardif serait fautif.
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

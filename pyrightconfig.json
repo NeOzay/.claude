@@ -1,0 +1,18 @@
+{
+  "typeCheckingMode": "all",
+  "pythonVersion": "3.12",
+  "include": [
+    "skills"
+  ],
+  "exclude": [
+    "plugins",
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "extraPaths": [
+    "skills/list-dir/scripts"
+  ],
+  "reportImplicitStringConcatenation": false,
+  "reportUnusedCallResult": false,
+  "reportImportCycles": false
+}

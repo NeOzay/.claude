@@ -40,3 +40,6 @@ telemetry/
 plugins/marketplaces/
 plugins/known_marketplaces.json
 tasks/
+
+__pycache__/
+.ruff_cache/

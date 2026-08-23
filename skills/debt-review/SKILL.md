@@ -1,12 +1,12 @@
 ---
 name: debt-review
 description: >
-  Relit le registre de dette technique entrée par entrée et le confronte au dépôt : chaque entrée
-  reçoit une catégorie instruite par une commande exécutée, l'utilisateur arbitre, puis les
-  registres de todo/ sont mis à jour et le rapport archivé. Skill exclusivement manuelle : elle
-  s'invoque uniquement via /debt-review. Ne corrige aucun code.
+  Relit le registre de dette technique entrée par entrée et le confronte au dépôt : une liste de
+  revue est dérivée du registre, le modèle instruit chaque fiche par une commande exécutée,
+  l'utilisateur arbitre, puis les entrées sont déplacées et le rapport aggloméré archivé. Skill
+  exclusivement manuelle : elle s'invoque uniquement via /debt-review. Ne corrige aucun code.
 disable-model-invocation: true
-argument-hint: "[@chemin/vers/technical-debt.md]"
+argument-hint: "[@chemin/vers/technical-debt]"
 ---
 
 # Debt Review
@@ -18,6 +18,12 @@ lit plus.
 
 Ce skill est cette relecture, et rien d'autre : **il instruit, il ne répare pas.**
 
+Le registre est un **répertoire-liste** (`../implementation-tracker/references/dette.md`), et la
+revue en est une seconde : `derive` engendre une fiche par entrée, le modèle les remplit, `merge`
+les agglomère en rapport. Ce partage est le principe du dispositif — **les scripts font la
+structure, le modèle fait le jugement**. Ni le découpage, ni le tri, ni le comptage ne sont écrits
+ici.
+
 ---
 
 ## Les trois règles
@@ -26,12 +32,14 @@ Ce skill est cette relecture, et rien d'autre : **il instruit, il ne répare pas
 correctif ouvre un chantier avec `/implementation-tracker` — c'est ce qui empêche une revue de se
 transformer en session de bricolage dont personne n'a validé le périmètre.
 
-**2. Un verdict par entrée, aucune omise.** Le compte des blocs du rapport égale le nombre d'entrées
-du registre. Une entrée qu'on ne sait pas classer est `pertinent` : le doute laisse la dette où elle
-est.
+**2. Un verdict par fiche, aucune omise.** `derive` crée exactement une fiche par entrée et
+`validate --filled` refuse la moindre fiche vierge : la complétude n'est plus quelque chose qu'on
+vérifie à la main, c'est quelque chose qu'une commande refuse.
 
-**3. L'utilisateur arbitre, le skill écrit ensuite.** Le rapport trié est présenté, l'utilisateur
-tranche entrée par entrée, l'écriture suit. Jamais l'inverse.
+Une entrée qu'on ne sait pas classer est `pertinent` : le doute laisse la dette où elle est.
+
+**3. L'utilisateur arbitre, le skill écrit ensuite.** Le rapport aggloméré est présenté,
+l'utilisateur tranche entrée par entrée, l'écriture suit. Jamais l'inverse.
 
 > *Mode de défaillance* — un skill qui solde de sa propre autorité produit exactement le geste que
 > le registre existe pour empêcher : faire disparaître un problème avec l'air de l'avoir traité.
@@ -40,10 +48,15 @@ tranche entrée par entrée, l'écriture suit. Jamais l'inverse.
 
 - `references/categories.md` — les sept catégories, ce qui entre dans chacune, la preuve exigée et
   la destination. **À lire avant d'instruire**, pas après.
-- `references/gabarit-rapport.md` — la forme du bloc, seule chose que le modèle et le script
-  doivent respecter à l'identique.
-- `../implementation-tracker/references/dette.md` — la tenue des registres : gabarit d'entrée,
-  règle de solde, ligne de dernière vérification.
+- `references/gabarit-rapport.md` — la fiche et l'aggloméré : ce que chaque section attend, et ce
+  que `merge` en fait.
+- `references/exemple-revue.md` — sept fiches instruites, une par catégorie, sur un dépôt fictif.
+- `../implementation-tracker/references/dette.md` — la tenue des registres : contrat d'une entrée,
+  règle de solde, champs de revue.
+
+**Aucun fichier n'est créé, déplacé ni renommé à la main.** Toute manipulation de liste passe par
+une commande de `list-dir` ; le modèle n'écrit que **dans** des fiches déjà créées. Un `mv` ou un
+`cp` sur un élément de liste est le signe qu'on a repris le travail du script.
 
 ---
 
@@ -52,28 +65,34 @@ tranche entrée par entrée, l'écriture suit. Jamais l'inverse.
 ```bash
 date +%F
 git rev-parse --is-inside-work-tree 2>/dev/null || echo "NON_GIT"
-ls .claude/implementation/todo/
-mkdir -p .claude/implementation/done/revues
-ls .claude/implementation/done/revues/
+
+L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
+T=.claude/implementation/todo
+
+for l in technical-debt technical-debt-solde technical-debt-ecarte; do
+  python3 "$L" validate "$T/$l" || echo "ÉCHEC : $l"
+done
+ls .claude/implementation/done/revues/ 2>/dev/null
 git status --short | grep -v '^.. \.claude/implementation/'
 ```
 
 Utiliser la date renvoyée par `date`, jamais l'inventer :
 [Dates et listing](../implementation-tracker/references/contrat.md#dates-et-listing).
 
-Le `mkdir -p` n'est pas une précaution : `done/revues/` n'existe pas dans un dépôt qui n'a jamais
-été revu, et l'Étape 1 y écrit directement. Sans lui, la première revue d'un dépôt échoue à
-l'écriture — après avoir instruit toutes les entrées.
+`validate` en tête n'est pas une précaution : une revue qui part d'un registre non conforme
+instruit des entrées dont la structure ment déjà. Sortie ≠ 0 → le dire et s'arrêter, la remise en
+conformité n'est pas le travail d'une revue.
 
 - **Registre absent** → le dire et s'arrêter. Ce skill relit un registre existant ; il n'en crée
-  pas, et n'a rien à instruire sur un fichier vide.
+  pas, et n'a rien à instruire sur une liste vide.
 - **Modifications hors de `.claude/implementation/`** → le signaler et demander. C'est ce que
   filtre le `grep -v` ci-dessus : une sortie vide suffit à continuer. Le contrôle ne porte que sur
   ce qui **fausserait** le `git status --short` de l'Étape 5 — un fichier déjà modifié sous
   `.claude/implementation/` y serait de toute façon accepté, donc l'exiger propre rejetterait des
   arbres parfaitement sains.
-- **Un rapport existe déjà à la date du jour** parmi les fichiers listés → le lire et proposer de le
-  reprendre. Ne jamais l'écraser sans accord ; le tri est idempotent, le relancer ne coûte rien.
+- **Une revue existe déjà à la date du jour** parmi les répertoires listés → la lire et proposer de
+  la reprendre. `derive` **refuse** d'écraser une destination existante, et c'est voulu : deux
+  revues sont deux répertoires, jamais une fusion.
 
 **Personne à qui demander** — appel non interactif, ou sous-agent : **s'arrêter et le dire**, sans
 instruire. Ce skill est manuel par construction (`disable-model-invocation`), et chacun de ses
@@ -82,9 +101,42 @@ personne n'a arbitré, c'est-à-dire précisément ce que la troisième règle i
 
 Un argument `@chemin` désigne un autre registre que celui par défaut.
 
-## Étape 1 — Instruire, entrée par entrée
+## Étape 1 — Dériver la liste de revue
 
-Lire le registre en entier, puis traiter les entrées **une à une, dans l'ordre du fichier**.
+```bash
+R=".claude/implementation/done/revues/$(date +%F)"
+python3 "$L" derive "$T/technical-debt" "$R" --template review
+python3 "$L" validate "$R"
+```
+
+`derive` écrit le contrat de la revue depuis `.list/templates/review.toml` de la liste source, puis
+une fiche par entrée depuis `review.md` : même `id`, `title` et `date` reportés, tout le reste au
+marqueur. `derive` en crée exactement une par entrée — **à cet instant, et à cet instant seul.**
+
+Ce que `merge` vérifiera plus tard est autre chose : il recompte les blocs rendus face aux
+**fichiers présents dans la liste de revue**. Une fiche disparue entre les deux réduit les deux
+comptes à la fois et ne fait donc rien échouer. Le registre est la seule référence qui ne bouge pas,
+et c'est contre lui que la complétude se contrôle :
+
+```bash
+test "$(python3 "$L" list "$R" | wc -l)" -eq "$(python3 "$L" list "$T/technical-debt" | wc -l)" \
+  || echo "ÉCHEC : autant de fiches que d'entrées attendu"
+```
+
+À rejouer **avant `merge`**, à l'Étape 3. C'est le seul contrôle de la revue qui ne soit pas dans
+une commande, précisément parce que la liste générique ne connaît pas le registre dont elle dérive.
+
+La fiche **ne porte rien de la prose de l'entrée**, et c'est délibéré : une fiche qui recopierait le
+*Constat* en serait un doublon éditable, et le registre cesserait d'être la source unique.
+
+## Étape 2 — Instruire, fiche par fiche
+
+Traiter les fiches **une à une**, dans l'ordre du registre :
+
+```bash
+python3 "$L" list "$T/technical-debt" --sort date     # l'ordre de travail
+python3 "$L" show "$T/technical-debt" <id>            # l'entrée à instruire
+```
 
 Pour chacune :
 
@@ -92,10 +144,8 @@ Pour chacune :
 2. **Exécuter la commande** qui établit si le constat tient encore. La choisir pour qu'elle se
    rejoue seule, sans contexte : c'est elle qui sera recopiée dans le registre.
 3. Classer, selon `references/categories.md`.
-4. Écrire le bloc dans le rapport, au format du gabarit.
-
-Le rapport s'écrit directement à sa place définitive, `done/revues/<AAAA-MM-DD>-revue.md` : il n'y a
-pas de fichier de travail à déplacer ensuite, donc pas d'archivage à oublier.
+4. Écrire la fiche `$R/<id>.md` : les champs `category` et `reviewed`, puis les sections **Vérifié
+   par**, **Verdict** et **Action**. La section `Arbitrage` reste au marqueur jusqu'à l'Étape 4.
 
 **Ne pas grouper les vérifications.** Une passe de `grep` qui répond à six entrées d'un coup produit
 six classements adossés à la même lecture — c'est le raccourci qui fait rater les cas particuliers,
@@ -104,16 +154,11 @@ et il ne laisse aucune commande rejouable par entrée.
 **Les repères d'une entrée ancienne sont périmés par défaut.** Chercher le **texte** que l'entrée
 décrit, jamais la ligne qu'elle nomme : un `fichier.md:42` qui a glissé de trois lignes se lit comme
 une cible disparue, et fait classer `non-pertinent` une dette parfaitement vivante. Le registre ne
-doit plus en contenir (`../implementation-tracker/references/dette.md`, « Gabarit d'entrée ») ; ceux
-qui restent sont à corriger, pas à croire.
+doit plus en contenir (`../implementation-tracker/references/dette.md`, « Ce qu'une entrée porte ») ;
+ceux qui restent sont à corriger, pas à croire.
 
 **Sans commande exécutée, l'entrée est `pertinent`.** Pas « probablement soldée », pas « sans doute
 obsolète » : la plausibilité ne fait sortir personne du registre.
-
-**`## ` est réservé aux en-têtes de bloc**, dans tout le rapport — c'est le séparateur du script,
-pas un niveau de titre. Un `## Comptes`, un `## ` de pile vide, et le tri s'arrête sur « en-tête mal
-formé » sans dire pourquoi le titre gêne. Le préambule accueille tout le reste : lui survit au tri,
-et rien n'y est découpé.
 
 **Compter en caractères, pas en octets.** Sur un corpus accentué, `awk 'length > 100'` compte les
 octets : il rend une centaine de faux dépassements et fait conclure `aggravee` sur un artefact
@@ -129,56 +174,71 @@ for i, l in enumerate(open(sys.argv[1], encoding='utf-8'), 1):
 Le piège vaut au-delà des longueurs de ligne : toute commande qui compte des caractères sur du texte
 français doit être choisie pour ça.
 
-## Étape 2 — Trier
+Quand toutes les fiches sont écrites :
 
 ```bash
-bash "$HOME/.claude/skills/debt-review/scripts/trier-revue.sh" \
-     .claude/implementation/done/revues/<AAAA-MM-DD>-revue.md
+python3 "$L" validate "$R" --filled
 ```
 
-Le modèle étiquette, le script regroupe : le tri par catégorie puis par date est mécanique, et le
-script vérifie qu'aucun bloc ne s'est perdu en route.
+**Sortie ≠ 0 → une fiche n'est pas instruite**, et le message nomme le fichier et ce qui y manque.
+Ce contrôle dit que chaque fiche **présente** est remplie ; il ne dit rien de celles qui auraient
+disparu — c'est le rôle du comptage contre le registre, ci-dessous.
 
-**Sortie ≠ 0 → corriger le rapport, pas contourner le script.** Un bloc rejeté est un bloc dont
-l'en-tête ne rattache plus rien au registre.
-
-Puis remplacer le rapport par sa version triée — **jamais par une redirection vers lui-même** :
+## Étape 3 — Agglomérer et restituer
 
 ```bash
-R=.claude/implementation/done/revues/<AAAA-MM-DD>-revue.md
-bash "$HOME/.claude/skills/debt-review/scripts/trier-revue.sh" "$R" > "$R.trie" \
-  && mv "$R.trie" "$R"
+test "$(python3 "$L" list "$R" | wc -l)" -eq "$(python3 "$L" list "$T/technical-debt" | wc -l)" \
+  || echo "ÉCHEC : autant de fiches que d'entrées attendu"
+python3 "$L" merge "$R" --out "$R-revue.md"
 ```
 
-> *Mode de défaillance* — `trier-revue.sh "$R" > "$R"` **détruit le rapport** : le shell tronque le
-> fichier avant que le script ne le lise, et le tri s'exécute sur du vide. Mesuré : 8 blocs et 4172
-> octets ramenés à 0. Le rapport vit dans `done/revues/`, que git ne suit pas encore à ce stade —
-> il n'y a rien à restaurer, et c'est le travail de l'Étape 1 en entier qui disparaît. Le `&&` du
-> bon idiome sert la même prudence : sortie ≠ 0, le rapport d'origine reste en place.
+**Le comptage passe avant `merge`, et il n'est pas redondant avec lui.** `merge` recompte les blocs
+rendus face aux fichiers présents dans la liste de revue : il attrape un `title` qui ouvrirait un
+faux bloc, mais **pas** une fiche supprimée, qui réduit les deux comptes ensemble. Seul le registre
+est une référence extérieure.
 
-**Confronter le compte** : autant de blocs que d'entrées au registre. Un écart ici est une entrée
-oubliée à l'Étape 1, pas une erreur de tri.
+> *Mode de défaillance* — mesuré : 16 fiches dérivées de 17 entrées s'agglomèrent en 16 blocs, code
+> 0, préambule « 16 — 16 ». Le rapport se lit comme complet, et l'entrée manquante n'est signalée
+> par rien. C'est la seule façon qu'une revue a de perdre une entrée en silence.
 
-Ce compte s'écrit **dans le préambule du rapport**, avec la date de la revue et le chemin du
-registre. Le tri le conserve — c'est le seul endroit du fichier qu'il ne redécoupe pas — donc le
-rapport archivé porte lui-même la preuve qu'aucune entrée n'a été oubliée, sans dépendre de la
-conversation où il a été produit.
+Le rapport s'écrit à côté de sa liste, `done/revues/<AAAA-MM-DD>-revue.md`, directement à sa place
+définitive : pas de fichier de travail à déplacer, donc pas d'archivage à oublier. `merge` refuse
+par ailleurs d'agglomérer tant qu'un marqueur subsiste.
 
-## Étape 3 — Restituer et arbitrer
+Présenter **les piles**, pas les fiches une par une : leur intitulé, leur effectif, et pour celles
+qui font sortir une entrée du registre, le verdict en une ligne chacune.
 
-Présenter **les piles**, pas les blocs un par un : leur intitulé, leur effectif, et pour celles qui
-font sortir une entrée du registre, le verdict en une ligne chacune.
+```bash
+for c in a-solder non-pertinent doublon pas-une-dette aggravee pertinent inverifiable; do
+  printf '%-16s %s\n' "$c" "$(python3 "$L" list "$R" --where category=$c | wc -l)"
+done
+```
 
-Puis faire arbitrer, pile par pile. Une décision peut être :
+**L'ordre des piles est celui de cette boucle** — ce qui **sort** du registre d'abord, ce qui y
+**reste** ensuite. Il ne s'obtient pas par `--sort category`, qui ordonne les valeurs
+alphabétiquement : c'est l'énumération ci-dessus qui le porte, et elle suit `categories.md`.
+`--sort date` ordonne l'intérieur d'une pile.
+
+## Étape 4 — Arbitrer
+
+Faire trancher, pile par pile. Une décision peut être :
 
 - **suivie** — la destination prévue s'applique ;
-- **renversée** — l'utilisateur reclasse l'entrée ; réécrire le bloc, ne pas le laisser mentir ;
+- **renversée** — l'utilisateur reclasse l'entrée ; corriger `category` **et** le **Verdict** de la
+  fiche, ne pas la laisser mentir ;
 - **différée** — l'entrée reste au registre telle quelle, sans marqueur ;
 - **élargie en règle** — l'arbitrage ne porte plus sur l'entrée seule, mais sur la façon dont le
   registre se tient. Voir ci-dessous.
 
-Consigner l'arbitrage dans le rapport, sous le bloc concerné. C'est ce qui distingue un rapport
-archivé d'un rapport qui n'a servi à rien.
+Consigner l'arbitrage dans la section `Arbitrage` de la fiche concernée, puis **réagglomérer** :
+
+```bash
+python3 "$L" merge "$R" --out "$R-revue.md"
+```
+
+C'est ce qui distingue un rapport archivé d'un rapport qui n'a servi à rien. Une section `Arbitrage`
+laissée au marqueur est simplement omise du rapport — le fichier ne se constelle pas de sections
+vides.
 
 ### Quand l'arbitrage produit une règle
 
@@ -189,77 +249,80 @@ mandat, et les entrées corrigées ici auront l'air de l'avoir été sans autori
 
 Où elle s'écrit, selon ce qu'elle régit :
 
-- **la tenue des registres** (gabarit d'entrée, solde, mise à l'écart, correction, marqueur) →
-  `../implementation-tracker/references/dette.md`, qui en est l'autorité ;
+- **la tenue des registres** (contrat d'une entrée, solde, mise à l'écart, correction, champs de
+  revue) → `../implementation-tracker/references/dette.md`, qui en est l'autorité ;
 - **le classement** (ce qu'une catégorie couvre, ce qu'elle ne couvre pas) →
   `references/categories.md`, avec un renvoi vers `dette.md` plutôt qu'une recopie ;
+- **la structure d'une liste** (un champ à ajouter au contrat, une section à déclarer) → le
+  `.list/contract.toml` concerné, puis `migrate` pour remettre les éléments en conformité ;
 - **le geste de la revue** → ce fichier.
 
 **La règle s'écrit avant les corrections qu'elle autorise**, jamais après : c'est elle qui les rend
 rejouables. Et elle est **la seule raison** pour laquelle une passe de revue écrit hors de
-`.claude/implementation/` — l'Étape 5 en tient compte.
+`.claude/implementation/` — l'Étape 6 en tient compte.
 
 > *Mode de défaillance* — sans ce chemin, la seule issue est de corriger les entrées sans écrire la
 > règle. Les corrections passent alors pour des retouches d'humeur, et le prochain relecteur, qui
 > lit un dispositif muet sur le sujet, les défait de bonne foi.
 
-## Étape 4 — Écrire les registres
+## Étape 5 — Écrire les registres
 
-Dans cet ordre, et seulement sur les entrées arbitrées :
+Seulement sur les entrées arbitrées, et **jamais à la main** : une entrée qui sort du registre
+change de liste par `move`, qui est un `git mv` et rien d'autre.
 
-1. **`a-solder`** → retirer du registre, appender en fin de `technical-debt-solde.md` avec
-   `**Soldé le <date> par <ce qui l'a soldé>**` et la commande exécutée.
-2. **`non-pertinent`, `doublon`, `pas-une-dette`** → retirer du registre, appender en fin de
-   `technical-debt-ecarte.md` avec `**Écartée le <date> — <motif>**` et la commande, ou l'entrée
-   conservée pour un doublon.
-3. **`aggravee`** → réécrire le **Constat**, daté du jour ; ajouter `(aggravée) <date>` sous le
-   titre. L'intitulé ne change pas.
-4. **`inverifiable`** → ajouter `(invérifiable en revue) <date>` sous le titre. Rien d'autre.
-5. **`pertinent`** → ne rien écrire.
-6. **Corrections de contenu arbitrées** — une entrée vraie mais mal écrite se corrige sur place,
-   quelle que soit sa catégorie : `../implementation-tracker/references/dette.md`, « Corriger une
-   entrée ».
-   Date et intitulé ne bougent pas, et la correction porte sa commande.
-7. **Actualiser la ligne de dernière vérification** en tête du registre, avec la date du jour —
-   y compris si la revue n'a rien fait sortir. C'est l'information qu'elle porte : le registre a
-   été relu.
+1. **`a-solder`** :
 
-Forme exacte des champs `Soldé le` et `Écartée le`, preuve exigée, et création du fichier des
-écartés s'il n'existe pas encore : `../implementation-tracker/references/dette.md`, sections
-« Solder » et « Écarter ».
+   ```bash
+   python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-solde"
+   ```
+
+   **Proposer le commit du seul déplacement** — jamais le lancer d'autorité. Puis, une fois
+   accordé et fait, écrire la section `## Soldé le` de l'entrée déplacée : la date, ce qui l'a
+   soldée, et la commande exécutée avec sa sortie. Elle part **dans un second commit**.
+
+2. **`non-pertinent`, `doublon`, `pas-une-dette`** → même geste vers `$T/technical-debt-ecarte`,
+   puis la section `## Écartée le` avec son motif et sa preuve.
+
+3. **`aggravee`** → l'entrée ne bouge pas : réécrire son **Constat**, daté du jour.
+
+4. **`inverifiable`, `pertinent`, `aggravee`** et toute entrée restée au registre → écrire ses deux
+   champs de revue, `category` et `reviewed` (la date du jour).
+
+5. **Corrections de contenu arbitrées** — une entrée vraie mais mal écrite se corrige sur place,
+   quelle que soit sa catégorie. Date et `id` ne bougent pas, et la correction porte sa commande.
+
+Forme exacte des sections `Soldé le` et `Écartée le`, preuve exigée, et raison pour laquelle le
+déplacement et la réécriture ne partagent jamais un commit :
+`../implementation-tracker/references/dette.md`, sections « Solder » et « Écarter ».
+
+> *Mode de défaillance* — un commit qui mêle le déplacement d'une entrée et la réécriture de son
+> contenu fait lâcher la détection de renommage de Git : l'historique de l'entrée s'arrête au jour
+> du solde, et la traçabilité que le format existe pour offrir est perdue.
 
 **Contrôle de conservation** — aucune entrée ne disparaît en chemin :
 
 ```bash
-total=0
-for f in technical-debt technical-debt-solde technical-debt-ecarte; do
-  p=".claude/implementation/todo/$f.md"
-  n=$([ -f "$p" ] && grep -c '^## ' "$p" || echo 0)
-  printf '%-22s %s\n' "$f" "$n"
-  total=$((total + n))
+for l in technical-debt technical-debt-solde technical-debt-ecarte; do
+  printf '%-26s %s\n' "$l" "$(python3 "$L" list "$T/$l" | wc -l)"
 done
-printf '%-22s %s\n' TOTAL "$total"
+python3 "$L" validate "$T/technical-debt" --filled
 ```
 
-La somme après la revue égale la somme avant. Une entrée manquante n'est signalée par rien d'autre.
-
-**Un registre absent compte 0**, il ne fait pas échouer le contrôle : `technical-debt-ecarte.md`
-n'existe qu'à partir de la première mise à l'écart, donc toute revue qui n'écarte rien tomberait
-sinon sur `No such file or directory` et un `rc=2` — un contrôle en erreur là où le résultat est
-bon.
+La somme après la revue égale la somme avant. Une liste vide compte 0 et ne fait pas échouer le
+contrôle — `technical-debt-ecarte` reste vide tant qu'aucune revue n'a écarté d'entrée.
 
 **Rester à la racine du dépôt**, ici comme partout dans ce skill : pas de `cd` vers `todo/`. Les
-chemins que `git status --short` rend sont relatifs au répertoire courant, et l'Étape 5 a besoin de
+chemins que `git status --short` rend sont relatifs au répertoire courant, et l'Étape 6 a besoin de
 les lire préfixés.
 
-## Étape 5 — Rendre la main
+## Étape 6 — Rendre la main
 
 ```bash
 git status --short
 ```
 
 **Il ne doit lister que des chemins sous `.claude/implementation/`** — plus, si et seulement si un
-arbitrage a produit une règle, le ou les fichiers de règle que l'Étape 3 nomme. Tout autre chemin
+arbitrage a produit une règle, le ou les fichiers de règle que l'Étape 4 nomme. Tout autre chemin
 est un fichier de code, et l'avoir modifié est la violation de la première règle : le dire, et
 proposer de l'annuler.
 

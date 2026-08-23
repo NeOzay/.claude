@@ -1,7 +1,23 @@
 # Registre de dette technique
 
-Fichiers : `.claude/implementation/todo/technical-debt.md`, `technical-debt-solde.md` pour ce qui
-a été soldé, et `technical-debt-ecarte.md` pour ce qui est sorti du registre sans avoir été payé.
+Trois **répertoires-listes**, sous `.claude/implementation/todo/` :
+
+| Répertoire | Ce qu'il contient |
+|---|---|
+| `technical-debt/` | la dette constatée et non résolue |
+| `technical-debt-solde/` | ce qui a été payé, avec la preuve qui l'établit |
+| `technical-debt-ecarte/` | ce qui est sorti du registre **sans** avoir été payé, avec son motif |
+
+Un répertoire = une liste, **un fichier = une entrée**, et `.list/contract.toml` déclare ce qu'une
+entrée doit porter. Toutes les manipulations passent par le skill `list-dir` :
+
+```bash
+L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
+T=".claude/implementation/todo"
+```
+
+Ce que le pipeline exige de son environnement pour que ces commandes tournent — et ce qu'il advient
+quand un outil déclaré manque : [Dépendances](contrat.md#dépendances).
 
 Le pipeline produisait déjà des constats de dette — l'auditeur en fait un axe de jugement — mais
 n'avait nulle part où les déposer : ils vivaient dans `<slug>.audit.md`, archivé en `done/` à la
@@ -31,6 +47,10 @@ Contrepartie assumée : c'est l'auteur du travail qui reporte ses propres dettes
 tenable est que chaque constat du rapport porte son `R<n>` — la complétude se vérifie après coup en
 confrontant le rapport au registre.
 
+**L'état est porté par le répertoire, jamais par un champ.** Une entrée soldée n'est pas une entrée
+marquée soldée : c'est une entrée qui a changé de liste. Un champ `statut` autoriserait une entrée
+payée à traîner dans le registre actif, ce que la ligne précédente interdit.
+
 ---
 
 ## Ce qui entre
@@ -45,7 +65,7 @@ Tout problème **non résolu** au moment de clore :
 **Ce qui n'entre pas :**
 
 - les idées d'amélioration — le registre ne liste que du constaté, vérifié dans le dépôt. Elles
-  iront dans `road-map.md`, à côté ;
+  iront dans une liste `road-map/`, à côté ;
 - ce qui a été corrigé pendant le chantier : le rapport en garde la trace, pas le registre ;
 - les préférences de style qu'aucun critère ne porte.
 
@@ -54,52 +74,37 @@ qu'un problème qui disparaît avec la conversation. L'élagage est son geste, p
 
 ---
 
-## Tête du registre
+## Ce qu'une entrée porte
 
-Sous le préambule, une ligne — et une seule :
+Le contrat fait foi — `.list/contract.toml` de chaque liste. Il se lit sans l'ouvrir :
 
-```markdown
-> Dernière vérification : 2026-08-14 (chantier `dette-technique`)
+```bash
+python3 "$L" show "$T/technical-debt" <id>      # une entrée, telle qu'elle est écrite
+python3 "$L" validate "$T/technical-debt"       # toutes, confrontées au contrat
 ```
 
-Elle dit **quand le registre a été confronté au dépôt pour la dernière fois**, pas quand il a été
-modifié. Sans elle, rien ne distingue un registre à jour d'un registre périmé dont les entrées ont
-été soldées ailleurs sans que personne ne l'ouvre — et un registre qu'on soupçonne périmé ne se lit
-plus.
+**Champs**, dans le front matter TOML délimité par `+++` :
 
-Elle s'actualise à chaque alimentation, et à chaque fois qu'on relit le registre entrée par entrée
-pour vérifier qu'il tient encore. L'historique des soldes, lui, ne vit pas ici : il est dans
-`technical-debt-solde.md`.
+| Champ | | |
+|---|---|---|
+| `id` | slug | le nom du fichier, jamais autre chose |
+| `title` | requis | l'énoncé de la dette |
+| `date` | requis | date du constat, **jamais modifiée** |
+| `source` | facultatif | le chantier qui l'a identifiée, et où il l'a écrit |
+| `reviewed` | facultatif | date de la dernière revue qui a statué |
+| `category` | facultatif | verdict de cette revue |
 
-## Gabarit d'entrée
-
-Entrées **horodatées, sans numéro** — un numéro obligerait à réindexer à chaque retrait. Ordre du
-plus ancien au plus récent, donc **ajout en fin de fichier**. Une entrée se référence par son
-intitulé.
-
-```markdown
-## 2026-08-14 — Les filtres de listing sont cassés par le hook rtk
-
-**Constat** — `ls .claude/implementation/*.md | grep -vE '\.(brief|audit)\.md$'` n'exclut plus
-rien : le hook `rtk` ajoute une colonne de taille en fin de ligne, l'ancre `$` ne matche jamais.
-
-**Pourquoi c'est gênant** — les `*.brief.md` et `*.audit.md` remontent dans la liste des
-implémentations en cours, que l'Étape 0 du tracker existe précisément pour tenir propre.
-
-**Pour solder** — filtrer sur le nom de fichier plutôt que sur la fin de ligne.
-
-*Identifié par `audit-integre`, R4 du rapport d'audit.*
-```
-
-Champ facultatif, quand c'en était un :
-
-```markdown
-**Assumé** : le hors-périmètre était écrit au brief — ce chantier ne devait pas toucher aux
-patterns de sécurité.
-```
+**Sections** — `## Constat`, `## Pourquoi c'est gênant`, `## Pour solder` sont requises,
+`## Assumé` est facultative. Les listes soldée et écartée exigent en plus `## Soldé le` /
+`## Écartée le`, et rendent facultatives les deux du milieu : ce qu'une entrée payée doit prouver
+est son solde, pas son plan de solde.
 
 Une entrée sans **Pour solder** est un regret, pas une dette : dire ce qu'il faudrait faire, même
 grossièrement, ou ne pas l'écrire.
+
+**L'`id` est la clé de référence et de dédoublonnage.** Il ne change jamais — c'est par lui qu'une
+entrée se cite, et sur lui que le point 3 d'*Alimenter* dédoublonne. Le renommer ferait revenir le
+même constat comme s'il était neuf.
 
 **Désigner sans numéro de ligne.** Une entrée cite un fichier, une section, une phrase — jamais
 `fichier.md:42`. Le repère se périme au premier commit qui insère une ligne au-dessus, sans qu'une
@@ -110,6 +115,23 @@ exactement quand elle disparaît — ce qui est précisément l'information cher
 > *Mode de défaillance* — un numéro de ligne périmé ne casse rien de visible : il fait classer
 > `non-pertinent` une dette vivante dont la relecture n'a pas retrouvé la cible. C'est la sortie de
 > registre la plus facile à obtenir sur une preuve fausse.
+
+---
+
+## La dernière vérification, entrée par entrée
+
+L'ancien registre portait **une** ligne « Dernière vérification » en tête de fichier. Elle a
+disparu avec le fichier unique, et ce qui la remplace dit davantage : le champ `reviewed` de
+**chaque** entrée, avec le `category` qui l'accompagne.
+
+```bash
+python3 "$L" list "$T/technical-debt" --sort reviewed          # les moins récemment relues d'abord
+python3 "$L" list "$T/technical-debt" --where category=aggravee
+```
+
+Un registre dont on soupçonne qu'il est périmé ne se lit plus — c'est ce que l'ancienne ligne
+protégeait. Une entrée dont `reviewed` est resté à `<OPTIONNEL>` n'a **jamais** été confrontée au
+dépôt depuis son écriture, et le tri le montre sans qu'on ait à le croire sur parole.
 
 ---
 
@@ -127,26 +149,62 @@ exactement quand elle disparaît — ce qui est précisément l'information cher
    (« clore avec ces réserves »), le hors-périmètre assumé, ce qui a été laissé en route.
 3. **Lire le registre avant d'écrire.** Un constat déjà présent ne se duplique pas : le compléter,
    en gardant sa date d'origine. C'est le seul contrôle qui empêche le registre de gonfler.
-4. Appender les nouvelles entrées en fin de fichier, dans l'ordre où elles ont été constatées.
-5. **Actualiser la ligne de dernière vérification** avec la date du jour
-   ([Dates et listing](contrat.md#dates-et-listing)) et le slug du chantier — y compris quand le chantier n'a rien eu à verser : le registre
-   a quand même été relu, et c'est cette information-là qu'elle porte.
 
-Le fichier n'existe pas encore → le créer avec son préambule, qui dit ce qu'il recense et ce qu'il
-exclut.
+   ```bash
+   python3 "$L" list "$T/technical-debt" --sort date
+   ```
+4. Créer une entrée par survivant, et **remplir le fichier créé** :
+
+   ```bash
+   python3 "$L" new "$T/technical-debt" <id>
+   ```
+
+   `new` pose tout le contrat, champs et sections, chacun au marqueur de son statut. Ce qu'on ne
+   voit pas n'est jamais rempli : les lignes préposées disent quoi écrire.
+5. **Vérifier avant de clore**, et pas seulement la structure :
+
+   ```bash
+   python3 "$L" validate "$T/technical-debt" --filled
+   ```
+
+   `--filled` exige qu'aucun marqueur ne subsiste là où le contrat exige quelque chose, sans jamais
+   réclamer ce qu'il dit facultatif.
+
+**Le contrat a changé depuis la dernière écriture** — un champ ajouté, une section nouvelle — et
+les entrées existantes ne lui correspondent plus :
+
+```bash
+python3 "$L" migrate "$T/technical-debt" --dry-run    # ce qui serait fait
+python3 "$L" migrate "$T/technical-debt"              # posé au marqueur, ordre repris du contrat
+```
+
+`migrate` ne renomme rien et ne reporte aucune valeur : c'est du remplissage de structure, le
+jugement reste à écrire à la main dans les fichiers.
 
 ---
 
 ## Solder
 
-Une entrée soldée est **retirée du registre**, pas barrée — et déplacée en fin de
-`technical-debt-solde.md`. Le registre reste ainsi la liste de ce qui reste à faire, sans gonfler.
+Une entrée soldée **change de liste**. Elle n'est ni barrée, ni marquée : elle sort du registre
+actif, qui reste ainsi la liste de ce qui reste à faire.
 
-L'entrée déplacée est complétée par :
+```bash
+python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-solde"
+```
+
+`move` est **un `git mv`, et rien d'autre** — c'est ce qui fait que `git log --follow` sur le
+fichier arrivé remonte jusqu'à son commit de création dans la liste de départ.
+
+> *Mode de défaillance* — un commit qui mêle le déplacement et la réécriture du contenu fait lâcher
+> la détection de renommage : l'historique de l'entrée s'arrête au jour du solde. **Déplacer et
+> commiter d'abord, écrire la preuve ensuite, dans un second commit.**
+
+L'entrée déplacée reçoit alors sa section `## Soldé le` :
 
 ```markdown
-**Soldé le 2026-09-02 par le chantier `listing-fix`** — les listings filtrent désormais sur le nom
-du fichier.
+## Soldé le
+
+**2026-09-02, chantier `listing-fix`** — les listings filtrent désormais sur le nom du fichier.
 Établi par : `ls .claude/implementation/*.md | grep -vE 'brief|audit'` → 2 lignes, aucun
 `.brief.md` ni `.audit.md` remonté.
 ```
@@ -155,8 +213,8 @@ du fichier.
 principe que le point d'intégrité de l'auditeur : celui qui vient de faire le travail est le plus
 mal placé pour affirmer qu'il l'a fait. Un solde s'établit, il ne se déclare pas.
 
-Une entrée qu'un chantier a **aggravée** plutôt que soldée reste où elle est, et son **Constat** est
-mis à jour — daté de la mise à jour, pas de l'origine.
+Une entrée qu'un chantier a **aggravée** plutôt que soldée ne bouge pas de liste : son `## Constat`
+est mis à jour, daté de la mise à jour et non de l'origine, et `category` passe à `aggravee`.
 
 ---
 
@@ -164,25 +222,29 @@ mis à jour — daté de la mise à jour, pas de l'origine.
 
 Une entrée peut cesser d'avoir sa place au registre sans qu'un correctif y soit pour quelque chose :
 ce qu'elle cite n'existe plus, une autre entrée dit déjà la même chose, ou le constat n'était pas
-une dette. Elle est alors **écartée** : retirée du registre et déplacée en fin de
-`technical-debt-ecarte.md`, complétée par son motif.
+une dette.
+
+```bash
+python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-ecarte"
+```
+
+Elle reçoit sa section `## Écartée le`, motif compris :
 
 ```markdown
-**Écartée le 2026-09-02 — non pertinent** — le hook `rtk` ne réécrit plus les `ls`, la colonne de
-taille a disparu.
+## Écartée le
+
+**2026-09-02 — non pertinent** — le hook `rtk` ne réécrit plus les `ls`, la colonne de taille a
+disparu.
 Établi par : `git log -1 --format=%H -- hooks/rtk.sh` → aucun commit, le hook a été supprimé.
 ```
 
 Motifs admis, et rien d'autre : **non pertinent**, **doublon**, **pas une dette**. Pour un doublon,
-la ligne `Établi par` cite l'**intitulé de l'entrée conservée** au lieu d'une commande — c'est la
-seule dispense, et l'entrée conservée est la plus ancienne des deux.
+la ligne `Établi par` cite l'**`id` de l'entrée conservée** au lieu d'une commande — c'est la seule
+dispense, et l'entrée conservée est la plus ancienne des deux.
 
 **Écarter exige la même preuve que solder** : une commande lancée et sa sortie réelle. Sans elle,
 l'entrée reste au registre. Le registre des écartés n'est pas une corbeille — c'est là qu'on
 retrouve, deux ans plus tard, pourquoi un problème a arrêté d'en être un.
-
-Le fichier n'existe pas encore → le créer avec son préambule, qui dit ce qu'il recense et pourquoi
-il n'est pas le registre des soldes.
 
 ---
 
@@ -191,37 +253,43 @@ il n'est pas le registre des soldes.
 Une entrée peut être **vraie et mal écrite** : un chiffre sous-mesuré dès l'origine, un **Pour
 solder** qui échouerait à son premier lancement, un **Assumé** devenu faux, un repère périmé. Ce
 n'est ni un solde, ni une mise à l'écart, ni une aggravation — le problème n'a pas bougé, c'est sa
-description qui est fautive. Elle se corrige **sur place**, sans changer de destination.
+description qui est fautive. Elle se corrige **sur place**, dans son fichier, sans changer de liste.
 
-Ce qui se corrige : le **Constat**, le **Pourquoi c'est gênant**, l'**Assumé**, le **Pour solder**.
+Ce qui se corrige : les sections **Constat**, **Pourquoi c'est gênant**, **Assumé**, **Pour
+solder**.
 
-Ce qui ne bouge pas : la **date** du titre — elle dit depuis quand le problème est connu, pas depuis
-quand il est bien décrit — et l'**intitulé**, clé de référence et de dédoublonnage (« Marqueur d'une
-entrée relue »). L'intitulé porte lui-même le chiffre faux → il reste tel quel, et le **Constat**
-énonce l'écart. Le réécrire ferait revenir l'entrée comme neuve au point 3 d'*Alimenter*, ce qui
-coûte plus cher que l'imprécision d'un titre.
+Ce qui ne bouge pas : le champ **`date`** — il dit depuis quand le problème est connu, pas depuis
+quand il est bien décrit — et l'**`id`**, clé de référence et de dédoublonnage. Le `title` porte
+lui-même le chiffre faux → il reste tel quel, et le **Constat** énonce l'écart.
 
 **La correction exige la même preuve que le solde** : la commande qui établit le bon chiffre, citée
 dans l'entrée. Sans elle, on remplace une erreur par une autre — et celle-là aura l'air vérifiée.
 
+Après correction, relire ce qui vient d'être écrit :
+
+```bash
+python3 "$L" validate "$T/technical-debt" --filled
+```
+
 ## Marqueur d'une entrée relue
 
 Une entrée peut être **relue et laissée en place**, avec une information sur cette relecture. Elle
-porte alors, sur une ligne seule **sous son titre**, la mention `(catégorie) date` :
+porte alors deux champs, et pas une ligne de prose : `category` reçoit le verdict, `reviewed` la
+date de la revue qui l'a rendu.
 
-```markdown
-## 2026-08-14 — Les correctifs de l'étape 9 n'ont jamais été audités
-
-(invérifiable en revue) 2026-08-16
+```toml
+reviewed = 2026-08-16
+category = "inverifiable"
 ```
 
-**L'intitulé, lui, ne bouge jamais** — pas de suffixe, pas de mention ajoutée. C'est par lui qu'une
-entrée se référence (« Gabarit d'entrée ») et sur lui que le point 3 d'*Alimenter* dédoublonne
-avant d'écrire : le modifier ferait revenir le même constat comme s'il était neuf, et le registre
+**Le `title` et l'`id`, eux, ne bougent jamais** — pas de suffixe, pas de mention ajoutée. C'est
+par l'`id` qu'une entrée se référence et sur lui que le point 3 d'*Alimenter* dédoublonne avant
+d'écrire : le modifier ferait revenir le même constat comme s'il était neuf, et le registre
 porterait deux fois la même dette.
 
 Les catégories qui marquent, et ce que chaque marqueur engage :
-`../../debt-review/references/categories.md`.
+`../../debt-review/references/categories.md`. Elles sont aussi énumérées par le contrat, qui refuse
+toute valeur hors de la liste.
 
 ---
 
@@ -231,7 +299,12 @@ Le pipeline n'ouvre jamais le registre de lui-même : ni `intent-brief` au cadra
 l'Étape 0. Il l'alimente, l'utilisateur le consulte — typiquement quand il cherche un sujet de
 chantier.
 
+```bash
+python3 "$L" list "$T/technical-debt" --sort date       # tout, du plus ancien au plus récent
+python3 "$L" show "$T/technical-debt" <id>              # une entrée
+```
+
 **Une exception, et elle est manuelle** : le skill `debt-review` ouvre le registre pour le relire
 entrée par entrée, le confronter au dépôt et le faire arbitrer. Il ne s'invoque jamais de lui-même,
-et il ne corrige aucun code — il instruit un verdict, l'utilisateur tranche, puis les registres et
-la ligne de dernière vérification sont écrits.
+et il ne corrige aucun code — il instruit un verdict, l'utilisateur tranche, puis les entrées sont
+déplacées, les champs de revue écrits.

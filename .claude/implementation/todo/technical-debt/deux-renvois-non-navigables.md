@@ -1,0 +1,36 @@
++++
+id = "deux-renvois-non-navigables"
+title = "Deux renvois du dépôt ne se suivent pas depuis l'éditeur"
+date = 2026-08-14
+source = "Identifié par `contrat-pipeline`, R18 du rapport d'audit et incertitude ouverte au cadrage."
+reviewed = 2026-08-17
+category = "pertinent"
++++
+
+## Constat
+
+le chantier a rendu navigables les 28 renvois vers le contrat, mais deux références
+restent en dehors :
+
+- l'en-tête d'`impl-list.sh` renvoie à `skills/implementation-tracker/references/contrat.md`, chemin
+  relatif à la racine du dépôt, alors que le fichier vit dans
+  `skills/implementation-tracker/scripts/` — depuis là, la cible est `../references/contrat.md` ;
+- `agents/implementation-auditor.md` renvoie en prose à
+  `skills/implementation-tracker/references/audit.md`, section « Gabarit du rapport » — seule
+  référence non ancrée subsistante.
+
+## Pourquoi c'est gênant
+
+la navigabilité des renvois était une contrainte explicite du brief. Ces
+deux-là sont exactement ce que le contrôle 1 ne regarde pas : il ne vérifie que les liens vers
+`contrat.md`.
+
+## Pour solder
+
+corriger le chemin dans l'en-tête d'`impl-list.sh` ; pour l'agent, trancher entre
+ancrer le renvoi (au prix d'une exception au hors-périmètre) et l'assumer définitivement.
+
+## Assumé
+
+la seconde découle du hors-périmètre — les agents ne sont pas rendus dépendants du
+noyau. L'incertitude a été ouverte au cadrage et jamais tranchée.
