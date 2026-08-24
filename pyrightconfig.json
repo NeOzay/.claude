@@ -13,7 +13,8 @@
   "extraPaths": [
     "skills/list-dir/scripts",
     "scripts",
-    "scripts/tests"
+    "scripts/tests",
+    "skills/list-dir/scripts/tests"
   ],
   "reportImplicitStringConcatenation": false,
   "reportUnusedCallResult": false,

@@ -28,6 +28,30 @@ t25: 1 élément(s) dans le document pour 3 fichier(s) dans le répertoire
 
 Rien n'est perdu : le bloc ouvert absorbe les `## ` des éléments suivants.
 
+**Mise à jour du 2026-08-24, chantier `tests-listdir`** — le versant décrit ci-dessus est traité :
+`outside_fences` repose désormais sur un `_scan_fences` unique qui expose le bloc encore ouvert, et
+`validate` nomme la fence à sa source. Sur le cas exact mesuré plus haut :
+
+```
+$ list-dir.py validate t25 --filled
+t25/a.md: section « Constat » — bloc de code ouvert par « ``` » et jamais refermé
+          — les sections suivantes y sont absorbées                      code 1
+```
+
+**Ce qui reste**, et pour quoi cette entrée demeure au registre : le correctif ne voit que les
+fences ouvertes **dans** une section. Une fence ouverte **avant le premier `## `** reproduit le
+diagnostic faux à l'identique, parce que `parse_sections` ignore ce qui précède le premier titre et
+qu'un `Item` ne conserve pas ce préambule :
+
+```
+corps = "```\ndu code jamais refermé\n\n## Constat\n\nx\n"
+→ item.sections == {}
+→ validate : « section « Constat » — manquante »   sur une section écrite dans le fichier
+```
+
+Établi par exécution le 2026-08-24 ; `fence_ouverte(corps)` rend bien ``` sur ce même texte, donc
+l'information existe — c'est `_check_sections` qui ne la consulte que section par section.
+
 ## Pourquoi c'est gênant
 
 L'échec est **fermé** — code ≠ 0, rien d'écrit — et le déclencheur est étroit : du Markdown
@@ -42,13 +66,21 @@ deux fois, en deux endroits aux messages sans rapport.
 
 ## Pour solder
 
-Signaler la fence **à sa source**, dans `validate` : une section dont un bloc de code reste ouvert
-est un manquement nommé, détecté à l'écriture de l'élément plutôt qu'à l'agglomération.
-`outside_fences` rend déjà l'information — il suffit qu'elle dise, en fin de parcours, si un bloc
-est resté ouvert.
+Le versant « fence dans une section » est fait (voir la mise à jour du Constat). Reste à couvrir le
+**préambule** : `validate` doit voir le corps entier, et non les seules sections découpées. Deux
+voies, aucune tranchée :
 
-Solde établi par : un élément à fence ouverte → `validate` code ≠ 0 avec un message nommant la
-section et la fence ; et le cas ci-dessus ne parvient plus jusqu'à `merge`.
+- `Item` conserve son corps brut, comme il conserve déjà `raw_front` pour la règle 1 — et
+  `_check_sections` y applique `fence_ouverte` avant de juger les sections ;
+- ou `parse_sections` rend le préambule sous une clé réservée, que `validate` examine sans que le
+  contrat ait à le déclarer.
+
+La première touche `types.py`, `items.py` et `store.py` ; la seconde change le contrat d'une
+fonction dont deux appelants dépendent. C'est ce coût qui a fait verser le reste au registre plutôt
+que le traiter en clôture de `tests-listdir`.
+
+Solde établi par : le corps du Constat ci-dessus (fence en préambule) → `validate` code ≠ 0 avec un
+message **nommant la fence**, et non « section manquante ».
 
 ## Assumé
 

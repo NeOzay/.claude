@@ -24,6 +24,37 @@ Ce qui tient lieu de vérification aujourd'hui : `ruff`, `basedpyright` en mode 
 linters ne jugent que la forme et les types ; les preuves d'exécution ne se rejouent pas seules —
 elles sont recopiées à la main dans un fichier archivé à la clôture.
 
+## Soldé le
+
+**2026-08-24, chantier `tests-listdir`** — le paquet porte une suite de 241 tests dans
+`skills/list-dir/scripts/tests/`, couvrant `items`, `contract`, `store` (lecture, écriture,
+`derive`, `merge`, `move`), `loader`, `utils` et le point d'entrée en sous-processus. Les cinq
+priorités que cette entrée listait sont couvertes : aller-retour octet et frontière des deux règles,
+les deux verdicts de `validate`, `derive`/`merge` (report par `from`, conservation, refus d'une
+destination existante), `migrate` (complétion, réordonnancement, rejeu sans écriture), et les échecs
+fermés (un code de sortie et un message par cas nommé). `move` tourne sur un dépôt git jetable
+(`tmp_path` + `git init`) et vérifie que `git log --follow` remonte au commit de création.
+
+Établi par :
+
+```
+$ uvx pytest skills/list-dir/scripts/tests -q
+241 passed                                                        code 0
+$ uvx pytest scripts/tests -q
+67 passed                                                         code 0
+$ cd skills/list-dir && uvx ruff check .
+All checks passed!
+$ cd skills/list-dir && uvx --with pytest basedpyright
+0 errors, 0 warnings, 0 notes
+```
+
+Couverture mesurée à 95 % des modules du paquet lors de l'audit de clôture — information seule,
+aucun seuil n'ayant été retenu au brief : « la couverture n'est pas l'objectif, le comportement
+l'est ».
+
+Deux constats subsistent et sont au registre actif : `derive-migrate-hors-cli` et
+`garde-version-jamais-executee`.
+
 ## Pourquoi c'est gênant
 
 Deux défauts de comportement ont été trouvés par un **auditeur qui lisait le code**, non par une

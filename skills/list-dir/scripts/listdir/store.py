@@ -31,6 +31,7 @@ from .gitcmd import git
 from .items import (
     SerialiseError,
     dump_value,
+    fence_ouverte,
     outside_fences,
     parse_sections,
     read_item,
@@ -80,6 +81,17 @@ class ListStore:
         Pas de recherche plein texte : grep la fait déjà mieux. Un champ inconnu
         est une erreur, pas un filtre qui ne rend rien — un filtre silencieusement
         vide se lit comme « aucun résultat ».
+
+        LA COMPARAISON EST TEXTUELLE, ET C'EST VOULU : `--where date=2026-08-24`
+        doit fonctionner sans que l'appelant ait à connaître le type déclaré, et
+        `validate` reste seul juge de la conformité.
+
+        UN CHAMP ABSENT NE VAUT PAS LA CHAÎNE « None ». Il l'a valu, et
+        `--where category=None` sélectionnait alors les éléments SANS `category` —
+        un comportement utile, découvert par accident, documenté nulle part, et que
+        rien ne distinguait d'un élément dont la valeur serait littéralement
+        « None ». La forme explicite est le critère VIDE : `--where category=`
+        sélectionne les éléments où le champ est absent.
         """
         for name in criteria:
             if name not in self.contract.fields:
@@ -94,7 +106,7 @@ class ListStore:
             [
                 it
                 for it in r.unwrap()
-                if all(str(it.fields.get(k)) == str(v) for k, v in criteria.items())
+                if all(_correspond(it.fields.get(k), v) for k, v in criteria.items())
             ]
         )
 
@@ -165,9 +177,23 @@ class ListStore:
     def _check_sections(self, item: Item, filled: bool) -> list[Violation]:
         out: list[Violation] = []
         declared = set(self.contract.sections)
-        for title in item.sections:
+        for title, corps in item.sections.items():
             if title not in declared:
                 out.append(Violation(item.path, f"section « {title} »", "non déclarée au contrat"))
+            # LA FENCE SE SIGNALE ICI, à sa source. Un bloc jamais refermé absorbe
+            # les `## ` suivants : sans ce contrôle, les sections avalées étaient
+            # rapportées « manquantes » alors qu'elles sont écrites dans le fichier,
+            # et merge annonçait plus loin une perte qui n'existait pas.
+            ouverte = fence_ouverte(corps)
+            if ouverte is not None:
+                out.append(
+                    Violation(
+                        item.path,
+                        f"section « {title} »",
+                        f"bloc de code ouvert par « {ouverte} » et jamais refermé — "
+                        "les sections suivantes y sont absorbées",
+                    )
+                )
 
         for title in self.contract.required_sections:
             subject = f"section « {title} »"
@@ -575,6 +601,18 @@ class ListStore:
         except OSError as exc:
             return fail(f"{target}: écriture impossible — {exc.strerror}")
         return ok(target)
+
+
+def _correspond(valeur: object, critere: FieldValue) -> bool:
+    """Un champ vaut-il le critère ? Comparaison textuelle, l'absence exceptée.
+
+    Le front matter vient de TOML, qui n'a pas de valeur nulle : un `None` lu ici
+    signifie donc TOUJOURS « le champ n'est pas écrit », jamais « il vaut None ».
+    C'est ce qui autorise à réserver le critère vide à l'absence, sans ambiguïté.
+    """
+    if valeur is None:
+        return str(critere) == ""
+    return str(valeur) == str(critere)
 
 
 def _reordering(

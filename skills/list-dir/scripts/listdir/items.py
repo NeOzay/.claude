@@ -61,6 +61,18 @@ def outside_fences(text: str) -> Iterator[tuple[str, bool]]:
     bloc ouvert par « ``` » est du contenu, pas une fermeture. Et une info string
     de bloc à backticks ne peut pas contenir de backtick.
     """
+    for line, libre, _ in _scan_fences(text):
+        yield line, libre
+
+
+def _scan_fences(text: str) -> Iterator[tuple[str, bool, str | None]]:
+    """Le parcours réel : chaque ligne, son drapeau, et le bloc ENCORE OUVERT après elle.
+
+    L'IMPLÉMENTATION EST ICI, ET NULLE PART AILLEURS. `outside_fences` en jette le
+    troisième élément, `fence_ouverte` ne garde que lui : deux lecteurs, une seule
+    définition de ce qu'est un bloc de code. Les recopier aurait reproduit la
+    divergence que `outside_fences` existe précisément pour avoir supprimée.
+    """
     fence: str | None = None
     for line in text.splitlines():
         marker = FENCE.match(line)
@@ -71,9 +83,25 @@ def outside_fences(text: str) -> Iterator[tuple[str, bool]]:
                     fence = found
             elif found[0] == fence[0] and len(found) >= len(fence) and not info.strip():
                 fence = None
-                yield line, False
+                yield line, False, None
                 continue
-        yield line, fence is None
+        yield line, fence is None, fence
+
+
+def fence_ouverte(text: str) -> str | None:
+    """Le marqueur du bloc de code resté ouvert en fin de texte, ou None.
+
+    POURQUOI CETTE FONCTION EXISTE : un bloc jamais refermé avale tout `## `
+    postérieur — c'est CommonMark, et l'aller-retour reste exact. Mais les deux
+    diagnostics qui en découlaient étaient faux et ne nommaient jamais la fence :
+    `validate` annonçait « section manquante » sur une section écrite sous les yeux
+    du lecteur, et `merge` une perte qui n'existait pas. Le défaut se signale donc
+    À SA SOURCE, à l'élément, avant que le document aggloméré n'ait à en juger.
+    """
+    ouverte: str | None = None
+    for _line, _libre, fence in _scan_fences(text):
+        ouverte = fence
+    return ouverte
 
 
 def parse_sections(body: str) -> dict[str, str]:

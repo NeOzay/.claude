@@ -8,7 +8,8 @@
     "**/__pycache__"
   ],
   "extraPaths": [
-    "scripts"
+    "scripts",
+    "scripts/tests"
   ],
   "reportImplicitStringConcatenation": false,
   "reportUnusedCallResult": false,
