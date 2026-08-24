@@ -199,7 +199,7 @@ globale, `CLAUDE.md`). Proposer, attendre, exécuter.
 **Listing des suivis actifs** — passer par le script, ne jamais réécrire le filtre en ligne :
 
 ```bash
-bash "$HOME/.claude/skills/implementation-tracker/scripts/impl-list.sh" .claude/implementation
+python3 "$HOME/.claude/skills/implementation-tracker/scripts/impl_list.py" .claude/implementation
 ```
 
 Il remonte les seuls fichiers de suivi : ni `.brief.md`, ni `.audit.md`, ni `.plan.md`.
@@ -228,12 +228,17 @@ Le pipeline dépend d'un skill et d'un interpréteur, et de rien d'autre :
 | `list-dir` (`skills/list-dir/scripts/list-dir.py`) | les trois registres de `todo/`, `debt-review` | `test -f "$HOME/.claude/skills/list-dir/scripts/list-dir.py"` |
 | Python ≥ 3.12 | `list-dir` (syntaxe PEP 695) | `list-dir.py` sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
-| `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx basedpyright` |
+| `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx --with pytest basedpyright` |
 
 > *Mode de défaillance* — les deux linters n'étant pas installés, un audit qui les appelle par leur
 > nom les rapporte « non exécutés » et rend un verdict amputé sans que rien n'échoue. C'est arrivé
 > à l'audit du 2026-08-23. Le lanceur fait partie de la dépendance : l'écrire ici est ce qui la rend
 > exécutable par quelqu'un d'autre.
+>
+> *Mode de défaillance* — `--with pytest` n'est pas un ornement : depuis que le dépôt porte des
+> tests, `uvx basedpyright` seul rend 52 erreurs d'import `pytest` non résolu, qui noient les
+> vraies. Constaté à l'audit du 2026-08-24. `uvx` monte l'environnement le temps de l'appel : rien
+> n'est installé, et la commande reste rejouable par quelqu'un d'autre.
 
 **Une dépendance se déclare, elle ne se suppose pas.** Une commande de `list-dir` nomme les outils
 externes dont elle a besoin dans son `REQUIRES`, et le chargeur les cherche dans le `PATH` **avant**

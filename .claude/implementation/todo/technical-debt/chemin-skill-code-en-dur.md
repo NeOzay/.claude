@@ -20,6 +20,20 @@ tracker lit comme « aucune implémentation en cours ».
 depuis un `.md` de `skills/`. Cette extension était structurellement forcée : elle ne se solde pas
 sans traiter le problème générique.
 
+**Amendée le 2026-08-24 par `check-pipeline-python`** — le **symptôme** est soldé, la **cause**
+reste. Le contrôle 7 du garde-fou vérifie désormais que chaque chemin `$HOME/.claude/…` cité dans
+un `.md` de `skills/` désigne un fichier ou un répertoire existant : un point d'édition oublié
+devient rouge au lieu de dormir. C'est ce qui a validé la bascule des trois appels d'`impl-list.sh`
+vers `impl_list.py` dans ce chantier même.
+Établi par : `python3 scripts/check_pipeline.py` → contrôle 7 « 12 chemins de skill cités, tous
+existent » ; `test_chemin_inexistant` le fait crier.
+
+Ce que le contrôle 7 **ne fait pas** : empêcher le compte de croître. Les points d'édition sont
+passés de 3 à 8 depuis l'ouverture de cette entrée, et chaque skill neuve en ajoute, puisque le
+contrôle 6 impose cette écriture. Seule une résolution du chemin de skill à la source y mettrait
+fin — écarté du périmètre de `check-pipeline-python`, qui n'aurait pas pu la mener sans changer la
+convention d'appel de toutes les skills.
+
 ## Pourquoi c'est gênant
 
 c'est exactement le défaut qui a bloqué la clôture de ce chantier, sous

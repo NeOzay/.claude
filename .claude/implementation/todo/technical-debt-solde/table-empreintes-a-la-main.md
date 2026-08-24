@@ -14,6 +14,22 @@ motifs, une par section du contrat. Rien ne vérifie qu'elle reste complète : u
 ajoutée au contrat sans son empreinte n'est protégée par rien, et le contrôle « section jamais
 citée » ne détecte que l'absence de renvoi, pas l'absence d'empreinte.
 
+## Soldé le
+
+**Soldé le 2026-08-24 par le chantier `check-pipeline-python`** — la liste plate est devenue une
+table `{ancre-de-section: (empreintes…)}`. Trois nouvelles issues rouges : une section du contrat
+sans empreinte, une empreinte dont la section a disparu, et une empreinte trouvée **hors de la
+section qu'elle protège**. `## Dépendances`, seule section non couverte à ce jour, a reçu son
+empreinte (« elle ne se suppose pas », `contrat.md:238`).
+
+Le **Pour solder** avertissait qu'« une règle par section n'est pas la réalité du fichier » :
+`#arborescence-et-nommage` en porte bien deux, et la table est un `dict` de tuples pour cette
+raison.
+
+Établi par : `python3 scripts/check_pipeline.py` → contrôle 2, **9 empreintes vertes pour 8
+sections** ; `test_section_sans_empreinte`, `test_empreinte_orpheline`,
+`test_motif_hors_de_sa_section`.
+
 ## Pourquoi c'est gênant
 
 le journal du chantier pose la règle (« toute règle ajoutée au contrat

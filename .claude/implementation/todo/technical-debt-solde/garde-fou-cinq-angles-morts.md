@@ -29,6 +29,32 @@ toutes vérifiées par injection à l'audit :
   exiger qu'elle commande l'appel ; et `$call` est injecté tel quel dans un motif `grep`, où les
   `.` du chemin sont des métacaractères.
 
+## Soldé le
+
+**Soldé le 2026-08-24 par le chantier `check-pipeline-python`** — les cinq points repris dans la
+réécriture Python du garde-fou :
+
+- portée du contrôle 1 étendue à tout le dépôt, `agents/` excepté comme la dette le demandait ;
+- `slugify()` retire toute la ponctuation et conserve les accents, au lieu des seules apostrophes ;
+- le contrôle 2 compte des **occurrences**, non des fichiers ;
+- l'auto-citation du contrat ne vaut plus citation pour « section jamais citée » ;
+- le garde du contrôle 6 doit **précéder** l'appel qu'il commande, et le chemin passe par
+  `re.escape` avant d'entrer dans un motif.
+
+Établi par : `uvx pytest scripts/tests -q` → **65 passed**, dont un test par point
+(`test_portee_hors_skills`, `test_slugify_ponctuation`,
+`test_deux_occurrences_dans_un_seul_fichier`, `test_auto_citation_ne_compte_pas`,
+`test_garde_en_commentaire_apres_lappel`, `test_point_nest_pas_un_metacaractere`) ; et
+`python3 scripts/check_pipeline.py` → 7 contrôles verts, rc 0.
+
+**Restriction assumée sur le premier point** : `.claude/implementation/` reste hors portée, avec
+`.git/` et `plugins/`. Archives figées et registre de dette portent des renvois volontairement
+morts — dont les deux `contrat.md#autorité)` que la note du 2026-08-17 signalait ici même. Ce sont
+des documents datés qu'on ne réécrit pas ; les scanner ferait crier le garde-fou sans qu'aucune
+correction soit possible. L'extension est donc **invisible sur l'arbre actuel** (30 renvois avant
+comme après) et ne se prouve que par `test_portee_hors_skills`, qui injecte un renvoi mort dans
+`CLAUDE.md` et dans `hooks/`.
+
 ## Pourquoi c'est gênant
 
 le garde-fou est ce qui doit empêcher la dérive de revenir. Un contrôle

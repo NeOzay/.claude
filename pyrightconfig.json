@@ -2,7 +2,8 @@
   "typeCheckingMode": "all",
   "pythonVersion": "3.12",
   "include": [
-    "skills"
+    "skills",
+    "scripts"
   ],
   "exclude": [
     "plugins",
@@ -10,7 +11,9 @@
     "**/__pycache__"
   ],
   "extraPaths": [
-    "skills/list-dir/scripts"
+    "skills/list-dir/scripts",
+    "scripts",
+    "scripts/tests"
   ],
   "reportImplicitStringConcatenation": false,
   "reportUnusedCallResult": false,

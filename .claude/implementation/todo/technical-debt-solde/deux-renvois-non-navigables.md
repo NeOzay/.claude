@@ -19,6 +19,22 @@ restent en dehors :
   `skills/implementation-tracker/references/audit.md`, section « Gabarit du rapport » — seule
   référence non ancrée subsistante.
 
+## Soldé le
+
+**Soldé le 2026-08-24 par le chantier `check-pipeline-python`** — les deux volets :
+
+- l'en-tête d'`impl_list.py` renvoie à `../references/contrat.md`, chemin correct depuis
+  `scripts/`, là où le `.sh` écrivait un chemin relatif à la racine du dépôt ;
+- le renvoi de `agents/implementation-auditor.md` vers `audit.md` est ancré en
+  `#gabarit-du-rapport`.
+
+L'incertitude laissée ouverte au cadrage de `contrat-pipeline` est **tranchée** : ancrer un renvoi
+qui existait déjà en prose ne crée aucun couplage nouveau, et le contrôle 4 — qui protège
+l'auto-suffisance des agents — ne vise que `contrat.md`.
+
+Établi par : `python3 scripts/check_pipeline.py` → contrôle 4 « 3 agents, aucun renvoi au
+contrat », rc 0.
+
 ## Pourquoi c'est gênant
 
 la navigabilité des renvois était une contrainte explicite du brief. Ces

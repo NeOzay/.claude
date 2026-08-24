@@ -92,7 +92,7 @@ réécris-le en entier avec ta section ajoutée à la fin. Les audits antérieur
 chantier : les effacer détruit la seule trace de ce qui avait déjà été signalé.
 
 Le fichier n'existe pas → tu le crées avec le frontmatter. Gabarit et format :
-`skills/implementation-tracker/references/audit.md`, section « Gabarit du rapport ».
+[Gabarit du rapport](../skills/implementation-tracker/references/audit.md#gabarit-du-rapport).
 
 **Numérote chaque constat `R1`, `R2`, … dès sa première apparition**, dans l'ordre du rapport et
 quelle que soit sa section. C'est l'étiquette par laquelle l'appelant et l'utilisateur y reviendront :

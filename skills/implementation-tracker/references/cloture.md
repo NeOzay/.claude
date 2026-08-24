@@ -11,7 +11,7 @@ terminée.
 qui hébergent le pipeline lui-même — ailleurs, ce contrôle n'a pas d'objet et se saute :
 
 ```bash
-if [ -f scripts/check-pipeline.sh ]; then bash scripts/check-pipeline.sh; fi
+if [ -f scripts/check_pipeline.py ]; then python3 scripts/check_pipeline.py; fi
 ```
 
 C'est un contrôle **mécanique**, pas un jugement : il constate que chaque règle partagée reste
