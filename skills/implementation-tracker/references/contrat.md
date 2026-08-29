@@ -199,7 +199,7 @@ globale, `CLAUDE.md`). Proposer, attendre, exécuter.
 **Listing des suivis actifs** — passer par le script, ne jamais réécrire le filtre en ligne :
 
 ```bash
-python3 "$HOME/.claude/skills/implementation-tracker/scripts/impl_list.py" .claude/implementation
+impl-list .claude/implementation
 ```
 
 Il remonte les seuls fichiers de suivi : ni `.brief.md`, ni `.audit.md`, ni `.plan.md`.
@@ -221,14 +221,45 @@ légitimement local au dépôt.
 
 ## Dépendances
 
-Le pipeline dépend d'un skill et d'un interpréteur, et de rien d'autre :
+Le pipeline dépend de deux commandes, d'un interpréteur, et de rien d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
 |---|---|---|
-| `list-dir` (`skills/list-dir/scripts/list-dir.py`) | les trois registres de `todo/`, `debt-review` | `test -f "$HOME/.claude/skills/list-dir/scripts/list-dir.py"` |
-| Python ≥ 3.12 | `list-dir` (syntaxe PEP 695) | `list-dir.py` sort non nul en nommant la version trouvée |
+| `list-dir` | les trois registres de `todo/`, `debt-review` | `command -v list-dir` |
+| `impl-list` | l'Étape 0 du tracker, le listing des suivis | `command -v impl-list` |
+| Python ≥ 3.12 | les deux commandes (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx --with pytest basedpyright` |
+
+**Ces commandes sont des liens de `bin/`, résolus par le `PATH`.** Rien ne les cite par leur
+chemin : un chemin de plus serait un point d'édition de plus, que le prochain déplacement
+casserait en silence. Leur présence, la validité de chaque lien et le fait qu'aucun homonyme ne
+gagne dans le `PATH` sont vérifiés **une fois par session** par `scripts/sante_skills.py`, branché
+sur `SessionStart` — et non par une garde recopiée dans chaque bloc.
+
+> **Un exécutable de skill invoqué depuis un `.md` s'expose dans `bin/`, et s'appelle par sa
+> commande.** Il n'y a pas d'autre forme correcte, et les deux contrôles du garde-fou le
+> démontrent ensemble : le contrôle 6 refuse le chemin relatif — inopérant hors du dépôt de
+> skills, où il rend 127 et une sortie vide — et le contrôle 7 refuse l'ancrage sur le `HOME`,
+> qui suppose une installation dans `~/.claude`. Un script qu'aucun `.md` n'invoque n'a pas
+> besoin de lien ; dès qu'un `.md` l'appelle, il lui en faut un.
+
+**Une machine neuve demande un geste, et un seul** : ajouter `bin/` au `PATH` depuis le profil du
+shell, `export PATH="$HOME/.claude/bin:$PATH"`. C'est la seule chose que le dépôt ne peut pas se
+donner à lui-même — un fichier versionné ne modifie pas l'environnement de son lecteur. Sans elle,
+`scripts/sante_skills.py` le dit au démarrage de la session suivante, en nommant la ligne à
+ajouter.
+
+> *Mode de défaillance* — de tout le `stderr` d'un hook en échec, l'hôte n'affiche que la
+> **première ligne** (constaté le 2026-08-29). Un diagnostic étalé sur plusieurs lignes y perd
+> tout sauf son en-tête. D'où la forme du script : une ligne unique et complète sur `stderr` pour
+> l'utilisateur, le détail sur `stdout` — que `SessionStart` reprend dans le contexte du modèle,
+> lequel est le premier concerné puisque c'est lui qui lance les commandes.
+
+Un chemin de skill **cité** — un répertoire, un module, un fichier de référence — s'écrit
+relativement à la racine du dépôt (`skills/list-dir/scripts/`), et un renvoi documentaire vers un
+autre skill s'écrit relativement au fichier courant. Une bibliothèque importée se localise depuis
+la commande qui l'expose (`shutil.which`), jamais par une constante.
 
 > *Mode de défaillance* — les deux linters n'étant pas installés, un audit qui les appelle par leur
 > nom les rapporte « non exécutés » et rend un verdict amputé sans que rien n'échoue. C'est arrivé
@@ -254,5 +285,5 @@ répertoire-liste comme un autre, et le skill ignore jusqu'au mot « dette ». C
 déployable ailleurs, et c'est mécaniquement vérifiable :
 
 ```bash
-grep -ril 'dette\|debt' "$HOME/.claude/skills/list-dir/" ; echo "attendu : aucune sortie"
+grep -ril 'dette\|debt' skills/list-dir/ ; echo "attendu : aucune sortie"
 ```

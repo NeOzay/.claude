@@ -1,6 +1,6 @@
 """Bout-en-bout : un dépôt-jouet sain, puis un défaut injecté par contrôle.
 
-CE QUE CE FICHIER PROUVE et que les unitaires ne prouvent pas : que les sept contrôles
+CE QUE CE FICHIER PROUVE et que les unitaires ne prouvent pas : que les huit contrôles
 sont branchés dans `main`, que chacun CRIE sur son défaut, et que le script sort en
 code 1 dès qu'un seul est rouge. Un garde-fou dont un contrôle serait débranché
 passerait tous les unitaires.
@@ -55,13 +55,27 @@ def depot_sain(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
     _ = ecrire(tmp_path, CONTRAT_REL, CONTRAT)
     _ = ecrire(tmp_path, LISTER, LISTER_FIDELE)
+    # Un exécutable de skill s'appelle par sa commande, et par rien d'autre : le
+    # contrôle 6 refuse le chemin relatif, le contrôle 7 refuse l'ancrage sur le HOME.
+    # Le dépôt-jouet doit donc exposer sa commande comme le vrai dépôt le fait.
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "impl-list").symlink_to(f"../{LISTER}")
     _ = ecrire(
         tmp_path,
         "skills/implementation-tracker/SKILL.md",
         "[Une](references/contrat.md#une-regle) et [Autre](references/contrat.md#une-autre)\n\n"
+        "Le contrat vit dans `skills/implementation-tracker/references/contrat.md`.\n\n"
         "```bash\n"
-        'python3 "$HOME/.claude/skills/implementation-tracker/scripts/impl_list.py" .\n'
+        "impl-list .\n"
         "```\n",
+    )
+    # Un second skill, pour que le contrôle 8 ait un renvoi à examiner : sans lui il
+    # se déclarerait « sans objet », ce qui est un échec, pas un succès.
+    _ = ecrire(tmp_path, "skills/debt-review/references/categories.md", "# Categories\n")
+    _ = ecrire(
+        tmp_path,
+        "skills/debt-review/SKILL.md",
+        "Voir [Contrat](../implementation-tracker/references/contrat.md#une-regle).\n",
     )
     _ = ecrire(tmp_path, "agents/auditeur.md", "Tu lis le suivi et le brief.\n")
     _ = ecrire(tmp_path, ".claude/plans/p.md", "plan\n")
@@ -80,8 +94,8 @@ def test_depot_sain(depot_sain: Path, capsys: pytest.CaptureFixture[str]) -> Non
     assert code == 0, sortie
     assert "Pipeline conforme." in sortie
     assert sortie.count("✗") == 0
-    # Les sept contrôles ont bien tourné : un titre numéroté chacun.
-    for n in range(1, 8):
+    # Les huit contrôles ont bien tourné : un titre numéroté chacun.
+    for n in range(1, 9):
         assert f"\n{n}. " in sortie
 
 
@@ -92,7 +106,8 @@ INJECTIONS: list[tuple[int, str, str]] = [
     (4, "agents/auditeur.md", "Voir references/contrat.md.\n"),
     (5, ".claude/implementation/done/chantier.md", "---\nplan: .claude/plans/disparu.md\n---\n"),
     (6, "skills/x/SKILL.md", "```bash\nbash scripts/x.sh\n```\n"),
-    (7, "skills/x/SKILL.md", '```bash\npython3 "$HOME/.claude/skills/x/disparu.py"\n```\n'),
+    (7, "skills/x/SKILL.md", "```bash\nskills/x/disparu.py list\n```\n"),
+    (8, "skills/x/SKILL.md", "[X](../disparu/references/contrat.md)\n"),
 ]
 
 

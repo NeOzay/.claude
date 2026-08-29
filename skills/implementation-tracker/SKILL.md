@@ -39,7 +39,7 @@ que le pipeline **alimente sans jamais les lire de lui-même**.
 git rev-parse --is-inside-work-tree 2>/dev/null || echo "NON_GIT"
 git branch --show-current
 git status --short
-python3 "$HOME/.claude/skills/implementation-tracker/scripts/impl_list.py" .claude/implementation
+impl-list .claude/implementation
 ```
 
 Le script ne remonte que les fichiers de suivi. **Ne jamais réécrire ce filtre en ligne** — pourquoi :
@@ -72,7 +72,7 @@ Lire ce fichier, aller directement à l'Étape 3 (reprise).
 Lire **uniquement les frontmatters** des fichiers de suivi (pas les fichiers entiers).
 
 ```bash
-python3 "$HOME/.claude/skills/implementation-tracker/scripts/impl_list.py" .claude/implementation
+impl-list .claude/implementation
 ```
 
 Compter ensuite les cases cochées de la section `## Étapes`. Afficher :

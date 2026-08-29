@@ -46,6 +46,29 @@ fichier existant, soit une résolution du chemin de la skill au lieu d'une const
 la seule qui empêche le compte de croître : le contrôle 6 impose la forme, donc chaque skill neuve
 ajoute ses points d'édition.
 
+## Soldé le
+
+**2026-08-29, chantier `resolution-chemin-skill`** — la cause est traitée, pas seulement le
+symptôme. Les exécutables de skill sont exposés dans `bin/` par des liens **relatifs** versionnés
+(`bin/list-dir`, `bin/impl-list`) et s'appellent par leur nom via le `PATH` ; plus aucun `.md` ne
+porte de chemin de skill ancré sur le `HOME`. Le contrôle 7 du garde-fou refuse désormais cette
+forme, ce qui empêche le compte de repartir à la hausse — c'est la condition que cette entrée
+posait pour son solde.
+
+Établi par :
+- `git grep -q '$HOME/.claude/skills' -- skills .claude/implementation/todo/README.md` → **code 1**,
+  aucune occurrence (le compte passe de 8 points d'édition à 0).
+- Injection d'un appel `"$HOME/.claude/skills/list-dir/scripts/list-dir.py" list .` dans
+  `skills/list-dir/SKILL.md`, puis `python3 scripts/check_pipeline.py` → **1 anomalie** :
+  « chemin ancré sur le HOME : skills/list-dir/scripts/list-dir.py — écrire le chemin relatif à la
+  racine du dépôt, ou appeler la commande de bin/ ». Arbre restauré, pipeline conforme.
+- `python3 scripts/sante_skills.py` → **code 0** : chaque lien de `bin/` est relatif, résout, est
+  exécutable, et gagne dans le `PATH`.
+
+Ce que le solde ne couvre pas : un `.md` reste libre de **citer** un chemin relatif à la racine du
+dépôt (`skills/list-dir/scripts/`), forme vérifiée par le contrôle 7 mais non résolue par `bin/`.
+Le cas d'une bibliothèque importée est traité à part, par `shutil.which`.
+
 ## Assumé
 
 arbitré à la clôture — le cas suppose un environnement où `HOME` est cassé ou une

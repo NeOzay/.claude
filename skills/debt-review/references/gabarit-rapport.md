@@ -87,8 +87,7 @@ double emploi avec le registre. `show` va lire l'entrée quand il faut la relire
 Rendu par `merge`, et par rien d'autre :
 
 ```bash
-python3 "$HOME/.claude/skills/list-dir/scripts/list-dir.py" \
-        merge .claude/implementation/done/revues/<AAAA-MM-DD> \
+list-dir merge .claude/implementation/done/revues/<AAAA-MM-DD> \
         --out .claude/implementation/done/revues/<AAAA-MM-DD>-revue.md
 ```
 

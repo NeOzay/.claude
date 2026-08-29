@@ -19,26 +19,25 @@ def rouges(root: Path) -> list[str]:
 
 
 @pytest.mark.parametrize("ecriture", ["$HOME", "${HOME}", "~"])
-def test_chemin_existant(tmp_path: Path, ecriture: str) -> None:
+def test_ancrage_sur_le_home_refuse(tmp_path: Path, ecriture: str) -> None:
+    """Le solde de `chemin-skill-code-en-dur` : la supposition ne se recopie plus.
+
+    Le fichier visé EXISTE : ce n'est pas son absence qu'on reproche, c'est la forme.
+    """
     _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", f'```bash\npython3 "{ecriture}/.claude/skills/x/scripts/outil.py"\n```\n')
-    assert rouges(tmp_path) == []
-
-
-def test_chemin_inexistant(tmp_path: Path) -> None:
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", '```bash\npython3 "$HOME/.claude/skills/x/scripts/disparu.py"\n```\n')
-    assert any("chemin de skill inexistant" in m for m in rouges(tmp_path))
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", f'```bash\n"{ecriture}/.claude/skills/x/scripts/outil.py" list\n```\n')
+    assert any("ancré sur le HOME" in m for m in rouges(tmp_path))
 
 
 def test_repertoire_accepte(tmp_path: Path) -> None:
     """Toutes les citations ne visent pas un fichier : `grep -ril … skills/list-dir/`."""
     _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\ngrep -ril x $HOME/.claude/skills/x/\n```\n")
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\ngrep -ril x skills/x/\n```\n")
     assert rouges(tmp_path) == []
 
 
 def test_gabarit_ignore(tmp_path: Path) -> None:
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", "Voir `$HOME/.claude/skills/<nom>/SKILL.md`.\n")
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "Voir `skills/<nom>/SKILL.md`.\n")
     assert any("aucun chemin de skill cité" in m for m in rouges(tmp_path))
 
 
@@ -46,3 +45,35 @@ def test_aucun_chemin_cite(tmp_path: Path) -> None:
     """Un contrôle qui n'examine rien échoue."""
     _ = ecrire(tmp_path, "skills/x/SKILL.md", "Aucun chemin ici.\n")
     assert any("contrôle sans objet" in m for m in rouges(tmp_path))
+
+
+# --- Chemin relatif au dépôt, et forme d'appel -------------------------------
+
+
+def test_chemin_relatif_existant(tmp_path: Path) -> None:
+    _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "Le module `skills/x/scripts/outil.py` porte tout.\n")
+    assert rouges(tmp_path) == []
+
+
+def test_chemin_relatif_inexistant(tmp_path: Path) -> None:
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "Voir `skills/x/scripts/disparu.py`.\n")
+    assert any("chemin de skill inexistant" in m for m in rouges(tmp_path))
+
+
+def test_chemin_alors_qu_une_commande_existe(tmp_path: Path) -> None:
+    """Le cœur de la dette : un chemin de plus est un point d'édition de plus."""
+    _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "outil").symlink_to("../skills/x/scripts/outil.py")
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\nskills/x/scripts/outil.py list\n```\n")
+    maux = rouges(tmp_path)
+    assert any("s'appelle par son nom" in m for m in maux)
+    assert any("« outil »" in m for m in maux), "le constat doit nommer la commande à employer"
+
+
+def test_sans_bin_le_chemin_reste_licite(tmp_path: Path) -> None:
+    """Tout exécutable n'est pas exposé : sans lien, le chemin est la seule façon."""
+    _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\nskills/x/scripts/outil.py list\n```\n")
+    assert rouges(tmp_path) == []

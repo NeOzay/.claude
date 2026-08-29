@@ -66,11 +66,10 @@ une commande de `list-dir` ; le modèle n'écrit que **dans** des fiches déjà 
 date +%F
 git rev-parse --is-inside-work-tree 2>/dev/null || echo "NON_GIT"
 
-L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
 T=.claude/implementation/todo
 
 for l in technical-debt technical-debt-solde technical-debt-ecarte; do
-  python3 "$L" validate "$T/$l" || echo "ÉCHEC : $l"
+  list-dir validate "$T/$l" || echo "ÉCHEC : $l"
 done
 ls .claude/implementation/done/revues/ 2>/dev/null
 git status --short | grep -v '^.. \.claude/implementation/'
@@ -105,13 +104,13 @@ Un argument `@chemin` désigne un autre registre que celui par défaut.
 
 ```bash
 R=".claude/implementation/done/revues/$(date +%F)"
-python3 "$L" derive "$T/technical-debt" "$R" --template review
-python3 "$L" validate "$R"
+list-dir derive "$T/technical-debt" "$R" --template review
+list-dir validate "$R"
 ```
 
-`derive` écrit le contrat de la revue depuis `.list/templates/review.toml` de la liste source, puis
-une fiche par entrée depuis `review.md` : même `id`, `title` et `date` reportés, tout le reste au
-marqueur. `derive` en crée exactement une par entrée — **à cet instant, et à cet instant seul.**
+`derive` crée exactement une fiche par entrée du registre — **à cet instant, et à cet instant
+seul.** Ce qu'il reporte et depuis quels gabarits :
+[Listes dérivées](../list-dir/references/contrat-liste.md#listes-dérivées).
 
 Ce que `merge` vérifiera plus tard est autre chose : il recompte les blocs rendus face aux
 **fichiers présents dans la liste de revue**. Une fiche disparue entre les deux réduit les deux
@@ -119,7 +118,7 @@ comptes à la fois et ne fait donc rien échouer. Le registre est la seule réf�
 et c'est contre lui que la complétude se contrôle :
 
 ```bash
-test "$(python3 "$L" list "$R" | wc -l)" -eq "$(python3 "$L" list "$T/technical-debt" | wc -l)" \
+test "$(list-dir list "$R" | wc -l)" -eq "$(list-dir list "$T/technical-debt" | wc -l)" \
   || echo "ÉCHEC : autant de fiches que d'entrées attendu"
 ```
 
@@ -134,8 +133,8 @@ La fiche **ne porte rien de la prose de l'entrée**, et c'est délibéré : une 
 Traiter les fiches **une à une**, dans l'ordre du registre :
 
 ```bash
-python3 "$L" list "$T/technical-debt" --sort date     # l'ordre de travail
-python3 "$L" show "$T/technical-debt" <id>            # l'entrée à instruire
+list-dir list "$T/technical-debt" --sort date     # l'ordre de travail
+list-dir show "$T/technical-debt" <id>            # l'entrée à instruire
 ```
 
 Pour chacune :
@@ -177,7 +176,7 @@ français doit être choisie pour ça.
 Quand toutes les fiches sont écrites :
 
 ```bash
-python3 "$L" validate "$R" --filled
+list-dir validate "$R" --filled
 ```
 
 **Sortie ≠ 0 → une fiche n'est pas instruite**, et le message nomme le fichier et ce qui y manque.
@@ -187,9 +186,9 @@ disparu — c'est le rôle du comptage contre le registre, ci-dessous.
 ## Étape 3 — Agglomérer et restituer
 
 ```bash
-test "$(python3 "$L" list "$R" | wc -l)" -eq "$(python3 "$L" list "$T/technical-debt" | wc -l)" \
+test "$(list-dir list "$R" | wc -l)" -eq "$(list-dir list "$T/technical-debt" | wc -l)" \
   || echo "ÉCHEC : autant de fiches que d'entrées attendu"
-python3 "$L" merge "$R" --out "$R-revue.md"
+list-dir merge "$R" --out "$R-revue.md"
 ```
 
 **Le comptage passe avant `merge`, et il n'est pas redondant avec lui.** `merge` recompte les blocs
@@ -210,7 +209,7 @@ qui font sortir une entrée du registre, le verdict en une ligne chacune.
 
 ```bash
 for c in a-solder non-pertinent doublon pas-une-dette aggravee pertinent inverifiable; do
-  printf '%-16s %s\n' "$c" "$(python3 "$L" list "$R" --where category=$c | wc -l)"
+  printf '%-16s %s\n' "$c" "$(list-dir list "$R" --where category=$c | wc -l)"
 done
 ```
 
@@ -233,7 +232,7 @@ Faire trancher, pile par pile. Une décision peut être :
 Consigner l'arbitrage dans la section `Arbitrage` de la fiche concernée, puis **réagglomérer** :
 
 ```bash
-python3 "$L" merge "$R" --out "$R-revue.md"
+list-dir merge "$R" --out "$R-revue.md"
 ```
 
 C'est ce qui distingue un rapport archivé d'un rapport qui n'a servi à rien. Une section `Arbitrage`
@@ -268,12 +267,12 @@ rejouables. Et elle est **la seule raison** pour laquelle une passe de revue éc
 ## Étape 5 — Écrire les registres
 
 Seulement sur les entrées arbitrées, et **jamais à la main** : une entrée qui sort du registre
-change de liste par `move`, qui est un `git mv` et rien d'autre.
+change de liste par `move`.
 
 1. **`a-solder`** :
 
    ```bash
-   python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-solde"
+   list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
    ```
 
    **Proposer le commit du seul déplacement** — jamais le lancer d'autorité. Puis, une fois
@@ -303,9 +302,9 @@ déplacement et la réécriture ne partagent jamais un commit :
 
 ```bash
 for l in technical-debt technical-debt-solde technical-debt-ecarte; do
-  printf '%-26s %s\n' "$l" "$(python3 "$L" list "$T/$l" | wc -l)"
+  printf '%-26s %s\n' "$l" "$(list-dir list "$T/$l" | wc -l)"
 done
-python3 "$L" validate "$T/technical-debt" --filled
+list-dir validate "$T/technical-debt" --filled
 ```
 
 La somme après la revue égale la somme avant. Une liste vide compte 0 et ne fait pas échouer le

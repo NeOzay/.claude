@@ -18,6 +18,7 @@ c'est précisément ce que la mention « (surchargée) » existe pour empêcher.
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import cast
 
@@ -27,7 +28,9 @@ from listdir.types import Result, Utils
 DESCRIPTION = "les commandes disponibles, génériques et propres à la liste"
 REQUIRES: list[str] = []
 
-USAGE = "list-dir.py <commande> [<liste>] [options]"
+# Le nom sous lequel on a été appelé, comme dans `list-dir.py` : un usage affiché doit
+# être recopiable tel quel, et le point d'entrée peut porter n'importe quel nom.
+USAGE = f"{Path(sys.argv[0]).name} <commande> [<liste>] [options]"
 
 
 def register(parser: argparse.ArgumentParser) -> None:

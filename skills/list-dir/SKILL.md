@@ -53,13 +53,9 @@ list-dir derive <src> <dst> --template <nom> # projette une liste sur une liste 
 list-dir merge <liste> [--out <fichier>]     # agglomère, conservation vérifiée
 ```
 
-`list-dir` est un lien vers `scripts/list-dir.py` posé dans `~/.local/bin`. Si `list-dir` n'est pas
-trouvé, le script est exécutable et autonome — l'appeler par son chemin fait la même chose :
-
-```bash
-"$HOME/.claude/skills/list-dir/scripts/list-dir.py" help
-ln -sfn "$HOME/.claude/skills/list-dir/scripts/list-dir.py" "$HOME/.local/bin/list-dir"  # rétablir le lien
-```
+`list-dir` est un lien de `bin/` vers `scripts/list-dir.py`, résolu par le `PATH`. Sa présence
+est vérifiée au démarrage de chaque session par `scripts/sante_skills.py` — inutile de la
+retester dans un bloc.
 
 **Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un
 coup tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au
@@ -77,8 +73,15 @@ Les commandes ne sont qu'une façade : tout passe par un paquet Python importabl
 script tiers exactement les mêmes moyens.
 
 ```python
-import sys, os
-sys.path.insert(0, os.path.expanduser("~/.claude/skills/list-dir/scripts"))
+import shutil, sys
+from pathlib import Path
+
+# La commande est un lien de `bin/` vers `scripts/list-dir.py` : le résoudre donne le
+# répertoire à insérer, sans constante et où que le dépôt soit installé.
+cmd = shutil.which("list-dir")
+if cmd is None:
+    raise SystemExit("list-dir introuvable dans le PATH — ajouter bin/ au profil du shell")
+sys.path.insert(0, str(Path(cmd).resolve().parent))
 from listdir import open_list
 
 lst = open_list("chemin/vers/ma-liste").unwrap()

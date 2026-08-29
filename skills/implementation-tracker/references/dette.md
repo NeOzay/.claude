@@ -8,11 +8,11 @@ Trois **répertoires-listes**, sous `.claude/implementation/todo/` :
 | `technical-debt-solde/` | ce qui a été payé, avec la preuve qui l'établit |
 | `technical-debt-ecarte/` | ce qui est sorti du registre **sans** avoir été payé, avec son motif |
 
-Un répertoire = une liste, **un fichier = une entrée**, et `.list/contract.toml` déclare ce qu'une
-entrée doit porter. Toutes les manipulations passent par le skill `list-dir` :
+Ce sont des répertoires-listes : toutes les manipulations passent par les commandes de `list-dir`,
+et par elles seules. Structure, contrat, marqueurs, comportement des commandes :
+[Répertoires-listes](../../list-dir/references/contrat-liste.md#structure-dun-répertoire-liste).
 
 ```bash
-L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
 T=".claude/implementation/todo"
 ```
 
@@ -76,14 +76,14 @@ qu'un problème qui disparaît avec la conversation. L'élagage est son geste, p
 
 ## Ce qu'une entrée porte
 
-Le contrat fait foi — `.list/contract.toml` de chaque liste. Il se lit sans l'ouvrir :
+Le contrat de la liste fait foi, et se lit sans l'ouvrir :
 
 ```bash
-python3 "$L" show "$T/technical-debt" <id>      # une entrée, telle qu'elle est écrite
-python3 "$L" validate "$T/technical-debt"       # toutes, confrontées au contrat
+list-dir show "$T/technical-debt" <id>      # une entrée, telle qu'elle est écrite
+list-dir validate "$T/technical-debt"       # toutes, confrontées au contrat
 ```
 
-**Champs**, dans le front matter TOML délimité par `+++` :
+**Champs** :
 
 | Champ | | |
 |---|---|---|
@@ -125,8 +125,8 @@ disparu avec le fichier unique, et ce qui la remplace dit davantage : le champ `
 **chaque** entrée, avec le `category` qui l'accompagne.
 
 ```bash
-python3 "$L" list "$T/technical-debt" --sort reviewed          # les moins récemment relues d'abord
-python3 "$L" list "$T/technical-debt" --where category=aggravee
+list-dir list "$T/technical-debt" --sort reviewed          # les moins récemment relues d'abord
+list-dir list "$T/technical-debt" --where category=aggravee
 ```
 
 Un registre dont on soupçonne qu'il est périmé ne se lit plus — c'est ce que l'ancienne ligne
@@ -151,35 +151,23 @@ dépôt depuis son écriture, et le tri le montre sans qu'on ait à le croire su
    en gardant sa date d'origine. C'est le seul contrôle qui empêche le registre de gonfler.
 
    ```bash
-   python3 "$L" list "$T/technical-debt" --sort date
+   list-dir list "$T/technical-debt" --sort date
    ```
 4. Créer une entrée par survivant, et **remplir le fichier créé** :
 
    ```bash
-   python3 "$L" new "$T/technical-debt" <id>
+   list-dir new "$T/technical-debt" <id>
    ```
-
-   `new` pose tout le contrat, champs et sections, chacun au marqueur de son statut. Ce qu'on ne
-   voit pas n'est jamais rempli : les lignes préposées disent quoi écrire.
 5. **Vérifier avant de clore**, et pas seulement la structure :
 
    ```bash
-   python3 "$L" validate "$T/technical-debt" --filled
+   list-dir validate "$T/technical-debt" --filled
    ```
 
-   `--filled` exige qu'aucun marqueur ne subsiste là où le contrat exige quelque chose, sans jamais
-   réclamer ce qu'il dit facultatif.
-
-**Le contrat a changé depuis la dernière écriture** — un champ ajouté, une section nouvelle — et
-les entrées existantes ne lui correspondent plus :
-
-```bash
-python3 "$L" migrate "$T/technical-debt" --dry-run    # ce qui serait fait
-python3 "$L" migrate "$T/technical-debt"              # posé au marqueur, ordre repris du contrat
-```
-
-`migrate` ne renomme rien et ne reporte aucune valeur : c'est du remplissage de structure, le
-jugement reste à écrire à la main dans les fichiers.
+**Le contrat a changé depuis la dernière écriture** et les entrées existantes ne lui correspondent
+plus : `list-dir migrate` les remet en ligne. Ce qu'il fait, ce qu'il ne fait pas, et pourquoi le
+renommage d'un champ reste à la main :
+[Quand le contrat change](../../list-dir/references/contrat-liste.md#quand-le-contrat-change).
 
 ---
 
@@ -189,11 +177,11 @@ Une entrée soldée **change de liste**. Elle n'est ni barrée, ni marquée : el
 actif, qui reste ainsi la liste de ce qui reste à faire.
 
 ```bash
-python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-solde"
+list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 ```
 
-`move` est **un `git mv`, et rien d'autre** — c'est ce qui fait que `git log --follow` sur le
-fichier arrivé remonte jusqu'à son commit de création dans la liste de départ.
+Le déplacement préserve l'historique de l'entrée, jusqu'à son commit de création dans la liste de
+départ — à une condition, qui est du ressort de ce registre :
 
 > *Mode de défaillance* — un commit qui mêle le déplacement et la réécriture du contenu fait lâcher
 > la détection de renommage : l'historique de l'entrée s'arrête au jour du solde. **Déplacer et
@@ -225,7 +213,7 @@ ce qu'elle cite n'existe plus, une autre entrée dit déjà la même chose, ou l
 une dette.
 
 ```bash
-python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-ecarte"
+list-dir move "$T/technical-debt" <id> "$T/technical-debt-ecarte"
 ```
 
 Elle reçoit sa section `## Écartée le`, motif compris :
@@ -268,7 +256,7 @@ dans l'entrée. Sans elle, on remplace une erreur par une autre — et celle-là
 Après correction, relire ce qui vient d'être écrit :
 
 ```bash
-python3 "$L" validate "$T/technical-debt" --filled
+list-dir validate "$T/technical-debt" --filled
 ```
 
 ## Marqueur d'une entrée relue
@@ -288,8 +276,8 @@ d'écrire : le modifier ferait revenir le même constat comme s'il était neuf, 
 porterait deux fois la même dette.
 
 Les catégories qui marquent, et ce que chaque marqueur engage :
-`../../debt-review/references/categories.md`. Elles sont aussi énumérées par le contrat, qui refuse
-toute valeur hors de la liste.
+[Catégories](../../debt-review/references/categories.md). Le contrat de la liste les énumère, et
+refuse toute autre valeur.
 
 ---
 
@@ -300,8 +288,8 @@ l'Étape 0. Il l'alimente, l'utilisateur le consulte — typiquement quand il ch
 chantier.
 
 ```bash
-python3 "$L" list "$T/technical-debt" --sort date       # tout, du plus ancien au plus récent
-python3 "$L" show "$T/technical-debt" <id>              # une entrée
+list-dir list "$T/technical-debt" --sort date       # tout, du plus ancien au plus récent
+list-dir show "$T/technical-debt" <id>              # une entrée
 ```
 
 **Une exception, et elle est manuelle** : le skill `debt-review` ouvre le registre pour le relire

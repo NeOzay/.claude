@@ -134,8 +134,15 @@ La CLI n'est qu'une façade. Un script tiers a les mêmes moyens, sans `subproce
 reparser.
 
 ```python
-import sys, os
-sys.path.insert(0, os.path.expanduser("~/.claude/skills/list-dir/scripts"))
+import shutil, sys
+from pathlib import Path
+
+# La commande est un lien de `bin/` vers `scripts/list-dir.py` : le résoudre donne le
+# répertoire à insérer, sans constante et où que le dépôt soit installé.
+cmd = shutil.which("list-dir")
+if cmd is None:
+    raise SystemExit("list-dir introuvable dans le PATH — ajouter bin/ au profil du shell")
+sys.path.insert(0, str(Path(cmd).resolve().parent))
 from listdir import open_list, PLACEHOLDER, OPTIONAL
 ```
 

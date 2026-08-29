@@ -30,6 +30,7 @@ arborescence-jouet.
 from __future__ import annotations
 
 import importlib.util
+import os
 import re
 import subprocess
 import sys
@@ -179,6 +180,33 @@ def sections(texte: str) -> dict[str, str]:
         corps.append(ligne)
     if ancre is not None:
         trouvees[ancre] = "\n".join(corps)
+    return trouvees
+
+
+TITRE = re.compile(r"^(#{1,6}) +(.+?)\s*$")
+
+
+def ancres_markdown(texte: str) -> set[str]:
+    """Toutes les ancres d'un document, quel que soit le niveau du titre.
+
+    Distinct de `sections()`, qui ne retient que les `## ` parce que le contrôle 1
+    juge la couverture des sections de premier rang du contrat. Ici la question est
+    autre : un lien peut viser un `###` parfaitement légitime, et le déclarer mort
+    serait un faux positif — celui que l'audit de clôture a trouvé par sonde.
+
+    Les blocs de code sont sautés, pour la même raison que dans `sections()`.
+    """
+    trouvees: set[str] = set()
+    dans_fence = False
+    for ligne in texte.splitlines():
+        if ligne.lstrip().startswith("```"):
+            dans_fence = not dans_fence
+            continue
+        if dans_fence:
+            continue
+        m = TITRE.match(ligne)
+        if m is not None:
+            trouvees.add(slugify(cast("str", m.group(2))))
     return trouvees
 
 
@@ -407,8 +435,38 @@ def check_archives(root: Path) -> list[Finding]:
 # `python3 -c`, `python3 - <<'PY'` et `python3 "$L"` ne sont pas concernés : aucun ne
 # porte un chemin de fichier en clair. La variable est résolue à l'exécution, et c'est
 # sa définition — non cet appel — qui doit être absolue.
+#
+# APPEL DIRECT, sans interpréteur : les scripts de skill portent leur shebang et
+# s'exposent dans `bin/`, donc la forme employée est `list-dir validate …` — ou, pour
+# ce qui n'a pas de lien, un chemin nu sans `python3` devant. Un contrôle resté sur
+# `bash|python3` serait devenu aveugle à tout ce qui a été converti, c'est-à-dire vert
+# sans rien examiner. Ce motif ne s'applique qu'à l'intérieur d'un bloc ```bash et en
+# tête de commande, faute de quoi un chemin cité en prose deviendrait un appel.
 APPEL = re.compile(r"\b(?:bash|python3)\s+\"?([^\"\s;)]+\.(?:sh|py))")
+APPEL_DIRECT = re.compile(r"(?:^|[;&|]\s*|\$\(\s*)\"?([^\"\s;)]+\.(?:sh|py))\"?(?=\s|$)")
 ABSOLUS = ("/", "~/", "$HOME/", "${HOME}/")
+
+
+def blocs_bash(texte: str) -> Iterator[list[tuple[int, str]]]:
+    """Les blocs ```bash d'un markdown, en (numéro de ligne, contenu).
+
+    Le découpage est volontairement littéral : ce qui n'est pas dans un bloc `bash`
+    n'est pas une commande à exécuter, et n'a donc pas à porter de garde.
+    """
+    bloc: list[tuple[int, str]] | None = None
+    for no, ligne in enumerate(texte.splitlines(), 1):
+        depouille = ligne.strip()
+        if bloc is None:
+            if depouille.startswith("```") and depouille[3:].strip() in ("bash", "sh"):
+                bloc = []
+            continue
+        if depouille.startswith("```"):
+            yield bloc
+            bloc = None
+            continue
+        bloc.append((no, ligne))
+    if bloc:
+        yield bloc
 
 
 def garde_commande(ligne: str, appel: str, debut_appel: int) -> bool:
@@ -438,7 +496,8 @@ def check_portabilite(root: Path) -> list[Finding]:
 
     findings: list[Finding] = []
     for md in fichiers:
-        for ligne in md.read_text(encoding="utf-8").splitlines():
+        texte = md.read_text(encoding="utf-8")
+        for ligne in texte.splitlines():
             for m in APPEL.finditer(ligne):
                 appel = cast("str", m.group(1))
                 if appel.startswith(ABSOLUS):
@@ -452,6 +511,21 @@ def check_portabilite(root: Path) -> list[Finding]:
                         " — inopérant et silencieux hors de ~/.claude",
                     )
                 )
+        for bloc in blocs_bash(texte):
+            for no, ligne in bloc:
+                for m in APPEL_DIRECT.finditer(ligne):
+                    appel = cast("str", m.group(1))
+                    if appel.startswith(ABSOLUS) or appel.startswith("$"):
+                        continue
+                    if garde_commande(ligne, appel, m.start()):
+                        continue
+                    findings.append(
+                        Finding(
+                            False,
+                            f"appel relatif non gardé : {md.relative_to(root)}:{no} → {appel}"
+                            " — inopérant et silencieux hors de ~/.claude",
+                        )
+                    )
     if not findings:
         findings.append(
             Finding(True, f"{len(fichiers)} fichiers examinés, aucun appel relatif non gardé")
@@ -467,24 +541,70 @@ def check_portabilite(root: Path) -> list[Finding]:
 # `$HOME/.claude` DÉSIGNE LE DÉPÔT AUDITÉ, pas le home de qui lance le script : sur un
 # clone ailleurs, résoudre vers le vrai $HOME validerait des fichiers étrangers au
 # chantier — exactement ce que le garde-fou existe pour ne pas faire.
-CHEMIN_SKILL = re.compile(r"(?:\$HOME|\$\{HOME\}|~)/\.claude/([^\"\s)`,;]+)")
+# Deux écritures d'un même chemin : ancrée sur le HOME (`$HOME/.claude/skills/x`) ou
+# relative à la racine du dépôt (`skills/x`). La première est REFUSÉE depuis le solde de
+# `chemin-skill-code-en-dur` : elle suppose le dépôt installé dans `~/.claude`, et c'est
+# cette supposition, recopiée à chaque point d'usage, qui a fait passer le compte de 3 à
+# 8 points d'édition sans qu'aucun n'échoue bruyamment. La seconde est vérifiée, jamais
+# supposée. Le motif garde les deux : on ne peut refuser que ce qu'on sait reconnaître.
+CHEMIN_SKILL = re.compile(
+    r"(?:(?:\$HOME|\$\{HOME\}|~)/\.claude/(?P<home>[^\"\s)`,;]+)"
+    r"|(?<![\w/.])(?P<rel>skills/[^\"\s)`,;]+))"
+)
 
 
-@control(7, "Existence des chemins de skill cités")
+def commandes_bin(root: Path) -> dict[str, str]:
+    """Les commandes exposées dans `bin/`, par chemin de cible relatif au dépôt.
+
+    C'est le point de rendez-vous du système : un exécutable qui y a son lien s'appelle
+    PAR SON NOM. Continuer à l'appeler par son chemin, c'est rouvrir la dette
+    `chemin-skill-code-en-dur` — un point d'édition de plus, qu'un déplacement ou un
+    renommage casse en silence.
+    """
+    bin_dir = root / "bin"
+    if not bin_dir.is_dir():
+        return {}
+    table: dict[str, str] = {}
+    for lien in bin_dir.iterdir():
+        if not lien.is_symlink():
+            continue
+        cible = (bin_dir / os.readlink(lien)).resolve()
+        try:
+            table[cible.relative_to(root).as_posix()] = lien.name
+        except ValueError:
+            continue  # pointe hors du dépôt : le script de santé s'en charge
+    return table
+
+
+@control(7, "Chemins de skill cités : existence et forme")
 def check_chemins_skill(root: Path) -> list[Finding]:
     fichiers = list(markdown_files(root, only="skills"))
     if not fichiers:
         return [Finding(False, "aucun fichier examiné dans skills/ — contrôle sans objet")]
 
+    commandes = commandes_bin(root)
     cites = 0
     findings: list[Finding] = []
     for md in fichiers:
         for ligne_no, ligne in enumerate(md.read_text(encoding="utf-8").splitlines(), 1):
             for m in CHEMIN_SKILL.finditer(ligne):
-                rel = cast("str", m.group(1)).rstrip("/")
+                brut = m.group("home") or m.group("rel")
+                rel = cast("str", brut).rstrip("/")
+                if m.group("home") is not None and not rel.startswith("skills/"):
+                    continue  # `$HOME/.claude/…` hors skills/ : pas notre affaire ici
                 if any(c in rel for c in "<>*…"):
                     continue  # gabarit, pas un chemin
                 cites += 1
+                if m.group("home") is not None:
+                    findings.append(
+                        Finding(
+                            False,
+                            f"{md.relative_to(root)}:{ligne_no} → chemin ancré sur le HOME :"
+                            f" {rel} — écrire le chemin relatif à la racine du dépôt, ou"
+                            " appeler la commande de bin/",
+                        )
+                    )
+                    continue
                 cible = root / rel
                 if not cible.exists():
                     findings.append(
@@ -493,10 +613,75 @@ def check_chemins_skill(root: Path) -> list[Finding]:
                             f"{md.relative_to(root)}:{ligne_no} → chemin de skill inexistant : {rel}",
                         )
                     )
+                elif rel in commandes:
+                    findings.append(
+                        Finding(
+                            False,
+                            f"{md.relative_to(root)}:{ligne_no} → {rel} s'appelle par son nom :"
+                            f" « {commandes[rel]} » — un chemin de plus est un point d'édition"
+                            " de plus, que le prochain déplacement casse en silence",
+                        )
+                    )
     if cites == 0:
         findings.append(Finding(False, "aucun chemin de skill cité — contrôle sans objet"))
     elif not findings:
         findings.append(Finding(True, f"{cites} chemins de skill cités, tous existent"))
+    return findings
+
+
+# Un skill en cite un autre de deux façons : il l'APPELLE (contrôles 6 et 7, chemin
+# ancré sur la racine résolue) ou il y RENVOIE le lecteur. Le renvoi est un lien
+# Markdown relatif — forme retenue parce qu'elle reste cliquable et survit à un
+# déplacement de la racine. Ce qu'elle ne supporte pas, c'est le RENOMMAGE d'un skill :
+# le lien pointe alors dans le vide sans que rien ne le signale, et le lecteur — modèle
+# ou humain — lit un renvoi mort comme une section absente. D'où ce contrôle.
+RENVOI_INTER_SKILL = re.compile(r"\]\((\.\./[^)#\s]+)(#[^)\s]+)?(?:\s+\"[^\"]*\")?\)")
+
+
+@control(8, "Renvois documentaires entre skills")
+def check_renvois_skill(root: Path) -> list[Finding]:
+    fichiers = list(markdown_files(root, only="skills"))
+    if not fichiers:
+        return [Finding(False, "aucun fichier examiné dans skills/ — contrôle sans objet")]
+
+    cites = 0
+    findings: list[Finding] = []
+    for md in fichiers:
+        for ligne_no, ligne in enumerate(md.read_text(encoding="utf-8").splitlines(), 1):
+            for m in RENVOI_INTER_SKILL.finditer(ligne):
+                rel = cast("str", m.group(1))
+                if any(c in rel for c in "<>*…"):
+                    continue  # gabarit, pas un chemin
+                cites += 1
+                cible = md.parent / rel
+                if not cible.exists():
+                    findings.append(
+                        Finding(
+                            False,
+                            f"{md.relative_to(root)}:{ligne_no} → renvoi mort : {rel}",
+                        )
+                    )
+                    continue
+                # L'ANCRE FAIT PARTIE DU RENVOI. Sans ce contrôle, un lien vers une
+                # section renommée reste vert et dépose le lecteur en tête d'une
+                # référence de 400 lignes — c'est-à-dire le mode de défaillance même
+                # que ce contrôle invoque pour exister.
+                ancre = m.group(2)
+                if ancre is None or not cible.is_file():
+                    continue
+                connues = ancres_markdown(cible.read_text(encoding="utf-8"))
+                if cast("str", ancre)[1:] not in connues:
+                    findings.append(
+                        Finding(
+                            False,
+                            f"{md.relative_to(root)}:{ligne_no} → ancre morte :"
+                            f" {rel}{ancre} — le renvoi fonctionne, il ne conduit pas",
+                        )
+                    )
+    if cites == 0:
+        findings.append(Finding(False, "aucun renvoi entre skills — contrôle sans objet"))
+    elif not findings:
+        findings.append(Finding(True, f"{cites} renvois entre skills, tous résolvent"))
     return findings
 
 

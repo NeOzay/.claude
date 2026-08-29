@@ -76,3 +76,40 @@ def test_variable_non_concernee(tmp_path: Path) -> None:
 
 def test_skills_vide(tmp_path: Path) -> None:
     assert any("contrôle sans objet" in m for m in rouges(tmp_path))
+
+
+# --- Appel direct et racine résolue -----------------------------------------
+#
+# Depuis que les scripts portent leur shebang, la forme employée n'a plus
+# d'interpréteur : une commande de `bin/`, ou un chemin nu pour ce qui n'y est pas
+# exposé. Sans ces cas, le contrôle serait resté vert en n'examinant plus rien.
+
+DIRECTS_FAUTIFS = [
+    "scripts/x.py validate .",
+    './scripts/x.sh --dry-run',
+    'cd /tmp && scripts/x.py list',
+]
+
+DIRECTS_ABSOLUS = [
+    '"$HOME/.claude/skills/x/scripts/y.py" list',
+    "~/.claude/skills/x/scripts/y.py list",
+    "/opt/x.sh",
+]
+
+
+@pytest.mark.parametrize("ligne", DIRECTS_FAUTIFS)
+def test_appel_direct_relatif(tmp_path: Path, ligne: str) -> None:
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", f"```bash\n{ligne}\n```\n")
+    assert any("appel relatif non gardé" in m for m in rouges(tmp_path))
+
+
+@pytest.mark.parametrize("ligne", DIRECTS_ABSOLUS)
+def test_appel_direct_absolu(tmp_path: Path, ligne: str) -> None:
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", f"```bash\n{ligne}\n```\n")
+    assert rouges(tmp_path) == []
+
+
+def test_chemin_en_prose_nest_pas_un_appel(tmp_path: Path) -> None:
+    """Hors bloc `bash`, un chemin cité reste une citation."""
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "Le fichier scripts/x.py porte la logique.\n")
+    assert rouges(tmp_path) == []

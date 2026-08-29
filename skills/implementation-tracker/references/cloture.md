@@ -41,15 +41,14 @@ Ce que le chantier laisse derrière lui part dans le répertoire-liste
 `.claude/implementation/todo/technical-debt/` — une entrée par fichier, créée par commande :
 
 ```bash
-L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
 T=.claude/implementation/todo
 
-python3 "$L" list "$T/technical-debt" --sort date   # lire AVANT d'écrire : ne pas dupliquer
-python3 "$L" new  "$T/technical-debt" <id>          # puis remplir le fichier créé
-python3 "$L" validate "$T/technical-debt" --filled  # aucun marqueur ne subsiste
+list-dir list "$T/technical-debt" --sort date   # lire AVANT d'écrire : ne pas dupliquer
+list-dir new  "$T/technical-debt" <id>          # puis remplir le fichier créé
+list-dir validate "$T/technical-debt" --filled  # aucun marqueur ne subsiste
 ```
 
-Procédure complète, contrat d'une entrée et règle de solde : `references/dette.md`.
+Procédure complète, contrat d'une entrée et règle de solde : [Registre de dette](dette.md).
 
 **Ici et pas ailleurs.** Après l'audit, parce que c'est lui qui produit les constats et que les
 arbitrages qu'il déclenche (« clore avec ces réserves ») en font partie. Avant l'archivage, pour que
@@ -57,20 +56,20 @@ l'écriture entre dans l'aplatissement de la branche. Et **une seule fois par ch
 intermédiaire ne l'alimente pas, sinon l'audit de clôture, qui rejuge le diff entier, y réécrirait
 les mêmes constats.
 
-C'est l'orchestrateur qui écrit, jamais l'auditeur (pourquoi : `references/dette.md`, « Un état, pas
-un journal »).
+C'est l'orchestrateur qui écrit, jamais l'auditeur (pourquoi :
+[Un état, pas un journal](dette.md#un-état-pas-un-journal)).
 
 Un chantier qui **solde** une entrée la déplace vers `technical-debt-solde/`, par `move` et jamais à
 la main :
 
 ```bash
-python3 "$L" move "$T/technical-debt" <id> "$T/technical-debt-solde"
+list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 ```
 
 L'entrée déplacée reçoit ensuite sa section `## Soldé le`, portant la commande exécutée qui
 l'établit. Sans cette sortie réelle, l'entrée reste. **Le déplacement et l'écriture de la preuve ne
 partagent jamais un commit** — un commit qui mêle les deux fait lâcher la détection de renommage de
-Git, et l'historique de l'entrée s'arrête au jour du solde (`references/dette.md`, « Solder »).
+Git, et l'historique de l'entrée s'arrête au jour du solde ([Solder](dette.md#solder)).
 
 **Mettre le registre à l'index dès qu'il est écrit** :
 

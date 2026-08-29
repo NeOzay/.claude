@@ -3,8 +3,13 @@
 La surface publique est ce que __all__ énumère, et rien d'autre. Le reste du paquet
 peut bouger d'une version à l'autre.
 
-    import sys, os
-    sys.path.insert(0, os.path.expanduser("~/.claude/skills/list-dir/scripts"))
+    import shutil, sys
+    from pathlib import Path
+
+    cmd = shutil.which("list-dir")
+    if cmd is None:
+        raise SystemExit("list-dir introuvable dans le PATH")
+    sys.path.insert(0, str(Path(cmd).resolve().parent))
     from listdir import open_list
 
     lst = open_list("chemin/vers/ma-liste").unwrap()

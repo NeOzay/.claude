@@ -21,13 +21,12 @@ reste vit sous `.list/`.
   sans objet, doublon d'une autre entrée, ou n'ayant jamais été une dette. Chaque entrée porte son
   motif et la preuve qui l'établit. Existante et **vide** : une liste vide est valide.
 
-Une entrée ne change jamais d'état par un champ, mais **par un `move` d'une liste vers l'autre** —
-un `git mv`, ce qui laisse `git log --follow` remonter jusqu'à son commit de création.
+Une entrée ne change jamais d'état par un champ, mais **par un `move` d'une liste vers l'autre**,
+ce qui préserve son historique jusqu'à son commit de création.
 
 ```bash
-L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
-python3 "$L" list .claude/implementation/todo/technical-debt --sort date
-python3 "$L" validate .claude/implementation/todo/technical-debt --filled
+list-dir list .claude/implementation/todo/technical-debt --sort date
+list-dir validate .claude/implementation/todo/technical-debt --filled
 ```
 
 Le répertoire a vocation à en accueillir d'autres — `road-map/` pour les idées d'amélioration, que
