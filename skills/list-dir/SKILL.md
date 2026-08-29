@@ -41,18 +41,24 @@ démarrage et sortent en code non nul si la version est inférieure.
 ## Les dix commandes
 
 ```bash
-L="$HOME/.claude/skills/list-dir/scripts/list-dir.py"
+list-dir help [<liste>]                      # les commandes disponibles, avec leur description
+list-dir init <répertoire>                   # crée une liste et son contrat squelette
+list-dir new <liste> <id>                    # crée un élément prérempli du contrat
+list-dir list <liste> [--where c=v] [--sort c]
+list-dir show <liste> <id>
+list-dir validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
+list-dir migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
+list-dir move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
+list-dir derive <src> <dst> --template <nom> # projette une liste sur une liste neuve
+list-dir merge <liste> [--out <fichier>]     # agglomère, conservation vérifiée
+```
 
-python3 "$L" help [<liste>]                      # les commandes disponibles, avec leur description
-python3 "$L" init <répertoire>                   # crée une liste et son contrat squelette
-python3 "$L" new <liste> <id>                    # crée un élément prérempli du contrat
-python3 "$L" list <liste> [--where c=v] [--sort c]
-python3 "$L" show <liste> <id>
-python3 "$L" validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
-python3 "$L" migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
-python3 "$L" move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
-python3 "$L" derive <src> <dst> --template <nom> # projette une liste sur une liste neuve
-python3 "$L" merge <liste> [--out <fichier>]     # agglomère, conservation vérifiée
+`list-dir` est un lien vers `scripts/list-dir.py` posé dans `~/.local/bin`. Si `list-dir` n'est pas
+trouvé, le script est exécutable et autonome — l'appeler par son chemin fait la même chose :
+
+```bash
+"$HOME/.claude/skills/list-dir/scripts/list-dir.py" help
+ln -sfn "$HOME/.claude/skills/list-dir/scripts/list-dir.py" "$HOME/.local/bin/list-dir"  # rétablir le lien
 ```
 
 **Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un

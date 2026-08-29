@@ -34,7 +34,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from listdir.loader import check_requires, discover
 from listdir.utils import Toolbox
 
-USAGE = "list-dir.py <commande> [<liste>] [options]"
+# Le nom sous lequel on a été appelé : « list-dir » via le lien dans le PATH,
+# « list-dir.py » en chemin direct. L'usage affiché doit être recopiable tel quel.
+USAGE = f"{Path(sys.argv[0]).name} <commande> [<liste>] [options]"
 
 
 def sniff_list_dir(argv: list[str]) -> Path | None:
