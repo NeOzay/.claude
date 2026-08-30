@@ -32,6 +32,91 @@ projeter zéro élément se lirait comme « rien à traiter ».
 
 ---
 
+## Définitions de listes
+
+`init` seul rend un squelette : un `id`, un `title`, une section. C'est assez pour commencer une
+liste à la main, et pas assez pour recréer une liste dont le contrat est connu. Une **définition**
+comble ce trou.
+
+Une définition est un répertoire dont le contenu **est** le futur `.list/` :
+
+```
+list-dir/
+└── recettes/            le nom de la définition
+    ├── contract.toml          obligatoire — sans lui, ce n'est pas une définition
+    └── templates/             facultatif, copié tel quel s'il existe
+        ├── review.toml
+        └── review.md
+```
+
+```bash
+list-dir defs                                # ce qui est définissable, et d'où
+list-dir init <cible> --def recettes   # résolu par son nom, dans les racines
+list-dir init <cible> --from <chemin>        # ou pris à un chemin, tel quel
+```
+
+**Pourquoi une définition peut ce qu'un gabarit ne pouvait pas** : un gabarit vit dans le
+`.list/templates/` d'une liste *existante*, et `init` s'adresse justement au cas où aucune liste
+n'existe. Une définition vit hors de tout répertoire-liste — c'est exactement ce qui la rend
+disponible quand il n'y a encore rien.
+
+### Les quatre racines
+
+Un nom est cherché dans quatre racines, du plus spécifique au plus général :
+
+| # | Racine | Ancrage |
+|---|---|---|
+| 1 | `<projet>/.claude/list-dir/<nom>/` | le premier répertoire **contenant** un `.claude`, en remontant depuis le répertoire courant |
+| 2 | `<projet>/.claude/skills/*/list-dir/<nom>/` | idem |
+| 3 | `<config>/list-dir/<nom>/` | le premier répertoire **nommé** `.claude`, en remontant depuis le paquet |
+| 4 | `<config>/skills/*/list-dir/<nom>/` | idem |
+
+**Les deux ancrages ne cherchent pas la même chose**, et les confondre casse le cas où une
+configuration porte son propre projet : un projet *contient* un `.claude`, une configuration *est*
+un `.claude`. Une règle unique ferait viser le même répertoire aux deux, et l'un des deux couples
+de racines serait faux.
+
+Aucune constante de chemin, aucune variable d'environnement : les deux ancrages sont des remontées.
+`defs` imprime celui qu'il a retenu — la remontée s'arrête au **premier** `.claude` trouvé, qui
+n'est pas toujours celui qu'on avait en tête, et le voir vaut mieux que le deviner.
+
+**N'avoir aucune racine est un état légitime**, pas une erreur : hors de tout `.claude`, `defs` ne
+liste rien et `--def` échoue en le disant.
+
+### Qui gagne
+
+**La spécificité prime, et masquer est le comportement voulu** : une définition de rang 1 l'emporte
+sur son homonyme de rang 4, exactement comme une commande de `.list/commands/` l'emporte sur une
+générique. C'est ainsi qu'un projet reprend la main sur une définition de sa configuration. `defs`
+montre la masquée plutôt que de la taire.
+
+**L'ambiguïté ne se déclare qu'à rang égal** : deux skills qui définissent le même nom font sortir
+la commande non nulle, en les nommant tous les deux.
+
+> *Mode de défaillance* — choisir en silence ferait dépendre le contrat d'une liste de l'ordre de
+> parcours d'un répertoire. Deux machines rendraient deux contrats, et rien ne dirait pourquoi.
+
+Un répertoire sans `contract.toml` n'est pas une définition à moitié faite : ce n'en est pas une, et
+`defs` ne le propose pas. L'annoncer pour échouer ensuite sur un fichier manquant serait pire que
+de l'ignorer.
+
+### La définition n'est autorité que le temps de l'`init`
+
+C'est la règle dont tout le reste découle. Une liste amorcée porte **sa propre copie** du contrat,
+et `contract_path` la lit toujours depuis `<liste>/.list/contract.toml` — jamais depuis une
+définition. `list-dir contract <liste>` imprime cette copie, c'est-à-dire la règle réellement
+appliquée.
+
+**Rien ne resynchronise une liste avec sa définition.** La définition peut évoluer, `migrate` ne
+la rattrapera pas : il remet les éléments au contrat *de la liste*. Il n'existe pas de re-semis, et
+c'est voulu — un projet qui redéfinit sa liste au rang 1 a délibérément pris la main.
+
+> *Mode de défaillance* — une documentation qui renverrait au fichier d'une définition décrirait
+> autre chose que ce que l'outil applique, et d'autant plus faux que le projet a justement
+> redéfini sa liste. Un renvoi vers `list-dir contract` ne peut pas mentir.
+
+---
+
 ## Un élément
 
 Un fichier Markdown à front matter TOML, délimité par `+++`.

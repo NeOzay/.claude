@@ -1,0 +1,36 @@
+name = "technical-debt-solde"
+description = "Dette soldée, avec la commande exécutée qui l'établit"
+
+[fields.id]
+type = "slug"
+
+[fields.title]
+type = "text"
+required = true
+description = "Dette soldée, avec la commande exécutée qui l'établit"
+
+[fields.date]
+type = "date"
+required = true
+description = "Dette soldée, avec la commande exécutée qui l'établit"
+
+[fields.source]
+type = "text"
+required = false
+description = "Dette soldée, avec la commande exécutée qui l'établit"
+
+[fields.reviewed]
+type = "date"
+required = false
+description = "date de la dernière revue qui a statué sur cette entrée"
+
+[fields.category]
+type = "enum"
+required = false
+description = "Dette soldée, avec la commande exécutée qui l'établit"
+values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
+          "aggravee", "pertinent", "inverifiable"]
+
+[sections]
+required = ["Constat", "Soldé le"]
+optional = ["Pourquoi c'est gênant", "Pour solder", "Assumé"]

@@ -646,26 +646,94 @@ def open_list(list_dir: Path | str) -> Result[ListStore]:
     return ok(ListStore(path, r.unwrap()))
 
 
-def init_list(list_dir: Path | str, name: str = "", description: str = "") -> Result[Path]:
-    """Crée une liste et son contrat squelette. Une liste vide est légitime.
+def _read_definition(definition: Path) -> Result[tuple[str, dict[str, str]]]:
+    """Le contrat d'une définition et ses gabarits, LUS ET VALIDÉS EN MÉMOIRE.
 
-    LE SQUELETTE EST ÉCRIT ICI, EN DUR, et c'est le seul endroit du paquet où un
-    contenu de contrat l'est. Il ne peut pas venir d'un gabarit : un gabarit vit
-    dans `.list/templates/` d'une liste existante, et `init` s'adresse précisément
-    au cas où aucune liste n'existe encore. Il est réduit au strict minimum — un
-    `id`, un `title`, une section — pour être complété à la main, jamais pour
-    servir de modèle à quoi que ce soit.
+    Rien n'est écrit ici, et c'est le point : un contrat de définition invalide
+    découvert après un mkdir laisserait une liste à moitié bâtie, que la tentative
+    suivante refuserait comme « contrat déjà présent ». L'appelant serait coincé
+    entre une erreur qu'il a corrigée et un répertoire qu'il n'a pas créé — c'est
+    la raison pour laquelle `derive` construit lui aussi tout en mémoire d'abord.
+    """
+    contrat = definition / CONTRACT
+    if not contrat.is_file():
+        return fail(f"{definition}: définition sans contrat — {CONTRACT} attendu")
+    try:
+        texte = contrat.read_text(encoding="utf-8")
+        gabarits = {
+            f.name: f.read_text(encoding="utf-8")
+            for f in sorted((definition / TEMPLATES).glob("*"))
+            if f.is_file()
+        }
+    except OSError as exc:
+        return fail(f"{definition}: définition illisible — {exc.strerror}")
+
+    # Le contrat est jugé ici, pas à la première commande qui ouvrira la liste :
+    # une définition fautive doit se dire au moment où on s'en sert, en nommant le
+    # fichier de la DÉFINITION, et non plus tard en nommant la copie.
+    lu = parse_contract(texte, contrat)
+    if not lu:
+        return Result(lu.status, None, lu.message)
+    return ok((texte, gabarits))
+
+
+def init_list(
+    list_dir: Path | str,
+    name: str = "",
+    description: str = "",
+    definition: Path | str | None = None,
+) -> Result[Path]:
+    """Crée une liste. Sans `definition`, son contrat squelette. Une liste vide est légitime.
+
+    DEUX SOURCES POSSIBLES POUR LE CONTRAT, et le partage est net :
+
+      - AUCUNE DÉFINITION → LE SQUELETTE, ÉCRIT ICI EN DUR. C'est le seul endroit du
+        paquet où un contenu de contrat l'est. Réduit au strict minimum — un `id`,
+        un `title`, une section — pour être complété à la main, jamais pour servir
+        de modèle à quoi que ce soit.
+      - UNE DÉFINITION → SON CONTRAT, COPIÉ TEL QUEL, et ses gabarits avec lui.
+
+    POURQUOI UNE DÉFINITION PEUT CE QU'UN GABARIT NE POUVAIT PAS. Un gabarit vit
+    dans le `.list/templates/` d'une liste EXISTANTE, et `init` s'adresse justement
+    au cas où aucune liste n'existe : il ne pouvait donc pas en venir. Une définition
+    vit hors de tout répertoire-liste (cf. definitions.py) — c'est exactement ce qui
+    la rend disponible quand il n'y a encore rien.
+
+    ELLE FAIT AUTORITÉ LE TEMPS DE CET APPEL, ET PAS AU-DELÀ. La liste créée porte
+    dès lors son propre contrat, que toute commande relira depuis
+    `<liste>/.list/contract.toml`. Rien ne les resynchronise ensuite, et c'est voulu :
+    une liste que son projet a délibérément redéfinie ne doit pas se faire rattraper
+    par la définition qui l'a semée.
 
     LES DEUX VALEURS LIBRES PASSENT PAR LE SÉRIALISEUR, jamais par une
     interpolation. Un `--name 'ma "liste"'` interpolé produisait un contrat que
     `tomllib` refuse — et `init` rendait 0 : un échec ouvert, exactement ce que ce
     paquet existe pour supprimer. Le guillemet est un caractère de nom parfaitement
-    ordinaire ; c'est l'écriture qui doit le supporter.
+    ordinaire ; c'est l'écriture qui doit le supporter. Elles ne s'appliquent qu'au
+    squelette : une définition porte déjà les siennes, et les écraser ferait mentir
+    le `diff` qui prouve qu'une semence est bien la copie de son original.
     """
     path = Path(list_dir)
-    target = path / LIST_DIR / "contract.toml"
+    target = path / LIST_DIR / CONTRACT
     if target.exists():
         return fail(f"{path}: contrat déjà présent — {LIST_DIR}/contract.toml")
+
+    if definition is not None:
+        lu = _read_definition(Path(definition))
+        if not lu:
+            return Result(lu.status, None, lu.message)
+        texte, gabarits = lu.unwrap()
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            _ = target.write_text(texte, encoding="utf-8")
+            if gabarits:
+                (target.parent / TEMPLATES).mkdir(exist_ok=True)
+                for nom, corps in gabarits.items():
+                    _ = (target.parent / TEMPLATES / nom).write_text(corps, encoding="utf-8")
+        except OSError as exc:
+            return fail(f"{target}: écriture impossible — {exc.strerror}")
+        return ok(target)
+
     try:
         nom = dump_value(name or path.name, "name")
         desc = dump_value(description or OPTIONAL, "description")

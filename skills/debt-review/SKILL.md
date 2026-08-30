@@ -69,21 +69,71 @@ git rev-parse --is-inside-work-tree 2>/dev/null || echo "NON_GIT"
 T=.claude/implementation/todo
 
 for l in technical-debt technical-debt-solde technical-debt-ecarte; do
-  list-dir validate "$T/$l" || echo "ÉCHEC : $l"
+  if [ ! -d "$T/$l" ]; then
+    echo "ABSENT : $l"
+    continue
+  fi
+  list-dir validate "$T/$l" >/dev/null; rc=$?
+  if [ "$rc" -eq 127 ]; then
+    echo "OUTIL ABSENT : list-dir"
+    break
+  elif [ "$rc" -ne 0 ]; then
+    echo "NON CONFORME : $l"
+  elif [ "$(list-dir list "$T/$l" | wc -l)" -eq 0 ]; then
+    echo "VIDE : $l"
+  else
+    echo "OK : $l"
+  fi
 done
 ls .claude/implementation/done/revues/ 2>/dev/null
 git status --short | grep -v '^.. \.claude/implementation/'
 ```
 
+**Chaque registre imprime son état, et chaque état a sa puce plus bas.** `list-dir validate` sort 1
+aussi bien sur un répertoire absent que sur des éléments non conformes ou sur un `list-dir`
+introuvable, et rend 0 sur une liste vide comme sur une liste pleine : aucun de ces états ne se
+déduit de son seul code de retour. Un `ÉCHEC` unique — ou pire, un silence — laisserait le lecteur
+choisir sa règle sans rien pour trancher.
+
+Ne pas annoncer ici **combien** il y en a : le compte s'est déjà périmé une fois, l'étiquette
+`OUTIL ABSENT` ayant été ajoutée sans que la phrase suive. Le bloc et les puces se répondent, et
+c'est cette correspondance qui se relit — pas un nombre écrit à côté d'eux.
+
+> *Mode de défaillance* — une version de ce bloc taisait `validate` par `>/dev/null` et n'imprimait
+> **rien** quand les trois registres étaient conformes et vides. Un état auquel une règle s'applique
+> se lisait comme « tout va bien ». D'où le `OK :` explicite : ici, aucune sortie du tout signifie
+> que la boucle n'a pas tourné, pas que tout est en ordre.
+
 Utiliser la date renvoyée par `date`, jamais l'inventer :
 [Dates et listing](../implementation-tracker/references/contrat.md#dates-et-listing).
 
-`validate` en tête n'est pas une précaution : une revue qui part d'un registre non conforme
-instruit des entrées dont la structure ment déjà. Sortie ≠ 0 → le dire et s'arrêter, la remise en
-conformité n'est pas le travail d'une revue.
+Un état, une suite, et pas deux :
 
-- **Registre absent** → le dire et s'arrêter. Ce skill relit un registre existant ; il n'en crée
-  pas, et n'a rien à instruire sur une liste vide.
+- **`ABSENT` sur les trois** → les registres n'existent pas encore dans ce projet. Les amorcer,
+  puis reprendre l'étape : [Registre de dette](../implementation-tracker/references/dette.md) en
+  porte la procédure. Ne pas la recopier ici, et ne créer aucun répertoire à la main — l'amorçage
+  est une commande.
+- **`ABSENT` sur un ou deux** → le dire et s'arrêter. Ce n'est pas un projet neuf mais un registre
+  incomplet, et amorcer par-dessus masquerait la question de savoir ce qui a disparu.
+- **`NON CONFORME`, quel que soit le registre** → le dire et s'arrêter. Une revue qui part d'un
+  registre non conforme instruit des entrées dont la structure ment déjà — mais **la remise en
+  conformité n'est pas le travail d'une revue**, et `migrate` réécrit des fichiers que
+  l'utilisateur n'a pas demandé à voir changer sous prétexte qu'il demandait une relecture.
+- **`VIDE` sur `technical-debt`** → le dire et s'arrêter : il n'y a rien à instruire, et l'Étape 1
+  échouerait de toute façon — `derive` refuse une liste sans élément. Ce n'est pas une anomalie :
+  un registre soldé jusqu'à la dernière entrée est un bon registre.
+- **`VIDE` sur `technical-debt-solde` ou `-ecarte`** → **continuer, c'est l'état normal.** Ces deux
+  registres sont des **destinations**, pas des sources : ils ne se remplissent qu'à l'Étape 5, quand
+  un `move` y dépose une entrée sortie du registre actif. Un projet qui n'a jamais rien soldé les a
+  légitimement vides, et l'Étape 5 le redit en toutes lettres — « `technical-debt-ecarte` reste vide
+  tant qu'aucune revue n'a écarté d'entrée ».
+- **`OK` sur `technical-debt`** → continuer. C'est le seul registre dont l'état décide qu'il y a une
+  revue à faire ; les deux autres n'ont qu'à exister et être conformes, puisque l'Étape 5 y écrit.
+- **`OUTIL ABSENT`** → s'arrêter, et dire que `list-dir` est introuvable dans le `PATH` — pas qu'un
+  registre est en faute. Ce n'est pas une garde de présence recopiée ici : `sante_skills.py` la fait
+  déjà une fois par session ([Dépendances](../implementation-tracker/references/contrat.md#dépendances)).
+  C'est le refus d'**attribuer au registre** un code 127 qui n'est pas le sien.
+
 - **Modifications hors de `.claude/implementation/`** → le signaler et demander. C'est ce que
   filtre le `grep -v` ci-dessus : une sortie vide suffit à continuer. Le contrôle ne porte que sur
   ce qui **fausserait** le `git status --short` de l'Étape 5 — un fichier déjà modifié sous
@@ -92,6 +142,21 @@ conformité n'est pas le travail d'une revue.
 - **Une revue existe déjà à la date du jour** parmi les répertoires listés → la lire et proposer de
   la reprendre. `derive` **refuse** d'écraser une destination existante, et c'est voulu : deux
   revues sont deux répertoires, jamais une fusion.
+
+> *Mode de défaillance* — ces règles ont été fautives trois fois de suite, toujours de la même
+> façon : chaque correctif relisait la ligne qu'il visait, jamais son voisinage. Deux pièges s'y
+> cachent. D'abord, **les trois registres ne sont pas symétriques** — `technical-debt` est la
+> source dont l'Étape 1 dérive, `-solde` et `-ecarte` sont les destinations où l'Étape 5 écrit ;
+> une règle qui les traite uniformément se trompe forcément sur deux d'entre eux, et l'une d'elles
+> arrêtait la revue d'un projet amorcé dès sa première dette. Ensuite, **le bloc et les puces
+> vieillissent séparément** : un état que le bloc cesse d'imprimer laisse une puce sans déclencheur,
+> et l'inverse laisse une sortie sans consigne. Une règle ajoutée ici se relit donc contre les trois
+> autres puces **et** contre les Étapes 1 et 5.
+
+> *Mode de défaillance* — `! list-dir validate` était vrai pour **n'importe quel** code non nul, y
+> compris le 127 d'une commande introuvable : un registre parfaitement sain s'affichait alors
+> `NON CONFORME`, et la seule trace du vrai motif partait sur `stderr`. Un diagnostic faux coûte
+> plus cher qu'une absence de diagnostic — il envoie corriger ce qui n'est pas cassé.
 
 **Personne à qui demander** — appel non interactif, ou sous-agent : **s'arrêter et le dire**, sans
 instruire. Ce skill est manuel par construction (`disable-model-invocation`), et chacun de ses

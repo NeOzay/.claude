@@ -2,10 +2,11 @@
 name: list-dir
 description: >
   Manipule des répertoires-listes : un répertoire = une liste, un fichier = un élément, un contrat
-  embarqué qui déclare la structure. Fournit dix commandes génériques (init, new, list, show,
-  validate, migrate, move, derive, merge, help) et une bibliothèque Python importable. Se déclenche
-  dès qu'il s'agit de créer, valider, migrer, filtrer, déplacer, dériver ou agglomérer les éléments
-  d'une liste stockée en fichiers. Ne juge aucun contenu.
+  embarqué qui déclare la structure. Fournit douze commandes génériques (init, new, list, show,
+  validate, migrate, move, derive, merge, defs, contract, help), des définitions de listes
+  réutilisables pour amorcer une liste dans un projet neuf, et une bibliothèque Python importable.
+  Se déclenche dès qu'il s'agit de créer, amorcer, valider, migrer, filtrer, déplacer, dériver ou
+  agglomérer les éléments d'une liste stockée en fichiers. Ne juge aucun contenu.
 ---
 
 # list-dir — répertoires-listes
@@ -38,14 +39,18 @@ un fichier quand il corrige une section. `validate` repasse après.
 **Python ≥ 3.12**, stdlib seule — aucune dépendance à installer. Les commandes le vérifient au
 démarrage et sortent en code non nul si la version est inférieure.
 
-## Les dix commandes
+## Les douze commandes
 
 ```bash
 list-dir help [<liste>]                      # les commandes disponibles, avec leur description
+list-dir defs                                # les définitions disponibles, et d'où elles viennent
 list-dir init <répertoire>                   # crée une liste et son contrat squelette
+list-dir init <répertoire> --def <nom>       # ... ou celui d'une définition, résolue par son nom
+list-dir init <répertoire> --from <chemin>   # ... ou d'un répertoire de définition, tel quel
 list-dir new <liste> <id>                    # crée un élément prérempli du contrat
 list-dir list <liste> [--where c=v] [--sort c]
 list-dir show <liste> <id>
+list-dir contract <liste>                    # le contrat EN VIGUEUR de cette liste
 list-dir validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
 list-dir migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
 list-dir move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
@@ -56,6 +61,19 @@ list-dir merge <liste> [--out <fichier>]     # agglomère, conservation vérifi�
 `list-dir` est un lien de `bin/` vers `scripts/list-dir.py`, résolu par le `PATH`. Sa présence
 est vérifiée au démarrage de chaque session par `scripts/sante_skills.py` — inutile de la
 retester dans un bloc.
+
+**Amorcer une liste quand aucune n'existe.** `init` seul rend un squelette minimal, à compléter à
+la main. Une **définition** — un `contract.toml` et ses gabarits, rangés sous `list-dir/<nom>/` —
+donne à la place un contrat complet, et `init --def <nom>` la trouve sans qu'on ait à dire où elle
+est. Quatre racines sont fouillées, du projet vers la configuration ; la plus spécifique gagne, et
+deux racines de même rang qui portent le même nom font échouer la commande en les nommant.
+`defs` montre ce qui est définissable, d'où ça vient, et ce qui en masque quoi.
+
+**La définition fait autorité le temps de l'`init`, et pas au-delà.** La liste créée porte dès lors
+sa propre copie du contrat, et c'est elle seule que les commandes appliquent — `contract` l'imprime.
+Rien ne les resynchronise ensuite : une liste qu'un projet a délibérément redéfinie ne se fait pas
+rattraper par la définition qui l'a semée. Forme d'une définition, les quatre racines, la règle de
+précédence : `references/contrat-liste.md`.
 
 **Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un
 coup tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au

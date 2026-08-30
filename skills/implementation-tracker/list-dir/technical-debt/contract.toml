@@ -1,0 +1,36 @@
+name = "technical-debt"
+description = "Dette technique constatée et non résolue"
+
+[fields.id]
+type = "slug"
+
+[fields.title]
+type = "text"
+required = true
+description = "l'énoncé de la dette, tel qu'il figurait en titre d'entrée"
+
+[fields.date]
+type = "date"
+required = true
+description = "date du constat, jamais modifiée"
+
+[fields.source]
+type = "text"
+required = false
+description = "le chantier qui l'a identifiée et où il l'a écrit, verbatim"
+
+[fields.reviewed]
+type = "date"
+required = false
+description = "date de la dernière revue qui a statué sur cette entrée"
+
+[fields.category]
+type = "enum"
+required = false
+description = "verdict de la dernière revue, posé par debt-review"
+values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
+          "aggravee", "pertinent", "inverifiable"]
+
+[sections]
+required = ["Constat", "Pourquoi c'est gênant", "Pour solder"]
+optional = ["Assumé"]

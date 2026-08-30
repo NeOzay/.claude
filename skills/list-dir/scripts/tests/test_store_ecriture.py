@@ -18,8 +18,9 @@ from __future__ import annotations
 
 import tomllib
 from pathlib import Path
+from typing import cast
 
-from jouet import CONTRAT, ecrire, element, monter_liste
+from jouet import CONTRAT, GABARIT_MD, GABARIT_TOML, ecrire, element, monter_liste
 from listdir import open_list
 from listdir.store import ListStore, init_list
 from listdir.types import OPTIONAL, PLACEHOLDER, Change
@@ -277,3 +278,90 @@ def test_le_squelette_accepte_un_element_neuf(tmp_path: Path) -> None:
     _ = store.write(store.create("premier").unwrap()).unwrap()
 
     assert ouvrir(tmp_path / "neuve").validate().unwrap() == []
+
+
+# ------------------------------------------------- init_list avec une définition
+def semence(base: Path, contrat: str = CONTRAT) -> Path:
+    """Une définition : le contenu d'un futur `.list/`, hors de tout répertoire-liste."""
+    _ = ecrire(base, "contract.toml", contrat)
+    return base
+
+
+def test_une_definition_donne_son_contrat_a_la_liste(tmp_path: Path) -> None:
+    src = semence(tmp_path / "defs/jouet")
+    cible = init_list(tmp_path / "neuve", definition=src).unwrap()
+
+    assert cible.read_text(encoding="utf-8") == (src / "contract.toml").read_text(encoding="utf-8")
+    assert open_list(tmp_path / "neuve").unwrap().contract.name == "jouet"
+
+
+def test_les_gabarits_de_la_definition_suivent(tmp_path: Path) -> None:
+    """Sans eux, `derive` échouerait sur une liste pourtant amorcée — et l'échec
+    ne se verrait qu'au moment de projeter, loin de l'amorçage qui l'a causé."""
+    src = semence(tmp_path / "defs/jouet")
+    _ = ecrire(src, "templates/revue.toml", GABARIT_TOML)
+    _ = ecrire(src, "templates/revue.md", GABARIT_MD)
+
+    _ = init_list(tmp_path / "neuve", definition=src).unwrap()
+    templates = tmp_path / "neuve/.list/templates"
+    assert sorted(f.name for f in templates.iterdir()) == ["revue.md", "revue.toml"]
+
+
+def test_une_definition_sans_gabarit_s_amorce(tmp_path: Path) -> None:
+    """`templates/` est facultatif : la plupart des listes ne dérivent jamais."""
+    src = semence(tmp_path / "defs/jouet")
+    _ = init_list(tmp_path / "neuve", definition=src).unwrap()
+
+    assert not (tmp_path / "neuve/.list/templates").exists()
+    assert open_list(tmp_path / "neuve").unwrap().validate().unwrap() == []
+
+
+def test_une_definition_sans_contrat_est_refusee(tmp_path: Path) -> None:
+    vide = tmp_path / "defs/vide"
+    vide.mkdir(parents=True)
+    r = init_list(tmp_path / "neuve", definition=vide)
+
+    assert not r
+    assert "définition sans contrat" in r.message
+    assert not (tmp_path / "neuve").exists()
+
+
+def test_un_contrat_de_definition_invalide_ne_cree_rien(tmp_path: Path) -> None:
+    """TOUT EST JUGÉ EN MÉMOIRE D'ABORD. Créée puis refusée, la liste serait ensuite
+    rejetée comme « contrat déjà présent » : l'appelant resterait coincé entre une
+    erreur corrigée et un répertoire qu'il n'a pas créé."""
+    src = semence(tmp_path / "defs/casse", 'name = "n"\n\n[fields.c]\ntype = "inconnu"\n')
+    r = init_list(tmp_path / "neuve", definition=src)
+
+    assert not r
+    assert not (tmp_path / "neuve").exists()
+
+
+def test_une_definition_ne_recoit_pas_nom_ni_description(tmp_path: Path) -> None:
+    """Les écraser ferait mentir le `diff` qui prouve qu'une semence est la copie
+    de son original."""
+    src = semence(tmp_path / "defs/jouet")
+    _ = init_list(tmp_path / "neuve", "Autre nom", "autre", definition=src).unwrap()
+
+    assert open_list(tmp_path / "neuve").unwrap().contract.name == "jouet"
+
+
+def test_le_squelette_reste_inchange_sans_definition(tmp_path: Path) -> None:
+    """Critère de réussite du chantier : l'ajout de `definition` ne touche pas le
+    comportement par défaut d'`init`."""
+    cible = init_list(tmp_path / "neuve").unwrap()
+    donnees = tomllib.loads(cible.read_text(encoding="utf-8"))
+
+    assert donnees["name"] == "neuve"
+    assert sorted(cast("dict[str, object]", donnees["fields"])) == ["id", "title"]
+    assert donnees["sections"] == {"required": ["Constat"], "optional": []}
+
+
+def test_une_liste_deja_montee_est_refusee_avant_de_lire_la_definition(tmp_path: Path) -> None:
+    """La garde passe en tête : une définition fautive ne doit pas masquer le vrai
+    motif du refus, qui est que la liste existe déjà."""
+    cible = monter_liste(tmp_path / "deja", CONTRAT)
+    r = init_list(cible, definition=tmp_path / "inexistante")
+
+    assert not r
+    assert "contrat déjà présent" in r.message

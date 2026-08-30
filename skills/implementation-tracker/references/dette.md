@@ -19,6 +19,23 @@ T=".claude/implementation/todo"
 Ce que le pipeline exige de son environnement pour que ces commandes tournent — et ce qu'il advient
 quand un outil déclaré manque : [Dépendances](contrat.md#dépendances).
 
+**Les trois registres n'existent pas d'office dans un projet neuf.** Ils s'y amorcent depuis les
+définitions que ce skill embarque sous `list-dir/`, résolues par leur nom :
+
+```bash
+T=".claude/implementation/todo"
+for l in technical-debt technical-debt-solde technical-debt-ecarte; do
+  list-dir init "$T/$l" --def "$l" || echo "ÉCHEC init : $l"
+  list-dir validate "$T/$l"        || echo "ÉCHEC validate : $l"
+done
+list-dir defs    # ce qui est définissable, et de quelle racine ça vient
+```
+
+Une fois amorcés, ils sont **détachés** de ces définitions : chaque registre porte sa propre copie
+du contrat, seule appliquée, et rien ne le resynchronise. Un projet qui redéfinit un registre chez
+lui a délibérément pris la main —
+[Définitions de listes](../../list-dir/references/contrat-liste.md#définitions-de-listes).
+
 Le pipeline produisait déjà des constats de dette — l'auditeur en fait un axe de jugement — mais
 n'avait nulle part où les déposer : ils vivaient dans `<slug>.audit.md`, archivé en `done/` à la
 clôture. Le registre est cet endroit.
@@ -76,28 +93,33 @@ qu'un problème qui disparaît avec la conversation. L'élagage est son geste, p
 
 ## Ce qu'une entrée porte
 
-Le contrat de la liste fait foi, et se lit sans l'ouvrir :
+**Le contrat de la liste fait foi.** Champs, sections requises et facultatives, valeurs admises
+d'un `category` : il les déclare tous, et il se lit sans l'ouvrir.
 
 ```bash
+list-dir contract "$T/technical-debt"       # le contrat EN VIGUEUR, tel qu'il s'applique
 list-dir show "$T/technical-debt" <id>      # une entrée, telle qu'elle est écrite
 list-dir validate "$T/technical-debt"       # toutes, confrontées au contrat
 ```
 
-**Champs** :
+**Lire le contrat, jamais une copie de sa structure.** Ce fichier portait ici un tableau des champs
+et une énumération des sections, recopiés à la main. Ils ont été retirés : deux écritures d'une même
+chose finissent toujours par diverger, et c'est la copie en prose qu'on croit, parce qu'elle se lit
+plus vite que le fichier qu'elle décrit.
 
-| Champ | | |
-|---|---|---|
-| `id` | slug | le nom du fichier, jamais autre chose |
-| `title` | requis | l'énoncé de la dette |
-| `date` | requis | date du constat, **jamais modifiée** |
-| `source` | facultatif | le chantier qui l'a identifiée, et où il l'a écrit |
-| `reviewed` | facultatif | date de la dernière revue qui a statué |
-| `category` | facultatif | verdict de cette revue |
+> *Mode de défaillance* — un projet peut redéfinir sa liste (rang 1 des définitions, cf.
+> [Définitions de listes](../../list-dir/references/contrat-liste.md#définitions-de-listes)). La
+> prose décrirait alors le contrat *d'origine* pendant que l'outil en applique un autre, sans
+> qu'aucune commande échoue. `list-dir contract` ne peut pas mentir : il imprime ce qui s'applique.
 
-**Sections** — `## Constat`, `## Pourquoi c'est gênant`, `## Pour solder` sont requises,
-`## Assumé` est facultative. Les listes soldée et écartée exigent en plus `## Soldé le` /
-`## Écartée le`, et rendent facultatives les deux du milieu : ce qu'une entrée payée doit prouver
-est son solde, pas son plan de solde.
+Ce qui suit n'est **pas** dans le contrat, et c'est pourquoi c'est écrit ici : les règles de tenue
+que la structure ne sait pas porter.
+
+Les listes soldée et écartée exigent une section de solde en plus, et rendent facultatives les deux
+qui **instruisent** la dette — pourquoi elle gênait, et ce qu'il faudrait faire : une entrée sortie
+du registre doit prouver sa sortie, pas plaider une cause déjà tranchée. **`Constat` y reste
+requis** — sans lui, une entrée soldée ne dirait plus de quoi elle parlait, et le registre des
+payées deviendrait une liste de dates.
 
 Une entrée sans **Pour solder** est un regret, pas une dette : dire ce qu'il faudrait faire, même
 grossièrement, ou ne pas l'écrire.

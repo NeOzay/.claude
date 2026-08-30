@@ -22,7 +22,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from jouet import ELEMENT, ecrire, monter_liste
+from jouet import CONTRAT, ELEMENT, ecrire, monter_liste
 
 CLI = Path(__file__).resolve().parent.parent / "list-dir.py"
 
@@ -182,7 +182,7 @@ def test_help_seul_ne_montre_que_les_generiques() -> None:
     r = lancer("help")
 
     assert r.code == 0
-    assert "Commandes génériques (10)" in r.out
+    assert "Commandes génériques (12)" in r.out
     assert "Passer un répertoire-liste en argument" in r.out
 
 
@@ -261,3 +261,220 @@ def test_la_garde_de_version_precede_tout_import_de_listdir() -> None:
     )
 
     assert rang_garde < rang_import
+
+
+# ------------------------------------------------ init : --def et --from
+def poser_definition(base: Path, nom: str) -> Path:
+    """Une définition sous un rang de projet : `<base>/.claude/list-dir/<nom>/`.
+
+    Le rang 1 gagne toujours, ce qui rend ces tests indépendants des définitions
+    réellement installées sur la machine : la configuration ne contribue qu'aux
+    rangs 3 et 4, que celui-ci masque.
+    """
+    _ = ecrire(base, f".claude/list-dir/{nom}/contract.toml", CONTRAT)
+    return base / ".claude/list-dir" / nom
+
+
+def test_init_def_inconnu(tmp_path: Path) -> None:
+    """Introuvable est un échec fermé, pas un repli sur le squelette : amorcer au
+    squelette une liste dont on a nommé la définition donnerait un contrat faux
+    sous un code de succès."""
+    r = lancer(
+        "init", str(tmp_path / "neuve"), "--def", "aucune-definition-de-ce-nom", cwd=tmp_path
+    )
+
+    assert r.code == 1
+    assert "introuvable" in r.err
+    assert not (tmp_path / "neuve").exists()
+
+
+def test_init_def_et_from_exclusifs(tmp_path: Path) -> None:
+    """Les combiner poserait la question de qui gagne, et toute réponse serait
+    arbitraire. argparse refuse : code 2, comme toute erreur d'appel."""
+    r = lancer(
+        "init", str(tmp_path / "neuve"), "--def", "jouet", "--from", str(tmp_path), cwd=tmp_path
+    )
+
+    assert r.code == 2
+    assert r.out == ""
+
+
+def test_init_def_amorce_depuis_le_rang_projet(tmp_path: Path) -> None:
+    _ = poser_definition(tmp_path, "jouet")
+    r = lancer("init", str(tmp_path / "neuve"), "--def", "jouet", cwd=tmp_path)
+
+    assert r.code == 0
+    assert r.out.strip().endswith("neuve/.list/contract.toml")
+    assert lancer("validate", str(tmp_path / "neuve")).code == 0
+
+
+def test_init_from_amorce_depuis_un_chemin(tmp_path: Path) -> None:
+    """La porte de sortie : essayer une définition qu'aucun rang ne porte encore."""
+    src = tmp_path / "hors-rang"
+    _ = ecrire(src, "contract.toml", CONTRAT)
+    r = lancer("init", str(tmp_path / "neuve"), "--from", str(src), cwd=tmp_path)
+
+    assert r.code == 0
+    assert lancer("validate", str(tmp_path / "neuve")).code == 0
+
+
+def test_init_sans_definition_reste_le_squelette(tmp_path: Path) -> None:
+    r = lancer("init", str(tmp_path / "neuve"), cwd=tmp_path)
+
+    assert r.code == 0
+    contrat = (tmp_path / "neuve/.list/contract.toml").read_text(encoding="utf-8")
+    assert 'required = ["Constat"]' in contrat
+    assert "category" not in contrat
+
+
+# ------------------------------------------------------------------ defs
+def test_defs_liste_et_origine(tmp_path: Path) -> None:
+    _ = poser_definition(tmp_path, "alpha")
+    _ = poser_definition(tmp_path, "beta")
+    r = lancer("defs", cwd=tmp_path)
+
+    assert r.code == 0
+    assert "alpha" in r.out
+    assert "beta" in r.out
+    assert "rang 1" in r.out
+    assert "projet" in r.out
+
+
+def test_defs_imprime_la_racine_de_projet_retenue(tmp_path: Path) -> None:
+    """La remontée s'arrête au premier `.claude` trouvé, qui n'est pas toujours
+    celui qu'on avait en tête. L'imprimer rend le choix visible."""
+    _ = poser_definition(tmp_path, "alpha")
+    profond = tmp_path / "src" / "a"
+    profond.mkdir(parents=True)
+    r = lancer("defs", cwd=profond)
+
+    assert r.code == 0
+    assert str(tmp_path / ".claude") in r.out
+
+
+def test_defs_dit_qu_une_definition_en_masque_une_autre(tmp_path: Path) -> None:
+    """Taire la perdante ferait chercher longtemps pourquoi une liste n'est pas
+    amorcée avec le contrat attendu."""
+    _ = poser_definition(tmp_path, "jouet")
+    _ = ecrire(tmp_path, ".claude/skills/s1/list-dir/jouet/contract.toml", CONTRAT)
+    r = lancer("defs", cwd=tmp_path)
+
+    assert r.code == 0
+    assert "masque projet:s1" in r.out
+
+
+def test_defs_hors_de_tout_claude_le_dit(tmp_path: Path) -> None:
+    """Une sortie muette se lirait comme un plantage."""
+    nu = tmp_path / "nu"
+    nu.mkdir()
+    r = lancer("defs", cwd=nu)
+
+    assert r.code == 0
+    assert "aucun — rangs 1 et 2 absents" in r.out
+
+
+def test_defs_apparait_dans_help() -> None:
+    r = lancer("help")
+
+    assert r.code == 0
+    assert "defs" in r.out
+
+
+# -------------------------------------------------------------- contract
+def test_contract_imprime_le_contrat(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste))
+
+    assert r.code == 0
+    assert r.out.rstrip("\n") == CONTRAT.rstrip("\n")
+
+
+def test_contract_rend_le_texte_tel_quel_commentaires_compris(tmp_path: Path) -> None:
+    """Les commentaires portent le pourquoi d'un champ : un aller-retour de parseur
+    perdrait exactement ce que le lecteur venait chercher."""
+    avec_commentaire = "# pourquoi ce contrat existe\n" + CONTRAT
+    liste = monter_liste(tmp_path / "commentee", avec_commentaire)
+    r = lancer("contract", str(liste))
+
+    assert r.code == 0
+    assert "# pourquoi ce contrat existe" in r.out
+
+
+def test_contract_refuse_un_contrat_casse(tmp_path: Path) -> None:
+    """Imprimer sans juger rendrait la règle sous un code de succès alors qu'aucune
+    commande ne peut l'appliquer."""
+    liste = monter_liste(tmp_path / "cassee", 'name = "n"\n\n[fields.c]\ntype = "inconnu"\n')
+    r = lancer("contract", str(liste))
+
+    assert r.code == 1
+    assert r.out == ""
+
+
+def test_contract_sur_un_repertoire_qui_n_est_pas_une_liste(tmp_path: Path) -> None:
+    r = lancer("contract", str(tmp_path))
+
+    assert r.code == 1
+    assert r.out == ""
+
+
+# ---------------------------------- R2/R3 : ce que defs annonce, init le fait
+def test_defs_ne_designe_pas_de_gagnante_a_rang_egal(tmp_path: Path) -> None:
+    """R2 — `defs` annonçait « rang 2, projet:a (masque projet:b) » pendant qu'`init
+    --def` sortait 1 en refusant de trancher. La commande de découverte promettait
+    ce que la commande d'amorçage refusait, et c'est la promesse qu'on croit."""
+    _ = ecrire(tmp_path, ".claude/skills/a/list-dir/dupe/contract.toml", CONTRAT)
+    _ = ecrire(tmp_path, ".claude/skills/b/list-dir/dupe/contract.toml", CONTRAT)
+
+    vu = lancer("defs", cwd=tmp_path)
+    assert vu.code == 0
+    assert "AMBIGUË" in vu.out
+    assert "masque" not in vu.out
+
+    amorce = lancer("init", str(tmp_path / "neuve"), "--def", "dupe", cwd=tmp_path)
+    assert amorce.code == 1
+    assert "ambiguë" in amorce.err
+
+
+def test_defs_annonce_encore_le_masquage_entre_rangs_differents(tmp_path: Path) -> None:
+    """Le correctif de R2 ne doit pas emporter le masquage légitime, qui lui est un
+    succès : c'est ainsi qu'un projet reprend la main."""
+    _ = poser_definition(tmp_path, "jouet")
+    _ = ecrire(tmp_path, ".claude/skills/s1/list-dir/jouet/contract.toml", CONTRAT)
+
+    r = lancer("defs", cwd=tmp_path)
+    assert r.code == 0
+    assert "masque projet:s1" in r.out
+    assert "AMBIGUË" not in r.out
+
+
+def test_name_avec_def_est_refuse(tmp_path: Path) -> None:
+    """R3 — `--name` était ignoré en silence : la commande rendait 0 sur un contrat
+    qui ne portait pas ce qui avait été demandé."""
+    _ = poser_definition(tmp_path, "jouet")
+    r = lancer("init", str(tmp_path / "neuve"), "--def", "jouet", "--name", "MonNom", cwd=tmp_path)
+
+    assert r.code == 2
+    assert "ne s'appliquent qu'au squelette" in r.err
+    assert not (tmp_path / "neuve").exists()
+
+
+def test_description_avec_from_est_refusee(tmp_path: Path) -> None:
+    """`--description` est ignoré exactement comme `--name` : le laisser passer
+    reproduirait le constat à l'identique."""
+    src = tmp_path / "hors-rang"
+    _ = ecrire(src, "contract.toml", CONTRAT)
+    r = lancer(
+        "init", str(tmp_path / "neuve"), "--from", str(src), "--description", "x", cwd=tmp_path
+    )
+
+    assert r.code == 2
+    assert not (tmp_path / "neuve").exists()
+
+
+def test_name_reste_accepte_sur_le_squelette(tmp_path: Path) -> None:
+    """Le refus ne vaut que combiné à une définition : sans elle, ces deux options
+    sont la seule façon de nommer une liste."""
+    r = lancer("init", str(tmp_path / "neuve"), "--name", "MonNom", cwd=tmp_path)
+
+    assert r.code == 0
+    assert 'name = "MonNom"' in (tmp_path / "neuve/.list/contract.toml").read_text(encoding="utf-8")
