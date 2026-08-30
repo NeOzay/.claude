@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 from check_pipeline import check_chemins_skill
-from conftest import ecrire
+from depot_jouet import ecrire
 
 
 def rouges(root: Path) -> list[str]:

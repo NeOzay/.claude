@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from check_pipeline import LISTER, check_agents, check_archives
-from conftest import ecrire
+from depot_jouet import ecrire
 from test_controle_3 import LISTER_FIDELE
 
 

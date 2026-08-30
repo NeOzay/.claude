@@ -11,7 +11,7 @@ from pathlib import Path
 import check_pipeline
 import pytest
 from check_pipeline import check_empreintes, sections
-from conftest import CONTRAT_REL, ecrire
+from depot_jouet import CONTRAT_REL, ecrire
 
 CONTRAT = """# Contrat
 

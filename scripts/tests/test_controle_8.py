@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from check_pipeline import check_renvois_skill
-from conftest import ecrire
+from depot_jouet import ecrire
 
 
 def rouges(root: Path) -> list[str]:

@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 
 from check_pipeline import check_renvois, slugify
-from conftest import CONTRAT_MINIMAL, CONTRAT_REL, ecrire
+from depot_jouet import CONTRAT_MINIMAL, CONTRAT_REL, ecrire
 
 
 def rouges(root: Path) -> list[str]:

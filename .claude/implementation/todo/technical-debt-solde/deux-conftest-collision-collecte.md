@@ -29,6 +29,36 @@ $ uvx pytest skills/list-dir/scripts/tests scripts/tests -q
 
 Le même dépôt, les mêmes fichiers, deux verdicts opposés selon l'ordre des arguments.
 
+## Soldé le
+
+**2026-08-30, hors chantier** — les helpers sortent de `scripts/tests/conftest.py` vers
+`scripts/tests/depot_jouet.py`, au basename unique au dépôt, et les huit fichiers de test
+importent depuis lui. `conftest.py` ne garde que la fixture `depot`. C'est le patron déjà retenu
+côté `list-dir` avec `jouet.py`, préféré aux deux voies que **Pour solder** proposait : pas
+d'`__init__.py` (qui casserait les imports par nom court), pas de fichier de configuration à la
+racine (le dépôt n'en porte toujours aucun).
+
+Établi par les deux ordres d'arguments que cette entrée oppose, plus le geste nu :
+
+```
+$ uvx pytest scripts/tests skills/list-dir/scripts/tests -q
+342 passed in 4.20s                                          code 0
+
+$ uvx pytest skills/list-dir/scripts/tests scripts/tests -q
+342 passed in 4.05s                                          code 0
+
+$ uvx pytest -q
+342 passed in 4.20s                                          code 0
+```
+
+Le même compte dans les trois cas. `uvx ruff check scripts skills/list-dir` et
+`uvx --with pytest basedpyright` sont verts, ce dernier après correction d'un défaut préexistant
+sans rapport (`test_sante_skills.py`, fixture demandée pour son seul effet de bord).
+
+Le mode de défaillance reste ouvert pour une troisième suite : la règle qui l'écarte — un basename
+d'appui unique au dépôt — est désormais écrite dans `scripts/tests/README.md`, avec les deux
+commandes qui la vérifient.
+
 ## Pourquoi c'est gênant
 
 Les commandes contractuelles lancent chaque suite séparément et restent vertes — c'est ce qui a

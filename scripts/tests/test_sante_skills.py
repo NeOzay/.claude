@@ -41,7 +41,9 @@ def test_bin_absent(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert any("n'existe pas" in m for m in sante_skills.anomalies())
 
 
-def test_bin_vide(racine: Path) -> None:
+@pytest.mark.usefixtures("racine")
+def test_bin_vide() -> None:
+    """Le `bin/` que monte la fixture est vide : elle sert ici d'effet de bord seul."""
     assert any("est vide" in m for m in sante_skills.anomalies())
 
 

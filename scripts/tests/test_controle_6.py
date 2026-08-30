@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 from check_pipeline import check_portabilite
-from conftest import ecrire
+from depot_jouet import ecrire
 
 FAUTIFS = [
     "bash scripts/x.sh",
