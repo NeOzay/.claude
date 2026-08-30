@@ -88,17 +88,9 @@
     "command": "python3 $HOME/.claude/statusline-command.py"
   },
   "enabledPlugins": {
-    "caveman@caveman": true,
     "rust-analyzer-lsp@claude-plugins-official": false
   },
-  "extraKnownMarketplaces": {
-    "caveman": {
-      "source": {
-        "source": "github",
-        "repo": "JuliusBrussee/caveman"
-      }
-    }
-  },
+  "extraKnownMarketplaces": {},
   "outputStyle": "Concise",
   "language": "Francais",
   "effortLevel": "medium",
