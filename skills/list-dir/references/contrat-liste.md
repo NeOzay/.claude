@@ -111,9 +111,47 @@ appliquée.
 la rattrapera pas : il remet les éléments au contrat *de la liste*. Il n'existe pas de re-semis, et
 c'est voulu — un projet qui redéfinit sa liste au rang 1 a délibérément pris la main.
 
-> *Mode de défaillance* — une documentation qui renverrait au fichier d'une définition décrirait
-> autre chose que ce que l'outil applique, et d'autant plus faux que le projet a justement
-> redéfini sa liste. Un renvoi vers `list-dir contract` ne peut pas mentir.
+> *Mode de défaillance* — une documentation qui renverrait au **fichier** d'une définition
+> décrirait autre chose que ce que l'outil applique, et d'autant plus faux que le projet a
+> justement redéfini sa liste. Un renvoi vers `list-dir contract` ne peut pas mentir : il rend ce
+> que la commande rendrait.
+
+### Ce que `contract` vise, et ce que ça engage
+
+`contract` accepte les deux cibles d'`init`, et la différence n'est pas cosmétique :
+
+| Forme | Ce qui est imprimé | Ce que ça vaut |
+|---|---|---|
+| `contract <liste>` | `<liste>/.list/contract.toml` | la règle **réellement appliquée** |
+| `contract --def <nom>` | `<définition>/contract.toml` | une **semence**, appliquée à rien |
+| `contract --from <chemin>` | idem, sans passer par les rangs | idem |
+
+`--template <nom>` vise le `<nom>.toml` de `templates/` au lieu du contrat, dans les trois cas.
+
+**Une prose doit dire laquelle des deux elle décrit.** Renvoyer à une définition alors qu'une
+liste existe et a divergé décrit ce qui *aurait été* semé, pas ce qui s'applique — c'est le mode de
+défaillance ci-dessus, déplacé d'un cran. Le renvoi à une définition se justifie quand la liste
+**n'existe pas encore** au moment de la lecture : une liste engendrée par `derive` n'a de contrat
+qu'après coup, et son gabarit source est le seul fichier déjà là.
+
+`--values <champ>` rend les valeurs déclarées d'un champ, une par ligne et **dans l'ordre du
+fichier**. Il extrait : rien n'est trié, filtré ni jugé. Un champ inconnu ou sans `values` est un
+échec nommé, jamais une sortie vide sous un code 0.
+
+**Le code de retour est à l'appelant, et il n'est pas facultatif.** `for c in $(list-dir contract …
+--values category)` avale l'échec : la substitution rend une chaîne vide, la boucle itère zéro fois
+et le bloc réussit. Affecter, tester, puis lire ligne à ligne :
+
+```bash
+if ! VALEURS=$(list-dir contract "$L" --values category); then
+  echo "ÉCHEC : contrat illisible"; false
+else
+  printf '%s\n' "$VALEURS" | while read -r v; do …; done
+fi
+```
+
+Le `while read` plutôt qu'un `for` sur la variable : zsh ne découpe pas une variable en mots, et la
+boucle y tournerait une seule fois sur la chaîne entière.
 
 ---
 
@@ -177,6 +215,14 @@ optional = ["Assumé"]
 
 Types admis : `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes). Tout autre type
 est une erreur nommant le type.
+
+**Une valeur de `values` est un jeton** : ni vide, ni porteuse d'espace. Le contrat est refusé
+sinon, en nommant la valeur fautive.
+
+> *Mode de défaillance* — une valeur à blanc traverse toute substitution de commande en se
+> découpant : `list-dir contract … --values <champ>` la rend sur une ligne, mais un appelant qui
+> boucle dessus compte deux catégories fantômes, chacune à zéro, sans qu'aucune commande n'échoue.
+> Une valeur vide, elle, disparaît sans laisser de trace.
 
 **L'état d'un élément est porté par son répertoire, jamais par un champ.** Une liste d'éléments
 soldés est une liste sœur avec son propre contrat, pas un champ `soldé = true`.

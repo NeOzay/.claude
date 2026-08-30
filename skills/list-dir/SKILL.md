@@ -51,6 +51,10 @@ list-dir new <liste> <id>                    # crée un élément prérempli du 
 list-dir list <liste> [--where c=v] [--sort c]
 list-dir show <liste> <id>
 list-dir contract <liste>                    # le contrat EN VIGUEUR de cette liste
+list-dir contract --def <nom>                # ... ou celui d'une définition, résolue par son nom
+list-dir contract --from <chemin>            # ... ou d'un répertoire de définition, tel quel
+list-dir contract <cible> --template <nom>   # ... le gabarit <nom>.toml plutôt que le contrat
+list-dir contract <cible> --values <champ>   # les valeurs déclarées d'un champ, une par ligne
 list-dir validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
 list-dir migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
 list-dir move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
@@ -70,10 +74,12 @@ deux racines de même rang qui portent le même nom font échouer la commande en
 `defs` montre ce qui est définissable, d'où ça vient, et ce qui en masque quoi.
 
 **La définition fait autorité le temps de l'`init`, et pas au-delà.** La liste créée porte dès lors
-sa propre copie du contrat, et c'est elle seule que les commandes appliquent — `contract` l'imprime.
-Rien ne les resynchronise ensuite : une liste qu'un projet a délibérément redéfinie ne se fait pas
-rattraper par la définition qui l'a semée. Forme d'une définition, les quatre racines, la règle de
-précédence : `references/contrat-liste.md`.
+sa propre copie du contrat, et c'est elle seule que les commandes appliquent — `contract <liste>`
+l'imprime. Rien ne les resynchronise ensuite : une liste qu'un projet a délibérément redéfinie ne se
+fait pas rattraper par la définition qui l'a semée. `contract --def`/`--from` imprime la semence,
+justement parce qu'une liste engendrée par `derive` n'a de contrat qu'après coup — une prose écrite
+d'avance n'a que le gabarit source à quoi renvoyer. Forme d'une définition, les quatre racines, la
+règle de précédence, ce que chaque cible engage : `references/contrat-liste.md`.
 
 **Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un
 coup tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au

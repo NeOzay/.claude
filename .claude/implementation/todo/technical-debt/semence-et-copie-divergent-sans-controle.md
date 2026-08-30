@@ -1,0 +1,60 @@
++++
+id = "semence-et-copie-divergent-sans-controle"
+title = "Rien ne confronte une liste amorcée à la définition qui l'a semée"
+date = 2026-08-30
+source = "chantier renvoi-contrat-des-categories, audit R6"
+reviewed = "<OPTIONNEL>"
+category = "<OPTIONNEL>"
++++
+
+## Constat
+
+`skills/implementation-tracker/list-dir/technical-debt/` et
+`.claude/implementation/todo/technical-debt/.list/` portent aujourd'hui le même `contract.toml` et
+les mêmes gabarits, au caractère près. Rien ne l'établit : `diff` est une vérification d'étape,
+jouée à la main par qui y pense.
+
+Le chantier `renvoi-contrat-des-categories` a rendu l'écart plus coûteux sans le créer. Il a ajouté
+aux deux `templates/review.toml` un commentaire de cinq lignes qui **justifie l'ordre non
+alphabétique** des `values` — la doctrine que `debt-review/SKILL.md` ne porte plus depuis que sa
+boucle des piles la lit par `list-dir contract … --values category`. Cette justification n'existe
+donc plus qu'à ces deux endroits, et ils peuvent diverger.
+
+## Pourquoi c'est gênant
+
+La divergence est le comportement **voulu** — `contrat-liste.md`, « La définition n'est autorité
+que le temps de l'`init` » : une liste qu'un projet a délibérément redéfinie ne doit pas se faire
+rattraper par sa semence. Ce qui manque n'est pas un re-semis, c'est un **constat** : aujourd'hui,
+une définition modifiée sans sa copie (ou l'inverse) ne fait échouer aucune commande, et personne
+ne sait laquelle des deux est en avance.
+
+Le cas concret est déjà là : une catégorie ajoutée à la définition mais pas à la copie amorcée
+donnerait deux registres aux verdicts différents, dont un seul serait celui que `derive` projette.
+Et le commentaire de doctrine, s'il ne subsiste que d'un côté, laisse l'autre éditeur ranger sa
+valeur à la fin par commodité — ce que le commentaire existe précisément pour empêcher.
+
+## Pour solder
+
+Rendre la comparaison exécutable et la faire jouer. La commande est triviale ; c'est son
+déclenchement qui est la vraie question :
+
+```bash
+diff -r skills/implementation-tracker/list-dir/technical-debt \
+        .claude/implementation/todo/technical-debt/.list
+```
+
+Trancher d'abord **ce qu'une divergence signifie**, faute de quoi le contrôle criera sur un état
+légitime : une copie en avance est une redéfinition assumée, une semence en avance est un oubli de
+propagation. Les deux se distinguent par l'intention, pas par le diff — un contrôle qui ne sait pas
+les séparer sera désarmé au premier cri.
+
+Piste : ne comparer que les listes que ce dépôt-ci amorce depuis ses propres définitions, et
+signaler sans échouer. Le contrôle de santé du pipeline (`scripts/check_pipeline.py`) est le seul
+endroit qui tourne à chaque session sans qu'on y pense.
+
+## Assumé
+
+Le chantier n'avait pas le choix : le commentaire devait vivre dans le contrat, là où le lira qui
+édite les `values`. L'écrire deux fois est la conséquence directe du modèle « une liste amorcée est
+détachée de sa semence », qui est documenté et voulu. C'est l'absence de constat qui est la dette,
+pas la duplication.

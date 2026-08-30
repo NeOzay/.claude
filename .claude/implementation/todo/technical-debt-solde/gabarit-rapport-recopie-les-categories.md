@@ -45,3 +45,36 @@ source — `.list/templates/review.toml` de `technical-debt` — et non la liste
 
 Le report lui-même est assumé : l'arbitrage Q2 a jugé que ce cas ne valait pas d'élargir le
 périmètre du chantier, et cette entrée existe pour qu'il ne disparaisse pas avec lui.
+
+## Soldé le
+
+**2026-08-30, chantier `renvoi-contrat-des-categories`** — `list-dir contract` sait désormais viser
+une définition (`--def`/`--from`), un de ses gabarits (`--template`) et les valeurs déclarées d'un
+champ (`--values`). `gabarit-rapport.md` renvoie à la commande au lieu d'énumérer, et la boucle des
+piles de `debt-review/SKILL.md` tire sa liste du contrat.
+
+Établi par :
+
+```
+$ list-dir contract --def technical-debt --template review --values category
+a-solder
+non-pertinent
+doublon
+pas-une-dette
+aggravee
+pertinent
+inverifiable
+
+$ grep -rn "sept" skills/debt-review/ ; echo "code=$?"
+code=1
+
+$ grep -rn "a-solder non-pertinent" skills/debt-review/ ; echo "code=$?"
+code=1
+```
+
+La difficulté qui avait motivé le report est levée par `--template` : le renvoi vise le gabarit
+source de la définition `technical-debt`, et non la liste dérivée, qui n'existe qu'après `derive`.
+
+Reste hors de ce solde, porté au registre sous
+`sections-de-categories-jamais-confrontees-au-contrat` : les titres de section de `categories.md`
+restent une copie de l'ensemble des `values`, qu'aucune commande ne confronte au contrat.

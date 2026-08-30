@@ -46,11 +46,11 @@ l'utilisateur tranche entrée par entrée, l'écriture suit. Jamais l'inverse.
 
 ## Ce qu'il faut lire
 
-- `references/categories.md` — les sept catégories, ce qui entre dans chacune, la preuve exigée et
-  la destination. **À lire avant d'instruire**, pas après.
+- `references/categories.md` — les catégories de verdict, ce qui entre dans chacune, la preuve
+  exigée et la destination. **À lire avant d'instruire**, pas après.
 - `references/gabarit-rapport.md` — la fiche et l'aggloméré : ce que chaque section attend, et ce
   que `merge` en fait.
-- `references/exemple-revue.md` — sept fiches instruites, une par catégorie, sur un dépôt fictif.
+- `references/exemple-revue.md` — une fiche instruite par catégorie, sur un dépôt fictif.
 - `../implementation-tracker/references/dette.md` — la tenue des registres : contrat d'une entrée,
   règle de solde, champs de revue.
 
@@ -273,15 +273,32 @@ Présenter **les piles**, pas les fiches une par une : leur intitulé, leur effe
 qui font sortir une entrée du registre, le verdict en une ligne chacune.
 
 ```bash
-for c in a-solder non-pertinent doublon pas-une-dette aggravee pertinent inverifiable; do
-  printf '%-16s %s\n' "$c" "$(list-dir list "$R" --where category=$c | wc -l)"
-done
+if ! CATEGORIES=$(list-dir contract "$R" --values category); then
+  echo "ÉCHEC : contrat illisible — les piles ne peuvent pas être comptées"; false
+else
+  printf '%s\n' "$CATEGORIES" | while read -r c; do
+    printf '%-16s %s\n' "$c" "$(list-dir list "$R" --where category=$c | wc -l)"
+  done
+fi
 ```
 
-**L'ordre des piles est celui de cette boucle** — ce qui **sort** du registre d'abord, ce qui y
-**reste** ensuite. Il ne s'obtient pas par `--sort category`, qui ordonne les valeurs
-alphabétiquement : c'est l'énumération ci-dessus qui le porte, et elle suit `categories.md`.
-`--sort date` ordonne l'intérieur d'une pile.
+> *Mode de défaillance* — `for c in $(commande)` avale le code de retour : si la commande échoue, la
+> substitution rend une chaîne vide, la boucle itère zéro fois et le bloc se termine à 0. Le tableau
+> vide se lit alors « aucune fiche » au lieu de « liste illisible ». D'où l'affectation testée :
+> elle est le seul point où ce code de retour existe encore. Le `if … ; false` plutôt qu'un
+> `|| exit 1` : ces blocs se collent dans un shell interactif, où un `exit` fermerait la session de
+> l'opérateur — le `false` rend l'échec au code de sortie sans rien tuer.
+>
+> Le `while read` n'est pas un détour : `for c in $CATEGORIES` dépend du découpage de mots, que zsh
+> ne fait pas sur une variable — mesuré, la boucle y tournait **une seule fois**, sur toutes les
+> catégories collées en une chaîne. Lire ligne à ligne suit exactement le contrat de `--values`,
+> qui rend une valeur par ligne, et vaut dans les deux shells.
+
+**L'ordre des piles est celui du contrat** — ce qui **sort** du registre d'abord, ce qui y **reste**
+ensuite. Il n'est pas recopié ici : `--values` rend les valeurs déclarées dans l'ordre du fichier,
+et c'est le commentaire du contrat qui dit pourquoi cet ordre-là. Une catégorie ajoutée entre donc
+dans la boucle sans que rien ne soit à retoucher ici. Il ne s'obtient pas par `--sort category`,
+qui ordonne les valeurs alphabétiquement ; `--sort date` ordonne l'intérieur d'une pile.
 
 ## Étape 4 — Arbitrer
 

@@ -30,7 +30,99 @@ TEMPLATES = "templates"
 
 
 def contract_path(list_dir: Path) -> Path:
-    return list_dir / LIST_DIR / CONTRACT
+    return list_base(list_dir) / CONTRACT
+
+
+def list_base(list_dir: Path) -> Path:
+    """Le répertoire d'une liste qui porte `contract.toml` et `templates/`.
+
+    L'ÉQUIVALENT POUR UNE DÉFINITION EST LA DÉFINITION ELLE-MÊME. C'est toute la
+    différence entre les deux, et la seule : une fois la base obtenue, plus rien ne
+    distingue une liste d'une semence, et rien ne peut donc les traiter
+    différemment par mégarde.
+    """
+    return list_dir / LIST_DIR
+
+
+def source_path(base: Path, template: str = "") -> Result[Path]:
+    """Le fichier de contrat d'une base : le sien, ou celui d'un de ses gabarits.
+
+    LE NOM DE GABARIT EST UN NOM, PAS UN CHEMIN. `--template ../contract` sortirait
+    sinon de `templates/` — sans danger pour une lecture, mais l'aide annonce « le
+    `<nom>.toml` de `templates/` », et une commande qui rend autre chose que ce
+    qu'elle annonce est un échec ouvert de plus.
+
+    L'ABSENCE EST DITE AVEC LE CHEMIN COMPLET, et non avec le nom de la cible : une
+    définition mal orthographiée, une liste sans `.list/` et un gabarit inexistant
+    se distinguent alors d'un coup d'œil, sans avoir à reconstruire le chemin de
+    tête.
+    """
+    if not template:
+        f = base / CONTRACT
+        return ok(f) if f.is_file() else fail(f"{f}: contrat introuvable")
+
+    if template != Path(template).name or template in (".", ".."):
+        return fail(
+            f"gabarit « {template} » — un nom est attendu, pas un chemin : "
+            f"le fichier est cherché dans {TEMPLATES}/"
+        )
+    f = base / TEMPLATES / f"{template}.toml"
+    if not f.is_file():
+        return fail(f"{f}: gabarit « {template} » introuvable — ce fichier manque")
+    return ok(f)
+
+
+def load_source(base: Path, template: str = "") -> Result[tuple[Path, str, Contract]]:
+    """Le fichier de contrat d'une base, son texte BRUT, et le contrat qu'il déclare.
+
+    LE TEXTE EST RENDU TEL QUEL, commentaires compris : ils portent souvent le
+    pourquoi d'un champ, et un contrat reformaté par un aller-retour de parseur
+    perdrait justement ce que le lecteur venait chercher. Le contrat est pourtant
+    JUGÉ AVANT D'ÊTRE RENDU — rendre un contrat cassé sous un code de succès ferait
+    croire à l'appelant qu'il tient la règle en vigueur alors qu'aucune commande ne
+    peut l'appliquer.
+
+    LES TROIS SORTENT ENSEMBLE parce qu'il a fallu les trois pour conclure : rendre
+    le seul texte obligerait l'appelant qui veut le contrat à reparser un fichier
+    déjà parsé ici, et rien ne garantirait qu'il le fasse avec le même chemin dans
+    les messages.
+    """
+    chemin = source_path(base, template)
+    if not chemin:
+        return Result(chemin.status, None, chemin.message)
+    f = chemin.unwrap()
+    try:
+        texte = f.read_text(encoding="utf-8")
+    except OSError as exc:
+        return fail(f"{f}: illisible — {exc.strerror}")
+    lu = parse_contract(texte, f)
+    if not lu:
+        return Result(lu.status, None, lu.message)
+    return ok((f, texte, lu.unwrap()))
+
+
+def field_values(contrat: Contract, champ: str, chemin: Path) -> Result[list[str]]:
+    """Les `values` déclarées d'un champ, DANS L'ORDRE DU FICHIER.
+
+    L'ORDRE EST UNE DONNÉE, PAS UN DÉTAIL DE PRÉSENTATION. Un contrat peut ranger
+    ses valeurs par ce qu'elles signifient plutôt que par l'alphabet ; les trier ici
+    détruirait exactement ce qu'une prose venait chercher en s'y référant. Rien
+    n'est trié, filtré ni jugé.
+
+    DEUX ÉCHECS NOMMÉS, et aucune liste vide sous un succès. Un champ mal
+    orthographié ou sans `values` rendrait zéro élément, et une boucle appelante
+    tournerait à vide en réussissant — précisément l'échec ouvert que ce paquet
+    existe pour supprimer.
+    """
+    field = contrat.fields.get(champ)
+    if field is None:
+        connus = ", ".join(contrat.fields) or "aucun"
+        return fail(f"{chemin}: champ « {champ} » non déclaré ; déclarés : {connus}")
+    if not field.values:
+        return fail(
+            f"{chemin}: champ « {champ} » — aucune `values` déclarée (type « {field.type} »)"
+        )
+    return ok(field.values)
 
 
 def _table(value: object, path: Path, subject: str) -> Result[dict[str, object]]:
@@ -122,6 +214,19 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
             return fail(values.message)
         if ftype == "enum" and not values.unwrap():
             return fail(f"{path}: champ « {name} » — un enum sans `values` n'admet rien")
+
+        # UNE VALEUR EST UN JETON, PAS UNE PHRASE. Rien n'y obligeait, et une valeur
+        # portant une espace se découpait en deux pseudo-valeurs dès qu'un appelant
+        # itérait dessus — `for c in $(list-dir contract … --values category)` en est
+        # un, et il comptait alors deux catégories fantômes à zéro sans qu'aucune
+        # commande n'échoue. La vide est refusée pour la même raison : elle traverse
+        # une substitution sans laisser de trace.
+        for v in values.unwrap():
+            if not v or v.split() != [v]:
+                return fail(
+                    f"{path}: champ « {name} », « values » — une valeur ne peut être vide "
+                    f"ni contenir d'espace, trouvé « {v} »"
+                )
 
         description = _texte(body.get("description"), path, f"champ « {name} », « description »")
         if not description:

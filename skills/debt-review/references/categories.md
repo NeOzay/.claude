@@ -1,4 +1,4 @@
-# Les sept catégories
+# Les catégories de verdict
 
 Une entrée du registre reçoit **exactement une** catégorie. Aucune n'est omise : une entrée qu'on
 ne sait pas classer est `pertinent` — le doute laisse la dette où elle est, il ne la fait pas
@@ -23,10 +23,10 @@ d'une entrée relue ». Ce fichier-ci dit **quel** verdict s'écrit, `dette.md` 
 tenue du registre lui appartient.
 
 **Correction** — une entrée peut être vraie et **mal écrite** : chiffre faux dès l'origine, `Pour
-solder` inexécutable, `Assumé` périmé, repère de ligne qui ne désigne plus rien. Aucune des sept
-catégories ne le dit, et aucune n'a à le dire : la catégorie juge le **fait**, pas sa rédaction. La
-fiche le signale, l'utilisateur arbitre, le texte se corrige sans que le verdict change —
-`../../implementation-tracker/references/dette.md`, « Corriger une entrée ».
+solder` inexécutable, `Assumé` périmé, repère de ligne qui ne désigne plus rien. Aucune des
+catégories ci-dessous ne le dit, et aucune n'a à le dire : la catégorie juge le **fait**, pas sa
+rédaction. La fiche le signale, l'utilisateur arbitre, le texte se corrige sans que le verdict
+change — `../../implementation-tracker/references/dette.md`, « Corriger une entrée ».
 
 ---
 

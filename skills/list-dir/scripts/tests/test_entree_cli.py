@@ -22,7 +22,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from jouet import CONTRAT, ELEMENT, ecrire, monter_liste
+from jouet import CONTRAT, ELEMENT, GABARIT_TOML, ecrire, monter_gabarit, monter_liste
 
 CLI = Path(__file__).resolve().parent.parent / "list-dir.py"
 
@@ -415,6 +415,210 @@ def test_contract_sur_un_repertoire_qui_n_est_pas_une_liste(tmp_path: Path) -> N
 
     assert r.code == 1
     assert r.out == ""
+
+
+# ------------------------------------------- contract : les trois cibles
+def test_contract_sans_cible(tmp_path: Path) -> None:
+    """Une commande sans cible est une erreur d'appel, pas un défaut sur une liste
+    implicite : rien ne désigne « la » liste courante, et en inventer une
+    imprimerait le contrat d'autre chose que ce qui a été demandé."""
+    r = lancer("contract", cwd=tmp_path)
+
+    assert r.code == 2
+    assert r.out == ""
+
+
+def test_contract_def_et_from_exclusifs(tmp_path: Path) -> None:
+    r = lancer("contract", "--def", "jouet", "--from", str(tmp_path), cwd=tmp_path)
+
+    assert r.code == 2
+    assert r.out == ""
+
+
+def test_contract_liste_et_def_exclusifs(tmp_path: Path) -> None:
+    """Le positionnel est dans le même groupe que les deux options : les combiner
+    poserait la question de qui gagne, et toute réponse serait arbitraire."""
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste), "--def", "jouet", cwd=tmp_path)
+
+    assert r.code == 2
+    assert r.out == ""
+
+
+def test_contract_def_imprime_le_contrat_de_la_definition(tmp_path: Path) -> None:
+    _ = poser_definition(tmp_path, "jouet")
+    r = lancer("contract", "--def", "jouet", cwd=tmp_path)
+
+    assert r.code == 0
+    assert r.out.rstrip("\n") == CONTRAT.rstrip("\n")
+
+
+def test_contract_def_inconnu(tmp_path: Path) -> None:
+    r = lancer("contract", "--def", "aucune-definition-de-ce-nom", cwd=tmp_path)
+
+    assert r.code == 1
+    assert "introuvable" in r.err
+    assert r.out == ""
+
+
+def test_contract_from_imprime_le_contrat_d_un_chemin(tmp_path: Path) -> None:
+    """La porte de sortie : lire une définition qu'aucun rang ne porte encore."""
+    src = tmp_path / "hors-rang"
+    _ = ecrire(src, "contract.toml", CONTRAT)
+    r = lancer("contract", "--from", str(src), cwd=tmp_path)
+
+    assert r.code == 0
+    assert r.out.rstrip("\n") == CONTRAT.rstrip("\n")
+
+
+def test_contract_from_sans_contrat(tmp_path: Path) -> None:
+    r = lancer("contract", "--from", str(tmp_path), cwd=tmp_path)
+
+    assert r.code == 1
+    assert "contrat introuvable" in r.err
+    assert r.out == ""
+
+
+def test_contract_def_au_contrat_casse_est_refuse(tmp_path: Path) -> None:
+    """Une définition fautive se dit au moment où on s'en sert, et non plus tard en
+    nommant la copie qu'elle aurait semée."""
+    _ = ecrire(
+        tmp_path,
+        ".claude/list-dir/cassee/contract.toml",
+        'name = "n"\n\n[fields.c]\ntype = "inconnu"\n',
+    )
+    r = lancer("contract", "--def", "cassee", cwd=tmp_path)
+
+    assert r.code == 1
+    assert r.out == ""
+
+
+# ----------------------------------------------- contract : --template
+def test_contract_template_sur_une_liste(tmp_path: Path) -> None:
+    liste = monter_gabarit(liste_sur_disque(tmp_path))
+    r = lancer("contract", str(liste), "--template", "revue")
+
+    assert r.code == 0
+    assert r.out.rstrip("\n") == GABARIT_TOML.rstrip("\n")
+
+
+def test_contract_template_sur_une_definition(tmp_path: Path) -> None:
+    """Le cas qui a justifié l'option : la liste engendrée par `derive` n'existe pas
+    encore, mais son contrat, lui, est déjà là — dans les gabarits de la semence."""
+    definition = poser_definition(tmp_path, "jouet")
+    _ = ecrire(definition, "templates/revue.toml", GABARIT_TOML)
+    r = lancer("contract", "--def", "jouet", "--template", "revue", cwd=tmp_path)
+
+    assert r.code == 0
+    assert r.out.rstrip("\n") == GABARIT_TOML.rstrip("\n")
+
+
+def test_contract_template_inexistant(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste), "--template", "absent")
+
+    assert r.code == 1
+    assert "absent" in r.err
+    assert r.out == ""
+
+
+def test_contract_template_ne_reclame_pas_le_md(tmp_path: Path) -> None:
+    """Seul le `.toml` est exigé : cette commande ne rend pas le `.md`, et réclamer
+    un fichier qu'on n'imprime pas ferait échouer une impression pour une raison
+    étrangère à elle. C'est la différence assumée avec `derive`, qui exige la paire."""
+    liste = liste_sur_disque(tmp_path)
+    _ = ecrire(liste, ".list/templates/seule.toml", GABARIT_TOML)
+    r = lancer("contract", str(liste), "--template", "seule")
+
+    assert r.code == 0
+    assert r.out.rstrip("\n") == GABARIT_TOML.rstrip("\n")
+
+
+# ------------------------------------------------- contract : --values
+def test_contract_values_rend_une_valeur_par_ligne(tmp_path: Path) -> None:
+    """La forme exacte importe : une valeur par ligne, rien autour, c'est ce qu'un
+    appelant lit ligne à ligne. Elle ne rend pas `for c in $(...)` sûr pour autant —
+    une substitution avale le code de retour, et c'est à l'appelant de le tester."""
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste), "--values", "category")
+
+    assert r.code == 0
+    assert r.out == "rouge\nvert\n"
+
+
+def test_contract_values_preserve_l_ordre_du_contrat(tmp_path: Path) -> None:
+    """L'ordre est une donnée, pas une présentation : un contrat peut ranger ses
+    valeurs par ce qu'elles signifient. Les trier détruirait ce qu'une prose venait
+    chercher en renvoyant ici."""
+    contrat = CONTRAT.replace('values = ["rouge", "vert"]', 'values = ["vert", "bleu", "rouge"]')
+    liste = monter_liste(tmp_path / "ordonnee", contrat)
+    r = lancer("contract", str(liste), "--values", "category")
+
+    assert r.code == 0
+    assert r.out.split() == ["vert", "bleu", "rouge"]
+
+
+def test_contract_values_champ_inconnu(tmp_path: Path) -> None:
+    """Zéro ligne sous un code 0 ferait tourner la boucle appelante à vide en
+    réussissant — l'échec ouvert que ce paquet existe pour supprimer."""
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste), "--values", "categori")
+
+    assert r.code == 1
+    assert r.out == ""
+    assert "non déclaré" in r.err
+    assert "category" in r.err
+
+
+def test_contract_values_champ_sans_values(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste), "--values", "title")
+
+    assert r.code == 1
+    assert r.out == ""
+    assert "aucune `values`" in r.err
+
+
+def test_contract_values_sur_une_definition_et_son_gabarit(tmp_path: Path) -> None:
+    """Le cas visé par le chantier : lire les valeurs d'un contrat que `derive`
+    n'a pas encore semé nulle part."""
+    definition = poser_definition(tmp_path, "jouet")
+    gabarit = GABARIT_TOML + '\n[fields.verdict_enum]\ntype = "enum"\nvalues = ["a", "b", "c"]\n'
+    _ = ecrire(definition, "templates/revue.toml", gabarit)
+    r = lancer(
+        "contract",
+        "--def",
+        "jouet",
+        "--template",
+        "revue",
+        "--values",
+        "verdict_enum",
+        cwd=tmp_path,
+    )
+
+    assert r.code == 0
+    assert r.out == "a\nb\nc\n"
+
+
+def test_contract_template_refuse_un_chemin(tmp_path: Path) -> None:
+    """`--template ../contract` sortirait de `templates/`. Sans danger pour une
+    lecture, mais l'aide annonce « le `<nom>.toml` de `templates/` » : une commande
+    qui rend autre chose que ce qu'elle annonce est un échec ouvert de plus."""
+    liste = monter_gabarit(liste_sur_disque(tmp_path))
+    r = lancer("contract", str(liste), "--template", "../contract")
+
+    assert r.code == 1
+    assert r.out == ""
+    assert "un nom est attendu" in r.err
+
+
+def test_contract_values_prime_sur_le_texte_brut(tmp_path: Path) -> None:
+    """`--values` remplace la sortie, il ne s'y ajoute pas : une ligne de contrat
+    ramassée par la boucle appelante en ferait une catégorie fantôme."""
+    liste = liste_sur_disque(tmp_path)
+    r = lancer("contract", str(liste), "--values", "category")
+
+    assert "name =" not in r.out
 
 
 # ---------------------------------- R2/R3 : ce que defs annonce, init le fait

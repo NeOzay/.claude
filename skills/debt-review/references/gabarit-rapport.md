@@ -47,9 +47,18 @@ category = "<À REMPLIR>"
 
 **Les deux champs à écrire :**
 
-- `category` — un des sept identifiants de `categories.md`, en ASCII kebab-case. Le contrat refuse
+- `category` — une des valeurs **déclarées par le contrat**, en ASCII kebab-case. Le contrat refuse
   toute valeur hors de la liste, donc une faute de frappe échoue à `validate` au lieu de se ranger
-  dans une pile fantôme.
+  dans une pile fantôme. Les lire — la liste de revue n'existant pas encore, le renvoi vise le
+  gabarit source :
+
+  ```bash
+  list-dir contract --def technical-debt --template review --values category
+  ```
+
+  Ce que chacune veut dire et la preuve qu'elle exige : `categories.md`. Ce fichier-ci ne les
+  recopie pas — une énumération de plus à tenir à jour se désynchroniserait sans qu'aucune commande
+  ne le dise.
 - `reviewed` — la date de **cette** revue, jamais celle du constat. `date` porte déjà celle-là, et
   elle est reportée sans être touchée : c'est elle qui ordonne l'intérieur d'une pile.
 

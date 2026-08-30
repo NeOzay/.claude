@@ -30,7 +30,12 @@ description = "date de CETTE revue, celle qui sera reportée au registre"
 [fields.category]
 type = "enum"
 required = true
-description = "le verdict, une des sept catégories de references/categories.md"
+description = "le verdict, une des catégories de references/categories.md"
+# L'ORDRE DE CETTE LISTE EST SÉMANTIQUE, PAS ALPHABÉTIQUE : ce qui FAIT SORTIR une
+# entrée du registre d'abord, ce qui l'y LAISSE ensuite. C'est lui qui ordonne les
+# piles présentées à l'arbitrage — `debt-review` le lit par
+# `list-dir contract <revue> --values category`, il ne le réécrit pas. Une catégorie
+# ajoutée se range donc à sa place de sens, jamais à la fin par commodité.
 values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
           "aggravee", "pertinent", "inverifiable"]
 

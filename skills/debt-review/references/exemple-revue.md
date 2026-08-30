@@ -1,7 +1,7 @@
-# Sept fiches instruites, une par catégorie
+# Une fiche instruite par catégorie
 
 Ce que le modèle écrit dans une fiche, une fois `derive` passé : les deux champs et les trois
-sections requises, sur les sept verdicts possibles. La huitième fiche montre une section
+sections requises, sur chacun des verdicts possibles. Une dernière fiche montre une section
 `Arbitrage` remplie — le seul ajout de l'Étape 4.
 
 Ce qui est reproduit ici est le **corps** d'une fiche, tel qu'il apparaîtrait dans

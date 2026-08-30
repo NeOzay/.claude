@@ -97,6 +97,23 @@ def test_type_absent_est_refuse() -> None:
     assert "inconnu" in echec('name = "n"\n\n[fields.id]\nrequired = true\n')
 
 
+def test_values_refuse_une_valeur_avec_espace() -> None:
+    """Une valeur est un jeton, pas une phrase : celle-ci se découperait en deux
+    pseudo-valeurs dès qu'un appelant itère dessus, chacune comptée à zéro, sans
+    qu'aucune commande n'échoue."""
+    m = echec('name = "n"\n\n[fields.c]\ntype = "enum"\nvalues = ["a b", "c"]\n')
+
+    assert "ne peut être vide ni contenir d'espace" in m
+    assert "a b" in m
+
+
+def test_values_refuse_une_valeur_vide() -> None:
+    """Elle traverse une substitution sans laisser de trace."""
+    m = echec('name = "n"\n\n[fields.c]\ntype = "enum"\nvalues = ["", "c"]\n')
+
+    assert "ne peut être vide" in m
+
+
 def test_enum_sans_values() -> None:
     message = echec('name = "n"\n\n[fields.c]\ntype = "enum"\n')
     assert "n'admet rien" in message
