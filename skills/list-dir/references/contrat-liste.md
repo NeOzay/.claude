@@ -202,6 +202,7 @@ required = true
 type = "date"
 required = true
 description = "date du constat, jamais modifiée"
+command = "date +%F"   # la sortie de cette commande, à la place du marqueur
 
 [fields.category]
 type = "enum"
@@ -219,6 +220,7 @@ description = "ce qu'il faut faire pour que la dette disparaisse"
 [sections."Assumé"]
 required = false
 description = ""
+text = "Rien d'assumé à ce jour."   # ce texte, à la place du marqueur
 ```
 
 Types admis : `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes). Tout autre type
@@ -255,6 +257,60 @@ soldés est une liste sœur avec son propre contrat, pas un champ `soldé = true
 > *Mode de défaillance* — un état porté par un champ se change par une écriture ; porté par le
 > répertoire, il se change par un renommage, que l'historique conserve.
 
+### Préremplir un champ ou une section
+
+Deux clés facultatives, sur `[fields.*]` comme sur `[sections.*]` :
+
+| Clé | Ce qu'elle pose à la place du marqueur |
+|---|---|
+| `text` | le texte, **littéral** — aucune substitution, ni `{{id}}` ni `$VAR` |
+| `command` | la sortie standard d'une commande Bash, débarrassée de ses blancs de bord |
+
+Elles s'appliquent **partout où un champ ou une section est posé pour la première fois** : `new`,
+`migrate` sur un champ ou une section absents, `derive` sur un champ sans `from`. Une valeur déjà
+écrite n'est jamais recalculée.
+
+**Un champ prérempli est une valeur ordinaire** : `validate --filled` ne le réclame pas, et `merge`
+la fait sortir. C'est tout l'objet de ces deux clés — ce qui est mécaniquement connu n'a pas à être
+relu.
+
+La commande tourne **dans le répertoire de la liste** — ou, si celui-ci n'existe pas encore, dans
+son premier ancêtre qui existe. Le cas se produit en `derive`, qui construit toutes ses fiches en
+mémoire avant de créer quoi que ce soit : `LISTDIR_LIST` y nomme bien la liste engendrée, mais le
+répertoire courant de la commande est ailleurs. Une commande qui lit le disque relativement à son
+cwd — `ls | wc -l` — n'y rendra donc pas la même chose qu'à `new`. `LISTDIR_ROOT` est résolue
+depuis ce même répertoire.
+
+L'environnement porte :
+
+| Variable | Valeur |
+|---|---|
+| `LISTDIR_ID` | l'identifiant de l'élément — le nom de son fichier, sans extension |
+| `LISTDIR_NAME` | le nom du champ, ou le titre de la section |
+| `LISTDIR_LIST` | le chemin du répertoire-liste |
+| `LISTDIR_CONTRACT` | le `name` du contrat |
+| `LISTDIR_ROOT` | la racine du dépôt git — **absente de l'environnement** hors dépôt |
+
+Le contrat est refusé si `text` et `command` sont déclarés ensemble, si l'un des deux est vide, ou
+s'il porte sur un champ de type `list` : la valeur produite est toujours du texte.
+
+**Échec fermé.** Une commande qui sort en code non nul interrompt l'opération, sans qu'aucun fichier
+soit écrit, en nommant le champ ou la section et la commande incriminée. Une sortie que le type
+déclaré refuse — `date` sur autre chose qu'une date ISO — est refusée de la même façon : à la
+création, jamais laissée écrire un front matter que `validate` recalera ensuite.
+
+Trois limites à connaître :
+
+- **`derive` ne préremplit pas les sections d'une fiche** : elles viennent du gabarit `.md`, pas du
+  contrat. Seuls les champs sans `from` y passent par `text`/`command`.
+- **`migrate --dry-run` ne lance aucune commande** : elle la nomme (« ajouté, sortie de « date +%F » »)
+  au lieu de citer sa valeur. Un mode d'essai qui exécute le shell d'un contrat ne promet plus rien.
+  Contrepartie : une `command` qui échouerait passe l'essai sans être signalée — on ne peut pas le
+  savoir sans la jouer. Un `text`, littéral, est en revanche confronté à son type dès le dry-run,
+  qui refuse donc exactement ce que la migration refusera.
+- **rien n'est mémorisé** : `migrate` rejouée sur un élément dont le champ est déjà écrit ne
+  relance pas la commande. C'est la pose initiale qu'on préremplit, pas la valeur qu'on maintient.
+
 ---
 
 ## Les marqueurs
@@ -271,7 +327,10 @@ Deux constantes, définies une seule fois dans `listdir/types.py` :
 | section `required = true` | `<À REMPLIR>` | la réclame |
 | section `required = false` | `<OPTIONNEL>` | l'ignore |
 
-Seul `id` échappe aux deux : il est renseigné à la création, puisqu'il est le nom du fichier.
+Seul `id` échappe aux deux : il est renseigné à la création, puisqu'il est le nom du fichier. Un
+champ ou une section portant `text` ou `command` y échappe aussi — il reçoit sa valeur, pas un
+marqueur, et `validate --filled` ne le réclame donc jamais (voir « Préremplir un champ ou une
+section »).
 
 Rien d'autre ne marque un vide — ni chaîne vide, ni champ omis, ni tiret. Un champ **absent** et un
 champ **à remplir** sont deux états différents.

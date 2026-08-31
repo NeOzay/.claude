@@ -108,6 +108,8 @@ class Field:
     description: str = ""
     values: list[str] = field(default_factory=list)  # enum seulement
     source: str | None = None  # le `from` d'un contrat dérivé
+    text: str | None = None  # texte littéral posé à la place du marqueur
+    command: str | None = None  # commande dont la sortie est posée à la place du marqueur
 
     @property
     def marker(self) -> str:
@@ -126,6 +128,8 @@ class Section:
     name: str
     required: bool = False
     description: str = ""
+    text: str | None = None  # texte littéral posé à la place du marqueur
+    command: str | None = None  # commande dont la sortie est posée à la place du marqueur
 
     @property
     def marker(self) -> str:
@@ -139,10 +143,6 @@ class Contract:
     description: str = ""
     fields: Mapping[str, Field] = field(default_factory=dict[str, Field])
     sections: Mapping[str, Section] = field(default_factory=dict[str, Section])
-
-    def section_marker(self, title: str) -> str:
-        section = self.sections.get(title)
-        return section.marker if section is not None else OPTIONAL
 
     @property
     def required_sections(self) -> list[str]:

@@ -88,6 +88,51 @@ def test_un_champ_sans_from_recoit_son_marqueur(liste: Path, tmp_path: Path) -> 
     assert derivee.get("premier").unwrap().fields["verdict"] == PLACEHOLDER
 
 
+def test_un_champ_sans_from_mais_preremplissable_recoit_sa_valeur(
+    liste: Path, tmp_path: Path
+) -> None:
+    """MÊME RÈGLE QU'À LA CRÉATION : un champ du contrat cible sans `from`, mais
+    portant `text`/`command`, reçoit cette valeur — pas son marqueur."""
+    contrat = GABARIT_TOML.replace(
+        '[fields.verdict]\ntype = "text"\nrequired = true\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ntext = "Non instruit."\n',
+    )
+    derivee = (
+        ouvrir(monter_gabarit(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
+    )
+
+    assert derivee.get("premier").unwrap().fields["verdict"] == "Non instruit."
+
+
+def test_un_champ_sans_from_portant_command_recoit_la_sortie(liste: Path, tmp_path: Path) -> None:
+    """LE CWD DES COMMANDES N'EST PAS LA DESTINATION : `derive` calcule tout en
+    mémoire avant d'écrire, et sa destination n'existe donc pas encore. Une
+    commande lancée depuis ce répertoire échouerait sur chaque champ prérempli."""
+    contrat = GABARIT_TOML.replace(
+        '[fields.verdict]\ntype = "text"\nrequired = true\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ncommand = "echo instruit"\n',
+    )
+    derivee = (
+        ouvrir(monter_gabarit(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
+    )
+
+    assert derivee.get("premier").unwrap().fields["verdict"] == "instruit"
+
+
+def test_une_command_qui_echoue_en_derive_n_ecrit_rien(liste: Path, tmp_path: Path) -> None:
+    contrat = GABARIT_TOML.replace(
+        '[fields.verdict]\ntype = "text"\nrequired = true\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ncommand = "false"\n',
+    )
+    cible = tmp_path / "revues"
+
+    r = ouvrir(monter_gabarit(liste, contrat=contrat)).derive(cible, "revue")
+
+    assert not r
+    assert "false" in r.message
+    assert not cible.exists()
+
+
 def test_id_est_reporte_d_office(liste: Path, tmp_path: Path) -> None:
     """Le seul lien entre une fiche et l'élément qu'elle instruit."""
     derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()

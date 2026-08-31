@@ -163,6 +163,45 @@ def _liste(value: object, path: Path, subject: str) -> Result[list[str]]:
     return ok(out)
 
 
+def _prefill(
+    body: dict[str, object], path: Path, subject: str, *, list_type: bool = False
+) -> Result[tuple[str | None, str | None]]:
+    """`text` et `command` d'un champ ou d'une section, validés ensemble.
+
+    Rendent `None` quand la clé est absente — à distinguer d'une chaîne vide,
+    refusée : elle ne préremplirait rien. Les deux ne peuvent être déclarées
+    ensemble ; sur un champ de type `list`, ni l'une ni l'autre n'a de sens, la
+    valeur produite étant toujours du texte que `check_value` rejetterait.
+    """
+    text_val = body.get("text")
+    if text_val is not None and not isinstance(text_val, str):
+        return fail(
+            f"{path}: {subject}, « text » — une chaîne est attendue, "
+            f"trouvé {type(text_val).__name__}"
+        )
+    command_val = body.get("command")
+    if command_val is not None and not isinstance(command_val, str):
+        return fail(
+            f"{path}: {subject}, « command » — une chaîne est attendue, "
+            f"trouvé {type(command_val).__name__}"
+        )
+
+    if text_val is not None and command_val is not None:
+        return fail(
+            f"{path}: {subject} — « text » et « command » ne peuvent être déclarés ensemble"
+        )
+    if text_val == "":
+        return fail(f"{path}: {subject}, « text » — une valeur vide ne préremplit rien")
+    if command_val == "":
+        return fail(f"{path}: {subject}, « command » — une valeur vide ne préremplit rien")
+    if list_type and (text_val is not None or command_val is not None):
+        return fail(
+            f"{path}: {subject} — « text »/« command » refusés sur un champ de type « list » : "
+            "la valeur produite est toujours du texte"
+        )
+    return ok((text_val, command_val))
+
+
 def load_contract(list_dir: Path) -> Result[Contract]:
     """Le contrat d'une liste, lu sur le disque."""
     path = contract_path(list_dir)
@@ -253,6 +292,11 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
                 f"trouvé {type(source).__name__}"
             )
 
+        prefill = _prefill(body, path, f"champ « {name} »", list_type=ftype == "list")
+        if not prefill:
+            return fail(prefill.message)
+        text_val, command_val = prefill.unwrap()
+
         fields[name] = Field(
             name=name,
             type=ftype,
@@ -260,6 +304,8 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
             description=description.unwrap(),
             values=values.unwrap(),
             source=source,
+            text=text_val,
+            command=command_val,
         )
 
     declared_sections = _table(raw.get("sections"), path, "« sections »")
@@ -294,10 +340,17 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
         if not description:
             return fail(description.message)
 
+        prefill = _prefill(body, path, f"section « {title} »")
+        if not prefill:
+            return fail(prefill.message)
+        text_val, command_val = prefill.unwrap()
+
         sections[title] = Section(
             name=title,
             required=bool(body.get("required", False)),
             description=description.unwrap(),
+            text=text_val,
+            command=command_val,
         )
 
     return ok(
@@ -341,7 +394,7 @@ def check_value(field: Field, value: object) -> str:
             if not isinstance(value, str):
                 return f"du texte est attendu, trouvé {type(value).__name__}"
             if not value.strip():
-                return "vide — un champ requis se remplit ou porte son marqueur"
+                return "vide — un champ se remplit ou porte son marqueur"
         case "date":
             if isinstance(value, datetime.date):
                 return ""

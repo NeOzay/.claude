@@ -47,3 +47,14 @@ présenter un titre inconnu.
 ## Assumé
 
 <OPTIONNEL>
+
+## Soldé le
+
+2026-08-31, par le chantier `2026-08-31-champs-preremplis` — seconde issue de « Pour solder » :
+`Contract.section_marker` retiré, ses appelants itérant désormais sur `contract.sections` et
+appelant `prefill.initial_section` avec la `Section` elle-même.
+
+```
+$ grep -rn "section_marker" skills/list-dir/ --include='*.py' --include='*.md' | grep -v __pycache__
+(aucune occurrence)
+```

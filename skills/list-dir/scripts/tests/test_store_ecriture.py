@@ -16,6 +16,7 @@ CE QUE CE FICHIER CADRE :
 
 from __future__ import annotations
 
+import datetime
 import tomllib
 from pathlib import Path
 from typing import cast
@@ -68,6 +69,58 @@ def test_create_refuse_d_ecraser(liste: Path) -> None:
     r = ouvrir(liste).create("premier")
     assert not r
     assert "existe déjà" in r.message
+
+
+CONTRAT_PREREMPLI = """name = "jouet"
+description = "liste-jouet des tests"
+
+[fields.id]
+type = "slug"
+
+[fields.title]
+type = "text"
+required = true
+
+[fields.date]
+type = "date"
+command = "date +%F"
+
+[fields.origine]
+type = "text"
+
+[sections."Constat"]
+required = true
+text = "Section posée automatiquement."
+description = ""
+"""
+"""Un contrat où le champ « date » est préremplit par `command`, et la section
+« Constat » par `text` — le cas porteur du chantier."""
+
+
+def test_create_pose_la_sortie_de_command(tmp_path: Path) -> None:
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_PREREMPLI)
+    item = ouvrir(liste).create("neuf").unwrap()
+
+    assert item.fields["date"] == datetime.date.today().isoformat()
+
+
+def test_create_pose_le_texte_litteral_d_une_section(tmp_path: Path) -> None:
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_PREREMPLI)
+    item = ouvrir(liste).create("neuf").unwrap()
+
+    assert item.sections["Constat"] == "Section posée automatiquement."
+
+
+def test_create_echoue_sur_une_command_ratee_et_n_ecrit_rien(tmp_path: Path) -> None:
+    """ÉCHEC FERMÉ : rien n'est écrit, et le message nomme la commande incriminée."""
+    casse = CONTRAT_PREREMPLI.replace('command = "date +%F"', 'command = "false"')
+    liste = monter_liste(tmp_path / "jouet", casse)
+
+    r = ouvrir(liste).create("neuf")
+
+    assert not r
+    assert "« false »" in r.message
+    assert not (liste / "neuf.md").exists()
 
 
 def test_un_element_cree_est_conforme_mais_pas_rempli(liste_vide: Path) -> None:
@@ -133,6 +186,42 @@ def test_valeur_deja_ecrite_n_est_jamais_touchee(liste_vide: Path) -> None:
     _ = ouvrir(liste_vide).migrate().unwrap()
 
     assert ouvrir(liste_vide).get("a").unwrap().fields["title"] == "Un titre tenu"
+
+
+def test_migrate_pose_la_valeur_preremplie_sur_un_champ_absent(tmp_path: Path) -> None:
+    """MÊME RÈGLE QU'À LA CRÉATION : un champ absent que le contrat préremplit
+    reçoit cette valeur, pas le marqueur."""
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_PREREMPLI)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\n', corps="")
+
+    changes = ouvrir(liste).migrate().unwrap()
+
+    posee = ouvrir(liste).get("a").unwrap()
+    assert posee.fields["date"] == datetime.date.today().isoformat()
+    assert posee.sections["Constat"] == "Section posée automatiquement."
+    assert f"a.md: champ « date » — ajouté, {datetime.date.today().isoformat()}" in actes(changes)
+
+
+def test_migrate_ne_touche_pas_un_champ_deja_rempli_meme_preremplissable(tmp_path: Path) -> None:
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_PREREMPLI)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\ndate = 2020-01-01\n')
+
+    _ = ouvrir(liste).migrate().unwrap()
+
+    assert ouvrir(liste).get("a").unwrap().fields["date"] == datetime.date(2020, 1, 1)
+
+
+def test_migrate_echoue_sur_une_command_ratee_et_n_ecrit_rien(tmp_path: Path) -> None:
+    casse = CONTRAT_PREREMPLI.replace('command = "date +%F"', 'command = "false"')
+    liste = monter_liste(tmp_path / "jouet", casse)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\n')
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    r = ouvrir(liste).migrate()
+
+    assert not r
+    assert "« false »" in r.message
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant
 
 
 def test_migration_rejouable(liste_vide: Path) -> None:
@@ -203,6 +292,48 @@ def test_dry_run_annonce_ce_que_la_migration_ferait(liste_vide: Path) -> None:
     sec = ouvrir(liste_vide).migrate(dry_run=True).unwrap()
     reel = ouvrir(liste_vide).migrate().unwrap()
     assert actes(sec) == actes(reel)
+
+
+def test_dry_run_n_execute_aucune_command(liste_vide: Path, tmp_path: Path) -> None:
+    """UN MODE QUI PROMET DE NE RIEN FAIRE NE LANCE PAS DE SHELL. Le libellé d'un
+    changement cite la valeur posée ; la composer en dry-run reviendrait à jouer la
+    `command` du contrat, dont rien ne borne l'effet."""
+    temoin = tmp_path / "TEMOIN"
+    _ = element(liste_vide, "a", 'id = "a"\n')
+    contrat = liste_vide / ".list" / "contract.toml"
+    _ = contrat.write_text(
+        contrat.read_text(encoding="utf-8")
+        + '\n[fields.trace]\ntype = "text"\nrequired = true\ndescription = ""\n'
+        + f'command = "touch {temoin} && echo v"\n',
+        encoding="utf-8",
+    )
+
+    changes = ouvrir(liste_vide).migrate(dry_run=True).unwrap()
+
+    assert not temoin.exists()
+    assert any("sortie de" in c.action and "touch" in c.action for c in changes)
+
+
+def test_dry_run_refuse_un_text_que_la_migration_refuserait(liste_vide: Path) -> None:
+    """UN DRY-RUN QUI MENT EST PIRE QU'INUTILE. `text` est littéral : rien à
+    exécuter, donc rien qui excuse de sauter le contrôle de type. Annoncer un
+    changement que la migration refusera ensuite tromperait sur ce qui va se
+    passer."""
+    _ = element(liste_vide, "a", 'id = "a"\n')
+    contrat = liste_vide / ".list" / "contract.toml"
+    _ = contrat.write_text(
+        contrat.read_text(encoding="utf-8")
+        + '\n[fields.jour]\ntype = "date"\nrequired = true\ndescription = ""\n'
+        + 'text = "pas une date"\n',
+        encoding="utf-8",
+    )
+
+    sec = ouvrir(liste_vide).migrate(dry_run=True)
+    reel = ouvrir(liste_vide).migrate()
+
+    assert not sec
+    assert not reel
+    assert "n'est pas une date ISO" in sec.message
 
 
 def test_migration_echoue_sur_un_element_illisible(liste_vide: Path) -> None:

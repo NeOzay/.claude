@@ -81,6 +81,14 @@ justement parce qu'une liste engendrée par `derive` n'a de contrat qu'après co
 d'avance n'a que le gabarit source à quoi renvoyer. Forme d'une définition, les quatre racines, la
 règle de précédence, ce que chaque cible engage : `references/contrat-liste.md`.
 
+**Ce qui est mécaniquement connu se prérenseigne.** Un champ ou une section du contrat peut porter
+`text = "…"` (texte littéral) ou `command = "…"` (sortie d'une commande Bash, lancée depuis le
+répertoire de la liste, ou son premier ancêtre existant quand `derive` ne l'a pas encore créé) : la
+valeur est posée à la place du marqueur, à la création comme en migration. Un champ prérempli est
+une valeur ordinaire — `validate --filled` ne le réclame pas. Une commande qui échoue interrompt
+l'opération sans rien écrire, en la nommant, et `migrate --dry-run` n'en exécute aucune — au prix
+de ne pas pouvoir annoncer celle qui échouera.
+
 **Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un
 coup tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au
 marqueur, l'ordre est repris du contrat, aucune valeur déjà écrite n'est touchée. Elle ne renomme

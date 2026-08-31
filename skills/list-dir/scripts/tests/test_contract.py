@@ -77,6 +77,70 @@ from = "source"
     )
 
 
+# ---------------------------------------------------------------- text / command
+def test_champ_declare_text() -> None:
+    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ntext = "2026-01-01"\n'
+    f = parse_contract(texte, FICHIER).unwrap().fields["date"]
+    assert (f.text, f.command) == ("2026-01-01", None)
+
+
+def test_champ_declare_command() -> None:
+    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ncommand = "date +%F"\n'
+    f = parse_contract(texte, FICHIER).unwrap().fields["date"]
+    assert (f.text, f.command) == (None, "date +%F")
+
+
+def test_section_declare_text() -> None:
+    texte = MINIMAL + '\n[sections."Origine"]\ndescription = ""\ntext = "Créé auto."\n'
+    s = parse_contract(texte, FICHIER).unwrap().sections["Origine"]
+    assert (s.text, s.command) == ("Créé auto.", None)
+
+
+def test_section_declare_command() -> None:
+    texte = MINIMAL + '\n[sections."Origine"]\ndescription = ""\ncommand = "echo x"\n'
+    s = parse_contract(texte, FICHIER).unwrap().sections["Origine"]
+    assert (s.text, s.command) == (None, "echo x")
+
+
+def test_text_et_command_ensemble_sur_un_champ_est_refuse() -> None:
+    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ntext = "x"\ncommand = "y"\n'
+    message = echec(texte)
+    assert "champ « date »" in message
+    assert "ne peuvent être déclarés ensemble" in message
+
+
+def test_text_et_command_ensemble_sur_une_section_est_refuse() -> None:
+    texte = MINIMAL + '\n[sections."Origine"]\ndescription = ""\ntext = "x"\ncommand = "y"\n'
+    message = echec(texte)
+    assert "section « Origine »" in message
+    assert "ne peuvent être déclarés ensemble" in message
+
+
+@pytest.mark.parametrize("cle", ["text", "command"])
+def test_text_ou_command_vide_est_refuse(cle: str) -> None:
+    texte = MINIMAL + f'\n[fields.date]\ntype = "date"\n{cle} = ""\n'
+    message = echec(texte)
+    assert f"« {cle} »" in message
+    assert "vide" in message
+
+
+@pytest.mark.parametrize("cle", ["text", "command"])
+def test_text_ou_command_non_textuel_est_refuse(cle: str) -> None:
+    texte = MINIMAL + f'\n[fields.date]\ntype = "date"\n{cle} = 3\n'
+    message = echec(texte)
+    assert f"« {cle} »" in message
+    assert "une chaîne est attendue" in message
+
+
+@pytest.mark.parametrize("cle", ["text", "command"])
+def test_text_ou_command_sur_un_champ_list_est_refuse(cle: str) -> None:
+    """La valeur produite est toujours du texte, `check_value` la rejetterait."""
+    texte = MINIMAL + f'\n[fields.tags]\ntype = "list"\n{cle} = "x"\n'
+    message = echec(texte)
+    assert "champ « tags »" in message
+    assert "list" in message
+
+
 # ------------------------------------------------------- ce qui doit être refusé
 def test_toml_invalide() -> None:
     assert "TOML invalide" in echec("name = \n")

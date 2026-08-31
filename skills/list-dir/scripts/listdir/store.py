@@ -37,6 +37,8 @@ from .items import (
     read_item,
     write_item,
 )
+from .prefill import PrefillContext, initial_field, initial_section, preview
+from .prefill import context as prefill_context
 from .types import OPTIONAL, Change, Contract, FieldValue, Item, Result, Violation, fail, ok
 
 
@@ -219,6 +221,8 @@ class ListStore:
         if path.exists():
             return fail(f"{self.path}: « {item_id} » existe déjà")
 
+        ctx = prefill_context(self.path, self.contract)
+
         fields: dict[str, FieldValue] = {}
         for name, f in self.contract.fields.items():
             if name in values:
@@ -226,8 +230,18 @@ class ListStore:
             elif f.type == "slug" and name == "id":
                 fields[name] = item_id
             else:
-                fields[name] = f.marker
-        sections = {t: self.contract.section_marker(t) for t in self.contract.sections}
+                initial = initial_field(f, item_id, ctx)
+                if not initial:
+                    return Result(initial.status, None, initial.message)
+                fields[name] = initial.unwrap()
+
+        sections: dict[str, str] = {}
+        for title, s in self.contract.sections.items():
+            posee = initial_section(s, item_id, ctx)
+            if not posee:
+                return Result(posee.status, None, posee.message)
+            sections[title] = posee.unwrap()
+
         return ok(Item(path, fields, sections))
 
     def write(self, item: Item) -> Result[Path]:
@@ -259,13 +273,21 @@ class ListStore:
         if not items:
             return Result(items.status, None, items.message)
 
+        # UNE SEULE FOIS PAR OPÉRATION : root coûte un appel à git, et le relancer
+        # par élément transformerait une migration en autant d'appels à git qu'elle
+        # a d'éléments à réaligner.
+        ctx = prefill_context(self.path, self.contract)
+
         # Tout est calculé avant la moindre écriture, comme pour derive : une
         # migration qui échoue à mi-parcours laisserait la liste dans un état que
         # ni l'ancien contrat ni le nouveau ne décrit.
         plan: list[Item] = []
         changes: list[Change] = []
         for item in items.unwrap():
-            aligned, faits = self._realign(item, drop)
+            realigned = self._realign(item, drop, ctx, dry_run)
+            if not realigned:
+                return Result(realigned.status, None, realigned.message)
+            aligned, faits = realigned.unwrap()
             changes.extend(faits)
             # Une remarque seule ne fait rien écrire : réécrire un élément que la
             # migration n'a pas eu à changer lui coûterait son raw_front pour rien.
@@ -281,11 +303,28 @@ class ListStore:
                 return Result(written.status, None, written.message)
         return ok(changes)
 
-    def _realign(self, item: Item, drop: bool) -> tuple[Item, list[Change]]:
+    def _realign(
+        self, item: Item, drop: bool, ctx: PrefillContext, dry_run: bool = False
+    ) -> Result[tuple[Item, list[Change]]]:
         """L'élément tel que le contrat courant le veut, et ce qu'il a fallu faire.
 
         Liste de changements vide → l'élément est déjà conforme, et l'appelant ne
         doit PAS le réécrire : le réécrire pour rien perdrait son raw_front.
+
+        FAILLIBLE : un champ ou une section absents peuvent porter `command`, dont
+        l'exécution peut échouer. L'appelant propage l'échec avant d'écrire quoi
+        que ce soit — comme pour derive, rien n'est jamais écrit à moitié.
+
+        `dry_run` NE FAIT RIEN EXÉCUTER. Le libellé d'un changement cite la valeur
+        posée ; la composer réclamerait de lancer la `command` du contrat, et un
+        mode qui promet de ne rien faire lancerait alors du shell arbitraire.
+        `prefill.preview` la NOMME à sa place — l'élément rendu n'est plus écrivable,
+        ce qui n'a pas d'importance : l'appelant le jette.
+
+        LE COURT-CIRCUIT NE VAUT QUE POUR `command`. Un `text` est littéral : rien à
+        exécuter, donc rien qui excuse de sauter son contrôle de type. Il repasse par
+        `initial_field` même en dry-run, et un dry-run refuse donc exactement ce que
+        la migration refusera.
         """
         changes: list[Change] = []
 
@@ -300,8 +339,19 @@ class ListStore:
                 fields[name] = item.path.stem
                 changes.append(Change(item.path, subject, f"posé à « {item.path.stem} »"))
             else:
-                fields[name] = f.marker
-                changes.append(Change(item.path, subject, f"ajouté, {f.marker}"))
+                # `text` et le marqueur passent par le chemin normal, même en
+                # dry-run : rien à exécuter, donc rien à excuser — et le contrôle
+                # de type de `initial_field` reste appliqué. Seule une `command`
+                # est nommée sans être jouée.
+                if dry_run and f.command is not None:
+                    valeur: FieldValue = preview(f)
+                else:
+                    posee = initial_field(f, item.id, ctx)
+                    if not posee:
+                        return Result(posee.status, None, posee.message)
+                    valeur = posee.unwrap()
+                fields[name] = valeur
+                changes.append(Change(item.path, subject, f"ajouté, {valeur}"))
 
         for name, value in item.fields.items():
             if name in self.contract.fields:
@@ -323,15 +373,20 @@ class ListStore:
                 )
 
         sections: dict[str, str] = {}
-        for title in self.contract.sections:
+        for title, s in self.contract.sections.items():
             subject = f"section « {title} »"
             if title in item.sections:
                 sections[title] = item.sections[title]
             else:
-                sections[title] = self.contract.section_marker(title)
-                changes.append(
-                    Change(item.path, subject, f"ajoutée, {self.contract.section_marker(title)}")
-                )
+                if dry_run and s.command is not None:
+                    corps = preview(s)
+                else:
+                    posee = initial_section(s, item.id, ctx)
+                    if not posee:
+                        return Result(posee.status, None, posee.message)
+                    corps = posee.unwrap()
+                sections[title] = corps
+                changes.append(Change(item.path, subject, f"ajoutée, {corps}"))
 
         declared = set(self.contract.sections)
         for title, body in item.sections.items():
@@ -371,8 +426,8 @@ class ListStore:
         )
 
         if not any(c.applied for c in changes):
-            return item, changes
-        return item.realigned(fields, sections), changes
+            return ok((item, changes))
+        return ok((item.realigned(fields, sections), changes))
 
     def move(self, item_id: str, target: ListStore | Path | str) -> Result[Path]:
         """Déplace un élément vers une autre liste. `git mv`, ET RIEN D'AUTRE.
@@ -457,9 +512,15 @@ class ListStore:
             return Result(parsed.status, None, parsed.message)
         derived = ListStore(target, parsed.unwrap())
 
+        # UNE SEULE FOIS PAR OPÉRATION, comme pour create/migrate : `LISTDIR_LIST`
+        # et `LISTDIR_CONTRACT` sont ceux de la liste ENGENDRÉE, celle que le champ
+        # sans `from` instruit — même si son répertoire n'existe pas encore sur
+        # le disque à cet instant, tout étant construit en mémoire d'abord.
+        ctx = prefill_context(target, derived.contract)
+
         fiches: list[Item] = []
         for source in sources.unwrap():
-            built = self._project(source, derived, gabarit)
+            built = self._project(source, derived, gabarit, ctx)
             if not built:
                 return Result(built.status, None, built.message)
             fiches.append(built.unwrap())
@@ -500,7 +561,7 @@ class ListStore:
         return ok((texte, parse_sections(corps)))
 
     def _project(
-        self, source: Item, derived: ListStore, gabarit: Mapping[str, str]
+        self, source: Item, derived: ListStore, gabarit: Mapping[str, str], ctx: PrefillContext
     ) -> Result[Item]:
         fields: dict[str, object] = {}
         for name, f in derived.contract.fields.items():
@@ -509,7 +570,10 @@ class ListStore:
                 # qu'elle instruit.
                 fields[name] = source.id
             elif f.source is None:
-                fields[name] = f.marker
+                posee = initial_field(f, source.id, ctx)
+                if not posee:
+                    return Result(posee.status, None, posee.message)
+                fields[name] = posee.unwrap()
             elif f.source not in self.contract.fields:
                 return fail(
                     f'{derived.path}: champ « {name} » — `from = "{f.source}"` '
