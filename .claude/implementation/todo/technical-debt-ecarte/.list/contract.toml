@@ -31,6 +31,22 @@ description = "Sorti du registre sans avoir été payé, avec son motif"
 values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
           "aggravee", "pertinent", "inverifiable"]
 
-[sections]
-required = ["Constat", "Écartée le"]
-optional = ["Pourquoi c'est gênant", "Pour solder", "Assumé"]
+[sections."Constat"]
+required = true
+description = ""
+
+[sections."Écartée le"]
+required = true
+description = ""
+
+[sections."Pourquoi c'est gênant"]
+required = false
+description = ""
+
+[sections."Pour solder"]
+required = false
+description = ""
+
+[sections."Assumé"]
+required = false
+description = ""

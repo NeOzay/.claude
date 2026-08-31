@@ -2,7 +2,7 @@
 id = "semence-et-copie-divergent-sans-controle"
 title = "Rien ne confronte une liste amorcée à la définition qui l'a semée"
 date = 2026-08-30
-source = "chantier renvoi-contrat-des-categories, audit R6"
+source = "chantier renvoi-contrat-des-categories, audit R6 ; revu par sections-en-forme-longue, audit R7"
 reviewed = "<OPTIONNEL>"
 category = "<OPTIONNEL>"
 +++
@@ -13,6 +13,13 @@ category = "<OPTIONNEL>"
 `.claude/implementation/todo/technical-debt/.list/` portent aujourd'hui le même `contract.toml` et
 les mêmes gabarits, au caractère près. Rien ne l'établit : `diff` est une vérification d'étape,
 jouée à la main par qui y pense.
+
+**2026-08-31, chantier `sections-en-forme-longue`** — le coût annoncé a été payé une fois de plus :
+le passage des `[sections]` en forme longue a imposé de réécrire **huit** `contract.toml` à la main
+là où quatre auraient suffi, les quatre paires étant maintenues identiques par un `diff` joué à la
+main en fin d'étape. Les paires sont à nouveau identiques (vérifié à `752449e`) ; rien ne le
+garantira à la prochaine évolution du format. Le constat ci-dessous est inchangé — c'est sa
+fréquence qui se précise : toute évolution du format de contrat double son propre coût.
 
 Le chantier `renvoi-contrat-des-categories` a rendu l'écart plus coûteux sans le créer. Il a ajouté
 aux deux `templates/review.toml` un commentaire de cinq lignes qui **justifie l'ordre non

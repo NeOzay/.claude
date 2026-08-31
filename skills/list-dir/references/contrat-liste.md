@@ -208,9 +208,17 @@ type = "enum"
 required = false
 values = ["a-traiter", "doublon", "sans-objet"]
 
-[sections]
-required = ["Constat", "Pour solder"]
-optional = ["Assumé"]
+[sections."Constat"]
+required = true
+description = "ce qui a été observé, factuel, sans remède"
+
+[sections."Pour solder"]
+required = true
+description = "ce qu'il faut faire pour que la dette disparaisse"
+
+[sections."Assumé"]
+required = false
+description = ""
 ```
 
 Types admis : `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes). Tout autre type
@@ -223,6 +231,23 @@ sinon, en nommant la valeur fautive.
 > découpant : `list-dir contract … --values <champ>` la rend sur une ligne, mais un appelant qui
 > boucle dessus compte deux catégories fantômes, chacune à zéro, sans qu'aucune commande n'échoue.
 > Une valeur vide, elle, disparaît sans laisser de trace.
+
+**Une section se déclare en table, une par section**, sur le modèle de `[fields.*]` : le titre est
+la clé, `required` dit si elle est obligatoire (défaut `false`), `description` dit ce qu'il faut y
+écrire. C'est l'ordre du TOML qui ordonne les sections dans un élément créé — pas un tri par
+`required`.
+
+**`description` est obligatoire, mais sa valeur est libre** : `description = ""` est accepté. Une
+section non documentée reste donc visible comme telle, sans qu'on soit forcé d'en rédiger le texte
+au moment où on la déclare. C'est `list-dir contract <liste>` qui la sert, à côté de celle des
+champs.
+
+**L'ancien format à deux listes** — un unique `[sections]` portant deux listes de noms, `required`
+et `optional` — est refusé, avec un message nommant la liste à migrer. La réécriture est manuelle :
+aucune commande ne la fait, et la semence de la liste est l'endroit où corriger.
+
+> *Mode de défaillance* — tolérer les deux formes en lecture, c'est les laisser diverger : la doc
+> d'une section n'existerait que dans l'une des deux écritures, et rien ne dirait laquelle fait foi.
 
 **L'état d'un élément est porté par son répertoire, jamais par un champ.** Une liste d'éléments
 soldés est une liste sœur avec son propre contrat, pas un champ `soldé = true`.
@@ -243,8 +268,8 @@ Deux constantes, définies une seule fois dans `listdir/types.py` :
 |---|---|---|
 | champ `required = true` | `<À REMPLIR>` | le réclame |
 | champ `required = false` | `<OPTIONNEL>` | l'ignore |
-| section de `required` | `<À REMPLIR>` | la réclame |
-| section de `optional` | `<OPTIONNEL>` | l'ignore |
+| section `required = true` | `<À REMPLIR>` | la réclame |
+| section `required = false` | `<OPTIONNEL>` | l'ignore |
 
 Seul `id` échappe aux deux : il est renseigné à la création, puisqu'il est le nom du fichier.
 
@@ -392,12 +417,17 @@ Le contrat :
 ```python
 contract.name, contract.description
 contract.fields         # Mapping[str, Field], ordonné
-contract.sections       # required: list[str], optional: list[str]
+contract.sections       # Mapping[str, Section], ordonné
+contract.required_sections  # list[str] — les titres requis, dans l'ordre du TOML
 
 field.type              # "slug" | "text" | "date" | "enum" | "list"
 field.required          # bool
 field.values            # list[str] — enum seulement
 field.source            # str | None — le `from` d'un contrat dérivé
+
+section.name            # str — le titre, tel qu'il paraît en `##`
+section.required        # bool
+section.description     # str — libre, éventuellement vide
 ```
 
 ---

@@ -21,7 +21,7 @@ import tomllib
 from pathlib import Path
 from typing import cast
 
-from .types import FIELD_TYPES, OPTIONAL, PLACEHOLDER, Contract, Field, Result, fail, ok
+from .types import FIELD_TYPES, OPTIONAL, PLACEHOLDER, Contract, Field, Result, Section, fail, ok
 
 LIST_DIR = ".list"
 CONTRACT = "contract.toml"
@@ -188,6 +188,20 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
     except tomllib.TOMLDecodeError as exc:
         return fail(f"{path}: TOML invalide — {exc}")
 
+    # NAME REMONTE EN TÊTE : le message de l'ancien format de [sections], plus bas,
+    # cite le nom du contrat fautif — il lui faut donc être connu avant d'y arriver.
+    # Le résultat est capturé sous un autre nom que la variable de boucle `name`
+    # utilisée plus loin pour chaque champ, qui l'écraserait sinon.
+    contract_name = _texte(raw.get("name"), path, "« name »")
+    if not contract_name:
+        return fail(contract_name.message)
+    if not contract_name.unwrap():
+        return fail(f"{path}: champ « name » manquant — une liste se nomme")
+
+    contract_description = _texte(raw.get("description"), path, "« description »")
+    if not contract_description:
+        return fail(contract_description.message)
+
     declared = _table(raw.get("fields"), path, "« fields »")
     if not declared:
         return fail(declared.message)
@@ -248,39 +262,50 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
             source=source,
         )
 
-    sections = _table(raw.get("sections"), path, "« sections »")
-    if not sections:
-        return fail(sections.message)
-    body = sections.unwrap()
+    declared_sections = _table(raw.get("sections"), path, "« sections »")
+    if not declared_sections:
+        return fail(declared_sections.message)
+    raw_sections = declared_sections.unwrap()
 
-    required = _liste(body.get("required"), path, "« sections.required »")
-    if not required:
-        return fail(required.message)
-    optional = _liste(body.get("optional"), path, "« sections.optional »")
-    if not optional:
-        return fail(optional.message)
+    # L'ANCIEN FORMAT SE REPÈRE À CECI PRÈS : deux clés, `required` et `optional`,
+    # portant chacune une LISTE de noms — une section légitimement titrée « required »
+    # porterait une table, jamais une liste, donc pas de faux positif ici.
+    if isinstance(raw_sections.get("required"), list) or isinstance(
+        raw_sections.get("optional"), list
+    ):
+        return fail(
+            f"{path}: [sections] à l'ancien format — deux listes de noms là où une "
+            "table par section est attendue. La réécriture est manuelle : voir la "
+            "forme à jour dans la semence de cette liste, « list-dir contract --def "
+            f"{contract_name.unwrap()} » (« list-dir defs » liste les définitions "
+            "disponibles)."
+        )
 
-    doubles = sorted(set(required.unwrap()) & set(optional.unwrap()))
-    if doubles:
-        return fail(f"{path}: section à la fois requise et optionnelle — {', '.join(doubles)}")
+    sections: dict[str, Section] = {}
+    for title, value in raw_sections.items():
+        decl = _table(value, path, f"section « {title} »")
+        if not decl:
+            return fail(decl.message)
+        body = decl.unwrap()
 
-    name = _texte(raw.get("name"), path, "« name »")
-    if not name:
-        return fail(name.message)
-    if not name.unwrap():
-        return fail(f"{path}: champ « name » manquant — une liste se nomme")
+        if "description" not in body:
+            return fail(f"{path}: section « {title} » — « description » manquante")
+        description = _texte(body.get("description"), path, f"section « {title} », « description »")
+        if not description:
+            return fail(description.message)
 
-    description = _texte(raw.get("description"), path, "« description »")
-    if not description:
-        return fail(description.message)
+        sections[title] = Section(
+            name=title,
+            required=bool(body.get("required", False)),
+            description=description.unwrap(),
+        )
 
     return ok(
         Contract(
-            name=name.unwrap(),
-            description=description.unwrap(),
+            name=contract_name.unwrap(),
+            description=contract_description.unwrap(),
             fields=fields,
-            required_sections=required.unwrap(),
-            optional_sections=optional.unwrap(),
+            sections=sections,
         )
     )
 

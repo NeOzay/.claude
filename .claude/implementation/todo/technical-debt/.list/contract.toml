@@ -31,6 +31,18 @@ description = "verdict de la dernière revue, posé par debt-review"
 values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
           "aggravee", "pertinent", "inverifiable"]
 
-[sections]
-required = ["Constat", "Pourquoi c'est gênant", "Pour solder"]
-optional = ["Assumé"]
+[sections."Constat"]
+required = true
+description = ""
+
+[sections."Pourquoi c'est gênant"]
+required = true
+description = ""
+
+[sections."Pour solder"]
+required = true
+description = ""
+
+[sections."Assumé"]
+required = false
+description = ""

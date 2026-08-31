@@ -120,20 +120,34 @@ class Field:
 
 
 @dataclass(frozen=True)
+class Section:
+    """Une section déclarée au contrat."""
+
+    name: str
+    required: bool = False
+    description: str = ""
+
+    @property
+    def marker(self) -> str:
+        """Le marqueur que cette section reçoit à la création. Voir Field.marker."""
+        return PLACEHOLDER if self.required else OPTIONAL
+
+
+@dataclass(frozen=True)
 class Contract:
     name: str
     description: str = ""
     fields: Mapping[str, Field] = field(default_factory=dict[str, Field])
-    required_sections: list[str] = field(default_factory=list)
-    optional_sections: list[str] = field(default_factory=list)
+    sections: Mapping[str, Section] = field(default_factory=dict[str, Section])
 
     def section_marker(self, title: str) -> str:
-        return PLACEHOLDER if title in self.required_sections else OPTIONAL
+        section = self.sections.get(title)
+        return section.marker if section is not None else OPTIONAL
 
     @property
-    def sections(self) -> list[str]:
-        """Toutes les sections, requises d'abord — l'ordre dans lequel `new` les pose."""
-        return [*self.required_sections, *self.optional_sections]
+    def required_sections(self) -> list[str]:
+        """Les titres requis, dans l'ordre du TOML — ce que lit store.py."""
+        return [s.name for s in self.sections.values() if s.required]
 
 
 @dataclass(frozen=True)

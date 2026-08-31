@@ -33,9 +33,13 @@ values = ["rouge", "vert"]
 [fields.tags]
 type = "list"
 
-[sections]
-required = ["Constat"]
-optional = ["Assumé"]
+[sections."Constat"]
+required = true
+description = ""
+
+[sections."Assumé"]
+required = false
+description = ""
 """
 
 ELEMENT = """+++
@@ -96,9 +100,13 @@ from = "title"
 type = "text"
 required = true
 
-[sections]
-required = ["Avis"]
-optional = ["Remarque"]
+[sections."Avis"]
+required = true
+description = ""
+
+[sections."Remarque"]
+required = false
+description = ""
 """
 
 GABARIT_MD = """+++

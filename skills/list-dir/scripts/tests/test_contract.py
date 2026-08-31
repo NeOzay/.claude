@@ -27,9 +27,9 @@ MINIMAL = """name = "n"
 [fields.id]
 type = "slug"
 
-[sections]
-required = ["Constat"]
-optional = []
+[sections."Constat"]
+required = true
+description = ""
 """
 
 
@@ -44,14 +44,18 @@ def test_contrat_minimal_se_charge() -> None:
     c = parse_contract(MINIMAL, FICHIER).unwrap()
     assert c.name == "n"
     assert list(c.fields) == ["id"]
-    assert c.sections == ["Constat"]
+    assert list(c.sections) == ["Constat"]
 
 
-def test_sections_requises_d_abord() -> None:
-    """`sections` est l'ordre dans lequel `new` les pose : requises, puis facultatives."""
-    texte = MINIMAL.replace('optional = []', 'optional = ["Assumé"]')
+def test_sections_dans_l_ordre_du_toml() -> None:
+    """L'ordre du TOML ordonne les sections — c'est lui que `new` reproduit."""
+    texte = MINIMAL + """
+[sections."Assumé"]
+required = false
+description = ""
+"""
     c = parse_contract(texte, FICHIER).unwrap()
-    assert c.sections == ["Constat", "Assumé"]
+    assert list(c.sections) == ["Constat", "Assumé"]
 
 
 def test_champ_porte_sa_declaration() -> None:
@@ -137,21 +141,25 @@ def test_from_qui_ne_nomme_pas_un_champ() -> None:
     assert "int" in message
 
 
-def test_section_a_la_fois_requise_et_optionnelle() -> None:
-    texte = 'name = "n"\n\n[sections]\nrequired = ["A", "B"]\noptional = ["B"]\n'
-    message = echec(texte)
-    assert "à la fois requise et optionnelle" in message
-    assert "B" in message
+def test_section_sans_description_est_refusee() -> None:
+    message = echec('name = "n"\n\n[sections."A"]\nrequired = true\n')
+    assert "description" in message
+    assert "manquante" in message
 
 
-def test_sections_required_n_est_pas_une_liste() -> None:
-    assert "une liste est attendue" in echec(
-        'name = "n"\n\n[sections]\nrequired = "A"\noptional = []\n'
+def test_section_description_vide_est_acceptee() -> None:
+    c = parse_contract('name = "n"\n\n[sections."A"]\ndescription = ""\n', FICHIER).unwrap()
+    assert c.sections["A"].description == ""
+
+
+def test_section_description_non_textuelle_est_refusee() -> None:
+    assert "une chaîne est attendue" in echec(
+        'name = "n"\n\n[sections."A"]\ndescription = 3\n'
     )
 
 
 def test_name_manquant() -> None:
-    assert "une liste se nomme" in echec('[sections]\nrequired = []\noptional = []\n')
+    assert "une liste se nomme" in echec('[sections."A"]\ndescription = ""\n')
 
 
 def test_name_vide_vaut_manquant() -> None:
@@ -162,11 +170,36 @@ def test_name_non_textuel() -> None:
     assert "une chaîne est attendue" in echec("name = 3\n")
 
 
+def test_ancien_format_de_sections_est_refuse() -> None:
+    """`[sections]` en deux listes de noms — le format d'avant ce chantier."""
+    message = echec(
+        'name = "n"\n\n[sections]\nrequired = ["Constat"]\noptional = ["Assumé"]\n'
+    )
+    assert "ancien format" in message
+    assert "list-dir contract --def n" in message
+    assert "list-dir defs" in message
+
+
+def test_ancien_format_avec_une_seule_des_deux_listes_est_refuse() -> None:
+    """`optional` seule à l'ancien format suffit à être détectée, sans `required`."""
+    message = echec('name = "n"\n\n[sections]\noptional = ["Assumé"]\n')
+    assert "ancien format" in message
+
+
+def test_section_nommee_required_ne_declenche_pas_l_ancien_format() -> None:
+    """Une section légitimement titrée « required » porte une table, jamais une
+    liste — pas de faux positif."""
+    c = parse_contract(
+        'name = "n"\n\n[sections.required]\ndescription = ""\n', FICHIER
+    ).unwrap()
+    assert list(c.sections) == ["required"]
+
+
 def test_sans_fields_ni_sections_reste_valide() -> None:
     """Une liste sans champ déclaré est pauvre, pas incohérente."""
     c = parse_contract('name = "n"\n', FICHIER).unwrap()
     assert c.fields == {}
-    assert c.sections == []
+    assert dict(c.sections) == {}
 
 
 # ---------------------------------------------------------------- load_contract

@@ -191,7 +191,7 @@ def test_le_titre_du_bloc_vient_du_champ_title(liste_vide: Path) -> None:
 def test_sans_title_le_bloc_porte_l_id(liste_vide: Path) -> None:
     sans_titre = (
         'name = "n"\n\n[fields.id]\ntype = "slug"\n\n'
-        '[sections]\nrequired = ["Constat"]\noptional = []\n'
+        '[sections."Constat"]\nrequired = true\ndescription = ""\n'
     )
     _ = ecrire(liste_vide, ".list/contract.toml", sans_titre)
     _ = element(liste_vide, "a", 'id = "a"\n')

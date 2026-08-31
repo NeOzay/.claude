@@ -42,6 +42,18 @@ values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
 # `category` et `reviewed` n'ont pas de `from` : ils sont posés au marqueur, et
 # c'est au modèle de trancher. Un champ reporté d'office serait un script qui juge.
 
-[sections]
-required = ["Vérifié par", "Verdict", "Action"]
-optional = ["Arbitrage"]
+[sections."Vérifié par"]
+required = true
+description = ""
+
+[sections."Verdict"]
+required = true
+description = ""
+
+[sections."Action"]
+required = true
+description = ""
+
+[sections."Arbitrage"]
+required = false
+description = ""

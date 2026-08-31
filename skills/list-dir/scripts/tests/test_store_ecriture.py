@@ -354,7 +354,7 @@ def test_le_squelette_reste_inchange_sans_definition(tmp_path: Path) -> None:
 
     assert donnees["name"] == "neuve"
     assert sorted(cast("dict[str, object]", donnees["fields"])) == ["id", "title"]
-    assert donnees["sections"] == {"required": ["Constat"], "optional": []}
+    assert donnees["sections"] == {"Constat": {"required": True, "description": ""}}
 
 
 def test_une_liste_deja_montee_est_refusee_avant_de_lire_la_definition(tmp_path: Path) -> None:

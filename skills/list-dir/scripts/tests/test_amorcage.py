@@ -30,7 +30,7 @@ def test_contrat_jouet_declare_les_cinq_types(liste_vide: Path) -> None:
         "list",
     }
     assert lst.contract.required_sections == ["Constat"]
-    assert lst.contract.optional_sections == ["Assumé"]
+    assert [s.name for s in lst.contract.sections.values() if not s.required] == ["Assumé"]
 
 
 def test_element_jouet_conforme_et_rempli(liste: Path) -> None:

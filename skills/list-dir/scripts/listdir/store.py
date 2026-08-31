@@ -749,9 +749,9 @@ def init_list(
             "\n[fields.title]\n"
             'type = "text"\n'
             "required = true\n"
-            "\n[sections]\n"
-            'required = ["Constat"]\n'
-            "optional = []\n",
+            '\n[sections."Constat"]\n'
+            "required = true\n"
+            'description = ""\n',
             encoding="utf-8",
         )
     except OSError as exc:

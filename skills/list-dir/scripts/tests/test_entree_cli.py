@@ -323,7 +323,7 @@ def test_init_sans_definition_reste_le_squelette(tmp_path: Path) -> None:
 
     assert r.code == 0
     contrat = (tmp_path / "neuve/.list/contract.toml").read_text(encoding="utf-8")
-    assert 'required = ["Constat"]' in contrat
+    assert '[sections."Constat"]' in contrat
     assert "category" not in contrat
 
 
