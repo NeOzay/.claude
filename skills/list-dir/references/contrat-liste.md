@@ -318,6 +318,11 @@ Trois limites à connaître :
 Un élément créé par `new`, ou une fiche créée par `derive`, porte **tout** le contrat : chaque champ
 et chaque section y figure, même facultatif. Ce qu'on ne voit pas n'est jamais rempli.
 
+**Un marqueur dit qu'il faut écrire, jamais quoi écrire.** Aucune `description` du contrat n'est
+reportée dans l'élément : `<À REMPLIR>` sous `## Constat` ne rappelle pas que la section veut un
+constat factuel sans remède. C'est `list-dir contract <liste>` qui la sert — le contrat réellement
+appliqué, à lire avant de remplir.
+
 Deux constantes, définies une seule fois dans `listdir/types.py` :
 
 | Déclaré au contrat | Marqueur posé | `validate --filled` |

@@ -81,6 +81,10 @@ justement parce qu'une liste engendrée par `derive` n'a de contrat qu'après co
 d'avance n'a que le gabarit source à quoi renvoyer. Forme d'une définition, les quatre racines, la
 règle de précédence, ce que chaque cible engage : `references/contrat-liste.md`.
 
+**Un élément posé ne dit pas ce qu'il attend.** Avant de remplir un élément, lire
+`list-dir contract <liste>` — le contrat réellement appliqué, pas la définition qui l'a semé. Un
+marqueur dit qu'il faut écrire, jamais quoi écrire : `references/contrat-liste.md`, « Les marqueurs ».
+
 **Ce qui est mécaniquement connu se prérenseigne.** Un champ ou une section du contrat peut porter
 `text = "…"` (texte littéral) ou `command = "…"` (sortie d'une commande Bash, lancée depuis le
 répertoire de la liste, ou son premier ancêtre existant quand `derive` ne l'a pas encore créé) : la
