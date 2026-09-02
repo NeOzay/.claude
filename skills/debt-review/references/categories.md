@@ -13,8 +13,8 @@ commande lancée et sa sortie réelle. C'est la règle du solde
 s'établit, il ne se déclare pas*, et une entrée écartée sans preuve est un solde déguisé. Sans
 preuve exécutée, le classement retombe sur `pertinent`.
 
-Deux catégories en sont dispensées, et seulement elles : `inverifiable`, où il n'y a rien à
-exécuter, et `doublon`, où la preuve est l'intitulé de l'entrée conservée.
+Deux catégories en sont dispensées, et seulement elles : `inverifiable` et `doublon` — ce que
+chacune fournit à la place est dit à sa section.
 
 **Champs de revue** — toute entrée qui reste au registre reçoit `category` et `reviewed`, quels que
 soient son verdict et la suite donnée. Forme exacte de ces deux champs et raison pour laquelle

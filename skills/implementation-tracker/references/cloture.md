@@ -68,8 +68,7 @@ list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 
 L'entrée déplacée reçoit ensuite sa section `## Soldé le`, portant la commande exécutée qui
 l'établit. Sans cette sortie réelle, l'entrée reste. **Le déplacement et l'écriture de la preuve ne
-partagent jamais un commit** — un commit qui mêle les deux fait lâcher la détection de renommage de
-Git, et l'historique de l'entrée s'arrête au jour du solde ([Solder](dette.md#solder)).
+partagent jamais un commit** — le motif est au registre ([Solder](dette.md#solder)).
 
 **Mettre le registre à l'index dès qu'il est écrit** :
 

@@ -124,9 +124,10 @@ payées deviendrait une liste de dates.
 Une entrée sans **Pour solder** est un regret, pas une dette : dire ce qu'il faudrait faire, même
 grossièrement, ou ne pas l'écrire.
 
-**L'`id` est la clé de référence et de dédoublonnage.** Il ne change jamais — c'est par lui qu'une
-entrée se cite, et sur lui que le point 3 d'*Alimenter* dédoublonne. Le renommer ferait revenir le
-même constat comme s'il était neuf.
+**L'`id` ne se renomme pas.** Il est la seule identité d'un élément de liste
+([Un élément](../../list-dir/references/contrat-liste.md#un-élément)) ; ce qui en découle ici,
+c'est que par lui une entrée se cite, et sur lui que le point 3 d'*Alimenter* dédoublonne. Le
+renommer ferait revenir le même constat comme s'il était neuf.
 
 **Désigner sans numéro de ligne.** Une entrée cite un fichier, une section, une phrase — jamais
 `fichier.md:42`. Le repère se périme au premier commit qui insère une ligne au-dessus, sans qu'une
@@ -203,11 +204,10 @@ list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 ```
 
 Le déplacement préserve l'historique de l'entrée, jusqu'à son commit de création dans la liste de
-départ — à une condition, qui est du ressort de ce registre :
-
-> *Mode de défaillance* — un commit qui mêle le déplacement et la réécriture du contenu fait lâcher
-> la détection de renommage : l'historique de l'entrée s'arrête au jour du solde. **Déplacer et
-> commiter d'abord, écrire la preuve ensuite, dans un second commit.**
+départ — à une condition, qui tient à ce qu'est `move`
+([L'API Python](../../list-dir/references/contrat-liste.md#lapi-python)) : **déplacer et commiter
+d'abord, écrire la preuve ensuite, dans un second commit.** Mêlés, l'historique de l'entrée
+s'arrête au jour du solde.
 
 L'entrée déplacée reçoit alors sa section `## Soldé le` :
 
@@ -269,7 +269,8 @@ Ce qui se corrige : les sections **Constat**, **Pourquoi c'est gênant**, **Assu
 solder**.
 
 Ce qui ne bouge pas : le champ **`date`** — il dit depuis quand le problème est connu, pas depuis
-quand il est bien décrit — et l'**`id`**, clé de référence et de dédoublonnage. Le `title` porte
+quand il est bien décrit — et l'**`id`**, qui ne se renomme pas ([Ce qu'une entrée
+porte](#ce-quune-entrée-porte)). Le `title` porte
 lui-même le chiffre faux → il reste tel quel, et le **Constat** énonce l'écart.
 
 **La correction exige la même preuve que le solde** : la commande qui établit le bon chiffre, citée
@@ -292,10 +293,9 @@ reviewed = 2026-08-16
 category = "inverifiable"
 ```
 
-**Le `title` et l'`id`, eux, ne bougent jamais** — pas de suffixe, pas de mention ajoutée. C'est
-par l'`id` qu'une entrée se référence et sur lui que le point 3 d'*Alimenter* dédoublonne avant
-d'écrire : le modifier ferait revenir le même constat comme s'il était neuf, et le registre
-porterait deux fois la même dette.
+**Le `title` et l'`id`, eux, ne bougent jamais** — pas de suffixe, pas de mention ajoutée. Marquer
+une entrée relue ne la réécrit pas : le verdict vit dans les champs de revue, jamais dans son
+identité ([Ce qu'une entrée porte](#ce-quune-entrée-porte)).
 
 Les catégories qui marquent, et ce que chaque marqueur engage :
 [Catégories](../../debt-review/references/categories.md). Le contrat de la liste les énumère, et

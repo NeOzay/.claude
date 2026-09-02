@@ -13,7 +13,7 @@ attend est dit ici, jamais dans la fiche.
   exécutée, le verdict est `pertinent` — la plausibilité ne fait sortir personne du
   registre. `inverifiable` et `doublon` en sont dispensés, et disent ici pourquoi.
 - **Verdict** — ce que la commande établit, et pourquoi cette catégorie plutôt que
-  la voisine. Pour un `doublon`, citer l'intitulé de l'entrée conservée : c'est la
+  la voisine. Pour un `doublon`, citer l'`id` de l'entrée conservée : c'est la
   preuve.
 - **Action** — ce qu'il faut écrire au registre une fois l'arbitrage rendu : la
   liste de destination pour une entrée qui sort, le constat réécrit pour une

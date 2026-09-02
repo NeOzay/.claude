@@ -568,8 +568,8 @@ Une remarque seule — un champ conservé — ne déclenche **aucune** écriture
 relancer `migrate` sur une liste conforme réécrirait chaque élément et lui coûterait son
 `raw_front` pour rien.
 
-Enfin, une migration réécrit du contenu : son commit ne doit jamais être mêlé à un `move`, sous
-peine de faire lâcher la détection de renommage et de perdre la traçabilité.
+Enfin, une migration réécrit du contenu : son commit ne doit jamais être mêlé à un `move`, pour la
+raison dite plus haut ([L'API Python](#lapi-python)).
 
 ---
 

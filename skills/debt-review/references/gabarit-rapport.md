@@ -66,25 +66,16 @@ category = "<À REMPLIR>"
 jugement, qui n'existe nulle part ailleurs — c'est ce qui la rend légitimement éditable sans faire
 double emploi avec le registre. `show` va lire l'entrée quand il faut la relire.
 
-**Les trois sections requises :**
+**Les quatre sections** — trois requises, `Arbitrage` facultative. Ce que chacune attend est dit
+dans la semence de fiche
+([`templates/review.md`](../../implementation-tracker/list-dir/technical-debt/templates/review.md)),
+et ce fichier-ci ne les recopie pas — même raison que pour les catégories.
 
-- **Vérifié par** — la commande lancée et sa **sortie réelle**, dans un bloc de code. Elle doit se
-  rejouer seule, sans contexte : c'est elle qui sera recopiée au registre au moment du solde ou de
-  la mise à l'écart. Coller la sortie telle quelle est sûr — un `## ` qui s'y trouverait n'ouvre pas
-  de section, le découpage comme le recomptage ignorent ce qui est entre fences.
-  Sans commande exécutée, le verdict est `pertinent`. Deux catégories en sont dispensées, et
-  seulement elles : `inverifiable`, où il n'y a rien à exécuter, et `doublon`, où la preuve est
-  l'`id` de l'entrée conservée. Dans ces deux cas, la section dit **pourquoi** rien n'est
-  exécutable — c'est ce qui la distingue d'un classement paresseux.
-- **Verdict** — ce que la commande établit, et pourquoi cette catégorie plutôt que la voisine.
-- **Action** — ce qu'il faudra écrire au registre une fois l'arbitrage rendu : la liste de
-  destination pour une entrée qui sort, le **Constat** réécrit pour une `aggravee`, rien pour un
-  `pertinent`.
+Deux points tiennent au rapport, et non à la fiche :
 
-**La section facultative :**
-
-- **Arbitrage** — écrite à l'Étape 4, après que l'utilisateur a tranché : décision suivie,
-  renversée, différée, ou élargie en règle. Laissée au marqueur, elle est **omise** du rapport.
+- coller une sortie de commande sous **Vérifié par** est sûr : un `## ` qui s'y trouverait n'ouvre
+  pas de section, le découpage comme le recomptage ignorent ce qui est entre fences ;
+- **Arbitrage** laissée au marqueur est **omise** du rapport, au lieu d'y figurer vide.
 
 > *Mode de défaillance* — le corps d'une section vaut « à remplir » **exactement** tant qu'il est le
 > marqueur seul. Y ajouter une consigne, un rappel ou un « TODO » suffit à faire passer la fiche
@@ -138,11 +129,10 @@ ne voudrait plus rien dire.
 > préambule.
 
 **Le préambule dit ce que `merge` a pu vérifier, et rien de plus** : les blocs rendus face aux
-fichiers **présents dans la liste de revue**. Les deux comptes divergent si un `title` ouvre un faux
-bloc — jamais si une fiche a disparu, puisqu'elle manque des deux côtés. Un préambule « 16 — 16 »
-sur un registre de 17 est parfaitement cohérent et parfaitement faux.
+fichiers **présents dans la liste de revue**.
 
-La complétude se contrôle donc **contre le registre**, avant d'agglomérer (`SKILL.md`, Étape 3).
+La complétude se contrôle donc **contre le registre**, avant d'agglomérer
+([Étape 3](../SKILL.md#étape-3--agglomérer-et-restituer), qui porte le mode de défaillance mesuré).
 C'est le seul contrôle de la revue qui ne tienne pas dans une commande : la liste générique ne
 connaît pas le registre dont elle dérive, et c'est précisément ce qui la garde générique.
 

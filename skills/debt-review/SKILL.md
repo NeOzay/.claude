@@ -282,17 +282,14 @@ else
 fi
 ```
 
-> *Mode de défaillance* — `for c in $(commande)` avale le code de retour : si la commande échoue, la
-> substitution rend une chaîne vide, la boucle itère zéro fois et le bloc se termine à 0. Le tableau
-> vide se lit alors « aucune fiche » au lieu de « liste illisible ». D'où l'affectation testée :
-> elle est le seul point où ce code de retour existe encore. Le `if … ; false` plutôt qu'un
-> `|| exit 1` : ces blocs se collent dans un shell interactif, où un `exit` fermerait la session de
-> l'opérateur — le `false` rend l'échec au code de sortie sans rien tuer.
->
-> Le `while read` n'est pas un détour : `for c in $CATEGORIES` dépend du découpage de mots, que zsh
-> ne fait pas sur une variable — mesuré, la boucle y tournait **une seule fois**, sur toutes les
-> catégories collées en une chaîne. Lire ligne à ligne suit exactement le contrat de `--values`,
-> qui rend une valeur par ligne, et vaut dans les deux shells.
+L'affectation testée puis le `while read` ne sont pas un détour : c'est la forme qu'impose le
+contrat de `--values`
+([Ce que `contract` vise](../list-dir/references/contrat-liste.md#ce-que-contract-vise-et-ce-que-ça-engage)).
+Ici, un tableau vide se lirait « aucune fiche » au lieu de « liste illisible ».
+
+> *Mode de défaillance* — le `if … ; false` plutôt qu'un `|| exit 1` : ces blocs se collent dans un
+> shell interactif, où un `exit` fermerait la session de l'opérateur. Le `false` rend l'échec au
+> code de sortie sans rien tuer.
 
 **L'ordre des piles est celui du contrat** — ce qui **sort** du registre d'abord, ce qui y **reste**
 ensuite. Il n'est pas recopié ici : `--values` rend les valeurs déclarées dans l'ordre du fichier,
@@ -374,11 +371,8 @@ change de liste par `move`.
 
 Forme exacte des sections `Soldé le` et `Écartée le`, preuve exigée, et raison pour laquelle le
 déplacement et la réécriture ne partagent jamais un commit :
-`../implementation-tracker/references/dette.md`, sections « Solder » et « Écarter ».
-
-> *Mode de défaillance* — un commit qui mêle le déplacement d'une entrée et la réécriture de son
-> contenu fait lâcher la détection de renommage de Git : l'historique de l'entrée s'arrête au jour
-> du solde, et la traçabilité que le format existe pour offrir est perdue.
+[Solder](../implementation-tracker/references/dette.md#solder) et
+[Écarter](../implementation-tracker/references/dette.md#écarter).
 
 **Contrôle de conservation** — aucune entrée ne disparaît en chemin :
 

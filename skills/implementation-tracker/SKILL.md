@@ -171,8 +171,8 @@ committer ou les mettre de côté) avant de relancer.
    Format d'une étape, granularité, conditions de délégabilité :
    [Format d'étape et délégabilité](references/contrat.md#format-détape-et-délégabilité).
 
-   **C'est ici que les étapes trop grosses se découpent**, pas en cours de route : un appel de
-   sous-agent est atomique et ne se reprend pas.
+   **C'est ici que les étapes trop grosses se découpent**, pas en cours de route — le renvoi
+   ci-dessus dit pourquoi.
 5. **Reprendre exactement le slug du brief**, jamais le réinventer — règle et conséquence :
    [Arborescence et nommage](references/contrat.md#arborescence-et-nommage).
 6. **Reprendre `## Objectif et périmètre` du brief**, ne pas le réinventer : symptôme, but,
@@ -264,14 +264,12 @@ de vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même 
   plus que le travail lui-même ;
 - une étape exploratoire, ou qui dépend d'un arbitrage encore ouvert ;
 - une étape **sans commande de vérification** — l'exécutant n'aurait aucun moyen de conclure ;
-- une étape **déjà entamée** et interrompue par une fin de session : la terminer en direct. Un
-  appel d'agent est atomique ; ré-déléguer enverrait un agent froid sur un travail à moitié fait,
-  qu'il rapporterait en `ÉCART`. Si le cas se répète, les étapes sont trop grosses : les découper.
+- une étape **déjà entamée** et interrompue par une fin de session : la terminer en direct
+  ([Format d'étape et délégabilité](references/contrat.md#format-détape-et-délégabilité)).
 
 Dans le doute sur un chantier entier, basculer `execution:` à `direct` et le noter au journal.
 
-**L'appelant reste responsable au retour.** Relire le fichier de suivi avant d'y écrire — il a pu
-vieillir pendant l'exécution.
+**L'appelant reste responsable au retour** : relire le fichier de suivi avant d'y écrire.
 
 **Premier réflexe, quel que soit le `RÉSULTAT` : regarder le diff.** Le travail a été produit hors
 session — ni `git-smart-commit` (court-circuité pour les commits d'étape) ni l'utilisateur ne l'ont
@@ -286,11 +284,10 @@ diff, et il vient **avant** toute autre action.
 | `DÉRIVE` | S'arrêter, nommer le signal déclenché, en reparler avant de continuer |
 | `BLOQUÉ` | Passer l'étape en `[!]` + raison, `statut: bloqué` |
 
-**Sur `ÉCART`, `DÉRIVE` ou `BLOQUÉ`, l'agent a laissé du travail partiel dans l'arbre** — c'est
-voulu, il n'a pas les commandes pour revenir en arrière. Trancher son sort avec l'utilisateur
-**avant de faire quoi que ce soit d'autre** : garder en l'état, ou annuler (`git restore`). Sans
-cet arbitrage, le prochain commit de session le ramasserait en silence — exactement ce que ce
-dispositif existe pour empêcher.
+**Sur `ÉCART`, `DÉRIVE` ou `BLOQUÉ`, l'agent a laissé derrière lui un travail inachevé.** Trancher
+son sort avec l'utilisateur **avant de faire quoi que ce soit d'autre** : garder en l'état, ou
+annuler (`git restore`). Pourquoi c'est voulu, et pourquoi cet arbitrage passe avant tout le
+reste : [Contrat des sous-agents](references/contrat.md#contrat-des-sous-agents).
 
 Dans tous les cas : **`À SIGNALER` non vide se remonte à l'utilisateur**, sans rien corriger
 d'office ; si l'anomalie relève du périmètre, elle devient une étape.
