@@ -67,9 +67,10 @@ jugement, qui n'existe nulle part ailleurs — c'est ce qui la rend légitimemen
 double emploi avec le registre. `show` va lire l'entrée quand il faut la relire.
 
 **Les quatre sections** — trois requises, `Arbitrage` facultative. Ce que chacune attend est dit
-dans la semence de fiche
-([`templates/review.md`](../../implementation-tracker/list-dir/technical-debt/templates/review.md)),
-et ce fichier-ci ne les recopie pas — même raison que pour les catégories.
+au contrat de la liste de revue, que `list-dir contract <revue>` imprime ; la semence de fiche
+([`templates/review.md`](../../implementation-tracker/list-dir/technical-debt/templates/review.md))
+n'ajoute que les cas qui n'y tiennent pas. Ce fichier-ci ne recopie ni l'un ni l'autre — même
+raison que pour les catégories.
 
 Deux points tiennent au rapport, et non à la fiche :
 

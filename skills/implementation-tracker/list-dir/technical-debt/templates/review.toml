@@ -44,16 +44,16 @@ values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
 
 [sections."Vérifié par"]
 required = true
-description = ""
+description = "la commande exécutée et sa sortie réelle, rejouable sans contexte"
 
 [sections."Verdict"]
 required = true
-description = ""
+description = "ce que la commande établit, et pourquoi cette catégorie et pas la voisine"
 
 [sections."Action"]
 required = true
-description = ""
+description = "le move à faire et la section de sortie à écrire, ou le maintien au registre"
 
 [sections."Arbitrage"]
 required = false
-description = ""
+description = "ce que l'utilisateur a tranché, quand il a corrigé le verdict"

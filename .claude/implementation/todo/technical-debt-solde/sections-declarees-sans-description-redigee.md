@@ -21,6 +21,13 @@ rédaction du contenu des descriptions […] la rédaction se fera dans son prop
 
 Le mécanisme est donc en place et vérifié ; ce qu'il devait servir n'existe pas encore.
 
+## Soldé le
+
+**2026-09-03, chantier `descriptions-de-contrat`** — les descriptions de section sont rédigées dans
+les quatre contrats, semence et copie en vigueur, et `dette.md` renvoie au contrat au lieu de le
+redire. Établi par : `grep -rn --include='*.toml' 'description = ""' skills .claude`
+→ aucune sortie, code de sortie 1.
+
 ## Pourquoi c'est gênant
 
 En l'état, `list-dir contract` rend une ligne `description = ""` par section — soit exactement

@@ -7,17 +7,17 @@ type = "slug"
 [fields.title]
 type = "text"
 required = true
-description = "Dette soldée, avec la commande exécutée qui l'établit"
+description = "l'énoncé de la dette, tel qu'il figurait en titre d'entrée"
 
 [fields.date]
 type = "date"
 required = true
-description = "Dette soldée, avec la commande exécutée qui l'établit"
+description = "date du constat, jamais modifiée"
 
 [fields.source]
 type = "text"
 required = false
-description = "Dette soldée, avec la commande exécutée qui l'établit"
+description = "le chantier qui l'a identifiée et où il l'a écrit, verbatim"
 
 [fields.reviewed]
 type = "date"
@@ -27,26 +27,26 @@ description = "date de la dernière revue qui a statué sur cette entrée"
 [fields.category]
 type = "enum"
 required = false
-description = "Dette soldée, avec la commande exécutée qui l'établit"
+description = "verdict de la dernière revue, posé par debt-review"
 values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
           "aggravee", "pertinent", "inverifiable"]
 
 [sections."Constat"]
 required = true
-description = ""
+description = "ce qui a été observé, factuel et daté, sans remède ni numéro de ligne"
 
 [sections."Soldé le"]
 required = true
-description = ""
+description = "date, chantier, puis la commande exécutée et sa sortie réelle"
 
 [sections."Pourquoi c'est gênant"]
 required = false
-description = ""
+description = "repris de l'entrée d'origine, à titre d'archive — plus rien à plaider"
 
 [sections."Pour solder"]
 required = false
-description = ""
+description = "repris de l'entrée d'origine ; la preuve du solde est dans « Soldé le »"
 
 [sections."Assumé"]
 required = false
-description = ""
+description = "pourquoi le report a été délibéré, quand il l'a été"

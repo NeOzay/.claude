@@ -205,8 +205,8 @@ list-dir show "$T/technical-debt" <id>            # l'entrée à instruire
 Pour chacune :
 
 1. Lire son **Constat** et son **Pour solder** — ce sont eux qui disent quoi aller chercher.
-2. **Exécuter la commande** qui établit si le constat tient encore. La choisir pour qu'elle se
-   rejoue seule, sans contexte : c'est elle qui sera recopiée dans le registre.
+2. **Exécuter la commande** qui établit si le constat tient encore. Ce qu'elle doit être est dit
+   au contrat de la liste de revue, section `Vérifié par`.
 3. Classer, selon `references/categories.md`.
 4. Écrire la fiche `$R/<id>.md` : les champs `category` et `reviewed`, puis les sections **Vérifié
    par**, **Verdict** et **Action**. La section `Arbitrage` reste au marqueur jusqu'à l'Étape 4.

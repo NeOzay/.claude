@@ -33,16 +33,16 @@ values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
 
 [sections."Constat"]
 required = true
-description = ""
+description = "ce qui a été observé, factuel et daté, sans remède ni numéro de ligne"
 
 [sections."Pourquoi c'est gênant"]
 required = true
-description = ""
+description = "le coût réel si rien n'est fait, et le mode de défaillance qu'il ouvre"
 
 [sections."Pour solder"]
 required = true
-description = ""
+description = "ce qu'il faut faire pour que la dette disparaisse — sans lui, c'est un regret"
 
 [sections."Assumé"]
 required = false
-description = ""
+description = "pourquoi le report a été délibéré, quand il l'a été"

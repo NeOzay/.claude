@@ -7,17 +7,17 @@ type = "slug"
 [fields.title]
 type = "text"
 required = true
-description = "Sorti du registre sans avoir été payé, avec son motif"
+description = "l'énoncé de la dette, tel qu'il figurait en titre d'entrée"
 
 [fields.date]
 type = "date"
 required = true
-description = "Sorti du registre sans avoir été payé, avec son motif"
+description = "date du constat, jamais modifiée"
 
 [fields.source]
 type = "text"
 required = false
-description = "Sorti du registre sans avoir été payé, avec son motif"
+description = "le chantier qui l'a identifiée et où il l'a écrit, verbatim"
 
 [fields.reviewed]
 type = "date"
@@ -27,26 +27,26 @@ description = "date de la dernière revue qui a statué sur cette entrée"
 [fields.category]
 type = "enum"
 required = false
-description = "Sorti du registre sans avoir été payé, avec son motif"
+description = "verdict de la dernière revue, posé par debt-review"
 values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
           "aggravee", "pertinent", "inverifiable"]
 
 [sections."Constat"]
 required = true
-description = ""
+description = "ce qui a été observé, factuel et daté, sans remède ni numéro de ligne"
 
 [sections."Écartée le"]
 required = true
-description = ""
+description = "date, preuve exécutée et motif : non pertinent, doublon (id conservé), pas une dette"
 
 [sections."Pourquoi c'est gênant"]
 required = false
-description = ""
+description = "repris de l'entrée d'origine, à titre d'archive — plus rien à plaider"
 
 [sections."Pour solder"]
 required = false
-description = ""
+description = "repris de l'entrée d'origine ; le motif de sortie est dans « Écartée le »"
 
 [sections."Assumé"]
 required = false
-description = ""
+description = "pourquoi le report a été délibéré, quand il l'a été"

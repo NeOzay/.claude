@@ -107,6 +107,15 @@ et une énumération des sections, recopiés à la main. Ils ont été retirés 
 chose finissent toujours par diverger, et c'est la copie en prose qu'on croit, parce qu'elle se lit
 plus vite que le fichier qu'elle décrit.
 
+Ce que ce fichier ne redit pas non plus, c'est le **contenu** attendu : les `description` du
+contrat disent ce qu'il faut écrire dans chaque champ et chaque section — ce qu'une entrée sortie
+du registre n'a plus à plaider, ou qu'une entrée sans `Pour solder` est un regret. Cela se lit là,
+pas ici.
+
+Ce que le contrat déclare sans pouvoir le motiver, en revanche, reste ici : **`Constat` est requis
+jusque dans les listes de sortie** — sans lui, une entrée soldée ne dirait plus de quoi elle
+parlait, et le registre des payées deviendrait une liste de dates.
+
 > *Mode de défaillance* — un projet peut redéfinir sa liste (rang 1 des définitions, cf.
 > [Définitions de listes](../../list-dir/references/contrat-liste.md#définitions-de-listes)). La
 > prose décrirait alors le contrat *d'origine* pendant que l'outil en applique un autre, sans
@@ -115,25 +124,16 @@ plus vite que le fichier qu'elle décrit.
 Ce qui suit n'est **pas** dans le contrat, et c'est pourquoi c'est écrit ici : les règles de tenue
 que la structure ne sait pas porter.
 
-Les listes soldée et écartée exigent une section de solde en plus, et rendent facultatives les deux
-qui **instruisent** la dette — pourquoi elle gênait, et ce qu'il faudrait faire : une entrée sortie
-du registre doit prouver sa sortie, pas plaider une cause déjà tranchée. **`Constat` y reste
-requis** — sans lui, une entrée soldée ne dirait plus de quoi elle parlait, et le registre des
-payées deviendrait une liste de dates.
-
-Une entrée sans **Pour solder** est un regret, pas une dette : dire ce qu'il faudrait faire, même
-grossièrement, ou ne pas l'écrire.
-
 **L'`id` ne se renomme pas.** Il est la seule identité d'un élément de liste
 ([Un élément](../../list-dir/references/contrat-liste.md#un-élément)) ; ce qui en découle ici,
 c'est que par lui une entrée se cite, et sur lui que le point 3 d'*Alimenter* dédoublonne. Le
 renommer ferait revenir le même constat comme s'il était neuf.
 
-**Désigner sans numéro de ligne.** Une entrée cite un fichier, une section, une phrase — jamais
-`fichier.md:42`. Le repère se périme au premier commit qui insère une ligne au-dessus, sans qu'une
-commande échoue et sans que rien ne le signale. Écrire plutôt `` `cloture.md`, « toutes les étapes
-sont cochées » `` : la citation reste vraie tant que la règle existe, et devient introuvable
-exactement quand elle disparaît — ce qui est précisément l'information cherchée.
+**Désigner sans numéro de ligne.** La description de `Constat` l'interdit ; ce que le contrat ne
+peut pas dire, c'est quoi écrire à la place. Une entrée cite un fichier, une section, une phrase :
+`` `cloture.md`, « toutes les étapes sont cochées » ``. La citation reste vraie tant que la règle
+existe, et devient introuvable exactement quand elle disparaît — ce qui est précisément
+l'information cherchée.
 
 > *Mode de défaillance* — un numéro de ligne périmé ne casse rien de visible : il fait classer
 > `non-pertinent` une dette vivante dont la relecture n'a pas retrouvé la cible. C'est la sortie de
