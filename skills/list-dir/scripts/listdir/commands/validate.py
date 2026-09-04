@@ -7,6 +7,11 @@ avec `help`, dont le comportement est le même partout.
 DEUX VERDICTS. Sans `--filled`, la structure seule — les marqueurs sont légitimes.
 Avec `--filled`, plus aucun marqueur là où le contrat exige quelque chose, sans
 jamais réclamer ce qu'il dit facultatif.
+
+LES AVERTISSEMENTS DE PROVENANCE SORTENT DANS LES DEUX CAS, et ne changent ni l'un
+ni l'autre. Une liste dont la semence a évolué n'a aucun élément fautif : la taire
+sur un succès laisserait la péremption invisible là où on la cherche justement, et
+la compter comme un manquement déclarerait invalide une liste en règle.
 """
 
 from __future__ import annotations
@@ -14,6 +19,7 @@ from __future__ import annotations
 import argparse
 from typing import cast
 
+from listdir.provenance import warnings
 from listdir.types import Result, Utils
 
 DESCRIPTION = "vérifie les éléments contre le contrat ; --filled exige qu'ils soient remplis"
@@ -35,10 +41,16 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
         return utils.fail(store.message)
     lst = store.unwrap()
 
+    # LES AVERTISSEMENTS SE CALCULENT AVANT LE PREMIER RETOUR, et pas après le
+    # dernier : un élément illisible fait sortir `validate` sans jamais parcourir la
+    # suite, et la péremption disparaissait alors du seul appel où l'on regarde la
+    # liste de plus près.
+    note = "\n".join(warnings(lst.path, lst.contract))
+
     filled = cast("bool", args.filled)
     r = lst.validate(filled=filled)
     if not r:
-        return utils.fail(r.message)
+        return utils.fail(f"{r.message}\n\n{note}" if note else r.message)
 
     violations = r.unwrap()
     if violations:
@@ -46,7 +58,8 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
         # la sortie qu'on relit pour corriger, pas un décompte.
         detail = "\n".join(str(v) for v in violations)
         pluriel = "s" if len(violations) > 1 else ""
-        return utils.fail(f"{detail}\n\n{lst.path} : {len(violations)} manquement{pluriel}")
+        bilan = f"{detail}\n\n{lst.path} : {len(violations)} manquement{pluriel}"
+        return utils.fail(f"{bilan}\n\n{note}" if note else bilan)
 
     quoi = "remplis et conformes" if filled else "conformes"
-    return utils.ok(f"{lst.path} : {len(lst.paths())} élément(s) {quoi} au contrat")
+    return utils.ok(f"{lst.path} : {len(lst.paths())} élément(s) {quoi} au contrat", note)

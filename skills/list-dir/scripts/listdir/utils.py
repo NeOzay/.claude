@@ -58,8 +58,8 @@ class Toolbox:
             register(parser)
         return entry.command(parser.parse_args(argv), self)
 
-    def ok[T](self, value: T = None) -> Result[T]:
-        return ok(value)
+    def ok[T](self, value: T = None, message: str = "") -> Result[T]:
+        return ok(value, message)
 
     def fail(self, message: str, code: int = 1) -> Result[Never]:
         return fail(message, code)

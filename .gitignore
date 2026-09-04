@@ -3,6 +3,9 @@
 
 # Fichiers générés / backups
 settings.json.bak*
+# La sauvegarde du dernier `list-dir reseed` : une marche arrière LOCALE et
+# immédiate. L'historique plus ancien est le travail de git, pas le sien.
+**/.list/backup/
 hooks/rtk-rewrite.sh
 
 # Données d'usage / caches locaux

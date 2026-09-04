@@ -111,6 +111,12 @@ def main(argv: list[str]) -> int:
         return result.status or 1
     if result.value is not None:
         print(result.value if isinstance(result.value, str) else repr(result.value))
+    # UN AVERTISSEMENT NE TOUCHE NI AU CODE DE RETOUR NI À STDOUT : `contract
+    # --values` est lu par un `while read`, et une ligne de plus y passerait pour une
+    # valeur déclarée. stderr est le seul canal qu'aucun appelant ne consomme comme
+    # une donnée.
+    if result.message:
+        sys.stderr.write(f"{result.message}\n")
     return 0
 
 

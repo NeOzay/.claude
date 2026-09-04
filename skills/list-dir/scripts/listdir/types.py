@@ -67,8 +67,15 @@ class Result[T]:
         return cast("T", self.value)
 
 
-def ok[T](value: T = None) -> Result[T]:
-    return Result(0, value)
+def ok[T](value: T = None, message: str = "") -> Result[T]:
+    """Un succès, et ce qu'il y aurait à dire malgré tout.
+
+    LE MESSAGE D'UN SUCCÈS EST UN AVERTISSEMENT, jamais une cause d'échec : la CLI
+    l'écrit sur stderr sans toucher au code de retour ni à stdout. C'est ce qui
+    permet à `validate` de signaler une liste périmée sans déclarer fautive une
+    liste dont tous les éléments sont conformes.
+    """
+    return Result(0, value, message)
 
 
 def fail(message: str, code: int = 1) -> Result[Never]:
@@ -138,11 +145,41 @@ class Section:
 
 
 @dataclass(frozen=True)
+class Origin:
+    """D'où vient un contrat, et ce qu'on s'autorise à lui rappeler.
+
+    ELLE VOYAGE AVEC LA SEMENCE. La table `[origin]` est écrite dans le contrat de la
+    DÉFINITION, et la copie qu'`init` en fait la reçoit avec le reste : `init` ne
+    l'écrit jamais lui-même. C'est ce qui préserve l'égalité octet pour octet entre
+    une liste et sa semence — l'invariant que défend la docstring d'`init_list` — et
+    ce qui fait que `--from <chemin>` estampille exactement comme `--def <nom>`.
+
+    `name` NOMME, IL NE LOCALISE PAS. Un chemin dépend de la machine ; deux machines
+    rendraient deux contrats, ce qui est précisément ce que la résolution par rangs
+    de definitions.py existe pour éviter. `reseed` rerésout ce nom le jour venu.
+
+    `name is None` DIT « CETTE LISTE N'A PAS DE SEMENCE » — c'est le `def = false`
+    du fichier, et l'état du squelette qu'`init` écrit sans `--def`. À distinguer
+    d'un `Contract.origin` à None, qui dit qu'aucune provenance n'est déclarée :
+    l'un est une réponse, l'autre une absence de réponse.
+    """
+
+    name: str | None
+    version: int = 0
+    frozen: bool = False
+    """La liste a délibérément pris la main : plus d'avertissement de péremption, et
+    `reseed` refuse d'y écrire sans `--force`. C'est ce refus qui justifie le mot."""
+
+
+@dataclass(frozen=True)
 class Contract:
     name: str
     description: str = ""
     fields: Mapping[str, Field] = field(default_factory=dict[str, Field])
     sections: Mapping[str, Section] = field(default_factory=dict[str, Section])
+    origin: Origin | None = None
+    """None = aucune table `[origin]` dans le fichier. Une liste antérieure à ce
+    dispositif est dans cet état, et c'est ce que l'avertissement d'adoption dit."""
 
     @property
     def required_sections(self) -> list[str]:
@@ -241,7 +278,7 @@ class Utils(Protocol):
     def open(self, list_dir: Path | str) -> Result[ListStore]: ...
     def git(self, *argv: str) -> Result[str]: ...
     def run(self, name: str, argv: list[str]) -> Result[object]: ...
-    def ok[T](self, value: T) -> Result[T]: ...
+    def ok[T](self, value: T, message: str = "") -> Result[T]: ...
     def fail(self, message: str, code: int = 1) -> Result[Never]: ...
 
 

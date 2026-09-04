@@ -32,9 +32,16 @@ list-dir defs    # ce qui est définissable, et de quelle racine ça vient
 ```
 
 Une fois amorcés, ils sont **détachés** de ces définitions : chaque registre porte sa propre copie
-du contrat, seule appliquée, et rien ne le resynchronise. Un projet qui redéfinit un registre chez
-lui a délibérément pris la main —
+du contrat, seule appliquée, et rien ne le resynchronise de lui-même. Un projet qui redéfinit un
+registre chez lui a délibérément pris la main —
 [Définitions de listes](../../list-dir/references/contrat-liste.md#définitions-de-listes).
+
+Détaché ne veut pas dire perdu de vue : chaque registre porte le nom de la définition qui l'a semé
+et sa version. `list-dir validate` avertit sur stderr quand cette définition a évolué depuis, et
+`list-dir reseed "$T/<liste>"` rattrape sur ordre — jamais de lui-même
+([Provenance et péremption](../../list-dir/references/contrat-liste.md#provenance-et-péremption)).
+Un contrat rattrapé rend les entrées écrites avant lui non conformes : `migrate` les remet en ligne
+ensuite.
 
 Le pipeline produisait déjà des constats de dette — l'auditeur en fait un axe de jugement — mais
 n'avait nulle part où les déposer : ils vivaient dans `<slug>.audit.md`, archivé en `done/` à la

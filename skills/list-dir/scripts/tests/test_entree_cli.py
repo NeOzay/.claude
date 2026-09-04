@@ -182,7 +182,7 @@ def test_help_seul_ne_montre_que_les_generiques() -> None:
     r = lancer("help")
 
     assert r.code == 0
-    assert "Commandes génériques (12)" in r.out
+    assert "Commandes génériques (13)" in r.out
     assert "Passer un répertoire-liste en argument" in r.out
 
 
@@ -682,3 +682,56 @@ def test_name_reste_accepte_sur_le_squelette(tmp_path: Path) -> None:
 
     assert r.code == 0
     assert 'name = "MonNom"' in (tmp_path / "neuve/.list/contract.toml").read_text(encoding="utf-8")
+
+
+def test_avertissement_de_provenance_sort_sur_stderr_sans_toucher_au_code(tmp_path: Path) -> None:
+    """Un avertissement n'est pas un manquement : stdout et le code de retour sont
+    ceux d'un succès, et la ligne va sur stderr — le seul canal qu'aucun appelant ne
+    consomme comme une donnée."""
+    liste = liste_sur_disque(tmp_path)
+    contrat = liste / ".list" / "contract.toml"
+    _ = contrat.write_text(
+        contrat.read_text(encoding="utf-8").replace("[origin]\ndef = false\n", ""),
+        encoding="utf-8",
+    )
+
+    r = lancer("validate", str(liste))
+
+    assert r.code == 0
+    assert "1 élément(s) conformes au contrat" in r.out
+    assert "aucune provenance déclarée" in r.err
+
+
+def test_init_def_discordant_sort_en_code_2_depuis_la_cli(tmp_path: Path) -> None:
+    """La bibliothèque rendait bien 2, la commande le ramenait à 1 : seul un test qui
+    passe par la CLI pouvait le voir."""
+    definition = tmp_path / ".claude" / "list-dir" / "jouet"
+    _ = ecrire(
+        definition,
+        "contract.toml",
+        CONTRAT.replace("[origin]\ndef = false\n", '[origin]\ndef = "autre"\nversion = 1\n'),
+    )
+
+    r = lancer("init", str(tmp_path / "neuve"), "--def", "jouet", cwd=tmp_path)
+
+    assert r.code == 2
+    assert "autre" in r.err
+
+
+def test_un_element_illisible_n_efface_pas_l_avertissement_de_provenance(
+    tmp_path: Path,
+) -> None:
+    """R11 : les avertissements se calculaient après le premier `return` — donc jamais
+    sur l'appel où l'on regarde justement la liste de plus près."""
+    liste = liste_sur_disque(tmp_path)
+    contrat = liste / ".list" / "contract.toml"
+    _ = contrat.write_text(
+        contrat.read_text(encoding="utf-8").replace("[origin]\ndef = false\n", ""),
+        encoding="utf-8",
+    )
+    _ = (liste / "casse.md").write_text("+++\nid = \n+++\n\n## Constat\n\nx\n", encoding="utf-8")
+
+    r = lancer("validate", str(liste))
+
+    assert r.code == 1
+    assert "aucune provenance déclarée" in r.err

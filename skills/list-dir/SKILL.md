@@ -2,8 +2,8 @@
 name: list-dir
 description: >
   Manipule des répertoires-listes : un répertoire = une liste, un fichier = un élément, un contrat
-  embarqué qui déclare la structure. Fournit douze commandes génériques (init, new, list, show,
-  validate, migrate, move, derive, merge, defs, contract, help), des définitions de listes
+  embarqué qui déclare la structure. Fournit treize commandes génériques (init, new, list, show,
+  validate, migrate, move, derive, merge, defs, contract, reseed, help), des définitions de listes
   réutilisables pour amorcer une liste dans un projet neuf, et une bibliothèque Python importable.
   Se déclenche dès qu'il s'agit de créer, amorcer, valider, migrer, filtrer, déplacer, dériver ou
   agglomérer les éléments d'une liste stockée en fichiers. Ne juge aucun contenu.
@@ -39,7 +39,7 @@ un fichier quand il corrige une section. `validate` repasse après.
 **Python ≥ 3.12**, stdlib seule — aucune dépendance à installer. Les commandes le vérifient au
 démarrage et sortent en code non nul si la version est inférieure.
 
-## Les douze commandes
+## Les treize commandes
 
 ```bash
 list-dir help [<liste>]                      # les commandes disponibles, avec leur description
@@ -57,6 +57,7 @@ list-dir contract <cible> --template <nom>   # ... le gabarit <nom>.toml plutôt
 list-dir contract <cible> --values <champ>   # les valeurs déclarées d'un champ, une par ligne
 list-dir validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
 list-dir migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
+list-dir reseed <liste> [--def <nom>|--from <chemin>] [--force] [--dry-run]  # rattrape le contrat
 list-dir move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
 list-dir derive <src> <dst> --template <nom> # projette une liste sur une liste neuve
 list-dir merge <liste> [--out <fichier>]     # agglomère, conservation vérifiée
@@ -72,6 +73,16 @@ donne à la place un contrat complet, et `init --def <nom>` la trouve sans qu'on
 est. Quatre racines sont fouillées, du projet vers la configuration ; la plus spécifique gagne, et
 deux racines de même rang qui portent le même nom font échouer la commande en les nommant.
 `defs` montre ce qui est définissable, d'où ça vient, et ce qui en masque quoi.
+
+**Une liste sait d'où elle vient.** Le contrat d'une définition porte une table `[origin]` — son
+nom, sa version, un gel éventuel — que la copie emporte avec le reste : `init` ne l'écrit jamais, il
+la reçoit, et une liste reste donc octet pour octet égale à sa semence. `validate` avertit sur
+stderr quand la définition a évolué depuis, sans jamais changer son code de retour : une liste
+périmée n'a aucun élément fautif. `reseed` rattrape **sur ordre**, par une fusion à trois points qui
+préserve les décisions locales et refuse en nommant les clés quand les deux côtés ont modifié la
+même — `--force` ne fait que dégeler. Une liste antérieure à ce dispositif s'adopte par `reseed
+--def <nom>`. Table, avertissements, règle de fusion : `references/contrat-liste.md`, « Provenance
+et péremption ».
 
 **La définition fait autorité le temps de l'`init`, et pas au-delà.** La liste créée porte dès lors
 sa propre copie du contrat, et c'est elle seule que les commandes appliquent — `contract <liste>`

@@ -21,12 +21,32 @@ import tomllib
 from pathlib import Path
 from typing import cast
 
-from .types import FIELD_TYPES, OPTIONAL, PLACEHOLDER, Contract, Field, Result, Section, fail, ok
+from .types import (
+    FIELD_TYPES,
+    OPTIONAL,
+    PLACEHOLDER,
+    Contract,
+    Field,
+    Origin,
+    Result,
+    Section,
+    fail,
+    ok,
+)
 
 LIST_DIR = ".list"
 CONTRACT = "contract.toml"
 TEMPLATES = "templates"
 """Les paires <nom>.toml / <nom>.md que `derive` projette, sous .list/."""
+
+SEED = "semence"
+"""La semence intacte, telle qu'elle était au dernier semis : le point de référence
+de `reseed`. Elle a la FORME D'UNE DÉFINITION — un contrat et ses gabarits — ce qui
+la rend lisible par `load_source` sans une ligne de plus."""
+
+BACKUP = "backup"
+"""Ce que le dernier `reseed` a remplacé. Une seule marche arrière : l'historique
+plus ancien est le travail de git."""
 
 
 def contract_path(list_dir: Path) -> Path:
@@ -161,6 +181,98 @@ def _liste(value: object, path: Path, subject: str) -> Result[list[str]]:
             )
         out.append(entry)
     return ok(out)
+
+
+def _origin(value: object, path: Path) -> Result[Origin | None]:
+    """La table `[origin]`, ou None quand le fichier n'en porte pas.
+
+    LES DEUX ABSENCES NE SE VALENT PAS. Pas de table = aucune provenance déclarée,
+    l'état d'une liste antérieure à ce dispositif, et ce que l'avertissement
+    d'adoption dit. `def = false` = « cette liste n'a pas de semence », une réponse
+    qui fait taire cet avertissement. Les confondre ferait taire le rappel sur toutes
+    les listes qu'il vise justement.
+
+    UNE CLÉ INCONNUE EST UN ÉCHEC, pas un ornement ignoré. Un `frozen` mal
+    orthographié laisserait une liste que son auteur croit gelée se faire réécrire
+    par `reseed` sans un mot — un échec ouvert, ce que ce paquet existe pour
+    supprimer. Le contrat n'est pas un langage : ici comme pour FIELD_TYPES, la liste
+    est fermée.
+
+    LE NOM EST UN JETON, POUR LA RAISON DES `values` D'UN ENUM : il traverse une
+    substitution de shell (`list-dir reseed "$L" --def "$NOM"`), et une espace le
+    découperait en deux arguments.
+    """
+    if value is None:
+        return ok(None)
+    table = _table(value, path, "« origin »")
+    if not table:
+        return Result(table.status, None, table.message)
+    body = table.unwrap()
+
+    inconnues = sorted(set(body) - {"def", "version", "frozen"})
+    if inconnues:
+        return fail(
+            f"{path}: « origin » — clé{'s' if len(inconnues) > 1 else ''} inconnue"
+            f"{'s' if len(inconnues) > 1 else ''} : {', '.join(inconnues)} ; "
+            "attendues : def, version, frozen"
+        )
+
+    if "def" not in body:
+        return fail(
+            f"{path}: « origin » — « def » manquante : un nom de définition, "
+            "ou false si cette liste n'a pas de semence"
+        )
+    declared = body["def"]
+
+    if declared is False:
+        # Une version ou un gel sous `def = false` n'a rien à quoi se rapporter :
+        # il n'y a pas de semence à comparer, ni à refuser de recopier. Les accepter
+        # en les ignorant ferait croire à une liste gelée qui ne l'est pas.
+        surplus = sorted(k for k in ("version", "frozen") if k in body)
+        if surplus:
+            return fail(
+                f"{path}: « origin » — {', '.join(surplus)} sous « def = false » : "
+                "une liste sans semence n'a ni version à comparer, ni semis à refuser"
+            )
+        return ok(Origin(name=None))
+
+    if not isinstance(declared, str):
+        return fail(
+            f"{path}: « origin », « def » — un nom de définition ou false est attendu, "
+            f"trouvé {type(declared).__name__}"
+        )
+    if not declared or declared.split() != [declared]:
+        return fail(
+            f"{path}: « origin », « def » — un nom ne peut être vide ni contenir "
+            f"d'espace, trouvé « {declared} »"
+        )
+
+    version = body.get("version")
+    if version is None:
+        return fail(
+            f'{path}: « origin » — « version » manquante sous « def = "{declared}" » : '
+            "c'est elle qui dit si la liste a décroché de sa semence"
+        )
+    # `isinstance(True, int)` est vrai en Python : sans ce refus, `version = true`
+    # passerait pour la version 1.
+    if isinstance(version, bool) or not isinstance(version, int):
+        return fail(
+            f"{path}: « origin », « version » — un entier est attendu, "
+            f"trouvé {type(version).__name__}"
+        )
+    if version < 1:
+        return fail(
+            f"{path}: « origin », « version » — un entier >= 1 est attendu, trouvé {version}"
+        )
+
+    frozen = body.get("frozen", False)
+    if not isinstance(frozen, bool):
+        return fail(
+            f"{path}: « origin », « frozen » — un booléen est attendu, "
+            f"trouvé {type(frozen).__name__}"
+        )
+
+    return ok(Origin(name=declared, version=version, frozen=frozen))
 
 
 def _prefill(
@@ -353,12 +465,17 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
             command=command_val,
         )
 
+    origin = _origin(raw.get("origin"), path)
+    if not origin:
+        return fail(origin.message)
+
     return ok(
         Contract(
             name=contract_name.unwrap(),
             description=contract_description.unwrap(),
             fields=fields,
             sections=sections,
+            origin=origin.unwrap(),
         )
     )
 

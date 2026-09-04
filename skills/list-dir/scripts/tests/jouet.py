@@ -1,5 +1,10 @@
 """La liste-jouet : contrat, élément de référence, et les fonctions qui les montent.
 
+ELLE DÉCLARE `def = false` : c'est une liste née à la main, sans semence à rattraper.
+Sans cette ligne, chaque commande lancée sur elle porterait l'avertissement
+d'adoption, et les tests de sortie devraient tous l'ignorer — ce qui reviendrait à
+tester une liste que personne n'écrirait.
+
 POURQUOI CE MODULE N'EST PAS `conftest.py` : deux suites coexistent dans ce dépôt,
 et `scripts/tests/conftest.py` porte déjà ce nom. Un `from conftest import …` résout
 alors vers l'un ou l'autre selon le chemin d'appel — le vérificateur de types de la
@@ -14,6 +19,9 @@ from pathlib import Path
 
 CONTRAT = """name = "jouet"
 description = "liste-jouet des tests"
+
+[origin]
+def = false
 
 [fields.id]
 type = "slug"

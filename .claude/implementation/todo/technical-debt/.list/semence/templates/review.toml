@@ -1,0 +1,59 @@
+# Contrat de la liste de revue engendrée par `derive <src> <dst> --template review`.
+#
+# Une fiche par entrée du registre, et rien de la prose de l'entrée : la fiche ne
+# porte que du jugement, qui n'existe nulle part ailleurs. C'est ce qui la rend
+# légitimement éditable sans faire double emploi avec la dette qu'elle instruit.
+
+name = "revue"
+description = "Revue du registre de dette — une fiche par entrée, un verdict par fiche"
+
+[fields.id]
+type = "slug"
+
+[fields.title]
+type = "text"
+required = true
+from = "title"
+description = "l'intitulé de l'entrée, reporté — c'est la clé qui rattache la fiche au registre"
+
+[fields.date]
+type = "date"
+required = true
+from = "date"
+description = "date du constat au registre, reportée — jamais celle de la revue"
+
+[fields.reviewed]
+type = "date"
+required = true
+description = "date de CETTE revue, celle qui sera reportée au registre"
+
+[fields.category]
+type = "enum"
+required = true
+description = "le verdict, une des catégories de references/categories.md"
+# L'ORDRE DE CETTE LISTE EST SÉMANTIQUE, PAS ALPHABÉTIQUE : ce qui FAIT SORTIR une
+# entrée du registre d'abord, ce qui l'y LAISSE ensuite. C'est lui qui ordonne les
+# piles présentées à l'arbitrage — `debt-review` le lit par
+# `list-dir contract <revue> --values category`, il ne le réécrit pas. Une catégorie
+# ajoutée se range donc à sa place de sens, jamais à la fin par commodité.
+values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
+          "aggravee", "pertinent", "inverifiable"]
+
+# `category` et `reviewed` n'ont pas de `from` : ils sont posés au marqueur, et
+# c'est au modèle de trancher. Un champ reporté d'office serait un script qui juge.
+
+[sections."Vérifié par"]
+required = true
+description = "la commande exécutée et sa sortie réelle, rejouable sans contexte"
+
+[sections."Verdict"]
+required = true
+description = "ce que la commande établit, et pourquoi cette catégorie et pas la voisine"
+
+[sections."Action"]
+required = true
+description = "le move à faire et la section de sortie à écrire, ou le maintien au registre"
+
+[sections."Arbitrage"]
+required = false
+description = "ce que l'utilisateur a tranché, quand il a corrigé le verdict"

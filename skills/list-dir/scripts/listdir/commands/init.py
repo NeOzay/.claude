@@ -5,6 +5,11 @@ register() et à un appel de la bibliothèque : c'est ce qui garantit qu'un scri
 tiers et la ligne de commande font exactement la même chose. La résolution d'un
 nom de définition vit dans definitions.py, la copie dans store.init_list.
 
+LE NOM ÉCRIT ENGAGE LA SEMENCE. `--def <nom>` sur une définition dont
+`origin.def` déclare autre chose sort en code 2 : la liste porterait une estampille
+nommant une définition que `reseed` irait rechercher à la place de la vraie. Le
+contrôle vit dans store.init_list, comme tout le reste.
+
 DEUX OPTIONS, ET ELLES S'EXCLUENT. `--def` désigne une définition PAR SON NOM et la
 fait résoudre dans les quatre rangs ; `--from` désigne un RÉPERTOIRE, tel quel.
 argparse refuse lui-même la combinaison — un `--def` et un `--from` ensemble
@@ -73,7 +78,15 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
     elif chemin:
         definition = Path(chemin)
 
-    r = init_list(Path(cast("str", args.repertoire)), libelle, desc, definition)
+    # `nom` n'est passé que s'il a été ÉCRIT : c'est ce que la semence doit déclarer
+    # de son côté. `--from` désigne un répertoire et n'affirme aucun nom — il ne
+    # déclenche donc pas le contrôle.
+    r = init_list(Path(cast("str", args.repertoire)), libelle, desc, definition, nom)
     if not r:
-        return utils.fail(r.message)
+        # LE CODE DE LA BIBLIOTHÈQUE EST REPORTÉ TEL QUEL. `utils.fail` retombe sur 1
+        # quand on ne lui en donne pas, et une erreur d'appel rendue en 2 par la
+        # bibliothèque redescendait alors en simple échec : la commande annonçait
+        # autre chose que ce qu'elle avait décidé, sans qu'aucun test de bibliothèque
+        # puisse le voir.
+        return utils.fail(r.message, r.status)
     return utils.ok(str(r.unwrap()))

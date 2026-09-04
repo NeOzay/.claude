@@ -21,6 +21,7 @@ from typing import final, override
 from .contract import (
     CONTRACT,
     LIST_DIR,
+    SEED,
     TEMPLATES,
     check_value,
     is_marker,
@@ -39,6 +40,7 @@ from .items import (
 )
 from .prefill import PrefillContext, initial_field, initial_section, preview
 from .prefill import context as prefill_context
+from .provenance import read_seed
 from .types import OPTIONAL, Change, Contract, FieldValue, Item, Result, Violation, fail, ok
 
 
@@ -710,42 +712,12 @@ def open_list(list_dir: Path | str) -> Result[ListStore]:
     return ok(ListStore(path, r.unwrap()))
 
 
-def _read_definition(definition: Path) -> Result[tuple[str, dict[str, str]]]:
-    """Le contrat d'une définition et ses gabarits, LUS ET VALIDÉS EN MÉMOIRE.
-
-    Rien n'est écrit ici, et c'est le point : un contrat de définition invalide
-    découvert après un mkdir laisserait une liste à moitié bâtie, que la tentative
-    suivante refuserait comme « contrat déjà présent ». L'appelant serait coincé
-    entre une erreur qu'il a corrigée et un répertoire qu'il n'a pas créé — c'est
-    la raison pour laquelle `derive` construit lui aussi tout en mémoire d'abord.
-    """
-    contrat = definition / CONTRACT
-    if not contrat.is_file():
-        return fail(f"{definition}: définition sans contrat — {CONTRACT} attendu")
-    try:
-        texte = contrat.read_text(encoding="utf-8")
-        gabarits = {
-            f.name: f.read_text(encoding="utf-8")
-            for f in sorted((definition / TEMPLATES).glob("*"))
-            if f.is_file()
-        }
-    except OSError as exc:
-        return fail(f"{definition}: définition illisible — {exc.strerror}")
-
-    # Le contrat est jugé ici, pas à la première commande qui ouvrira la liste :
-    # une définition fautive doit se dire au moment où on s'en sert, en nommant le
-    # fichier de la DÉFINITION, et non plus tard en nommant la copie.
-    lu = parse_contract(texte, contrat)
-    if not lu:
-        return Result(lu.status, None, lu.message)
-    return ok((texte, gabarits))
-
-
 def init_list(
     list_dir: Path | str,
     name: str = "",
     description: str = "",
     definition: Path | str | None = None,
+    expected_name: str = "",
 ) -> Result[Path]:
     """Crée une liste. Sans `definition`, son contrat squelette. Une liste vide est légitime.
 
@@ -762,6 +734,19 @@ def init_list(
     au cas où aucune liste n'existe : il ne pouvait donc pas en venir. Une définition
     vit hors de tout répertoire-liste (cf. definitions.py) — c'est exactement ce qui
     la rend disponible quand il n'y a encore rien.
+
+    LA SEMENCE EST GARDÉE INTACTE sous `.list/semence/`, mêmes octets que ce qui va
+    dans `.list/`. Ce n'est pas une sauvegarde : c'est le POINT DE RÉFÉRENCE de
+    `reseed`. Sans lui, une liste et sa semence qui diffèrent ne disent pas laquelle
+    des deux a bougé, et la moindre évolution de définition se lirait comme un
+    conflit. Il vaut aussi hors ligne : une modification locale se voit sans avoir à
+    résoudre la moindre définition.
+
+    `expected_name` EST LE NOM QUE L'APPELANT A ÉCRIT, quand il en a écrit un
+    (`--def <nom>`). Une semence qui en déclare un autre est refusée en code 2 :
+    l'estampille copiée nommerait alors une définition que `reseed` irait rechercher
+    à la place de celle qui a réellement semé. `--from` n'affirme aucun nom et ne
+    déclenche donc pas ce contrôle.
 
     ELLE FAIT AUTORITÉ LE TEMPS DE CET APPEL, ET PAS AU-DELÀ. La liste créée porte
     dès lors son propre contrat, que toute commande relira depuis
@@ -783,17 +768,32 @@ def init_list(
         return fail(f"{path}: contrat déjà présent — {LIST_DIR}/contract.toml")
 
     if definition is not None:
-        lu = _read_definition(Path(definition))
+        lu = read_seed(Path(definition))
         if not lu:
             return Result(lu.status, None, lu.message)
-        texte, gabarits = lu.unwrap()
+        texte, gabarits, contrat = lu.unwrap()
+
+        # UNE ABSENCE N'EST PAS UNE CONTRADICTION : une définition sans `[origin]`
+        # reste utilisable et sème une liste sans provenance, que l'avertissement
+        # d'adoption signalera. Seuls DEUX NOMS QUI SE CONTREDISENT sont refusés.
+        declare = contrat.origin.name if contrat.origin is not None else None
+        if expected_name and declare is not None and declare != expected_name:
+            return fail(
+                f"{Path(definition) / CONTRACT}: semée sous « {expected_name} », mais "
+                f"« origin.def » y déclare « {declare} » — "
+                "l'estampille nommerait une définition que `reseed` irait chercher à tort",
+                2,
+            )
+
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
-            _ = target.write_text(texte, encoding="utf-8")
-            if gabarits:
-                (target.parent / TEMPLATES).mkdir(exist_ok=True)
-                for nom, corps in gabarits.items():
-                    _ = (target.parent / TEMPLATES / nom).write_text(corps, encoding="utf-8")
+            for base in (target.parent, target.parent / SEED):
+                base.mkdir(parents=True, exist_ok=True)
+                _ = (base / CONTRACT).write_text(texte, encoding="utf-8")
+                if gabarits:
+                    (base / TEMPLATES).mkdir(exist_ok=True)
+                    for nom, corps in gabarits.items():
+                        _ = (base / TEMPLATES / nom).write_text(corps, encoding="utf-8")
         except OSError as exc:
             return fail(f"{target}: écriture impossible — {exc.strerror}")
         return ok(target)
@@ -808,6 +808,8 @@ def init_list(
         target.write_text(
             f"name = {nom}\n"
             f"description = {desc}\n"
+            "\n[origin]\n"
+            "def = false\n"
             "\n[fields.id]\n"
             'type = "slug"\n'
             "\n[fields.title]\n"

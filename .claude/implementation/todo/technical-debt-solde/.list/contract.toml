@@ -1,6 +1,10 @@
 name = "technical-debt-solde"
 description = "Dette soldée, avec la commande exécutée qui l'établit"
 
+[origin]
+def = "technical-debt-solde"
+version = 1
+
 [fields.id]
 type = "slug"
 
