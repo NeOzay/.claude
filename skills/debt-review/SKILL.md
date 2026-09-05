@@ -175,7 +175,7 @@ list-dir validate "$R"
 
 `derive` crée exactement une fiche par entrée du registre — **à cet instant, et à cet instant
 seul.** Ce qu'il reporte et depuis quels gabarits :
-[Listes dérivées](../list-dir/references/contrat-liste.md#listes-dérivées).
+[Listes dérivées](../list-dir/references/operations.md#listes-dérivées).
 
 Ce que `merge` vérifiera plus tard est autre chose : il recompte les blocs rendus face aux
 **fichiers présents dans la liste de revue**. Une fiche disparue entre les deux réduit les deux
@@ -284,7 +284,7 @@ fi
 
 L'affectation testée puis le `while read` ne sont pas un détour : c'est la forme qu'impose le
 contrat de `--values`
-([Ce que `contract` vise](../list-dir/references/contrat-liste.md#ce-que-contract-vise-et-ce-que-ça-engage)).
+([Ce que `contract` vise](../list-dir/references/definitions.md#ce-que-contract-vise-et-ce-que-ça-engage)).
 Ici, un tableau vide se lirait « aucune fiche » au lieu de « liste illisible ».
 
 > *Mode de défaillance* — le `if … ; false` plutôt qu'un `|| exit 1` : ces blocs se collent dans un

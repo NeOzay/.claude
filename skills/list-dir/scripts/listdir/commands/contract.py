@@ -31,7 +31,7 @@ CE QUE CETTE OPTION NE PEUT PAS FAIRE À LA PLACE DE L'APPELANT : une substituti
 commande avale le code de retour. `for c in $(list-dir contract … --values category)`
 itère donc zéro fois et réussit quand la commande a échoué — l'erreur part bien sur
 stderr, mais un tableau vide se lit « rien à compter ». L'appelant affecte, teste,
-puis lit ligne à ligne ; la forme exacte est dans `references/contrat-liste.md`.
+puis lit ligne à ligne ; la forme exacte est dans `references/definitions.md`.
 
 D'OÙ CETTE COMMANDE. `show` rend un élément, `validate` confronte des éléments au
 contrat — rien n'imprimait le contrat lui-même. Une prose qui recopie les champs

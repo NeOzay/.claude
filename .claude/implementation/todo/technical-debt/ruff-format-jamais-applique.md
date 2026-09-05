@@ -8,7 +8,7 @@ source = "chantier semences-de-listes, journal du suivi et audit R7"
 ## Constat
 
 `uvx ruff format --check .` dans `skills/list-dir/` signale **cinq fichiers** à reformater :
-`references/contrat-liste.md` et les suites `test_contract.py`, `test_items.py`, `test_loader.py`,
+`references/extension.md` et les suites `test_contract.py`, `test_items.py`, `test_loader.py`,
 `test_move.py`. Chacun vérifié antérieur au chantier `semences-de-listes`, en confrontant sa version
 `master` extraite par `git show` au même contrôle.
 

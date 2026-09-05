@@ -11,8 +11,8 @@ category = "<OPTIONNEL>"
 
 Le contrôle 2 de `check_pipeline.py` (`EMPREINTES`) protège une phrase verbatim par section de
 `contrat.md`, et vérifie qu'elle apparaît exactement une fois dans `skills/`. Il ne couvre que ce
-fichier. Les règles dont l'autorité est ailleurs — `contrat-liste.md` « Un élément » et « L'API
-Python », `dette.md` « Ce qu'une entrée porte », `templates/review.md`, `debt-review/SKILL.md`
+fichier. Les règles dont l'autorité est ailleurs — `format.md` « Un élément », `operations.md`
+« Déplacer un élément », `dette.md` « Ce qu'une entrée porte », `templates/review.md`, `debt-review/SKILL.md`
 Étape 3 — ne sont protégées par rien.
 
 Le chantier `recopies-hors-contrat` a résorbé neuf écritures de ce type, dont deux qui se
@@ -36,7 +36,8 @@ Deux formes ont été étudiées et écartées pour ce chantier, faute d'arbitra
   ancre de `contrat.md`, sans exiger une empreinte par section. Simple, mais perd le contrôle de
   complétude qui garantit aujourd'hui qu'aucune section n'est laissée sans filet ;
 - **sections marquées** — une convention de marquage dans les fichiers d'autorité, qui garde la
-  complétude au prix d'une convention à tenir. Plus coûteux : `dette.md` et `contrat-liste.md`
+  complétude au prix d'une convention à tenir. Plus coûteux : `dette.md` et les références de
+  `list-dir`
   mêlent règles d'autorité et prose locale, et la frontière demande un jugement.
 
 Trancher entre les deux, puis étendre le contrôle 2.

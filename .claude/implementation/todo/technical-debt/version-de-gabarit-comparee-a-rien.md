@@ -12,7 +12,7 @@ category = "<OPTIONNEL>"
 Depuis le chantier `provenance-listes-derivees`, un gabarit déclare sa propre estampille
 (`templates/review.toml`, `[origin] def = "technical-debt/review"`, `version`, `frozen = true`) et
 `derive` la recopie dans la liste engendrée. Cette `version` n'est **jamais confrontée à quoi que
-ce soit** : `contrat-liste.md` le dit en toutes lettres — « la version d'un gabarit ne se compare à
+ce soit** : `operations.md` le dit en toutes lettres — « la version d'un gabarit ne se compare à
 rien ». Deux chemins la ferment, et ils se recouvrent : le gel déclaré par le gabarit fait sortir
 `warnings()` avant tout contrôle, et `_peremption` refuse par ailleurs de résoudre un nom composite
 dans les quatre rangs.

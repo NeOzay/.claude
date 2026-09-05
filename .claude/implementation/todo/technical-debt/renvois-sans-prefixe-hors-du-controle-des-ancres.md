@@ -14,7 +14,10 @@ Son motif `RENVOI_INTER_SKILL` n'accepte que les liens dont le chemin commence p
 formes lui échappent donc entièrement :
 
 - les renvois **intra-fichier**, `[Un titre](#ancre)` — le chantier `recopies-hors-contrat` en a
-  introduit trois, dans `dette.md` et `contrat-liste.md` ;
+  introduit trois, dans `dette.md` et l'ancien `contrat-liste.md`. Le découpage de ce dernier
+  (`decoupe-contrat-liste`, 2026-09-05) a converti les siens en renvois voisins écrits
+  `../references/<fichier>.md#<ancre>`, forme que le contrôle 8 accepte ; il en reste **deux**,
+  dans `dette.md` ;
 - les renvois vers un **fichier voisin**, `[Solder](dette.md#solder)` sans préfixe — `cloture.md` en
   portait déjà un avant ce chantier.
 

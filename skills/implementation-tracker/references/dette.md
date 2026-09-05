@@ -10,7 +10,7 @@ Trois **répertoires-listes**, sous `.claude/implementation/todo/` :
 
 Ce sont des répertoires-listes : toutes les manipulations passent par les commandes de `list-dir`,
 et par elles seules. Structure, contrat, marqueurs, comportement des commandes :
-[Répertoires-listes](../../list-dir/references/contrat-liste.md#structure-dun-répertoire-liste).
+[Répertoires-listes](../../list-dir/references/format.md#structure-dun-répertoire-liste).
 
 ```bash
 T=".claude/implementation/todo"
@@ -34,12 +34,12 @@ list-dir defs    # ce qui est définissable, et de quelle racine ça vient
 Une fois amorcés, ils sont **détachés** de ces définitions : chaque registre porte sa propre copie
 du contrat, seule appliquée, et rien ne le resynchronise de lui-même. Un projet qui redéfinit un
 registre chez lui a délibérément pris la main —
-[Définitions de listes](../../list-dir/references/contrat-liste.md#définitions-de-listes).
+[Définitions de listes](../../list-dir/references/definitions.md#définitions-de-listes).
 
 Détaché ne veut pas dire perdu de vue : chaque registre porte le nom de la définition qui l'a semé
 et sa version. `list-dir validate` avertit sur stderr quand cette définition a évolué depuis, et
 `list-dir reseed "$T/<liste>"` rattrape sur ordre — jamais de lui-même
-([Provenance et péremption](../../list-dir/references/contrat-liste.md#provenance-et-péremption)).
+([Provenance et péremption](../../list-dir/references/provenance.md#provenance-et-péremption)).
 Un contrat rattrapé rend les entrées écrites avant lui non conformes : `migrate` les remet en ligne
 ensuite.
 
@@ -124,7 +124,7 @@ jusque dans les listes de sortie** — sans lui, une entrée soldée ne dirait p
 parlait, et le registre des payées deviendrait une liste de dates.
 
 > *Mode de défaillance* — un projet peut redéfinir sa liste (rang 1 des définitions, cf.
-> [Définitions de listes](../../list-dir/references/contrat-liste.md#définitions-de-listes)). La
+> [Définitions de listes](../../list-dir/references/definitions.md#définitions-de-listes)). La
 > prose décrirait alors le contrat *d'origine* pendant que l'outil en applique un autre, sans
 > qu'aucune commande échoue. `list-dir contract` ne peut pas mentir : il imprime ce qui s'applique.
 
@@ -132,7 +132,7 @@ Ce qui suit n'est **pas** dans le contrat, et c'est pourquoi c'est écrit ici : 
 que la structure ne sait pas porter.
 
 **L'`id` ne se renomme pas.** Il est la seule identité d'un élément de liste
-([Un élément](../../list-dir/references/contrat-liste.md#un-élément)) ; ce qui en découle ici,
+([Un élément](../../list-dir/references/format.md#un-élément)) ; ce qui en découle ici,
 c'est que par lui une entrée se cite, et sur lui que le point 3 d'*Alimenter* dédoublonne. Le
 renommer ferait revenir le même constat comme s'il était neuf.
 
@@ -197,7 +197,7 @@ dépôt depuis son écriture, et le tri le montre sans qu'on ait à le croire su
 **Le contrat a changé depuis la dernière écriture** et les entrées existantes ne lui correspondent
 plus : `list-dir migrate` les remet en ligne. Ce qu'il fait, ce qu'il ne fait pas, et pourquoi le
 renommage d'un champ reste à la main :
-[Quand le contrat change](../../list-dir/references/contrat-liste.md#quand-le-contrat-change).
+[Quand le contrat change](../../list-dir/references/operations.md#quand-le-contrat-change).
 
 ---
 
@@ -212,7 +212,7 @@ list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 
 Le déplacement préserve l'historique de l'entrée, jusqu'à son commit de création dans la liste de
 départ — à une condition, qui tient à ce qu'est `move`
-([L'API Python](../../list-dir/references/contrat-liste.md#lapi-python)) : **déplacer et commiter
+([Déplacer un élément](../../list-dir/references/operations.md#déplacer-un-élément)) : **déplacer et commiter
 d'abord, écrire la preuve ensuite, dans un second commit.** Mêlés, l'historique de l'entrée
 s'arrête au jour du solde.
 

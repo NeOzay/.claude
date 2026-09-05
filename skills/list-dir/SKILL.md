@@ -84,7 +84,7 @@ même — `--force` ne fait que dégeler. Une liste antérieure à ce dispositif
 --def <nom>`. Une liste engendrée par `derive` la reçoit de son **gabarit**, sous un nom composite
 `mère/dérivée` qui dit où retrouver la semence sans jamais se résoudre — et gelée, parce qu'une
 dérivée est jetable. Table, formes du nom, avertissements, règle de fusion :
-`references/contrat-liste.md`, « Provenance et péremption ».
+`references/provenance.md`.
 
 **La définition fait autorité le temps de l'`init`, et pas au-delà.** La liste créée porte dès lors
 sa propre copie du contrat, et c'est elle seule que les commandes appliquent — `contract <liste>`
@@ -92,11 +92,11 @@ l'imprime. Rien ne les resynchronise ensuite : une liste qu'un projet a délibé
 fait pas rattraper par la définition qui l'a semée. `contract --def`/`--from` imprime la semence,
 justement parce qu'une liste engendrée par `derive` n'a de contrat qu'après coup — une prose écrite
 d'avance n'a que le gabarit source à quoi renvoyer. Forme d'une définition, les quatre racines, la
-règle de précédence, ce que chaque cible engage : `references/contrat-liste.md`.
+règle de précédence, ce que chaque cible engage : `references/definitions.md`.
 
 **Un élément posé ne dit pas ce qu'il attend.** Avant de remplir un élément, lire
 `list-dir contract <liste>` — le contrat réellement appliqué, pas la définition qui l'a semé. Un
-marqueur dit qu'il faut écrire, jamais quoi écrire : `references/contrat-liste.md`, « Les marqueurs ».
+marqueur dit qu'il faut écrire, jamais quoi écrire : `references/format.md`, « Les marqueurs ».
 
 **Ce qui est mécaniquement connu se prérenseigne.** Un champ ou une section du contrat peut porter
 `text = "…"` (texte littéral) ou `command = "…"` (sortie d'une commande Bash, lancée depuis le
@@ -140,6 +140,12 @@ for item in lst.items().unwrap():
 
 ## Pour aller plus loin
 
-Structure d'une liste, format du contrat, marqueurs de champ à remplir, surface complète de l'API,
-déclaration et surcharge des commandes, listes dérivées :
-`references/contrat-liste.md`.
+Cinq références, une par sujet — chacune fait autorité sur le sien, les autres y renvoient :
+
+| Fichier | Ce qu'il porte |
+|---|---|
+| `references/format.md` | structure d'un répertoire-liste, format d'un élément, contrat, préremplissage, marqueurs |
+| `references/definitions.md` | amorcer depuis une définition : les quatre racines, la précédence, l'autorité bornée à l'`init`, ce que `contract` vise |
+| `references/provenance.md` | la table `[origin]`, les deux formes de `def`, ce dont `validate` avertit, `reseed`, l'adoption |
+| `references/operations.md` | `validate`, `migrate`, `move`, `list`, `derive`, `merge` |
+| `references/extension.md` | la bibliothèque Python, la déclaration et la surcharge des commandes |

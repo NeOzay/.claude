@@ -18,7 +18,7 @@ le mentionne pas.
 
 ## Pourquoi c'est gênant
 
-La convention `list-dir/<nom>/` est publique : elle est documentée dans `contrat-liste.md` pour que
+La convention `list-dir/<nom>/` est publique : elle est documentée dans `definitions.md` pour que
 des définitions tierces s'y rangent. La première qui organisera ses gabarits en sous-répertoires les
 verra disparaître à l'amorçage, et l'échec ne se manifestera qu'au premier `derive`, loin de la
 commande qui l'a causé.
@@ -31,7 +31,7 @@ pour supprimer — `list-dir.py` : « ÉCHEC FERMÉ […] Jamais de succès sile
 Trancher ce que `templates/` accepte, et le faire dire par le code :
 
 - **arborescence plate seulement** → `_read_definition` refuse en nommant le sous-répertoire
-  trouvé, et la docstring comme `contrat-liste.md` le déclarent ;
+  trouvé, et la docstring comme `definitions.md` le déclarent ;
 - **arborescence libre** → la copie devient récursive, et un test monte une définition à
   sous-répertoire pour le prouver.
 

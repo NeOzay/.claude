@@ -29,7 +29,7 @@ qui n'a pas la définition — un échec dont la cause est ailleurs que là où 
 
 ## Pour solder
 
-Trancher entre deux voies et l'écrire dans `contrat-liste.md` : soit une définition introuvable
+Trancher entre deux voies et l'écrire dans `provenance.md` : soit une définition introuvable
 cesse d'avertir (le silence est alors la règle, et la péremption invérifiable ne se dit plus),
 soit les contrôles de ce dépôt cessent de garder sur un stderr vide et visent une chaîne
 précise. Vérifier en jouant `validate` dans un répertoire sans aucun `.claude` accessible.

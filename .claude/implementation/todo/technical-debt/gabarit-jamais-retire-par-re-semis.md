@@ -14,7 +14,7 @@ category = "<OPTIONNEL>"
 
 Le comportement est cohérent avec la règle générale — ce que la semence ne porte plus est gardé
 sur place — mais la documentation ne l'énonce que pour les clés du contrat. La table de fusion
-de `contrat-liste.md` parle de clés ; la ligne des gabarits, juste au-dessus, ne dit rien de la
+de `provenance.md` parle de clés ; la ligne des gabarits, juste au-dessus, ne dit rien de la
 suppression.
 
 ## Pourquoi c'est gênant
@@ -28,7 +28,7 @@ seule commande échoue.
 
 ## Pour solder
 
-Documenter la règle côté gabarits dans `contrat-liste.md`, section « Provenance et péremption »,
+Documenter la règle côté gabarits dans `provenance.md`, section « `reseed` : rattraper sur ordre »,
 et vérifier par un test qu'un gabarit absent de la semence survit à `reseed`. Si le retrait doit
 devenir possible, il lui faut un drapeau explicite, sur le modèle du `--drop` de `migrate`.
 

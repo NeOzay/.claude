@@ -29,7 +29,7 @@ donc plus qu'à ces deux endroits, et ils peuvent diverger.
 
 ## Pourquoi c'est gênant
 
-La divergence est le comportement **voulu** — `contrat-liste.md`, « La définition n'est autorité
+La divergence est le comportement **voulu** — `definitions.md`, « La définition n'est autorité
 que le temps de l'`init` » : une liste qu'un projet a délibérément redéfinie ne doit pas se faire
 rattraper par sa semence. Ce qui manque n'est pas un re-semis, c'est un **constat** : aujourd'hui,
 une définition modifiée sans sa copie (ou l'inverse) ne fait échouer aucune commande, et personne

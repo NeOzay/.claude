@@ -46,7 +46,7 @@ méfier.
 
 ## Pour solder
 
-Documenter la règle dans `references/contrat-liste.md` (une valeur est comparée à sa forme
+Documenter la règle dans `references/operations.md` (une valeur est comparée à sa forme
 textuelle), **et** décider du cas de l'absence : soit `None` devient une valeur réservée qui filtre
 explicitement les champs non renseignés, soit la comparaison refuse de matcher un champ absent et
 `--where` gagne une forme dédiée.

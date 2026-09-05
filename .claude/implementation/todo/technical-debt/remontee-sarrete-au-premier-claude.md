@@ -32,7 +32,7 @@ Décider si la règle doit être bornée, et par quoi :
 - un **marqueur explicite** dans le `.claude/` d'un projet, que la remontée cherche en priorité ;
 - ou la racine du dépôt git, en déclarant `git` dans les `REQUIRES` de la commande concernée — ce
   que le paquet sait faire proprement, `move` le fait déjà ;
-- ou rien, et alors l'écrire comme une limite assumée dans `contrat-liste.md`, plutôt que de la
+- ou rien, et alors l'écrire comme une limite assumée dans `definitions.md`, plutôt que de la
   laisser se découvrir.
 
 ## Assumé
