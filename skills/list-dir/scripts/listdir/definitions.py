@@ -47,7 +47,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .contract import CONTRACT
-from .types import Result, fail, ok
+from .types import SEPARATEUR, Result, fail, nom_mal_forme, ok
 
 CLAUDE = ".claude"
 SKILLS = "skills"
@@ -180,7 +180,12 @@ def definitions(where: list[Root]) -> dict[str, list[Root]]:
 def resolve(name: str, where: list[Root]) -> Result[Path]:
     """Le répertoire de définition retenu pour `name`.
 
-    TROIS ISSUES, et pas une de plus :
+    QUATRE ISSUES, et pas une de plus :
+      - un nom de GABARIT — `technical-debt/review` — → échec disant ce qu'il est. Un
+        gabarit n'est pas une définition : il ne s'amorce ni ne se rattrape, il
+        transforme une liste qui existe déjà. Le chercher dans les rangs rendrait
+        « introuvable » sur un nom parfaitement valide, et enverrait chercher là où
+        il n'a jamais été ;
       - un seul rang le porte, ou plusieurs à des rangs différents → le plus
         spécifique gagne. Masquer est le comportement voulu : c'est ainsi qu'un
         projet reprend la main sur une définition de la configuration ;
@@ -190,7 +195,27 @@ def resolve(name: str, where: list[Root]) -> Result[Path]:
       - personne → échec listant les noms connus, comme le fait `list-dir.py` pour
         une commande inconnue. Un « introuvable » sec obligerait à aller lire
         l'arborescence pour trouver l'orthographe exacte.
+
+    LE REFUS DU GABARIT VIENT EN PREMIER, et c'est ce qui donne son message à
+    `init --def a/b` comme à `reseed --def a/b` : un seul point de contrôle pour tous
+    ceux qui résolvent un nom, plutôt qu'un contrôle par appelant qui finirait par
+    manquer au dernier arrivé.
     """
+    if SEPARATEUR in name:
+        motif = nom_mal_forme(name)
+        if motif is not None:
+            # LA FORME SE JUGE AVANT LE SENS, sans quoi le refus conseille une commande
+            # qui ne marchera pas : « --def technical-debt/ » nommerait un gabarit vide,
+            # et « --def a/b/c » un gabarit « b/c » qui ne peut pas exister.
+            return fail(f"« {name} » n'est pas un nom de semence : {motif}")
+        definition, _, gabarit = name.partition(SEPARATEUR)
+        return fail(
+            f"« {name} » nomme le gabarit « {gabarit} » de la définition « {definition} », "
+            "pas une définition — un gabarit ne s'amorce ni ne se rattrape ; il projette une "
+            f"liste existante (« list-dir derive <src> <dst> --template {gabarit} »), et "
+            f"« list-dir contract --def {definition} --template {gabarit} » l'imprime"
+        )
+
     candidates = definitions(where).get(name, [])
     if not candidates:
         connues = ", ".join(sorted(definitions(where))) or "aucune"

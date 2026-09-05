@@ -104,6 +104,52 @@ def test_def_avec_espace_refusee() -> None:
     assert "espace" in r.message
 
 
+def test_nom_de_gabarit_admis() -> None:
+    """« mère/dérivée » nomme le gabarit d'une définition — la semence d'une dérivée."""
+    r = contrat('\n[origin]\ndef = "technical-debt/review"\nversion = 1\nfrozen = true\n')
+    origin = r.unwrap().origin
+    assert origin is not None
+    assert origin.name == "technical-debt/review"
+    assert origin.definition == "technical-debt"
+    assert origin.template == "review"
+
+
+def test_nom_simple_ne_vise_aucun_gabarit() -> None:
+    origin = contrat('\n[origin]\ndef = "technical-debt"\nversion = 1\n').unwrap().origin
+    assert origin is not None
+    assert origin.definition == "technical-debt"
+    assert origin.template is None
+
+
+def test_sans_semence_les_deux_parts_sont_absentes() -> None:
+    origin = contrat("\n[origin]\ndef = false\n").unwrap().origin
+    assert origin is not None
+    assert origin.definition is None
+    assert origin.template is None
+
+
+def test_trois_segments_refuses() -> None:
+    """Les gabarits vivent à plat dans `templates/` : un troisième segment ne vise rien."""
+    for nom in ("a/b/c", "a//b"):
+        r = contrat(f'\n[origin]\ndef = "{nom}"\nversion = 1\n')
+        assert not r, nom
+        assert "au plus un" in r.message
+
+
+def test_segment_vide_refuse() -> None:
+    for nom in ("a/", "/a"):
+        r = contrat(f'\n[origin]\ndef = "{nom}"\nversion = 1\n')
+        assert not r, nom
+        assert "n'est pas un nom" in r.message
+
+
+def test_remontee_de_chemin_refusee() -> None:
+    """C'est un nom, pas un chemin : `..` sortirait de `templates/`."""
+    for nom in ("../x", "a/..", "./a", "a/."):
+        r = contrat(f'\n[origin]\ndef = "{nom}"\nversion = 1\n')
+        assert not r, nom
+
+
 def test_version_manquante_sous_un_nom_refusee() -> None:
     r = contrat('\n[origin]\ndef = "d"\n')
     assert not r
@@ -278,6 +324,26 @@ def test_frozen_tait_la_peremption(tmp_path: Path) -> None:
     _chdir(tmp_path)
 
     assert dits(cible) == []
+
+
+def test_estampille_de_gabarit_ne_se_dit_pas_introuvable(tmp_path: Path) -> None:
+    """Une dérivée dégelée à la main ne doit pas s'entendre envoyer au mauvais endroit.
+
+    Le gel du gabarit fait taire ce cas en temps normal ; il reste que le message,
+    quand on l'atteint, doit dire la vérité plutôt que « définition introuvable ».
+    """
+    definition, cible = semer(tmp_path)
+    _ = ecrire(
+        cible,
+        f"{LIST_DIR}/{CONTRACT}",
+        BASE + '\n[origin]\ndef = "semee/review"\nversion = 1\n',
+    )
+    _chdir(tmp_path)
+    assert definition.is_dir()
+
+    (dit,) = [d for d in dits(cible) if "péremption d'un gabarit" in d]
+    assert "introuvable dans les quatre rangs" not in dit
+    assert "list-dir contract --def semee --template review" in dit
 
 
 def test_semence_introuvable_dit_que_la_peremption_est_invérifiable(tmp_path: Path) -> None:

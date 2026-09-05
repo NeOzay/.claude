@@ -3,7 +3,7 @@ description = "Dette technique constatée et non résolue"
 
 [origin]
 def = "technical-debt"
-version = 1
+version = 2
 
 [fields.id]
 type = "slug"

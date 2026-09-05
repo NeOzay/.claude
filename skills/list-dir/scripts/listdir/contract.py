@@ -31,6 +31,7 @@ from .types import (
     Result,
     Section,
     fail,
+    nom_mal_forme,
     ok,
 )
 
@@ -183,6 +184,28 @@ def _liste(value: object, path: Path, subject: str) -> Result[list[str]]:
     return ok(out)
 
 
+def _forme_du_nom(declared: str, path: Path) -> Result[None]:
+    """La forme d'un `origin.def`, dite avec le fichier qui la porte.
+
+    LA RÈGLE VIT DANS `types.nom_mal_forme`, ET NULLE PART AILLEURS : `resolve` la
+    juge aussi, sur un argument de ligne de commande plutôt que sur un fichier. Ce
+    module n'ajoute que ce qu'il est seul à savoir — quel fichier, et sous quelle clé.
+
+    RIEN N'EST OUVERT ICI, à la différence de `source_path` : une estampille se relit
+    sur une machine où la définition n'est pas installée, et une forme qu'on ne juge
+    qu'à l'ouverture ne s'y juge jamais.
+
+    > *Mode de défaillance* — sans ce contrôle, `def = "technical-debt/revue"` (faute
+    > de frappe) passe, et rien ne le dira jamais : le gel tait la péremption, et
+    > `reseed` n'est pas appelé sur une liste jetable. Une estampille fausse est pire
+    > qu'une absente, parce qu'elle se croit vraie.
+    """
+    motif = nom_mal_forme(declared)
+    if motif is not None:
+        return fail(f"{path}: « origin », « def » — « {declared} » n'est pas un nom : {motif}")
+    return ok(None)
+
+
 def _origin(value: object, path: Path) -> Result[Origin | None]:
     """La table `[origin]`, ou None quand le fichier n'en porte pas.
 
@@ -246,6 +269,9 @@ def _origin(value: object, path: Path) -> Result[Origin | None]:
             f"{path}: « origin », « def » — un nom ne peut être vide ni contenir "
             f"d'espace, trouvé « {declared} »"
         )
+    forme = _forme_du_nom(declared, path)
+    if not forme:
+        return Result(forme.status, None, forme.message)
 
     version = body.get("version")
     if version is None:

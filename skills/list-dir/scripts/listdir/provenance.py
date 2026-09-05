@@ -43,7 +43,7 @@ from .contract import (
 )
 from .definitions import resolve, roots
 from .items import ESCAPES, SerialiseError, dump_value
-from .types import Contract, Result, fail, ok
+from .types import Contract, Origin, Result, fail, ok
 
 
 def seed_base(list_dir: Path) -> Path:
@@ -68,17 +68,41 @@ def warnings(list_dir: Path, contract: Contract) -> list[str]:
     if origin.name is None or origin.frozen:
         return []
 
-    return _peremption(list_dir, origin.name, origin.version) + _modifications(list_dir)
+    return _peremption(list_dir, origin) + _modifications(list_dir)
 
 
-def _peremption(list_dir: Path, nom: str, version: int) -> list[str]:
+def _peremption(list_dir: Path, origin: Origin) -> list[str]:
     """L'écart de version avec la définition, quand elle est joignable.
 
     INTROUVABLE N'EST PAS UNE FAUTE, mais ne peut pas non plus se taire : sur une
     machine où le skill qui porte la définition n'est pas installé, la péremption
     devient invérifiable, et le lecteur doit savoir que le silence des lignes
     suivantes ne prouve rien.
+
+    UN GABARIT NE SE SUIT PAS, et le dire est le seul comportement honnête. Une
+    estampille `mère/dérivée` nomme la semence d'une liste engendrée par `derive` ;
+    la résoudre dans les rangs rendrait « introuvable », ce qui est faux et envoie
+    chercher au mauvais endroit. Ce n'est PAS un quatrième silence : les trois de
+    l'en-tête disent qu'il n'y a rien à rattraper, celui-ci dit qu'on ne sait pas.
+    Le cas ne survient que sur une dérivée dégelée à la main — le gabarit qui l'a
+    semée pose `frozen = true`, et `warnings` s'arrête avant d'arriver ici.
+
+    ELLE PREND L'`Origin` ENTIÈRE, ET RÉTRÉCIT ELLE-MÊME. Recevoir le nom à part
+    laissait passer un couple incohérent — un nom d'un côté, une autre estampille de
+    l'autre — sans que rien ne le dise, sur une fonction dont tout le propos est de
+    ne pas mentir sur la provenance. Sans semence, il n'y a pas de péremption : c'est
+    une réponse, pas un cas impossible.
     """
+    nom = origin.name
+    if nom is None:
+        return []
+    if origin.template is not None:
+        return [
+            f"{list_dir} : semée par le gabarit « {nom} » — la péremption d'un gabarit "
+            f"n'est pas suivie ; « list-dir contract --def {origin.definition} --template "
+            f"{origin.template} » imprime la semence, à comparer à la main"
+        ]
+
     trouve = resolve(nom, roots())
     if not trouve:
         return [
@@ -99,6 +123,7 @@ def _peremption(list_dir: Path, nom: str, version: int) -> list[str]:
         ]
 
     courante = semence.origin.version
+    version = origin.version
     if courante > version:
         return [
             f"{list_dir} : contrat périmé — semé en v{version}, « {nom} » est en "

@@ -22,6 +22,8 @@ from pathlib import Path
 
 from jouet import GABARIT_TOML, ecrire, element, monter_gabarit
 from listdir import open_list
+from listdir.contract import load_contract
+from listdir.provenance import warnings
 from listdir.store import ListStore
 from listdir.types import OPTIONAL, PLACEHOLDER
 
@@ -144,6 +146,33 @@ def test_une_liste_derivee_est_conforme_et_pas_remplie(liste: Path, tmp_path: Pa
 
     assert derivee.validate().unwrap() == []
     assert derivee.validate(filled=True).unwrap() != []
+
+
+def test_une_derivee_d_un_gabarit_estampille_ne_dit_rien(liste: Path, tmp_path: Path) -> None:
+    """C'est le symptôme qui a ouvert ce chantier : une liste de revue naissait sans
+    provenance, et `validate` réclamait à chaque fois une adoption qui n'a pas de sens
+    sur une liste jetable. L'estampille voyage avec le gabarit, comme toute estampille
+    voyage avec sa semence — `derive` n'en écrit pas une ligne."""
+    estampille = '\n[origin]\ndef = "jouet/revue"\nversion = 1\nfrozen = true\n'
+    source = monter_gabarit(liste, contrat=GABARIT_TOML + estampille)
+    derivee = ouvrir(source).derive(tmp_path / "revues", "revue").unwrap()
+
+    contrat = load_contract(derivee.path).unwrap()
+    origin = contrat.origin
+    assert origin is not None
+    assert (origin.definition, origin.template) == ("jouet", "revue")
+    assert warnings(derivee.path, contrat) == []
+
+
+def test_une_derivee_sans_estampille_reclame_toujours_une_adoption(
+    liste: Path, tmp_path: Path
+) -> None:
+    """Le pendant : rien n'est posé d'office. Un gabarit muet sème une liste muette,
+    et c'est l'avertissement d'adoption qui le dit."""
+    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+
+    dits = warnings(derivee.path, load_contract(derivee.path).unwrap())
+    assert any("aucune provenance déclarée" in d for d in dits)
 
 
 def test_from_qui_ne_nomme_aucun_champ_source(liste: Path, tmp_path: Path) -> None:

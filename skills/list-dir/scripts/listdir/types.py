@@ -32,6 +32,40 @@ if TYPE_CHECKING:  # pragma: no cover
 PLACEHOLDER = "<À REMPLIR>"  # requis — tant qu'il est là, l'élément n'est pas instruit
 OPTIONAL = "<OPTIONNEL>"  # facultatif — sa présence n'empêche rien
 
+SEPARATEUR = "/"
+"""Ce qui sépare une définition du gabarit qu'on y vise, dans un `origin.def`. Défini
+ici parce qu'`Origin` le découpe et que `_origin` le valide : deux modules, une seule
+constante, sinon l'un accepterait un jour ce que l'autre ne saurait pas relire."""
+
+
+def nom_mal_forme(nom: str) -> str | None:
+    """Pourquoi `nom` n'est pas un nom de semence bien formé, ou None s'il l'est.
+
+    DEUX FORMES, ET PAS UNE DE PLUS : `technical-debt` nomme une définition,
+    `technical-debt/review` nomme le gabarit `review` de cette définition. Un
+    troisième segment ne désignerait rien — les gabarits vivent à plat dans
+    `templates/`.
+
+    C'EST UN NOM, PAS UN CHEMIN, exactement comme pour `--template` : `..`
+    remonterait hors de `templates/`, `.` désignerait le répertoire lui-même.
+
+    ICI PLUTÔT QUE DANS `contract.py` : la règle sert à DEUX lecteurs qui n'ont pas le
+    même vocabulaire — `_origin` juge un fichier et parle en `Result` avec un chemin,
+    `resolve` juge un argument de ligne de commande. Rendre le seul MOTIF, sans
+    chemin ni Result, est ce qui les laisse composer chacun son message sur une règle
+    unique. Deux copies finiraient par diverger, et c'est arrivé : `resolve` a d'abord
+    conseillé « --template  » sur un `technical-debt/` que `_origin` refusait déjà.
+    """
+    segments = nom.split(SEPARATEUR)
+    if len(segments) > 2:
+        return f"au plus un « {SEPARATEUR} », qui sépare une définition du gabarit qu'on y vise"
+    if any(not s or s in (".", "..") for s in segments):
+        return (
+            f"chaque part d'un « <définition>{SEPARATEUR}<gabarit> » doit être non vide, "
+            "et différente de « . » et « .. »"
+        )
+    return None
+
 
 class ListError(Exception):
     """Levée par Result.unwrap() sur un résultat en échec."""
@@ -162,6 +196,13 @@ class Origin:
     du fichier, et l'état du squelette qu'`init` écrit sans `--def`. À distinguer
     d'un `Contract.origin` à None, qui dit qu'aucune provenance n'est déclarée :
     l'un est une réponse, l'autre une absence de réponse.
+
+    `name` PREND DEUX FORMES, et la seconde nomme un gabarit. Un segment unique
+    désigne une définition, résolue dans les quatre rangs. Deux segments séparés
+    d'un `/` — `technical-debt/review` — désignent le GABARIT `review` de la
+    définition `technical-debt`, c'est-à-dire la semence d'une liste engendrée par
+    `derive`. La forme est vérifiée par `_origin`, seul constructeur de cette classe :
+    les deux propriétés ci-dessous s'appuient là-dessus et ne revalident rien.
     """
 
     name: str | None
@@ -169,6 +210,28 @@ class Origin:
     frozen: bool = False
     """La liste a délibérément pris la main : plus d'avertissement de péremption, et
     `reseed` refuse d'y écrire sans `--force`. C'est ce refus qui justifie le mot."""
+
+    @property
+    def definition(self) -> str | None:
+        """La définition nommée : le nom entier, ou son premier segment.
+
+        C'est elle qu'on résout dans les rangs — un gabarit n'y est jamais cherché
+        pour lui-même, il vit dans le `templates/` de celle-ci.
+        """
+        return None if self.name is None else self.name.split(SEPARATEUR, 1)[0]
+
+    @property
+    def template(self) -> str | None:
+        """Le gabarit nommé, ou None quand l'estampille désigne une définition.
+
+        DEUX ABSENCES DIFFÉRENTES, ET C'EST VOULU : None sur `name is None` dit qu'il
+        n'y a pas de semence du tout ; None sur un nom simple dit que la semence est
+        une définition. Les deux se lisent au même endroit — `definition` — et rien
+        n'oblige un appelant à les distinguer s'il n'en a pas besoin.
+        """
+        if self.name is None or SEPARATEUR not in self.name:
+            return None
+        return self.name.split(SEPARATEUR, 1)[1]
 
 
 @dataclass(frozen=True)

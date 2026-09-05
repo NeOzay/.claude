@@ -81,8 +81,10 @@ stderr quand la définition a évolué depuis, sans jamais changer son code de r
 périmée n'a aucun élément fautif. `reseed` rattrape **sur ordre**, par une fusion à trois points qui
 préserve les décisions locales et refuse en nommant les clés quand les deux côtés ont modifié la
 même — `--force` ne fait que dégeler. Une liste antérieure à ce dispositif s'adopte par `reseed
---def <nom>`. Table, avertissements, règle de fusion : `references/contrat-liste.md`, « Provenance
-et péremption ».
+--def <nom>`. Une liste engendrée par `derive` la reçoit de son **gabarit**, sous un nom composite
+`mère/dérivée` qui dit où retrouver la semence sans jamais se résoudre — et gelée, parce qu'une
+dérivée est jetable. Table, formes du nom, avertissements, règle de fusion :
+`references/contrat-liste.md`, « Provenance et péremption ».
 
 **La définition fait autorité le temps de l'`init`, et pas au-delà.** La liste créée porte dès lors
 sa propre copie du contrat, et c'est elle seule que les commandes appliquent — `contract <liste>`

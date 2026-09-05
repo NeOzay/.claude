@@ -145,6 +145,43 @@ def test_nom_inconnu_liste_les_noms_connus(tmp_path: Path) -> None:
     assert "alpha, beta" in trouve.message
 
 
+def test_nom_de_gabarit_refuse_en_disant_ce_qu_il_est(tmp_path: Path) -> None:
+    """Un gabarit n'est pas une définition : il projette une liste qui existe déjà.
+
+    Le chercher dans les rangs rendrait « introuvable » sur un nom parfaitement
+    valide, et enverrait chercher là où il n'a jamais été.
+    """
+    _ = definition(tmp_path / ".claude" / "list-dir", "technical-debt")
+    r = resolve("technical-debt/review", roots(cwd=tmp_path, package=tmp_path))
+
+    assert not r
+    assert "introuvable" not in r.message
+    assert "review" in r.message and "technical-debt" in r.message
+    assert "--template review" in r.message
+
+
+def test_un_nom_composite_mal_forme_ne_conseille_pas_une_commande_inutilisable() -> None:
+    """La FORME se juge avant le sens, sinon le refus conseille ce qui ne marchera pas.
+
+    « technical-debt/ » nommerait un gabarit vide et conseillerait « --template  » ;
+    « a/b/c » inventerait un gabarit « b/c ». Un message qui envoie taper une commande
+    vouée à échouer est un échec ouvert de plus, pas une aide.
+    """
+    for nom in ("technical-debt/", "/x", "../x", "a/b/c"):
+        r = resolve(nom, [])
+        assert not r, nom
+        assert "--template " not in r.message, nom
+        assert "n'est pas un nom de semence" in r.message, nom
+
+
+def test_le_refus_du_gabarit_ne_depend_d_aucune_racine() -> None:
+    """Il se prononce sur la FORME du nom : aucune racine n'a besoin d'exister."""
+    r = resolve("a/b", [])
+
+    assert not r
+    assert "gabarit" in r.message
+
+
 def test_repertoire_sans_contrat_n_est_pas_une_definition(tmp_path: Path) -> None:
     """Le proposer à `--def` reviendrait à promettre un amorçage qui échouerait
     ensuite sur un fichier manquant."""

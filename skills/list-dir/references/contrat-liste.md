@@ -202,6 +202,48 @@ et `reseed --from <chemin>` reste la porte de sortie quand la définition n'est 
 Une liste née à la main n'a rien à rattraper, et l'absence de réponse se distingue de la réponse
 « aucune ».
 
+### `def` prend deux formes, et la seconde nomme un gabarit
+
+Une liste engendrée par [`derive`](#listes-dérivées) n'est pas semée par une définition : sa semence
+est le **gabarit** `<nom>.toml` d'une définition. `def` le dit sous la forme `mère/dérivée` :
+
+```toml
+[origin]
+def = "technical-debt/review"   # le gabarit « review » de la définition « technical-debt »
+version = 1                     # celle du GABARIT, sans rapport avec celle de sa définition
+frozen = true                   # la norme d'une liste jetable — voir plus bas
+```
+
+| Forme | Ce qu'elle nomme | Ce qu'on peut en faire |
+|---|---|---|
+| `technical-debt` | une définition, cherchée dans les quatre rangs | `init --def`, `reseed --def`, `contract --def` |
+| `technical-debt/review` | le gabarit `review` de cette définition | **rien** : elle se lit, elle ne se résout pas |
+
+**Le nom composite DIT, il ne résout pas.** `--def technical-debt/review` est refusé en le disant :
+un gabarit ne s'amorce ni ne se rattrape, il projette une liste qui existe déjà. Ce qu'il donne au
+lecteur, c'est de quoi retrouver la semence sans la chercher —
+`list-dir contract --def technical-debt --template review` l'imprime, et les deux moitiés du nom
+sont exactement les deux arguments à taper.
+
+> *Mode de défaillance* — sans cette forme, la seule façon de faire taire l'avertissement d'adoption
+> sur une liste dérivée serait `def = false`, c'est-à-dire lui faire déclarer qu'elle n'a pas de
+> semence. Elle en a une ; ce serait un mensonge, et il effacerait la seule trace du gabarit qui
+> l'a produite.
+
+**Deux segments, pas trois**, chacun non vide et différent de `.` et `..` — les gabarits vivent à
+plat dans `templates/`. La forme est vérifiée à la lecture du contrat, sans rien ouvrir : une
+estampille se relit sur une machine où la définition n'est pas installée, et une forme qu'on ne
+jugerait qu'à l'ouverture ne s'y jugerait jamais. Un `def = "technical-debt/revue"` fautif
+échouerait sinon en silence — le gel tait la péremption, et `reseed` n'est jamais appelé sur une
+liste jetable.
+
+**`frozen = true` est la norme d'une liste dérivée**, et c'est le gabarit qui le déclare, comme il
+déclare le reste de l'estampille. Une liste de revue est dérivée, instruite, agglomérée puis
+archivée : il n'y a rien à y rattraper, et une liste qu'on ne rattrapera jamais n'a pas à s'entendre
+rappeler qu'elle pourrait l'être. Sur une dérivée qu'on aurait dégelée à la main, `validate` dit que
+la péremption d'un gabarit **n'est pas suivie** — plutôt que de le chercher dans les rangs, où il
+n'a jamais été.
+
 ### Ce que `validate` avertit
 
 Les avertissements sortent sur **stderr**, sur un succès comme sur un échec, et ne changent jamais
@@ -213,6 +255,7 @@ suivent le contrat qu'elle porte, et c'est celui-là que les commandes appliquen
 | pas de table `[origin]` | aucune provenance déclarée, et le geste d'adoption |
 | `def = false` | rien |
 | `frozen = true` | rien |
+| `def` nomme un gabarit (`mère/dérivée`) | la péremption d'un gabarit n'est pas suivie, et le `contract --def … --template …` qui imprime la semence |
 | définition introuvable dans les quatre rangs | péremption invérifiable, avec le nom cherché |
 | semence sans `[origin]`, ou illisible | dit avec le fichier fautif |
 | version de la semence plus haute | « contrat périmé — semé en v2, en v5 », et `reseed` |
@@ -754,6 +797,17 @@ values = ["retenu", "écarté"]
 L'`id` est reporté d'office — c'est le seul lien entre une fiche dérivée et son élément d'origine.
 `derive` ne transforme, ne concatène et ne calcule rien : un champ nommé par `from` est recopié, un
 champ sans `from` reçoit le marqueur de son statut.
+
+**La dérivée reçoit son estampille du gabarit**, comme toute liste reçoit la sienne de sa semence :
+`derive` recopie le `<nom>.toml` verbatim, et n'écrit pas une ligne de `[origin]`. Un gabarit qui
+porte la table sème donc une liste qui sait d'où elle vient, sous la forme `mère/dérivée` —
+[`def` prend deux formes](#def-prend-deux-formes-et-la-seconde-nomme-un-gabarit) ; un gabarit muet
+sème une liste muette, à qui `validate` réclamera une adoption.
+
+**`derive` n'écrit pas de `.list/semence/`.** Une liste dérivée est gelée par convention, et une
+liste gelée n'a rien à rattraper : le point de référence d'un `reseed` qui n'aura jamais lieu ne
+serait qu'une copie de plus à tenir à jour. C'est aussi pourquoi la version d'un gabarit ne se
+compare à rien — ce que `validate` dit plutôt que de le taire.
 
 **`derive` projette, `move` déplace.** `move` fait changer un fichier de liste — `git mv`,
 l'historique suit, l'élément reste le même. `derive` crée un second fichier à côté du premier, sans

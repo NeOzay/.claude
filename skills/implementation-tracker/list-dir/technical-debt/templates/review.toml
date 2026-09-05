@@ -7,6 +7,24 @@
 name = "revue"
 description = "Revue du registre de dette — une fiche par entrée, un verdict par fiche"
 
+# LA PROVENANCE D'UNE LISTE ENGENDRÉE PAR CE GABARIT. `derive` la recopie avec le
+# reste — il n'en écrit pas une ligne, exactement comme `init` reçoit l'estampille
+# d'une définition sans jamais l'écrire lui-même.
+#
+# LE NOM EST COMPOSITE parce qu'un gabarit n'est pas une définition : il vit dans le
+# `templates/` de « technical-debt », et c'est là qu'on le retrouve
+# (« list-dir contract --def technical-debt --template review »). Le nom le DIT, il
+# ne se résout pas : « --def technical-debt/review » est refusé en le disant.
+#
+# `frozen = true` PARCE QU'UNE REVUE EST JETABLE. Elle est dérivée le matin, instruite
+# dans la journée, agglomérée en rapport et archivée : il n'y a rien à y rattraper, et
+# une liste qu'on ne rattrapera jamais n'a pas à s'entendre rappeler qu'elle pourrait
+# l'être.
+[origin]
+def = "technical-debt/review"
+version = 1
+frozen = true
+
 [fields.id]
 type = "slug"
 
