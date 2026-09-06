@@ -47,18 +47,23 @@ un schéma se survole.
       <id>.md                    #   une entrée = un fichier
     technical-debt-solde/        # ce qui a été soldé, avec la commande qui l'établit
     technical-debt-ecarte/       # ce qui en est sorti sans avoir été payé, avec son motif
+    road-map/                    # les tâches qu'on veut accomplir, notées à la demande
+    road-map-fait/               # celles qu'un chantier a portées, avec ce chantier
+    road-map-ecarte/             # celles qu'on a cessé de vouloir, avec leur motif
 ```
 
 `done/` porte des **archives figées** ; `todo/` des registres **vivants**, relus et élagués, jamais
 archivés. Le pipeline alimente `todo/` à la clôture et ne l'ouvre à aucun autre moment ; seul
 `debt-review`, invoqué à la main, le relit et le met à jour.
 
-Les trois registres sont des **répertoires-listes** : un répertoire = une liste, un fichier = une
+Les six registres sont des **répertoires-listes** : un répertoire = une liste, un fichier = une
 entrée, un `.list/contract.toml` qui déclare la structure. Ils ne s'éditent jamais à la main — les
 commandes du skill `list-dir` créent, valident, déplacent et agglomèrent. Contrat des entrées et
-gestes autorisés : `dette.md`.
+gestes autorisés : `dette.md` pour la dette, `road-map.md` pour la road-map. Les deux familles se
+distinguent par ce qu'elles portent — un constat vérifié d'un côté, une tâche voulue de l'autre — et
+par qui les alimente : [Road-map](road-map.md#la-frontière-avec-le-registre-de-dette).
 
-> *Mode de défaillance* — ces trois listes ont d'abord été trois fichiers Markdown uniques.
+> *Mode de défaillance* — les trois listes de dette ont d'abord été trois fichiers Markdown uniques.
 > Solder une entrée revenait à découper trente lignes de prose et à les recoller ailleurs, sans
 > qu'aucune commande ne signale une perte. Un `mv` ou une édition de front matter à la main
 > ramène exactement ce mode d'échec.
@@ -88,13 +93,17 @@ réattribue ces noms d'un chantier à l'autre.
 | Fichier | Champs |
 |---|---|
 | `<slug>.brief.md` | `slug`, `titre`, `statut` (`brouillon` \| `validé`), `execution`, `créé` |
-| `<slug>.md` (suivi) | `slug`, `titre`, `branche`, `base`, `statut` (`en-cours` \| `bloqué` \| `terminé` \| `abandonné`), `session`, `execution`, `plan`, `brief`, `audit`, `créé`, `maj` |
+| `<slug>.md` (suivi) | `slug`, `titre`, `branche`, `base`, `statut` (`en-cours` \| `bloqué` \| `terminé` \| `abandonné`), `session`, `execution`, `plan`, `brief`, `audit`, `road-map`, `créé`, `maj` |
 | `<slug>.audit.md` | `slug` |
 
 - `branche` = `<slug>` ; `base` = la branche principale, cible de l'aplatissement final.
 - `audit` n'apparaît qu'au premier audit du chantier.
 - `execution` vaut `délégué` ou `direct`. Le suivi le **reprend tel quel** du brief.
   **Une valeur absente vaut `direct`.**
+- `road-map` porte l'**`id`** de l'entrée de road-map dont le chantier est parti — pas un chemin.
+  Absent quand le chantier ne part d'aucune entrée, ce qui est le cas courant. Il n'est **pas**
+  réécrit à l'archivage : il ne désigne aucun fichier qui bouge vers `done/`. C'est lui qui dit à la
+  clôture quoi déplacer vers `road-map-fait/` ([Road-map](road-map.md#le-champ-road-map)).
 - `maj` est actualisé à chaque écriture dans le suivi, en même temps que le contenu.
 
 > *Mode de défaillance* — lire un `execution` absent comme « délégable » enverrait un exécutant en
@@ -225,7 +234,7 @@ Le pipeline dépend de deux commandes, d'un interpréteur, et de rien d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
 |---|---|---|
-| `list-dir` | les trois registres de `todo/`, `debt-review` | `command -v list-dir` |
+| `list-dir` | les six registres de `todo/`, `debt-review` | `command -v list-dir` |
 | `impl-list` | l'Étape 0 du tracker, le listing des suivis | `command -v impl-list` |
 | Python ≥ 3.12 | les deux commandes (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |

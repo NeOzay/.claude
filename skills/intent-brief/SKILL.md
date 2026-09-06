@@ -103,6 +103,10 @@ Utiliser la date renvoyée par `date`, jamais l'inventer :
 Objectif : savoir ce que le code répond déjà, pour ne demander que le reste. Aucune question ici,
 et pas de narration fichier par fichier.
 
+- **l'entrée de `road-map/` dont part la demande**, s'il y en a une : c'est un point de départ déjà
+  écrit, et sa section `Références` **est** le début de cette reconnaissance. Retenir son `id` — il
+  ira dans le `road-map:` du futur suivi, et c'est lui qui fera sortir l'entrée à la clôture
+  ([Road-map](../implementation-tracker/references/road-map.md#le-champ-road-map))
 - `CLAUDE.md` du projet, `README`, conventions locales
 - fichiers concernés par la demande
 - `git log --oneline -20` sur la zone visée — les commits racontent les tentatives passées

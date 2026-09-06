@@ -180,6 +180,11 @@ committer ou les mettre de côté) avant de relancer.
    ont été validés. Renseigner `brief:` dans le frontmatter, ainsi que `execution:` — repris tel
    quel du brief. Champs, valeurs et défauts : [Frontmatter](references/contrat.md#frontmatter).
 
+   **Chantier parti d'une entrée de `road-map/`** → renseigner `road-map:` avec son `id`, relevé
+   par `intent-brief` à la reconnaissance. C'est la seule chose qui fera sortir l'entrée à la
+   clôture ; omis, elle y restera indéfiniment
+   ([Road-map](references/road-map.md#le-champ-road-map)).
+
    Le **symptôme** est ce qui permet, trois sessions plus tard, de voir qu'on a construit la
    bonne solution au mauvais problème. Les **signaux de dérive** deviennent un déclencheur
    d'arrêt pendant l'implémentation (Étape 4). C'est ce point de jonction qui attache le chantier à

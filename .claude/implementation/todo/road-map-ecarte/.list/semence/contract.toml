@@ -1,0 +1,37 @@
+name = "road-map-ecarte"
+description = "Tâches sorties de la road-map sans avoir été faites, avec leur motif"
+
+[origin]
+def = "road-map-ecarte"
+version = 1
+
+[fields.id]
+type = "slug"
+description = ""
+
+[fields.title]
+type = "text"
+required = true
+description = "l'énoncé de la tâche, tel qu'il figurait en titre d'entrée"
+
+[fields.date]
+type = "date"
+required = true
+description = "date où l'entrée a été notée, jamais modifiée"
+
+[fields.source]
+type = "text"
+required = false
+description = "d'où vient l'idée — le chantier en cours, une entrée de dette, une discussion"
+
+[sections."À faire"]
+required = true
+description = "repris de l'entrée d'origine — sans lui, une entrée sortie ne dit plus de quoi elle parlait"
+
+[sections."Écartée le"]
+required = true
+description = "date et motif : sans objet, doublon (id conservé), faite ailleurs, plus voulue — aucune preuve exécutée n'est exigée, une tâche à laquelle on renonce n'établit rien dans le dépôt"
+
+[sections."Références"]
+required = false
+description = "repris de l'entrée d'origine ; le motif de sortie est dans « Écartée le »"

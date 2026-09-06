@@ -35,7 +35,7 @@ pour laquelle ce regard est confié à un agent qui n'a pas écrit le code.
 journal, rendre la main. `RÉSERVES` → l'utilisateur tranche entre clore avec, ou traiter d'abord ;
 ne pas décider à sa place, et ne pas requalifier une réserve en détail pour pouvoir continuer.
 
-### 2. Alimenter le registre de dette
+### 2. Alimenter la dette, sortir la road-map
 
 Ce que le chantier laisse derrière lui part dans le répertoire-liste
 `.claude/implementation/todo/technical-debt/` — une entrée par fichier, créée par commande :
@@ -69,6 +69,26 @@ list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 L'entrée déplacée reçoit ensuite sa section `## Soldé le`, portant la commande exécutée qui
 l'établit. Sans cette sortie réelle, l'entrée reste. **Le déplacement et l'écriture de la preuve ne
 partagent jamais un commit** — le motif est au registre ([Solder](dette.md#solder)).
+
+**Si le suivi porte un `road-map:`**, le chantier est parti d'une entrée de road-map : la sortir
+vers `road-map-fait/`, par `move` et jamais à la main, puis lui écrire sa section `## Fait le` —
+date, slug du chantier, et le chemin de son archive dans `done/`.
+
+```bash
+list-dir move "$T/road-map" <id> "$T/road-map-fait"
+```
+
+Champ absent → **rien à faire** : c'est le cas courant, pas une omission. Le geste ne se déclenche
+sur aucune autre déduction — ni la ressemblance d'un intitulé, ni le souvenir d'une conversation.
+Ce que porte ce champ et pourquoi c'est un `id` : [Road-map](road-map.md#le-champ-road-map).
+
+Le déplacement et l'écriture de `## Fait le` **ne partagent pas un commit** non plus, pour la raison
+donnée plus haut à propos du solde de dette ([Solder](dette.md#solder)).
+
+**La road-map ne s'alimente pas ici.** La clôture n'y écrit qu'en sortie ; une entrée n'y entre
+qu'à la demande de l'utilisateur, à aucun moment du pipeline
+([Road-map](road-map.md#qui-écrit-et-quand)). Une idée croisée pendant le chantier se propose, elle
+ne s'ajoute pas.
 
 **Mettre le registre à l'index dès qu'il est écrit** :
 
@@ -182,6 +202,11 @@ tous les listings suivants.
 
    On décide **ici**, on écrit au point 4. Même raison qu'au point 2 de la clôture : le registre
    n'a de valeur que sur `base:`, et l'abandon n'y passe qu'au point suivant.
+
+   **Une entrée de road-map, elle, ne bouge pas** : un `road-map:` au frontmatter d'un chantier
+   abandonné reste dans `road-map/`. La tâche n'a pas été faite, et l'abandon est précisément ce
+   qui la remet en attente. La sortir vers `road-map-ecarte/` demanderait une décision distincte —
+   celle de ne plus vouloir la tâche, et non celle de renoncer à ce chantier-ci.
 4. **Décider du sort du travail avec l'utilisateur**, sans rien supposer :
    - *tout jeter* → archiver le suivi, le brief et le rapport d'audit éventuel en `done/` sur
      `base:` (commit direct), puis supprimer la branche : `git branch -D <slug>` ;

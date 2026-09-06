@@ -28,6 +28,7 @@ execution: délégué          # repris tel quel du brief
 plan: .claude/plans/refonte-auth-lucky-beaver.md
 brief: .claude/implementation/auth-refactor.brief.md
 audit: .claude/implementation/auth-refactor.audit.md   # créé au premier audit, cf. references/audit.md
+road-map: token-store-a-reecrire   # id de l'entrée de road-map dont le chantier part — absent sinon
 créé: 2026-07-12
 maj: 2026-07-12
 ---

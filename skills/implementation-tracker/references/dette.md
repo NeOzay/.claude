@@ -89,7 +89,8 @@ Tout problème **non résolu** au moment de clore :
 **Ce qui n'entre pas :**
 
 - les idées d'amélioration — le registre ne liste que du constaté, vérifié dans le dépôt. Elles
-  iront dans une liste `road-map/`, à côté ;
+  vont dans `road-map/`, à côté, et la frontière entre les deux se lit là-bas :
+  [Road-map](road-map.md#la-frontière-avec-le-registre-de-dette) ;
 - ce qui a été corrigé pendant le chantier : le rapport en garde la trace, pas le registre ;
 - les préférences de style qu'aucun critère ne porte.
 

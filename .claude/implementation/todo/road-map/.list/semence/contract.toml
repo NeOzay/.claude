@@ -1,0 +1,33 @@
+name = "road-map"
+description = "Tâches à accomplir, notées à la demande — point de départ d'un chantier"
+
+[origin]
+def = "road-map"
+version = 1
+
+[fields.id]
+type = "slug"
+description = ""
+
+[fields.title]
+type = "text"
+required = true
+description = "l'énoncé de la tâche, tel qu'il figurait en titre d'entrée"
+
+[fields.date]
+type = "date"
+required = true
+description = "date où l'entrée a été notée, jamais modifiée"
+
+[fields.source]
+type = "text"
+required = false
+description = "d'où vient l'idée — le chantier en cours, une entrée de dette, une discussion"
+
+[sections."À faire"]
+required = true
+description = "la tâche, en quelques lignes — de quoi rouvrir le sujet sans l'avoir en tête"
+
+[sections."Références"]
+required = true
+description = "contexte, code, entrées de dette, chantiers archivés — ce dont un chantier partirait"

@@ -1,0 +1,37 @@
+name = "road-map-fait"
+description = "Tâches accomplies, avec le chantier qui les a portées"
+
+[origin]
+def = "road-map-fait"
+version = 1
+
+[fields.id]
+type = "slug"
+description = ""
+
+[fields.title]
+type = "text"
+required = true
+description = "l'énoncé de la tâche, tel qu'il figurait en titre d'entrée"
+
+[fields.date]
+type = "date"
+required = true
+description = "date où l'entrée a été notée, jamais modifiée"
+
+[fields.source]
+type = "text"
+required = false
+description = "d'où vient l'idée — le chantier en cours, une entrée de dette, une discussion"
+
+[sections."À faire"]
+required = true
+description = "repris de l'entrée d'origine — sans lui, une entrée sortie ne dit plus de quoi elle parlait"
+
+[sections."Fait le"]
+required = true
+description = "date, slug du chantier qui l'a portée, et le chemin de son archive dans done/"
+
+[sections."Références"]
+required = false
+description = "repris de l'entrée d'origine ; le chantier qui a servi est dans « Fait le »"
