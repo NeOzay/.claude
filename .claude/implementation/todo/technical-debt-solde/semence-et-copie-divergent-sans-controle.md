@@ -3,8 +3,8 @@ id = "semence-et-copie-divergent-sans-controle"
 title = "Rien ne confronte une liste amorcée à la définition qui l'a semée"
 date = 2026-08-30
 source = "chantier renvoi-contrat-des-categories, audit R6 ; revu par sections-en-forme-longue, audit R7"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "a-solder"
 +++
 
 ## Constat
@@ -26,6 +26,39 @@ aux deux `templates/review.toml` un commentaire de cinq lignes qui **justifie l'
 alphabétique** des `values` — la doctrine que `debt-review/SKILL.md` ne porte plus depuis que sa
 boucle des piles la lit par `list-dir contract … --values category`. Cette justification n'existe
 donc plus qu'à ces deux endroits, et ils peuvent diverger.
+
+## Soldé le
+
+**2026-09-06, revue de dette** — le **constat** que le *Pour solder* réclamait existe désormais, et
+sous la forme exacte qu'il envisageait. `.list/semence/` conserve la définition telle qu'elle a
+semé ; `validate` la confronte à la définition courante par son `[origin] version` et **avertit
+sans échouer** ; `reseed` rattrape. La question de fond — ce qu'une divergence signifie — est
+tranchée dans le sens suggéré : une copie en avance est une redéfinition assumée (le local gagne à
+la fusion), une semence en avance est un oubli de propagation.
+
+Établi par : une liste amorcée depuis une définition jouet, dont la définition avance seule.
+
+```
+$ list-dir init maliste --def jouet
+maliste/.list/contract.toml
+$ grep -A3 '\[origin\]' maliste/.list/contract.toml
+[origin]
+def = "jouet"
+version = 3
+$ # …la définition passe en v4, la liste amorcée n'est pas touchée…
+$ list-dir validate maliste; echo "code $?"
+maliste : contrat périmé — semé en v3, « jouet » est en v4 ; « list-dir reseed maliste » rattrape
+maliste : 0 élément(s) conformes au contrat
+code 0
+
+$ ls .claude/implementation/todo/technical-debt/.list/
+backup/  semence/  templates/  contract.toml
+```
+
+**Ce que le solde ne couvre pas** : la comparaison repose sur le numéro de version de la
+définition. Une définition modifiée **sans** que sa version soit incrémentée reste invisible — c'est
+une entrée distincte du registre, `version-de-definition-non-incrementee-apres-changement-de-contrat`
+(2026-09-06).
 
 ## Pourquoi c'est gênant
 

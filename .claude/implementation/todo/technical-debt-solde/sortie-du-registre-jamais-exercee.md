@@ -3,8 +3,8 @@ id = "sortie-du-registre-jamais-exercee"
 title = "La moitié « sortie du registre » de `debt-review` n'a jamais été exercée"
 date = 2026-08-17
 source = "Identifié par `revue-dette`, R12 du rapport d'audit de clôture."
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "a-solder"
 +++
 
 ## Constat
@@ -16,6 +16,39 @@ sortir une entrée : ni `a-solder`, ni `non-pertinent`, ni `doublon`, ni `pas-un
 jamais effectué par ce skill.
 Établi par : `ls .claude/implementation/todo/` → `README.md`, `technical-debt.md`,
 `technical-debt-solde.md` — trois fichiers, pas quatre.
+
+## Soldé le
+
+**2026-09-06, revue de dette** — le chemin de sortie du registre a été exercé pour de vrai, ce que
+le **Pour solder** demandait de constater : deux entrées sont arrivées dans
+`technical-debt-ecarte` par un `move`, chacune porte sa section `## Écartée le` avec son motif et
+sa preuve, et le contrôle de conservation reste juste.
+
+Établi par :
+
+```
+$ list-dir list .claude/implementation/todo/technical-debt-ecarte
+correctif-r21-non-audite 2026-08-14
+correctifs-etape-9-non-audites 2026-08-14
+
+$ git show --stat --find-renames 6754ac1
+ .../{technical-debt => technical-debt-ecarte}/correctif-r21-non-audite.md | 0
+ .../correctifs-etape-9-non-audites.md                                     | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+
+$ list-dir show .claude/implementation/todo/technical-debt-ecarte correctif-r21-non-audite | grep -A2 "Écartée le"
+## Écartée le
+**2026-08-30 — non pertinent** — le correctif visé n'existe plus. […] Établi par :
+
+$ for l in technical-debt technical-debt-solde technical-debt-ecarte; do \
+    printf '%-26s %s\n' "$l" "$(list-dir list .claude/implementation/todo/$l | wc -l)"; done
+technical-debt             49
+technical-debt-solde       21
+technical-debt-ecarte      2
+```
+
+Le `0 insertions` du renommage établit que la procédure a été suivie jusqu'au bout : déplacement
+d'abord, preuve dans un second commit — c'est-à-dire le chemin complet, pas seulement le `move`.
 
 ## Pourquoi c'est gênant
 
