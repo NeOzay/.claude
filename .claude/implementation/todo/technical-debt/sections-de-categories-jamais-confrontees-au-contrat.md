@@ -3,8 +3,8 @@ id = "sections-de-categories-jamais-confrontees-au-contrat"
 title = "les sections de categories.md recopient l'ensemble des valeurs du contrat"
 date = 2026-08-30
 source = "chantier renvoi-contrat-des-categories, hors-périmètre assumé"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

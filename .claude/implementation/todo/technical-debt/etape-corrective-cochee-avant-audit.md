@@ -3,7 +3,7 @@ id = "etape-corrective-cochee-avant-audit"
 title = "Une étape corrective née d'un audit ne peut pas être cochée avant l'audit"
 date = 2026-08-14
 source = "Identifié par `audit-integre`, R8 du rapport d'audit ; élargi par `contrat-pipeline`, R3 puis R13."
-reviewed = 2026-08-17
+reviewed = 2026-09-06
 category = "pertinent"
 +++
 

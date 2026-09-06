@@ -3,7 +3,7 @@ id = "critere-reussite-faux-dans-sa-lettre"
 title = "Un critère de réussite du brief `contrat-pipeline` était faux dans sa lettre"
 date = 2026-08-14
 source = "Identifié par `contrat-pipeline`, R1 du rapport d'audit ; élargi par `revue-dette`, R14."
-reviewed = 2026-08-17
+reviewed = 2026-09-06
 category = "pertinent"
 +++
 

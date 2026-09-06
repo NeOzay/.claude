@@ -3,22 +3,29 @@ id = "statusline-hors-des-linters"
 title = "`statusline-command.py` échoue à la commande de lint documentée"
 date = 2026-08-24
 source = "Identifié par `check-pipeline-python`, R8 du rapport d'audit de clôture."
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "aggravee"
 +++
 
 ## Constat
 
-`uvx ruff check .`, la commande que `contrat.md` § Dépendances documente pour vérifier « le code
-Python versionné », rend **3 erreurs** dans `statusline-command.py` — un fichier de la racine,
-préexistant à ce chantier et sans rapport avec lui.
+**Mesuré le 2026-09-06 :** `uvx ruff check .`, la commande que `contrat.md` § Dépendances documente
+pour vérifier « le code Python versionné », rend **6 erreurs** — le double du constat d'origine, qui
+en comptait 3 le 2026-08-24.
 
-Il échappe par ailleurs à `basedpyright` : l'`include` de `pyrightconfig.json` vaut `skills` et
-`scripts`, jamais la racine. C'est le seul `.py` versionné du dépôt qu'aucun des deux linters ne
-couvre vraiment — l'un l'ignore, l'autre échoue dessus.
+Les 3 d'origine sont toujours dans `statusline-command.py`, un fichier de la racine (dont `BLE001`
+sur le `except Exception:` de la lecture du drapeau). **Les 3 nouvelles sont ailleurs** :
+`skills/list-dir/scripts/tests/test_fusion.py` (2) et `test_contract.py` (1) — c'est-à-dire **dans**
+le répertoire que l'entrée citait comme sain.
 
-Établi par : `uvx ruff check .` → `Found 3 errors.`, toutes dans `statusline-command.py` (dont
-`BLE001` ligne 110) ; `uvx ruff check scripts skills/implementation-tracker` → `All checks passed!`.
+Conséquence directe : `uvx ruff check scripts skills`, qui rendait `All checks passed!` au constat
+et servait de repli documentable, rend aujourd'hui `Found 3 errors.` La seconde voie du
+**Pour solder** — restreindre la commande documentée aux répertoires réellement couverts — ne
+suffirait donc plus à rendre la ligne vraie.
+
+`statusline-command.py` échappe par ailleurs toujours à `basedpyright` : l'`include` de
+`pyrightconfig.json` vaut `skills` et `scripts`, jamais la racine. C'est le seul `.py` versionné
+qu'aucun des deux linters ne couvre vraiment — l'un l'ignore, l'autre échoue dessus.
 
 ## Pourquoi c'est gênant
 

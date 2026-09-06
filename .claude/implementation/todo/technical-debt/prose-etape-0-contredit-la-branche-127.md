@@ -3,6 +3,8 @@ id = "prose-etape-0-contredit-la-branche-127"
 title = "La prose de l'Étape 0 affirme que le code 127 ne se distingue pas, alors que le bloc le distingue"
 date = 2026-08-30
 source = "chantier semences-de-listes, audit R22"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

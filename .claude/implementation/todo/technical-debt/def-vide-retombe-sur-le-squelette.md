@@ -3,6 +3,8 @@ id = "def-vide-retombe-sur-le-squelette"
 title = "list-dir init --def \"\" rend le squelette sans dire que la définition a été ignorée"
 date = 2026-08-30
 source = "chantier semences-de-listes, audit R10"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

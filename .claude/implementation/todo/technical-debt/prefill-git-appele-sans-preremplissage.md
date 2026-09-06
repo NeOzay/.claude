@@ -3,8 +3,8 @@ id = "prefill-git-appele-sans-preremplissage"
 title = "create, migrate et derive lancent git même quand aucun champ n'est prérempli"
 date = 2026-08-31
 source = "chantier 2026-08-31-champs-preremplis, audit de clôture R7"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

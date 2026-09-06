@@ -3,6 +3,8 @@ id = "hook-sante-chemin-home"
 title = "Le hook SessionStart porte la dernière constante ancrée sur le HOME, sans être déclarée comme exception"
 date = 2026-08-29
 source = "Identifié par `resolution-chemin-skill`, R1 du rapport d'audit."
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

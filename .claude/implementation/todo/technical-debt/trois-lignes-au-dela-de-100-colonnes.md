@@ -3,24 +3,27 @@ id = "trois-lignes-au-dela-de-100-colonnes"
 title = "Trois lignes du corpus dépassent l'enroulement à 100 colonnes"
 date = 2026-08-14
 source = "Identifié par `contrat-pipeline`, R8 puis R17 du rapport d'audit."
-reviewed = 2026-08-17
-category = "pertinent"
+reviewed = 2026-09-06
+category = "aggravee"
 +++
 
 ## Constat
 
-**133 lignes** du corpus versionné dépassaient déjà 100
-caractères à l'écriture de cette entrée, et non trois. Les trois lignes qu'elle nomme sont les plus
-longues du seul répertoire `skills/implementation-tracker/references/` — 121, 131 et 140 caractères
-— mais quatorze lignes de ce répertoire dépassent 100, dont une à 188 et une à 193. **L'intitulé est
-donc faux** ; il est conservé tel quel parce qu'il sert de clé de référence.
+**Mesuré le 2026-09-06 : 157 lignes** du corpus versionné dépassent 100 caractères. Les trois
+lignes que l'intitulé nomme sont les plus longues du seul répertoire
+`skills/implementation-tracker/references/` — 121, 131 et 140 caractères — mais seize lignes de ce
+répertoire dépassent 100. **L'intitulé est donc faux** ; il est conservé tel quel parce qu'il sert
+de clé de référence.
 
-**Corrigé le 2026-08-17 par `revue-dette`** — le Constat annonçait « trois lignes […] que le
-reste du corpus respecte », description sous-mesurée **d'un facteur 44** dès son écriture. Ce
-n'est pas une aggravation : rien ne s'est étendu, la mesure d'origine était fausse.
 Établi par : comptage **en caractères** sur `git ls-files -- skills scripts hooks` filtré
-`.md`/`.sh`, via `python3` (`len(l.rstrip('\n')) > 100`) → **133 sur `master`**. En octets,
-`awk length` en rendrait une centaine de plus, sur du texte accentué.
+`.md`/`.sh`, via `python3` (`len(l) > 100`) → **157**. En octets, `awk length` en rendrait une
+centaine de plus, sur du texte accentué.
+
+**Historique de la mesure** — le Constat d'origine annonçait « trois lignes […] que le reste du
+corpus respecte », description sous-mesurée **d'un facteur 44** dès son écriture ; corrigée à
+**133** le 2026-08-17 par `revue-dette`. Le passage de 133 à 157, lui, est une **aggravation
+réelle** : même corpus, même commande, même unité, **24 lignes de plus** en trois semaines. C'est
+l'absence de la seconde décision réclamée ci-dessous qui la produit.
 
 ## Pourquoi c'est gênant
 

@@ -3,7 +3,7 @@ id = "git-smart-commit-illisible-seul"
 title = "`git-smart-commit` n'est plus lisible sans `implementation-tracker`"
 date = 2026-08-14
 source = "Identifié par `contrat-pipeline`, R10 du rapport d'audit."
-reviewed = 2026-08-17
+reviewed = 2026-09-06
 category = "pertinent"
 +++
 

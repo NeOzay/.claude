@@ -3,8 +3,8 @@ id = "revue-reelle-jamais-menee"
 title = "Le flux de revue n'a jamais produit d'archive réelle sous `done/revues/`"
 date = 2026-08-23
 source = "chantier `format-registres`, R2 des audits de clôture — écart au brief ratifié le 2026-08-20"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

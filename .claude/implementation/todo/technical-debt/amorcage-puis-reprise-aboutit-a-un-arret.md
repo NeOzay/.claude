@@ -3,6 +3,8 @@ id = "amorcage-puis-reprise-aboutit-a-un-arret"
 title = "« Amorcer puis reprendre l'étape » aboutit toujours à un arrêt, sans que la puce le dise"
 date = 2026-08-30
 source = "chantier semences-de-listes, audit R16"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

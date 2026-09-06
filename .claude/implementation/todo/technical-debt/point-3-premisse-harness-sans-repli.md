@@ -3,7 +3,7 @@ id = "point-3-premisse-harness-sans-repli"
 title = "Le point 3 du tracker repose sur une prémisse de harness sans repli écrit"
 date = 2026-08-16
 source = "Identifié par `revue-plan-deleguee`, R4 du rapport d'audit."
-reviewed = 2026-08-17
+reviewed = 2026-09-06
 category = "pertinent"
 +++
 

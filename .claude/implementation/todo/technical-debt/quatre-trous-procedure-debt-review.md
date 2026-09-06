@@ -3,39 +3,49 @@ id = "quatre-trous-procedure-debt-review"
 title = "Quatre trous de procédure de `debt-review` sont connus et non traités"
 date = 2026-08-17
 source = "Identifié par `revue-dette`, R5 à R8 des rapports d'audit."
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat
 
-l'audit de clôture les a relevés, la première passe réelle les a tous rencontrés, et
-aucun n'a été corrigé :
+**Un seul des quatre trous subsiste**, réduit ici le 2026-09-06 ; l'intitulé est conservé tel quel
+parce qu'il sert de clé de référence.
 
-- **la somme « avant » du contrôle de conservation n'est mesurée nulle part** : l'Étape 0 ne compte
-  pas les registres et le préambule ne porte que le compte de `technical-debt.md`. Le point de
-  comparaison a dû être reconstitué de la conversation ;
-- **rien ne dit quoi faire d'un marqueur déjà présent** quand une entrée est reclassée `aggravee` ou
-  `inverifiable` à une revue ultérieure : remplacer la ligne, ou en ajouter une seconde. Trois
-  entrées en portent un depuis cette revue ;
-- **la ligne de tête n'a pas de forme pour une revue sans chantier** : `dette.md`, § *Tête du
-  registre*, impose `(chantier <slug>)`, et une revue n'a pas de slug. Cette passe s'en est tirée
-  parce qu'elle **était** un chantier ;
-- **une clause résiduelle du gabarit** dit de recopier l'intitulé « marqueur de catégorie exclu s'il
-  y en a déjà un », alors que le marqueur vit sous le titre depuis l'amendement du 2026-08-16 et
-  qu'aucun intitulé ne peut en porter.
+**Ce qui reste** — la somme « avant » du contrôle de conservation n'est mesurée nulle part.
+L'Étape 0 de `debt-review` ne fait que tester `-eq 0` sur chaque registre (vide ou non), et le seul
+comptage des trois listes est à l'Étape 5, c'est-à-dire du côté « après ». Le point de comparaison
+doit donc être reconstitué de la conversation.
+
+**Ce qui est tombé** — les trois autres sont devenus **sans objet** avec le passage des registres en
+répertoires-listes :
+
+- *quoi faire d'un marqueur déjà présent* — il n'y a plus de marqueur sous un titre. `category` et
+  `reviewed` sont des champs de front matter, qu'une revue ultérieure écrase sans avoir à choisir
+  entre remplacer et ajouter ;
+- *la ligne de tête n'a pas de forme pour une revue sans chantier* — il n'y a plus de ligne de
+  tête : un registre est un répertoire, et `dette.md` ne porte plus de section *Tête du registre* ;
+- *une clause résiduelle du gabarit* — elle n'existe plus ; aucune occurrence de « marqueur de
+  catégorie exclu » ne subsiste dans `skills/` ni dans `.list/`.
+
+Établi par : `grep -n "wc -l" skills/debt-review/SKILL.md` → l'Étape 0 ne compte pas ;
+`grep -n "ligne de tête\|Tête du registre\|marqueur déjà" skills/debt-review/SKILL.md
+skills/implementation-tracker/references/dette.md` et
+`grep -rn "marqueur de catégorie exclu\|recopier l'intitulé" skills/ .claude/implementation/todo/technical-debt/.list/`
+→ aucun résultat.
 
 ## Pourquoi c'est gênant
 
-les trois premiers se paieront à la **deuxième** revue, pas dans un an :
-c'est elle qui rencontrera les marqueurs déjà posés et qui n'aura pas de chantier pour donner un
-slug à sa ligne de tête. Un dispositif conçu pour être rejoué périodiquement a ses défauts au
-deuxième tour, pas au premier.
+Le trou restant se paie à **chaque** revue, pas dans un an : celle du 2026-09-06 a dû reconstituer
+sa somme « avant » de la conversation, comme celle du 2026-08-17. Un contrôle de conservation dont
+un seul des deux termes est mesuré ne conserve rien — il additionne l'état d'après et le compare à
+un souvenir.
 
 ## Pour solder
 
-les quatre sont des corrections d'une à trois lignes. Le premier demande le bloc
-de comptage à l'Étape 0 avec report du TOTAL au préambule.
+Une correction d'une à trois lignes : ajouter le bloc de comptage des trois registres à l'Étape 0
+de `debt-review`, et en reporter le TOTAL au préambule, pour que l'Étape 5 ait un terme de
+comparaison écrit plutôt que remémoré.
 
 ## Assumé
 

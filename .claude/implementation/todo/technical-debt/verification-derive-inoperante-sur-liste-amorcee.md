@@ -3,6 +3,8 @@ id = "verification-derive-inoperante-sur-liste-amorcee"
 title = "La vérification de l'étape 7 du plan semences-de-listes imprime ÉCHEC derive"
 date = 2026-08-30
 source = "chantier semences-de-listes, audit R6"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

@@ -3,8 +3,8 @@ id = "garde-version-jamais-executee"
 title = "La garde de version de `list-dir.py` n'est vérifiée que par son rang, jamais exécutée"
 date = 2026-08-24
 source = "chantier `tests-listdir`, constat de l'étape 9"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

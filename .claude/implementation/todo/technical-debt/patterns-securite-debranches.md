@@ -3,7 +3,7 @@ id = "patterns-securite-debranches"
 title = "Les patterns de sécurité de `git-pre-commit-audit` ne sont plus branchés"
 date = 2026-08-14
 source = "Identifié par `audit-integre`, hors-périmètre assumé au brief."
-reviewed = 2026-08-17
+reviewed = 2026-09-06
 category = "pertinent"
 +++
 

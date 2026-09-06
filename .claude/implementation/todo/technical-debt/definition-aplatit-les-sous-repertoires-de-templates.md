@@ -3,18 +3,25 @@ id = "definition-aplatit-les-sous-repertoires-de-templates"
 title = "L'amorçage depuis une définition perd les sous-répertoires de templates/"
 date = 2026-08-30
 source = "chantier semences-de-listes, audit R5"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat
 
-`store.py:_read_definition` lit les gabarits d'une définition par
-`sorted((definition / TEMPLATES).glob("*"))`, filtré par `f.is_file()`. Tout **sous-répertoire** de
-`templates/` est donc ignoré, sans message et sans code non nul : `init --def` sort 0 et rend une
-liste à laquelle il manque des gabarits.
+La lecture des gabarits d'une définition — `_read_definition`, aujourd'hui dans
+`listdir/provenance.py` — les collecte par `sorted((definition / TEMPLATES).glob("*"))`, filtré par
+`f.is_file()`. Tout **sous-répertoire** de `templates/` est donc ignoré, sans message et sans code
+non nul : `init --def` sort 0 et rend une liste à laquelle il manque des gabarits.
 
-Aucune des trois définitions embarquées n'est concernée — `technical-debt/templates/` ne porte que
+Aucune des définitions embarquées n'est concernée — `technical-debt/templates/` ne porte que
 `review.toml` et `review.md`, deux fichiers plats. Aucun test ne couvre le cas, et la docstring ne
 le mentionne pas.
+
+Établi par : `grep -rn "definition / TEMPLATES" skills/list-dir/scripts/listdir/` →
+`provenance.py:232`, `glob("*")` non récursif suivi de `if f.is_file()`. Vérifié le 2026-09-06 —
+le code a migré de `store.py` vers `provenance.py` depuis le constat d'origine, sans changer de
+comportement ; l'entrée le nomme désormais par sa fonction plutôt que par son fichier.
 
 ## Pourquoi c'est gênant
 

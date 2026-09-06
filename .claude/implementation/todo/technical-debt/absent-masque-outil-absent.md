@@ -3,6 +3,8 @@ id = "absent-masque-outil-absent"
 title = "Un projet neuf sans list-dir affiche ABSENT plutôt que OUTIL ABSENT"
 date = 2026-08-30
 source = "chantier semences-de-listes, audit R19"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

@@ -3,28 +3,32 @@ id = "ruff-format-jamais-applique"
 title = "Le formatage ruff n'a jamais été appliqué au paquet list-dir"
 date = 2026-08-30
 source = "chantier semences-de-listes, journal du suivi et audit R7"
+reviewed = 2026-09-06
+category = "aggravee"
 +++
 
 ## Constat
 
-`uvx ruff format --check .` dans `skills/list-dir/` signale **cinq fichiers** à reformater :
-`references/extension.md` et les suites `test_contract.py`, `test_items.py`, `test_loader.py`,
-`test_move.py`. Chacun vérifié antérieur au chantier `semences-de-listes`, en confrontant sa version
-`master` extraite par `git show` au même contrôle.
+**Mesuré le 2026-09-06 :** `uvx ruff format --check .` dans `skills/list-dir/` signale **huit
+fichiers** à reformater — `8 files would be reformatted, 39 files already formatted` :
+`references/extension.md`, `test_contract.py`, `test_derive_merge.py`, `test_fusion.py`,
+`test_items.py`, `test_loader.py`, `test_move.py`, `test_provenance.py`.
 
-**Cette entrée a d'abord annoncé cinq fichiers alors qu'il y en avait six**, et affirmé que le
-chantier « n'y a rien ajouté ». C'était faux : `test_entree_cli.py`, formaté sur `master`, avait été
-dé-formaté par des enroulements de ligne écrits à la main pour satisfaire `E501`. Le fichier a été
-repassé à `ruff format` et le compte est redescendu à cinq — mais le constat mérite d'être gardé ici
-plutôt qu'effacé : c'est précisément parce que rien ne contrôle le formatage qu'une régression
-introduite par un chantier a pu passer six commits sans être vue, et se faire décrire comme
-antérieure à lui.
+**Trois de plus qu'au constat d'origine**, qui en comptait cinq le 2026-08-30 :
+`test_fusion.py`, `test_derive_merge.py` et `test_provenance.py` sont des suites écrites **après**
+lui. C'est exactement le mode de défaillance que l'entrée annonçait — « rien n'empêche un chantier
+d'en ajouter un » —, vérifié en une semaine.
 
-`contrat.md`, section Dépendances, ne déclare que `uvx ruff check .` et
+L'entrée avait déjà connu ce mouvement une fois : elle a d'abord annoncé cinq fichiers alors qu'il
+y en avait six, `test_entree_cli.py` ayant été dé-formaté par des enroulements écrits à la main
+pour satisfaire `E501`, puis repassé à `ruff format`. Le constat mérite d'être gardé : c'est parce
+que rien ne contrôle le formatage qu'une régression introduite par un chantier passe des commits
+sans être vue.
+
+`contrat.md`, section Dépendances, ne déclare toujours que `uvx ruff check .` et
 `uvx --with pytest basedpyright` : le formatage n'est **pas** dans les contrôles du pipeline, et
-rien ne le réclame aujourd'hui. Le chantier `semences-de-listes` avait inscrit
-`uvx ruff format --check` à son contrôle final, puis l'a retiré en constatant qu'il échouait sur
-ces cinq fichiers.
+rien ne le réclame. Le chantier `semences-de-listes` avait inscrit `uvx ruff format --check` à son
+contrôle final, puis l'a retiré en constatant qu'il échouait.
 
 ## Pourquoi c'est gênant
 

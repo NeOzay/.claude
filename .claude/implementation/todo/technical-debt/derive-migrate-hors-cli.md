@@ -3,8 +3,8 @@ id = "derive-migrate-hors-cli"
 title = "`derive` et `migrate` ne sont exercés que par la bibliothèque, jamais par la ligne de commande"
 date = 2026-08-24
 source = "chantier `tests-listdir`, réserve Q2 du relecteur de plan, restée partielle à la clôture"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

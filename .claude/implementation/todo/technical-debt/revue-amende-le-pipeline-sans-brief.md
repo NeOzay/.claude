@@ -3,8 +3,8 @@ id = "revue-amende-le-pipeline-sans-brief"
 title = "Une revue peut amender les règles du pipeline sans brief, plan ni audit"
 date = 2026-08-17
 source = "Identifié par `revue-dette`, R19 du troisième rapport d'audit."
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

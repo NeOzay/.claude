@@ -3,8 +3,8 @@ id = "marqueurs-recopies-dans-gabarits"
 title = "Les deux marqueurs sont recopiés en dur dans les gabarits, hors de tout contrôle"
 date = 2026-08-23
 source = "chantier `format-registres`, R5 des audits de clôture"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

@@ -3,8 +3,8 @@ id = "listdir-list-non-absolue"
 title = "LISTDIR_LIST n'est pas absolue, contrairement à LISTDIR_ROOT et au plan"
 date = 2026-08-31
 source = "chantier 2026-08-31-champs-preremplis, audit de clôture R6"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat

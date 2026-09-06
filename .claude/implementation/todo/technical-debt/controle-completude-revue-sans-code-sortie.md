@@ -3,8 +3,8 @@ id = "controle-completude-revue-sans-code-sortie"
 title = "Le contrôle de complétude d'une revue signale par `echo`, sans code de sortie"
 date = 2026-08-23
 source = "chantier `format-registres`, R15 des audits de clôture"
-reviewed = "<OPTIONNEL>"
-category = "<OPTIONNEL>"
+reviewed = 2026-09-06
+category = "pertinent"
 +++
 
 ## Constat
