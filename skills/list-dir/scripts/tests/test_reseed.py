@@ -27,11 +27,13 @@ version = 1
 
 [fields.id]
 type = "slug"
+description = ""
 
 [fields.title]
 type = "text"
 required = true
 description = "le titre"
+text = "titre par défaut"
 
 [sections."Constat"]
 required = true
@@ -68,7 +70,10 @@ def test_semence_qui_evolue_est_recopiee_verbatim(tmp_path: Path) -> None:
     """Rien n'avait bougé localement : la nouvelle semence s'applique telle quelle,
     commentaires compris — les réémettre les perdrait pour rien."""
     definition, cible = semer(tmp_path)
-    neuve = SEMENCE.replace("version = 1", "version = 2") + '\n[fields.reviewed]\ntype = "date"\n'
+    neuve = (
+        SEMENCE.replace("version = 1", "version = 2")
+        + '\n[fields.reviewed]\ntype = "date"\ndescription = ""\n'
+    )
     _ = ecrire(definition, CONTRACT, neuve)
 
     fait = reseed(cible, definition).unwrap()
@@ -89,7 +94,8 @@ def test_apport_de_semence_sur_une_liste_editee_est_reemis(tmp_path: Path) -> No
     _ = ecrire(
         definition,
         CONTRACT,
-        SEMENCE.replace("version = 1", "version = 2") + '\n[fields.vu]\ntype = "date"\n',
+        SEMENCE.replace("version = 1", "version = 2")
+        + '\n[fields.vu]\ntype = "date"\ndescription = ""\n',
     )
 
     fait = reseed(cible, definition).unwrap()
@@ -251,7 +257,9 @@ def test_adoption_cree_la_semence_gardee(tmp_path: Path) -> None:
 
 
 def test_adoption_d_une_liste_divergente_injecte_sans_ecraser(tmp_path: Path) -> None:
-    definition, cible = anterieure(tmp_path, SANS_ORIGIN + '\n[fields.propre]\ntype = "text"\n')
+    definition, cible = anterieure(
+        tmp_path, SANS_ORIGIN + '\n[fields.propre]\ntype = "text"\ndescription = ""\n'
+    )
 
     fait = reseed(cible, definition).unwrap()
 
@@ -278,13 +286,13 @@ def test_suppression_locale_survit_a_un_re_semis(tmp_path: Path) -> None:
     l'émetteur, qui sortait par un traceback — après la sauvegarde et une partie de
     l'écriture, donc en laissant la liste à moitié appliquée."""
     definition, cible = semer(tmp_path)
-    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE.replace('description = "le titre"\n', ""))
+    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE.replace('text = "titre par défaut"\n', ""))
     _ = ecrire(definition, CONTRACT, SEMENCE.replace("version = 1", "version = 2"))
 
     fait = reseed(cible, definition).unwrap()
 
     assert fait.ecrit
-    assert "le titre" not in contrat_de(cible)
+    assert "titre par défaut" not in contrat_de(cible)
     assert "version = 2" in contrat_de(cible)
 
 
@@ -321,7 +329,7 @@ def test_une_liste_a_suppression_locale_finit_par_dire_qu_elle_est_a_jour(
     une telle liste n'annonçait jamais « déjà à jour » et `--dry-run` promettait sans
     fin un changement qui n'en était pas un."""
     definition, cible = semer(tmp_path)
-    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE.replace('description = "le titre"\n', ""))
+    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE.replace('text = "titre par défaut"\n', ""))
     _ = reseed(cible, definition).unwrap()
 
     fait = reseed(cible, definition).unwrap()
@@ -347,7 +355,7 @@ def test_une_difference_de_pure_forme_ne_se_dit_pas_modifiee(tmp_path: Path) -> 
 
 def test_une_divergence_de_contenu_se_dit_toujours(tmp_path: Path) -> None:
     definition, cible = semer(tmp_path)
-    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE.replace('description = "le titre"\n', ""))
+    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE.replace('text = "titre par défaut"\n', ""))
 
     dits = warnings(cible, load_contract(cible).unwrap())
 
@@ -372,7 +380,11 @@ def test_un_champ_ajoute_localement_ne_se_rejoue_pas_a_chaque_appel(tmp_path: Pa
     """R12 : « retirée de la semence » décrivait un état durable — le local garde une
     clé que la semence ne porte pas — rapporté comme un changement à chaque re-semis."""
     definition, cible = semer(tmp_path)
-    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", SEMENCE + '\n[fields.propre]\ntype = "text"\n')
+    _ = ecrire(
+        cible,
+        f"{LIST_DIR}/{CONTRACT}",
+        SEMENCE + '\n[fields.propre]\ntype = "text"\ndescription = ""\n',
+    )
     _ = ecrire(definition, CONTRACT, SEMENCE.replace("version = 1", "version = 2"))
     _ = reseed(cible, definition).unwrap()
 

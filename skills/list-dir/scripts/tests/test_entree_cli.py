@@ -403,7 +403,10 @@ def test_contract_rend_le_texte_tel_quel_commentaires_compris(tmp_path: Path) ->
 def test_contract_refuse_un_contrat_casse(tmp_path: Path) -> None:
     """Imprimer sans juger rendrait la règle sous un code de succès alors qu'aucune
     commande ne peut l'appliquer."""
-    liste = monter_liste(tmp_path / "cassee", 'name = "n"\n\n[fields.c]\ntype = "inconnu"\n')
+    liste = monter_liste(
+        tmp_path / "cassee",
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "inconnu"\ndescription = ""\n',
+    )
     r = lancer("contract", str(liste))
 
     assert r.code == 1
@@ -485,7 +488,7 @@ def test_contract_def_au_contrat_casse_est_refuse(tmp_path: Path) -> None:
     _ = ecrire(
         tmp_path,
         ".claude/list-dir/cassee/contract.toml",
-        'name = "n"\n\n[fields.c]\ntype = "inconnu"\n',
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "inconnu"\ndescription = ""\n',
     )
     r = lancer("contract", "--def", "cassee", cwd=tmp_path)
 
@@ -583,7 +586,10 @@ def test_contract_values_sur_une_definition_et_son_gabarit(tmp_path: Path) -> No
     """Le cas visé par le chantier : lire les valeurs d'un contrat que `derive`
     n'a pas encore semé nulle part."""
     definition = poser_definition(tmp_path, "jouet")
-    gabarit = GABARIT_TOML + '\n[fields.verdict_enum]\ntype = "enum"\nvalues = ["a", "b", "c"]\n'
+    gabarit = (
+        GABARIT_TOML
+        + '\n[fields.verdict_enum]\ntype = "enum"\nvalues = ["a", "b", "c"]\ndescription = ""\n'
+    )
     _ = ecrire(definition, "templates/revue.toml", gabarit)
     r = lancer(
         "contract",

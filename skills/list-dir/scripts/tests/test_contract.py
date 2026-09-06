@@ -23,9 +23,11 @@ from listdir.types import OPTIONAL, PLACEHOLDER, Field
 FICHIER = Path("/jouet/.list/contract.toml")
 
 MINIMAL = """name = "n"
+description = ""
 
 [fields.id]
 type = "slug"
+description = ""
 
 [sections."Constat"]
 required = true
@@ -79,13 +81,13 @@ from = "source"
 
 # ---------------------------------------------------------------- text / command
 def test_champ_declare_text() -> None:
-    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ntext = "2026-01-01"\n'
+    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ndescription = ""\ntext = "2026-01-01"\n'
     f = parse_contract(texte, FICHIER).unwrap().fields["date"]
     assert (f.text, f.command) == ("2026-01-01", None)
 
 
 def test_champ_declare_command() -> None:
-    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ncommand = "date +%F"\n'
+    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ndescription = ""\ncommand = "date +%F"\n'
     f = parse_contract(texte, FICHIER).unwrap().fields["date"]
     assert (f.text, f.command) == (None, "date +%F")
 
@@ -103,7 +105,7 @@ def test_section_declare_command() -> None:
 
 
 def test_text_et_command_ensemble_sur_un_champ_est_refuse() -> None:
-    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ntext = "x"\ncommand = "y"\n'
+    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ndescription = ""\ntext = "x"\ncommand = "y"\n'
     message = echec(texte)
     assert "champ « date »" in message
     assert "ne peuvent être déclarés ensemble" in message
@@ -118,7 +120,7 @@ def test_text_et_command_ensemble_sur_une_section_est_refuse() -> None:
 
 @pytest.mark.parametrize("cle", ["text", "command"])
 def test_text_ou_command_vide_est_refuse(cle: str) -> None:
-    texte = MINIMAL + f'\n[fields.date]\ntype = "date"\n{cle} = ""\n'
+    texte = MINIMAL + f'\n[fields.date]\ntype = "date"\ndescription = ""\n{cle} = ""\n'
     message = echec(texte)
     assert f"« {cle} »" in message
     assert "vide" in message
@@ -126,7 +128,7 @@ def test_text_ou_command_vide_est_refuse(cle: str) -> None:
 
 @pytest.mark.parametrize("cle", ["text", "command"])
 def test_text_ou_command_non_textuel_est_refuse(cle: str) -> None:
-    texte = MINIMAL + f'\n[fields.date]\ntype = "date"\n{cle} = 3\n'
+    texte = MINIMAL + f'\n[fields.date]\ntype = "date"\ndescription = ""\n{cle} = 3\n'
     message = echec(texte)
     assert f"« {cle} »" in message
     assert "une chaîne est attendue" in message
@@ -135,7 +137,7 @@ def test_text_ou_command_non_textuel_est_refuse(cle: str) -> None:
 @pytest.mark.parametrize("cle", ["text", "command"])
 def test_text_ou_command_sur_un_champ_list_est_refuse(cle: str) -> None:
     """La valeur produite est toujours du texte, `check_value` la rejetterait."""
-    texte = MINIMAL + f'\n[fields.tags]\ntype = "list"\n{cle} = "x"\n'
+    texte = MINIMAL + f'\n[fields.tags]\ntype = "list"\ndescription = ""\n{cle} = "x"\n'
     message = echec(texte)
     assert "champ « tags »" in message
     assert "list" in message
@@ -147,29 +149,38 @@ def test_toml_invalide() -> None:
 
 
 def test_fields_n_est_pas_une_table() -> None:
-    assert "une table est attendue" in echec('name = "n"\nfields = "x"\n')
+    assert "une table est attendue" in echec('name = "n"\ndescription = ""\nfields = "x"\n')
 
 
 def test_champ_declare_par_autre_chose_qu_une_table() -> None:
-    assert "champ « id »" in echec('name = "n"\n\n[fields]\nid = "slug"\n')
+    assert "champ « id »" in echec(
+        'name = "n"\ndescription = ""\n\n[fields]\nid = "slug"\n'
+    )
 
 
 def test_type_inconnu_est_nomme_avec_les_types_admis() -> None:
-    message = echec('name = "n"\n\n[fields.id]\ntype = "couleur"\n')
+    message = echec(
+        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "couleur"\ndescription = ""\n'
+    )
     assert "couleur" in message
     assert "slug" in message and "enum" in message
 
 
 def test_type_absent_est_refuse() -> None:
     """Un champ sans type n'est pas un champ par défaut : la liste est fermée."""
-    assert "inconnu" in echec('name = "n"\n\n[fields.id]\nrequired = true\n')
+    assert "inconnu" in echec(
+        'name = "n"\ndescription = ""\n\n[fields.id]\nrequired = true\ndescription = ""\n'
+    )
 
 
 def test_values_refuse_une_valeur_avec_espace() -> None:
     """Une valeur est un jeton, pas une phrase : celle-ci se découperait en deux
     pseudo-valeurs dès qu'un appelant itère dessus, chacune comptée à zéro, sans
     qu'aucune commande n'échoue."""
-    m = echec('name = "n"\n\n[fields.c]\ntype = "enum"\nvalues = ["a b", "c"]\n')
+    m = echec(
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "enum"\n'
+        'values = ["a b", "c"]\ndescription = ""\n'
+    )
 
     assert "ne peut être vide ni contenir d'espace" in m
     assert "a b" in m
@@ -177,49 +188,89 @@ def test_values_refuse_une_valeur_avec_espace() -> None:
 
 def test_values_refuse_une_valeur_vide() -> None:
     """Elle traverse une substitution sans laisser de trace."""
-    m = echec('name = "n"\n\n[fields.c]\ntype = "enum"\nvalues = ["", "c"]\n')
+    m = echec(
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "enum"\n'
+        'values = ["", "c"]\ndescription = ""\n'
+    )
 
     assert "ne peut être vide" in m
 
 
 def test_enum_sans_values() -> None:
-    message = echec('name = "n"\n\n[fields.c]\ntype = "enum"\n')
+    message = echec(
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "enum"\ndescription = ""\n'
+    )
     assert "n'admet rien" in message
 
 
 def test_values_n_est_pas_une_liste_de_chaines() -> None:
     assert "liste de chaînes" in echec(
-        'name = "n"\n\n[fields.c]\ntype = "enum"\nvalues = [1, 2]\n'
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "enum"\n'
+        'values = [1, 2]\ndescription = ""\n'
     )
 
 
 def test_description_de_champ_non_textuelle() -> None:
     assert "une chaîne est attendue" in echec(
-        'name = "n"\n\n[fields.id]\ntype = "slug"\ndescription = 3\n'
+        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\ndescription = 3\n'
     )
 
 
 def test_from_qui_ne_nomme_pas_un_champ() -> None:
-    message = echec('name = "n"\n\n[fields.id]\ntype = "slug"\nfrom = 3\n')
+    message = echec(
+        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\n'
+        'description = ""\nfrom = 3\n'
+    )
     assert "« from »" in message
     assert "int" in message
 
 
 def test_section_sans_description_est_refusee() -> None:
-    message = echec('name = "n"\n\n[sections."A"]\nrequired = true\n')
+    message = echec('name = "n"\ndescription = ""\n\n[sections."A"]\nrequired = true\n')
     assert "description" in message
     assert "manquante" in message
 
 
 def test_section_description_vide_est_acceptee() -> None:
-    c = parse_contract('name = "n"\n\n[sections."A"]\ndescription = ""\n', FICHIER).unwrap()
+    c = parse_contract(
+        'name = "n"\ndescription = ""\n\n[sections."A"]\ndescription = ""\n', FICHIER
+    ).unwrap()
     assert c.sections["A"].description == ""
 
 
 def test_section_description_non_textuelle_est_refusee() -> None:
     assert "une chaîne est attendue" in echec(
-        'name = "n"\n\n[sections."A"]\ndescription = 3\n'
+        'name = "n"\ndescription = ""\n\n[sections."A"]\ndescription = 3\n'
     )
+
+
+def test_champ_sans_description_est_refuse() -> None:
+    """Un champ obéit à la même règle qu'une section : sans ce contrôle, `_texte` rendait
+    `""` pour une clé absente et un contrat à moitié documenté restait vert."""
+    message = echec('name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\n')
+    assert "champ « id »" in message
+    assert "manquante" in message
+
+
+def test_champ_description_vide_est_acceptee() -> None:
+    """C'est la clé qui est exigée, pas son texte — documenter n'a pas à se faire au
+    moment où on déclare."""
+    c = parse_contract(
+        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\ndescription = ""\n',
+        FICHIER,
+    ).unwrap()
+    assert c.fields["id"].description == ""
+
+
+def test_contrat_sans_description_est_refuse() -> None:
+    message = echec('name = "n"\n\n[fields.id]\ntype = "slug"\ndescription = ""\n')
+    assert "« description »" in message
+    assert "manquante" in message
+
+
+def test_contrat_description_vide_est_acceptee() -> None:
+    c = parse_contract('name = "n"\ndescription = ""\n', FICHIER).unwrap()
+    assert c.description == ""
 
 
 def test_name_manquant() -> None:
@@ -237,7 +288,8 @@ def test_name_non_textuel() -> None:
 def test_ancien_format_de_sections_est_refuse() -> None:
     """`[sections]` en deux listes de noms — le format d'avant ce chantier."""
     message = echec(
-        'name = "n"\n\n[sections]\nrequired = ["Constat"]\noptional = ["Assumé"]\n'
+        'name = "n"\ndescription = ""\n\n'
+        '[sections]\nrequired = ["Constat"]\noptional = ["Assumé"]\n'
     )
     assert "ancien format" in message
     assert "list-dir contract --def n" in message
@@ -246,7 +298,9 @@ def test_ancien_format_de_sections_est_refuse() -> None:
 
 def test_ancien_format_avec_une_seule_des_deux_listes_est_refuse() -> None:
     """`optional` seule à l'ancien format suffit à être détectée, sans `required`."""
-    message = echec('name = "n"\n\n[sections]\noptional = ["Assumé"]\n')
+    message = echec(
+        'name = "n"\ndescription = ""\n\n[sections]\noptional = ["Assumé"]\n'
+    )
     assert "ancien format" in message
 
 
@@ -254,14 +308,14 @@ def test_section_nommee_required_ne_declenche_pas_l_ancien_format() -> None:
     """Une section légitimement titrée « required » porte une table, jamais une
     liste — pas de faux positif."""
     c = parse_contract(
-        'name = "n"\n\n[sections.required]\ndescription = ""\n', FICHIER
+        'name = "n"\ndescription = ""\n\n[sections.required]\ndescription = ""\n', FICHIER
     ).unwrap()
     assert list(c.sections) == ["required"]
 
 
 def test_sans_fields_ni_sections_reste_valide() -> None:
     """Une liste sans champ déclaré est pauvre, pas incohérente."""
-    c = parse_contract('name = "n"\n', FICHIER).unwrap()
+    c = parse_contract('name = "n"\ndescription = ""\n', FICHIER).unwrap()
     assert c.fields == {}
     assert dict(c.sections) == {}
 

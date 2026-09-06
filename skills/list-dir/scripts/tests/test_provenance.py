@@ -24,6 +24,7 @@ description = "liste-jouet des tests"
 
 [fields.id]
 type = "slug"
+description = ""
 
 [sections."Constat"]
 required = true
@@ -371,7 +372,9 @@ def test_contrat_modifie_localement_est_dit_sans_resoudre_la_definition(tmp_path
     _ = ecrire(
         cible,
         f"{LIST_DIR}/{CONTRACT}",
-        BASE + '\n[fields.local]\ntype = "text"\n\n[origin]\ndef = "semee"\nversion = 2\n',
+        BASE
+        + '\n[fields.local]\ntype = "text"\ndescription = ""\n\n'
+        '[origin]\ndef = "semee"\nversion = 2\n',
     )
     for f in sorted(definition.glob("*")):
         f.unlink()

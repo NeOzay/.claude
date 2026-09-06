@@ -26,6 +26,7 @@ version = 2
 
 [fields.id]
 type = "slug"
+description = ""
 
 [fields.category]
 type = "enum"
@@ -143,7 +144,7 @@ def test_une_cle_retiree_de_la_semence_est_gardee_sans_etre_rapportee() -> None:
 def test_une_cle_neuve_de_la_semence_est_posee() -> None:
     base = plat(CONTRAT)
     local = plat(CONTRAT)
-    semence = plat(CONTRAT + '\n[fields.reviewed]\ntype = "date"\n')
+    semence = plat(CONTRAT + '\n[fields.reviewed]\ntype = "date"\ndescription = ""\n')
 
     f = fusionner(base, local, semence)
 
@@ -154,7 +155,7 @@ def test_une_cle_neuve_de_la_semence_est_posee() -> None:
 def test_sans_base_seul_le_manquant_est_injecte() -> None:
     """Mode adoption : une liste antérieure n'a pas de point de référence."""
     local = plat(CONTRAT.replace('description = "la couleur"', 'description = "la teinte"'))
-    semence = plat(CONTRAT + '\n[fields.reviewed]\ntype = "date"\n')
+    semence = plat(CONTRAT + '\n[fields.reviewed]\ntype = "date"\ndescription = ""\n')
 
     f = fusionner({}, local, semence)
 
@@ -173,8 +174,8 @@ def test_sans_base_une_liste_identique_ne_produit_rien() -> None:
 
 def test_l_ordre_emis_est_celui_de_la_semence_puis_du_local() -> None:
     """Un contrat rattrapé doit se relire comme sa définition."""
-    local = plat(CONTRAT + '\n[fields.propre]\ntype = "text"\n')
-    semence = plat(CONTRAT + '\n[fields.reviewed]\ntype = "date"\n')
+    local = plat(CONTRAT + '\n[fields.propre]\ntype = "text"\ndescription = ""\n')
+    semence = plat(CONTRAT + '\n[fields.reviewed]\ntype = "date"\ndescription = ""\n')
 
     f = fusionner(plat(CONTRAT), local, semence)
 
@@ -262,7 +263,7 @@ def test_une_cle_terminale_exotique_traverse_l_aller_retour() -> None:
     `parse_contract` tolère l'inconnu. Écrite brute, `ma cle = "x"` n'était plus du
     TOML — et `note.libre` était pire : le contrat réémis portait une table
     `[fields.id.note]` que personne n'avait écrite, et `validate` la trouvait bonne."""
-    contrat = CONTRAT + '\n[fields.exotique]\ntype = "text"\n"ma cle" = "x"\n"note.libre" = "y"\n'
+    contrat = CONTRAT + '\n[fields.exotique]\ntype = "text"\ndescription = ""\n"ma cle" = "x"\n"note.libre" = "y"\n'
 
     texte = emit(plat(contrat)).unwrap()
 
@@ -272,7 +273,7 @@ def test_une_cle_terminale_exotique_traverse_l_aller_retour() -> None:
 
 
 def test_une_cle_terminale_a_caractere_de_controle_est_refusee() -> None:
-    contrat = CONTRAT + '\n[fields.exotique]\ntype = "text"\n"cl\\u0007e" = "x"\n'
+    contrat = CONTRAT + '\n[fields.exotique]\ntype = "text"\ndescription = ""\n"cl\\u0007e" = "x"\n'
 
     r = emit(plat(contrat))
 
@@ -288,7 +289,7 @@ def test_une_cle_exotique_traverse_l_aller_retour_a_tous_les_etages() -> None:
         '"ma cle" = "premier niveau"\n'
         '"note.libre" = "point au premier niveau"\n'
         + CONTRAT
-        + '\n[fields."champ exotique"]\ntype = "text"\n"sous cle" = "x"\n"sous.point" = "y"\n'
+        + '\n[fields."champ exotique"]\ntype = "text"\ndescription = ""\n"sous cle" = "x"\n"sous.point" = "y"\n'
         + '\n[sections."Un \\" ici"]\ndescription = ""\n'
     )
 

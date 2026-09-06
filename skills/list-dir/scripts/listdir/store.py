@@ -812,9 +812,11 @@ def init_list(
             "def = false\n"
             "\n[fields.id]\n"
             'type = "slug"\n'
+            'description = ""\n'
             "\n[fields.title]\n"
             'type = "text"\n'
             "required = true\n"
+            'description = ""\n'
             '\n[sections."Constat"]\n'
             "required = true\n"
             'description = ""\n',

@@ -78,10 +78,12 @@ description = "À quoi sert cette liste"
 
 [fields.id]
 type = "slug"          # toujours obligatoire, toujours égal au nom de fichier
+description = ""
 
 [fields.title]
 type = "text"
 required = true
+description = ""
 
 [fields.date]
 type = "date"
@@ -92,6 +94,7 @@ command = "date +%F"   # la sortie de cette commande, à la place du marqueur
 [fields.category]
 type = "enum"
 required = false
+description = ""
 values = ["a-traiter", "doublon", "sans-objet"]
 
 [sections."Constat"]
@@ -122,23 +125,15 @@ la clé, `required` dit si elle est obligatoire (défaut `false`), `description`
 écrire. C'est l'ordre du TOML qui ordonne les sections dans un élément créé — pas un tri par
 `required`.
 
-**`description` n'est pas exigée des deux côtés**, et c'est une asymétrie, non une règle :
+**`description` est exigée partout** — sur chaque `[fields.*]`, sur chaque `[sections.*]`, et à la
+racine du contrat. Elle manque : le contrat est refusé, en nommant l'endroit.
 
-| Où | `description` | Absente |
-|---|---|---|
-| `[sections.*]` | **obligatoire** | le contrat est refusé, en nommant la section |
-| `[fields.*]` | facultative | vaut `""` |
-| racine du contrat | facultative | vaut `""` |
-
-Sur une section, **sa valeur reste libre** : `description = ""` est accepté. Une section non
-documentée reste donc visible comme telle, sans qu'on soit forcé d'en rédiger le texte au moment où
-on la déclare. C'est `list-dir contract <liste>` qui la sert, à côté de celle des champs — laquelle
-peut être vide sans que rien ne l'ait réclamée.
-
-> L'asymétrie n'est pas voulue : la raison qui fait exiger une description de section vaut telle
-> quelle pour un champ. La résorber est une dette ouverte
-> (`description-obligatoire-sur-les-sections-seulement`), et le sens de la symétrie — exiger
-> partout, ou nulle part — reste à trancher.
+**C'est la clé qui est exigée, pas son texte** : `description = ""` est accepté aux trois endroits.
+Un champ ou une section qu'on n'a pas su décrire sur le moment reste donc déclarable — mais il
+reste aussi *visible* comme non documenté, ce qui est précisément l'objet de la règle. Sans elle,
+une clé absente et une clé vide rendaient toutes deux `""`, et un contrat à moitié documenté
+traversait `validate` sans un mot. C'est `list-dir contract <liste>` qui sert ces descriptions,
+celles des champs comme celles des sections.
 
 **L'ancien format à deux listes** — un unique `[sections]` portant deux listes de noms, `required`
 et `optional` — est refusé, avec un message nommant la liste à migrer. La réécriture est manuelle :

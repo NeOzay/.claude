@@ -375,6 +375,13 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
     if not contract_name.unwrap():
         return fail(f"{path}: champ « name » manquant — une liste se nomme")
 
+    # LA CLÉ EST EXIGÉE, PAS SON TEXTE — ici, sur chaque champ et sur chaque section.
+    # `description = ""` reste donc accepté partout. Ce qui est visé est le contrat à
+    # moitié documenté : sans ce test, `_texte` rend `""` pour une clé absente, et rien
+    # ne distingue plus « pas de texte » de « pas documenté ». Le contrôle de `name`
+    # reste avant celui-ci : un contrat anonyme s'annonce comme tel d'abord.
+    if "description" not in raw:
+        return fail(f"{path}: « description » manquante — la clé se déclare, fût-elle vide")
     contract_description = _texte(raw.get("description"), path, "« description »")
     if not contract_description:
         return fail(contract_description.message)
@@ -419,6 +426,8 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
                     f"ni contenir d'espace, trouvé « {v} »"
                 )
 
+        if "description" not in body:
+            return fail(f"{path}: champ « {name} » — « description » manquante")
         description = _texte(body.get("description"), path, f"champ « {name} », « description »")
         if not description:
             return fail(description.message)

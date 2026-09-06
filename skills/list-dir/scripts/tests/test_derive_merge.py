@@ -96,8 +96,9 @@ def test_un_champ_sans_from_mais_preremplissable_recoit_sa_valeur(
     """MÊME RÈGLE QU'À LA CRÉATION : un champ du contrat cible sans `from`, mais
     portant `text`/`command`, reçoit cette valeur — pas son marqueur."""
     contrat = GABARIT_TOML.replace(
-        '[fields.verdict]\ntype = "text"\nrequired = true\n',
-        '[fields.verdict]\ntype = "text"\nrequired = true\ntext = "Non instruit."\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
+        'text = "Non instruit."\n',
     )
     derivee = (
         ouvrir(monter_gabarit(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
@@ -111,8 +112,9 @@ def test_un_champ_sans_from_portant_command_recoit_la_sortie(liste: Path, tmp_pa
     mémoire avant d'écrire, et sa destination n'existe donc pas encore. Une
     commande lancée depuis ce répertoire échouerait sur chaque champ prérempli."""
     contrat = GABARIT_TOML.replace(
-        '[fields.verdict]\ntype = "text"\nrequired = true\n',
-        '[fields.verdict]\ntype = "text"\nrequired = true\ncommand = "echo instruit"\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
+        'command = "echo instruit"\n',
     )
     derivee = (
         ouvrir(monter_gabarit(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
@@ -123,8 +125,9 @@ def test_un_champ_sans_from_portant_command_recoit_la_sortie(liste: Path, tmp_pa
 
 def test_une_command_qui_echoue_en_derive_n_ecrit_rien(liste: Path, tmp_path: Path) -> None:
     contrat = GABARIT_TOML.replace(
-        '[fields.verdict]\ntype = "text"\nrequired = true\n',
-        '[fields.verdict]\ntype = "text"\nrequired = true\ncommand = "false"\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
+        'command = "false"\n',
     )
     cible = tmp_path / "revues"
 
@@ -198,7 +201,10 @@ def test_un_echec_ne_laisse_aucune_destination(liste: Path, tmp_path: Path) -> N
 
 
 def test_un_gabarit_au_contrat_incoherent_ne_cree_rien(liste: Path, tmp_path: Path) -> None:
-    _ = monter_gabarit(liste, contrat='name = "revue"\n\n[fields.c]\ntype = "enum"\n')
+    _ = monter_gabarit(
+        liste,
+        contrat='name = "revue"\ndescription = ""\n\n[fields.c]\ntype = "enum"\ndescription = ""\n',
+    )
     cible = tmp_path / "revues"
 
     r = ouvrir(liste).derive(cible, "revue")
@@ -264,7 +270,7 @@ def test_le_titre_du_bloc_vient_du_champ_title(liste_vide: Path) -> None:
 
 def test_sans_title_le_bloc_porte_l_id(liste_vide: Path) -> None:
     sans_titre = (
-        'name = "n"\n\n[fields.id]\ntype = "slug"\n\n'
+        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\ndescription = ""\n\n'
         '[sections."Constat"]\nrequired = true\ndescription = ""\n'
     )
     _ = ecrire(liste_vide, ".list/contract.toml", sans_titre)

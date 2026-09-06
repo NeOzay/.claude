@@ -76,17 +76,21 @@ description = "liste-jouet des tests"
 
 [fields.id]
 type = "slug"
+description = ""
 
 [fields.title]
 type = "text"
 required = true
+description = ""
 
 [fields.date]
 type = "date"
 command = "date +%F"
+description = ""
 
 [fields.origine]
 type = "text"
+description = ""
 
 [sections."Constat"]
 required = true
@@ -461,7 +465,10 @@ def test_un_contrat_de_definition_invalide_ne_cree_rien(tmp_path: Path) -> None:
     """TOUT EST JUGÉ EN MÉMOIRE D'ABORD. Créée puis refusée, la liste serait ensuite
     rejetée comme « contrat déjà présent » : l'appelant resterait coincé entre une
     erreur corrigée et un répertoire qu'il n'a pas créé."""
-    src = semence(tmp_path / "defs/casse", 'name = "n"\n\n[fields.c]\ntype = "inconnu"\n')
+    src = semence(
+        tmp_path / "defs/casse",
+        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "inconnu"\ndescription = ""\n',
+    )
     r = init_list(tmp_path / "neuve", definition=src)
 
     assert not r

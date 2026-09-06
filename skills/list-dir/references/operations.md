@@ -114,11 +114,13 @@ Le report par `from` est le seul emprunt, et il est déclaratif :
 [fields.title]
 type = "text"
 required = true
+description = ""
 from = "title"        # repris de l'élément source
 
 [fields.verdict]
 type = "enum"
 required = true
+description = ""
 values = ["retenu", "écarté"]
                       # pas de `from` : posé au marqueur, c'est au modèle de trancher
 ```

@@ -25,6 +25,7 @@ def = false
 
 [fields.id]
 type = "slug"
+description = ""
 
 [fields.title]
 type = "text"
@@ -33,13 +34,16 @@ description = "le titre de l'élément"
 
 [fields.date]
 type = "date"
+description = ""
 
 [fields.category]
 type = "enum"
 values = ["rouge", "vert"]
+description = ""
 
 [fields.tags]
 type = "list"
+description = ""
 
 [sections."Constat"]
 required = true
@@ -98,15 +102,18 @@ description = "fiches de revue"
 
 [fields.id]
 type = "slug"
+description = ""
 
 [fields.title]
 type = "text"
 required = true
 from = "title"
+description = ""
 
 [fields.verdict]
 type = "text"
 required = true
+description = ""
 
 [sections."Avis"]
 required = true

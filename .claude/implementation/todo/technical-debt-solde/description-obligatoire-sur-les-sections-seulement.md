@@ -24,6 +24,31 @@ La `description` du contrat lui-même est facultative, par le même `_texte()`.
 
 L'asymétrie n'est **pas voulue** — dit par l'utilisateur le 2026-09-05.
 
+## Soldé le
+
+**Soldé le 2026-09-05 par le chantier `description-obligatoire-partout`** — `description` est
+désormais exigée aux trois endroits, champ, section et racine du contrat, sur le modèle du
+contrôle qui existait déjà pour les sections. C'est la clé qui est exigée, pas son texte :
+`description = ""` reste accepté partout, de sorte qu'un contrat à moitié documenté se voit à la
+déclaration sans qu'il faille rédiger sur-le-champ. La règle est énoncée en un seul endroit,
+`skills/list-dir/references/format.md`, où le tableau de l'asymétrie a disparu.
+Établi par :
+
+```
+$ d=$(mktemp -d) && mkdir -p "$d/.list" \
+    && printf 'name = "x"\ndescription = ""\n\n[fields.id]\ntype = "slug"\n' \
+       > "$d/.list/contract.toml" \
+    && list-dir validate "$d"
+/tmp/tmp.4psAxG089H/.list/contract.toml: champ « id » — « description » manquante
+$ echo $?
+1
+```
+
+Le même contrat, `description = ""` ajoutée sous `[fields.id]`, passe. Les contrats produits par
+l'outil restent valides sans intervention : `list-dir init` puis `validate` → « 0 élément(s)
+conformes », `list-dir derive … --template review` puis `validate` → « 46 élément(s) conformes ».
+Suite de tests : 444 passent, dont quatre neufs sur cette règle.
+
 ## Pourquoi c'est gênant
 
 Deux tables présentées comme parallèles n'obéissent pas à la même règle, et rien ne le dit à

@@ -27,6 +27,7 @@ frozen = true
 
 [fields.id]
 type = "slug"
+description = ""
 
 [fields.title]
 type = "text"

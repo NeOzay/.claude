@@ -159,7 +159,7 @@ def test_hors_depot_git_echoue_sans_rien_perdre(tmp_path: Path) -> None:
 def test_check_item_rappelle_sans_refuser(depot: Path) -> None:
     """Le contrat d'arrivée peut exiger davantage : c'est un RAPPEL, jamais un refus.
     Le déplacement a réussi ; compléter demande un second commit."""
-    exigeant = CONTRAT + '\n[fields.verdict]\ntype = "text"\nrequired = true\n'
+    exigeant = CONTRAT + '\n[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
     _ = monter_liste(depot / "cible", exigeant)
 
     arrivee = ouvrir(depot / "source").move("entree", depot / "cible").unwrap()
