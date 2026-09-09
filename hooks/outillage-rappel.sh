@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
-# SessionStart — rappelle l'outillage du dépôt, et UNIQUEMENT quand la session tourne
-# dedans. Les hooks de ~/.claude/settings.json sont globaux : sans cette condition, les
-# règles de ce dépôt seraient injectées dans tous les projets de l'utilisateur, où elles
-# sont hors sujet et parfois fausses (« uvx basedpyright » dans un projet Node).
+# SessionStart — rappelle l'outillage du dépôt.
+#
+# BRANCHÉ DANS `.claude/settings.json`, LES SETTINGS DE PROJET, et pas dans
+# `~/.claude/settings.json`, qui est celui de l'utilisateur : ceux-là valent pour tous
+# ses projets, où les règles d'ici sont hors sujet et parfois fausses (« uvx
+# basedpyright » dans un projet Node). Le settings de projet ne charge le hook que
+# lorsque ce dépôt est ouvert, et il est versionné avec lui.
+#
+# La garde sur le répertoire ci-dessous n'est donc plus ce qui limite la portée — c'est
+# une ceinture, qui rend le script correct où qu'on le branche.
 #
 # QUATRE LIGNES, PAS LE FICHIER. `OUTILLAGE.md` fait ~2 000 tokens ; le recopier à chaque
 # session coûterait plus que ce qu'il évite. Le rappel nomme les lanceurs, l'interdit qui

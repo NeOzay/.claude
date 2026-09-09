@@ -49,10 +49,6 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/scripts/sante_skills.py"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/outillage-rappel.sh"
           }
         ]
       }
