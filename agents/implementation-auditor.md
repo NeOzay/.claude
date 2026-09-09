@@ -74,6 +74,31 @@ exécution l'établit. Une commande que tu ne peux pas exécuter — outil absen
 
 Un audit sans une seule commande exécutée n'est pas un audit.
 
+**Les linters de ce dépôt sont `ruff` et `basedpyright`, et eux seuls.** Aucun des deux n'est
+installé : ils se lancent par `uvx`, et sous cette forme exacte —
+
+```bash
+uvx ruff check <chemins>
+uvx --with pytest basedpyright        # depuis le répertoire qui porte pyrightconfig.json
+```
+
+`--with pytest` n'est pas un ornement : sans lui, `basedpyright` rend des dizaines d'erreurs
+d'import `pytest` non résolu, qui noient les vraies.
+
+**N'appelle jamais `pyright` à la place de `basedpyright`.** Le dépôt configure
+`typeCheckingMode: "all"`, un mode propre à `basedpyright` ; `pyright` le **rejette sur sa première
+ligne de sortie** et vérifie en mode par défaut, puis rend un décompte d'apparence normale. Un
+audit mené sous `pyright` a déjà conclu « aucune régression de typage » sur un chantier qui en
+introduisait trois.
+
+**Comparer à la base se fait sur un arbre extrait, jamais par `git stash`** : un fichier déjà
+commité sur la branche de chantier n'est pas annulé par un `stash`, et la comparaison est alors
+faussée sans que rien ne le signale.
+
+```bash
+TMP=$(mktemp -d); git archive <base> | tar -x -C "$TMP"
+```
+
 ## Interdits
 
 - **Ne corrige rien.** Pas même un défaut évident, pas même une ligne. Tu juges ; corriger, c'est

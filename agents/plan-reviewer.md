@@ -71,6 +71,10 @@ toi. Tu vérifies qu'il est exécutable, pas qu'il est celui que tu aurais écri
 - chaque étape tient-elle en **un seul tour d'exécution** ? Une étape qui en demande trois se
   découpe maintenant, pas en cours de route.
 - chaque étape **nomme-t-elle ses fichiers** ?
+- une commande de vérification qui invoque **`pyright`** est inopérante et se relève : les linters
+  de ce dépôt sont `ruff` et `basedpyright`, lancés par `uvx ruff check <chemins>` et
+  `uvx --with pytest basedpyright`. `pyright` rejette le `typeCheckingMode: "all"` du dépôt et
+  vérifie en mode par défaut, en rendant un décompte d'apparence normale ;
 - chaque étape porte-t-elle une **commande de vérification** ? Une étape sans vérification n'a
   aucun moyen de conclure.
 - l'**ordre des dépendances** tient-il ? Une étape qui suppose acquis ce qu'une étape ultérieure

@@ -65,6 +65,12 @@ Même règle si un signal de dérive du brief ou du suivi se déclenche : arrêt
 
 ## Vérification
 
+**Les linters de ce dépôt sont `ruff` et `basedpyright`, et eux seuls.** Aucun des deux n'est
+installé : `uvx ruff check <chemins>` et `uvx --with pytest basedpyright` (depuis le répertoire qui
+porte `pyrightconfig.json`). **Jamais `pyright`** : le dépôt configure `typeCheckingMode: "all"`,
+mode propre à `basedpyright`, que `pyright` rejette avant de vérifier en mode par défaut — en
+rendant un décompte d'apparence normale.
+
 **Avant de modifier quoi que ce soit, exécute la commande de vérification une fois** pour
 connaître l'état de départ. Si elle échoue déjà, ce n'est pas ton étape : signale-le dans
 `À SIGNALER` et poursuis — tu jugeras ensuite sur la variation, pas sur le verdict absolu.

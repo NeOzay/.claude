@@ -131,7 +131,7 @@ Un état, une suite, et pas deux :
   revue à faire ; les deux autres n'ont qu'à exister et être conformes, puisque l'Étape 5 y écrit.
 - **`OUTIL ABSENT`** → s'arrêter, et dire que `list-dir` est introuvable dans le `PATH` — pas qu'un
   registre est en faute. Ce n'est pas une garde de présence recopiée ici : `sante_skills.py` la fait
-  déjà une fois par session ([Dépendances](../implementation-tracker/references/contrat.md#dépendances)).
+  déjà une fois par session ([Outillage du dépôt](../../OUTILLAGE.md)).
   C'est le refus d'**attribuer au registre** un code 127 qui n'est pas le sien.
 
 - **Modifications hors de `.claude/implementation/`** → le signaler et demander. C'est ce que

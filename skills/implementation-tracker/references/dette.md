@@ -17,7 +17,7 @@ T=".claude/implementation/todo"
 ```
 
 Ce que le pipeline exige de son environnement pour que ces commandes tournent — et ce qu'il advient
-quand un outil déclaré manque : [Dépendances](contrat.md#dépendances).
+quand un outil déclaré manque : [Outillage du dépôt](../../../OUTILLAGE.md).
 
 **Les trois registres n'existent pas d'office dans un projet neuf.** Ils s'y amorcent depuis les
 définitions que ce skill embarque sous `list-dir/`, résolues par leur nom :

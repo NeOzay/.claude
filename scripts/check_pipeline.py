@@ -278,7 +278,6 @@ EMPREINTES: dict[str, tuple[str, ...]] = {
     "contrat-des-sous-agents": ("rev-parse --show-toplevel",),  # racine du dépôt
     "branche-et-commits": ("ramasse ce qui traîne",),  # staging
     "dates-et-listing": ("jamais devinée",),
-    "dépendances": ("elle ne se suppose pas",),
 }
 
 
@@ -578,9 +577,11 @@ def commandes_bin(root: Path) -> dict[str, str]:
 
 @control(7, "Chemins de skill cités : existence et forme")
 def check_chemins_skill(root: Path) -> list[Finding]:
-    fichiers = list(markdown_files(root, only="skills"))
+    # Les `.md` de la racine comptent : `OUTILLAGE.md` cite des chemins de skill, et
+    # un chemin faux y trompe autant qu'ailleurs.
+    fichiers = [*markdown_files(root, only="skills"), *root.glob("*.md")]
     if not fichiers:
-        return [Finding(False, "aucun fichier examiné dans skills/ — contrôle sans objet")]
+        return [Finding(False, "aucun fichier examiné — contrôle sans objet")]
 
     commandes = commandes_bin(root)
     cites = 0
