@@ -1,0 +1,9 @@
+# Les dépendances du dépôt de skills, installées dans .venv et contrôlées à chaque
+# démarrage de session par scripts/sante_skills.py.
+#
+# tomlkit est ÉPINGLÉ : `list-dir` ne s'en sert pas comme d'un utilitaire mais comme
+# d'un garant de mise en forme — regroupement des commentaires, tableaux multilignes,
+# aller-retour à l'octet. Un changement de son rendu se verrait dans le front matter
+# de tous les éléments, pas dans une exception.
+tomlkit==0.15.1
+pytest==9.1.1

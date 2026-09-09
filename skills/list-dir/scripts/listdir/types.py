@@ -291,10 +291,15 @@ class Item:
     """Un élément de liste : un fichier, son front matter, ses sections.
 
     IMMUABLE, et ce n'est pas un principe abstrait : `raw_front` conserve le texte
-    TOML tel qu'il a été lu, et render() le reconduit tel quel tant qu'il est là.
-    Muter `fields` en place le ferait diverger de `raw_front` sans que rien ne le
-    signale. with_fields() rend une copie dont `raw_front` est None — c'est ce
-    None, et lui seul, qui déclenche une resérialisation.
+    TOML tel qu'il a été lu, et l'écriture REPROJETTE `fields` dessus — elle n'y
+    touche que les champs dont la valeur a changé. Muter `fields` en place le ferait
+    diverger de `raw_front` sans que rien ne le signale, et la reprojection écrirait
+    alors sur un document qui ne correspond plus à rien.
+
+    `raw_front` N'EST PLUS UN COMMUTATEUR. Il l'a été : le mettre à None déclenchait
+    une resérialisation intégrale, qui aplatissait les tableaux et effaçait les
+    commentaires de quelqu'un qui n'avait rien demandé. Il n'est plus que le document
+    d'origine, et None y signifie « il n'y en a pas » — un élément neuf, rien de plus.
     """
 
     path: Path
@@ -313,7 +318,7 @@ class Item:
         return self.path.stem
 
     def with_fields(self, **kw: object) -> Item:
-        return replace(self, fields={**self.fields, **kw}, raw_front=None)
+        return replace(self, fields={**self.fields, **kw})
 
     def with_sections(self, **kw: str) -> Item:
         return replace(self, sections={**self.sections, **kw})
@@ -324,9 +329,11 @@ class Item:
         with_fields et with_sections fusionnent : ils savent ajouter et écraser,
         jamais retirer ni réordonner. Or c'est exactement ce qu'une migration doit
         pouvoir faire quand le contrat a changé d'ordre ou perdu un champ. D'où ce
-        troisième constructeur, et la resérialisation qu'il impose (raw_front None).
+        troisième constructeur — mais plus la resérialisation qui l'accompagnait :
+        retirer et réordonner se font désormais SUR le document d'origine, dont le
+        reste garde sa mise en forme.
         """
-        return replace(self, fields=dict(fields), sections=dict(sections), raw_front=None)
+        return replace(self, fields=dict(fields), sections=dict(sections))
 
     def render(self) -> str:
         from .items import render_item

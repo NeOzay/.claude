@@ -9,7 +9,8 @@ CE QUE CE FICHIER CADRE :
     supprime rien de son propre chef — décider que `severite` est devenu `gravite`,
     c'est juger, et un script qui juge est la ligne que ce dispositif ne franchit pas.
   · MIGRER EST REJOUABLE, et un élément déjà conforme n'est PAS réécrit : le
-    réécrire pour rien lui coûterait son `raw_front`, donc l'aller-retour octet.
+    le réécrire pour rien lui donnerait une date neuve et le ferait remonter dans
+    `git status` sans qu'aucun champ n'ait changé.
   · `init_list` fait passer ses deux valeurs libres par le sérialiseur. Un `--name`
     contenant un guillemet produisait un contrat que `tomllib` refuse — en rendant 0.
 """
@@ -242,7 +243,7 @@ def test_migration_rejouable(liste_vide: Path) -> None:
 
 def test_champ_non_declare_est_conserve_et_signale_sans_ecriture(liste_vide: Path) -> None:
     """LE POINT LE PLUS FIN : une REMARQUE ne fait rien écrire. Réécrire un élément
-    que la migration n'a pas eu à changer lui coûterait son raw_front pour rien."""
+    que la migration n'a pas eu à changer le daterait de maintenant pour rien."""
     # L'élément est DÉJÀ CONFORME par ailleurs : sans cela les ajouts légitimes
     # noieraient la remarque, et le test ne prouverait plus rien sur elle.
     _ = element(
@@ -503,3 +504,114 @@ def test_une_liste_deja_montee_est_refusee_avant_de_lire_la_definition(tmp_path:
 
     assert not r
     assert "contrat déjà présent" in r.message
+
+
+# ------------------------------- ce qu'une migration NE reformate pas (le chantier)
+ELEMENT_MIS_EN_FORME = """\
++++
+id = "premier"
+title = "Le premier élément"
+date = 2026-08-24
+category = "rouge"
+# la légende de « tags », posée à la main
+tags = [
+  "une entrée un peu longue",
+  "une autre entrée un peu longue",
+]
++++
+
+## Constat
+
+Ce qui a été constaté.
+
+## Assumé
+
+<OPTIONNEL>
+"""
+
+# Le même contrat, un champ de plus. C'est le geste ordinaire qui déclenchait le
+# reformatage : il touche TOUS les éléments, donc les réécrivait tous.
+CONTRAT_AVEC_CHAMP_EN_PLUS = CONTRAT.replace(
+    """[fields.title]
+type = "text"
+required = true
+description = "le titre de l'élément"
+""",
+    """[fields.ajoute]
+type = "text"
+description = "un champ ajouté après coup"
+
+[fields.title]
+type = "text"
+required = true
+description = "le titre de l'élément"
+""",
+)
+
+# Le même contrat, « tags » remonté en tête : migrate remet dans l'ordre du contrat.
+CONTRAT_TAGS_EN_TETE = CONTRAT.replace(
+    """[fields.id]
+type = "slug"
+description = ""
+""",
+    """[fields.tags]
+type = "list"
+description = ""
+
+[fields.id]
+type = "slug"
+description = ""
+""",
+).replace(
+    """[fields.tags]
+type = "list"
+description = ""
+
+[sections."Constat"]""",
+    """[sections."Constat"]""",
+)
+
+
+def test_migrate_ajoute_un_champ_sans_aplatir_les_tableaux(tmp_path: Path) -> None:
+    """LE CHANTIER, EN UN TEST. Un ajout de champ au contrat touche TOUS les éléments.
+    Il resérialisait donc tout leur front matter : les tableaux mis en forme à la main
+    revenaient sur une ligne, et le diff mélangeait la migration et un reformatage
+    massif que personne n'avait demandé."""
+    liste = monter_liste(tmp_path / "jouet")
+    fiche = ecrire(liste, "premier.md", ELEMENT_MIS_EN_FORME)
+    _ = ecrire(liste, ".list/contract.toml", CONTRAT_AVEC_CHAMP_EN_PLUS)
+
+    changes = ouvrir(liste).migrate().unwrap()
+    apres = fiche.read_text(encoding="utf-8")
+
+    assert any("ajouté" in c.action for c in changes)
+    assert "ajoute = " in apres
+    assert '  "une entrée un peu longue",\n  "une autre entrée un peu longue",\n' in apres
+    assert "# la légende de « tags », posée à la main" in apres
+
+
+def test_migrate_reordonne_sans_reformater(tmp_path: Path) -> None:
+    """Remettre dans l'ordre du contrat, c'est DÉPLACER des blocs — pas les réécrire.
+    Le commentaire suit le champ dont il est la légende."""
+    liste = monter_liste(tmp_path / "jouet")
+    fiche = ecrire(liste, "premier.md", ELEMENT_MIS_EN_FORME)
+    _ = ecrire(liste, ".list/contract.toml", CONTRAT_TAGS_EN_TETE)
+
+    _ = ouvrir(liste).migrate().unwrap()
+    apres = fiche.read_text(encoding="utf-8")
+
+    assert apres.index("tags = [") < apres.index('id = "premier"')
+    assert apres.index("# la légende de « tags »") < apres.index("tags = [")
+    assert '  "une entrée un peu longue",\n' in apres
+
+
+def test_migrate_reste_rejouable_sur_un_element_mis_en_forme(tmp_path: Path) -> None:
+    """REJOUABLE veut dire « ne touche à rien » : un élément déjà conforme n'est pas
+    réécrit, et sa mise en forme survit donc à une migration relancée."""
+    liste = monter_liste(tmp_path / "jouet")
+    fiche = ecrire(liste, "premier.md", ELEMENT_MIS_EN_FORME)
+
+    changes = ouvrir(liste).migrate().unwrap()
+
+    assert [c for c in changes if c.applied] == []
+    assert fiche.read_text(encoding="utf-8") == ELEMENT_MIS_EN_FORME

@@ -52,3 +52,17 @@ la première réécriture. La limite « entrées courtes » est donc double : li
 - ce qui a fait remonter le sujet : le contrat des fiches d'analyse de `claude-translator`
   (`docs/ANALYSE.md`, décision D19), où six données de type liste ont été portées du corps vers le
   frontmatter et où la longueur des entrées devient un critère de conception
+
+## Fait le
+
+**2026-09-09, chantier `tableaux-toml-aplatis-a-l-ecriture`** — l'écriture ne resérialise plus le
+front matter, elle y reprojette les champs modifiés via tomlkit : un tableau mis en forme à la
+main, une chaîne multiligne et un commentaire survivent à une réécriture qui ne portait pas sur
+eux. La question posée par l'entrée est tranchée dans le sens « enrouler », mais sans imposer de
+style : rien n'est reformaté, c'est ce qui a été écrit qui est conservé.
+
+Archive du chantier : `.claude/implementation/done/2026-09-09-tableaux-toml-aplatis-a-l-ecriture.md`
+
+Établi par : sur une liste neuve portant un tableau écrit sur trois lignes avec un commentaire
+au-dessus, l'ajout de deux champs au contrat puis `list-dir migrate` →
+`git diff --stat` = `1 file changed, 2 insertions(+)`, tableau et commentaire intacts.

@@ -58,13 +58,16 @@ contrat ne promet plus rien. Contrepartie assumée : une `command` qui échouera
 confronté à son type dès le dry-run, qui refuse donc exactement ce que la migration refusera
 ([Préremplir un champ ou une section](../references/format.md#préremplir-un-champ-ou-une-section)).
 
-Un élément modifié voit en revanche son front matter **resérialisé** — `Item.realigned` abandonne
-`raw_front`, et c'est ce qui permet de retirer et de réordonner, là où `with_fields` ne sait que
-fusionner. D'éventuels commentaires TOML écrits à la main y disparaissent. C'est assumé : le
-contrat est l'autorité sur la structure, pas sur la mise en page du fichier. C'est aussi pourquoi
-une remarque seule — un champ conservé — ne déclenche **aucune** écriture : sans cette distinction,
-relancer `migrate` sur une liste conforme réécrirait chaque élément et lui coûterait son
-`raw_front` pour rien.
+Un élément modifié voit son front matter **reprojeté**, jamais reformaté : seuls les champs dont la
+valeur change sont réécrits, et `Item.realigned` retire et réordonne SUR le document d'origine, là
+où `with_fields` ne sait que fusionner. Tableaux mis en forme sur plusieurs lignes, guillemets et
+commentaires survivent donc à une migration qui ne portait pas sur eux — un champ retiré emportant
+seulement le commentaire qui le précédait, sa légende.
+
+Une remarque seule — un champ conservé — ne déclenche pour autant **aucune** écriture. Le rendu
+serait aujourd'hui identique à l'octet, mais réécrire un fichier que rien n'oblige à changer lui
+donne une date de modification neuve, et fait apparaître dans `git status` des éléments qu'aucune
+migration n'a touchés.
 
 Enfin, une migration réécrit du contenu : son commit ne doit jamais être mêlé à un `move`, pour la
 raison dite juste en dessous.

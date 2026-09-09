@@ -61,11 +61,11 @@ item.with_fields(**kw)  # copie modifiée
 item.with_sections(**kw)
 ```
 
-**Pourquoi immuable** : un élément lu conserve le texte brut de son front matter, et `render()` le
-reconduit tel quel — c'est ce qui garantit qu'un aller-retour lecture/écriture ne change pas un
-octet. Muter les valeurs en place les ferait diverger du texte conservé, sans que rien ne le
-signale. `with_fields` rend une copie dont le texte brut est marqué périmé : c'est ce marquage, et
-lui seul, qui déclenche une resérialisation.
+**Pourquoi immuable** : un élément lu conserve le texte brut de son front matter, et `render()`
+REPROJETTE les champs dessus — il n'y réécrit que ceux dont la valeur a changé, ce qui garantit
+qu'un aller-retour lecture/écriture ne change pas un octet, et qu'une modification n'en change que
+sa ligne. Muter les valeurs en place les ferait diverger du texte conservé, sans que rien ne le
+signale, et la reprojection écrirait alors sur un document qui ne correspond plus à rien.
 
 ### Le contrat
 

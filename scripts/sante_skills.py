@@ -18,11 +18,18 @@ SILENCIEUX QUAND TOUT VA BIEN : un hook qui parle à chaque session finit par ne
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
 
 MIN_PYTHON = (3, 12)
+
+# Le venv du dépôt, celui dans lequel `list-dir.py` se ré-exécute. Les scripts de
+# skill n'ont plus la stdlib pour seul horizon : ce qui manque ici ne se voit
+# autrement qu'en ImportError au milieu d'une opération.
+VENV = ".venv"
+REQUIREMENTS = "requirements.txt"
 
 
 def racine() -> Path:
@@ -32,6 +39,98 @@ def racine() -> Path:
     c'est précisément ce que le reste du système ne peut pas faire depuis un `.md`.
     """
     return Path(__file__).resolve().parent.parent
+
+
+def _requises(root: Path) -> list[tuple[str, str | None]]:
+    """Les distributions déclarées par `requirements.txt` : (nom, version épinglée).
+
+    PAS DE requirements.txt = RIEN À CONTRÔLER, et c'est voulu : un dépôt qui ne
+    déclare aucune dépendance n'a pas à se voir reprocher l'absence d'un venv. C'est
+    la déclaration qui crée l'exigence, jamais l'inverse.
+
+    SEUL `==` DONNE UNE VERSION, et seulement SANS MARQUEUR D'ENVIRONNEMENT. Une
+    contrainte souple (`>=`, `~=`) déclare un intervalle, dont ce script ne saurait
+    dire s'il est respecté sans embarquer un résolveur ; elle ne contrôle donc que la
+    présence. Épingler, c'est demander à être averti — et ne rien vérifier d'une
+    épingle la rendrait décorative.
+
+    UN MARQUEUR (`… ; python_version >= "3.12"`) retombe sur la présence seule : dire
+    si la ligne s'applique demande d'évaluer le marqueur, ce qui est le travail d'un
+    résolveur. Signaler une version « divergente » sur une ligne peut-être inactive
+    serait pire que se taire — c'est l'avertissement qu'on apprend à ignorer.
+    """
+    fichier = root / REQUIREMENTS
+    if not fichier.is_file():
+        return []
+    requises: list[tuple[str, str | None]] = []
+    for ligne in fichier.read_text(encoding="utf-8").splitlines():
+        brut = ligne.split("#")[0].strip()
+        if not brut or brut.startswith("-"):
+            continue
+        nom, epingle, version = brut.partition("==")
+        requises.append(
+            (
+                re.split(r"[<>=!~;\[ ]", nom)[0].strip(),
+                version.strip() if epingle and ";" not in version else None,
+            )
+        )
+    return requises
+
+
+def _dependances(root: Path) -> list[str]:
+    """Le venv du dépôt porte-t-il ce que `requirements.txt` déclare ?
+
+    SANS SOUS-PROCESSUS. Ce script tourne à chaque démarrage de session ; lancer un
+    interpréteur par dépendance pour l'interroger coûterait plus que tout le reste
+    du contrôle réuni. Les `*.dist-info` posés par pip et uv disent la même chose,
+    en une lecture de répertoire.
+    """
+    requises = _requises(root)
+    if not requises:
+        return []
+
+    venv = root / VENV
+    reparer = (
+        f"uv venv {venv} && uv pip install --python {venv}/bin/python -r {root / REQUIREMENTS}"
+    )
+
+    site = next(iter(sorted(venv.glob("lib/python*/site-packages"))), None)
+    if site is None:
+        return [f"{venv} absent ou incomplet — le (re)créer : {reparer}"]
+
+    def normal(nom: str) -> str:
+        return nom.lower().replace("_", "-")
+
+    # `tomlkit-0.15.1.dist-info` → « tomlkit » : « 0.15.1 ». Le nom d'une
+    # distribution peut porter des tirets, la version jamais : c'est le DERNIER
+    # tiret qui sépare les deux.
+    installees = {
+        normal(d.name.removesuffix(".dist-info").rpartition("-")[0]): d.name.removesuffix(
+            ".dist-info"
+        ).rpartition("-")[2]
+        for d in site.glob("*.dist-info")
+    }
+
+    absentes = [nom for nom, _ in requises if normal(nom) not in installees]
+    if absentes:
+        mal = (
+            f"{venv} : {', '.join(absentes)} déclaré(s) dans {REQUIREMENTS} mais absent(s) — "
+            f"réinstaller : {reparer}"
+        )
+        return [mal]
+
+    divergentes = [
+        f"{nom} {installees[normal(nom)]} au lieu de {version}"
+        for nom, version in requises
+        if version is not None and installees[normal(nom)] != version
+    ]
+    if divergentes:
+        mal = (
+            f"{venv} : {', '.join(divergentes)} — {REQUIREMENTS} épingle une autre "
+            f"version ; réaligner : {reparer}"
+        )
+        return [mal]
+    return []
 
 
 def anomalies() -> list[str]:
@@ -72,6 +171,8 @@ def anomalies() -> list[str]:
             )
         elif Path(trouve).resolve() != lien.resolve():
             maux.append(f"« {lien.name} » résout vers {trouve}, pas vers bin/{lien.name}.")
+
+    maux.extend(_dependances(root))
 
     if sys.version_info < MIN_PYTHON:
         v = ".".join(str(n) for n in sys.version_info[:3])

@@ -267,9 +267,14 @@ class ListStore:
         fichier et rend une liste de changements vide. C'est ce qui permet de la
         relancer après une écriture interrompue.
 
-        EFFET DE BORD À CONNAÎTRE : un élément modifié voit son front matter
-        resérialisé (cf. Item.realigned). D'éventuels commentaires TOML écrits à la
-        main y disparaissent — le contrat est l'autorité, pas la mise en page.
+        ELLE NE REFORMATE RIEN. Un élément modifié voit son front matter reprojeté,
+        pas resérialisé (cf. `items.dump_front`) : seuls les champs dont la valeur
+        change sont réécrits. Tableaux mis en forme, guillemets et commentaires
+        survivent à une migration qui ne portait pas sur eux — et le diff ne montre
+        alors que la migration.
+
+        Un champ RETIRÉ emporte le commentaire qui le précédait : c'était sa légende,
+        et la laisser derrière lui décrirait un champ qui n'existe plus.
         """
         items = self.items()
         if not items:
@@ -291,8 +296,10 @@ class ListStore:
                 return Result(realigned.status, None, realigned.message)
             aligned, faits = realigned.unwrap()
             changes.extend(faits)
-            # Une remarque seule ne fait rien écrire : réécrire un élément que la
-            # migration n'a pas eu à changer lui coûterait son raw_front pour rien.
+            # Une remarque seule ne fait rien écrire. Le rendu serait aujourd'hui
+            # identique à l'octet, mais réécrire un fichier que rien n'oblige à
+            # changer lui donne une date de modification neuve, et fait remonter dans
+            # `git status` des éléments qu'aucune migration n'a touchés.
             if any(c.applied for c in faits):
                 plan.append(aligned)
 
@@ -311,7 +318,8 @@ class ListStore:
         """L'élément tel que le contrat courant le veut, et ce qu'il a fallu faire.
 
         Liste de changements vide → l'élément est déjà conforme, et l'appelant ne
-        doit PAS le réécrire : le réécrire pour rien perdrait son raw_front.
+        doit PAS le réécrire : il en ressortirait identique à l'octet, mais daté de
+        maintenant et remonté par `git status` sans que rien n'ait changé.
 
         FAILLIBLE : un champ ou une section absents peuvent porter `command`, dont
         l'exécution peut échouer. L'appelant propage l'échec avant d'écrire quoi

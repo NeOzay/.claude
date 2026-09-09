@@ -1,19 +1,27 @@
 """Lecture et écriture d'un élément : front matter TOML + sections Markdown.
 
-DEUX RÈGLES, ET LEUR FRONTIÈRE :
+UNE SEULE RÈGLE : écrire, c'est REPROJETER. Le texte brut du front matter lu
+(`raw_front`) est le document sur lequel on repose les champs, et seuls ceux dont
+la valeur a changé sont réécrits. Tout le reste — tableau mis en forme sur
+plusieurs lignes, guillemets choisis, commentaire posé au-dessus d'un champ —
+ressort tel qu'il a été écrit. Un aller-retour lecture/écriture ne change donc pas
+un octet, et une réécriture qui ne portait pas sur un champ ne le touche pas non
+plus.
 
-  1. Un élément lu conserve le texte brut de son front matter (`raw_front`), et
-     render() le reconduit TEL QUEL. Un aller-retour lecture/écriture ne change
-     donc pas un octet — guillemets, ordre des clés, commentaires compris.
+IL Y AVAIT UNE FRONTIÈRE ICI, et elle coûtait cher : `raw_front is None`
+déclenchait une resérialisation intégrale, si bien qu'un simple ajout de champ au
+contrat aplatissait d'un coup tous les tableaux de tous les éléments. Le diff git
+mélangeait alors la migration et un reformatage que personne n'avait demandé.
 
-  2. Un élément dont un champ a changé (raw_front is None, cf. Item.with_fields)
-     est resérialisé par un sérialiseur BORNÉ aux seuls types du contrat. Un type
-     non couvert est une erreur qui le nomme, jamais une écriture approximative.
+CE QUI L'A RENDUE INUTILE : tomlkit. L'ancienne justification — « tomllib lit mais
+n'écrit pas, et la stdlib n'a aucun écrivain TOML » — tenait tant qu'écrire voulait
+dire sérialiser à la main. Un parseur préservant supprime la prémisse.
 
-POURQUOI CETTE FRONTIÈRE : tomllib lit mais n'écrit pas, et la stdlib n'a aucun
-écrivain TOML. Sérialiser à la main est exactement le travail que ce chantier
-supprime — on le réduit donc au strict nécessaire, et la règle 1 prime partout où
-elle s'applique.
+DEUX ÉCRIVAINS COHABITENT, et ce n'est pas un oubli : `dump_front` (tomlkit)
+n'écrit QUE le front matter des éléments, seul endroit où quelqu'un met en forme à
+la main. `dump_value` reste borné à une ligne et sert les contrats et les semences
+(`store.init_list`, `provenance`), qui sont recopiés à l'octet et n'ont donc rien à
+préserver.
 """
 
 from __future__ import annotations
@@ -21,9 +29,13 @@ from __future__ import annotations
 import datetime
 import re
 import tomllib
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import cast
+
+import tomlkit
+from tomlkit.items import Item as TomlItem
+from tomlkit.items import Key as TomlKey
 
 from .types import Item, Result, fail, ok
 
@@ -161,7 +173,12 @@ ESCAPES = {"\n": "\\n", "\r": "\\r", "\t": "\\t", "\b": "\\b", "\f": "\\f"}
 
 
 def dump_value(value: object, key: str) -> str:
-    """Une valeur TOML, pour les seuls types déclarables au contrat.
+    """Une valeur TOML sur une ligne — DÉPRÉCIÉ, ne prend plus de nouvel appelant.
+
+    Remplacé par `toml_value` partout où quelqu'un met en forme à la main. Il ne
+    survit que pour les contrats et les semences (`store.init_list`, `provenance`),
+    recopiés à l'octet et qui n'ont donc rien à préserver. Sa suppression est écrite :
+    dette `deux-ecrivains-toml-coexistent`, road-map `supprimer-dump-value`.
 
     TOUT CE QUI EST ÉCRIT DOIT SE RELIRE. N'échapper que `\\` et `"` laissait un
     saut de ligne fermer la chaîne au milieu : `migrate` écrivait alors un fichier
@@ -195,17 +212,133 @@ def dump_value(value: object, key: str) -> str:
     )
 
 
-def dump_front(fields: dict[str, object]) -> str:
-    return "\n".join(f"{k} = {dump_value(v, k)}" for k, v in fields.items())
+def toml_value(value: object, key: str) -> object:
+    """La valeur, en item tomlkit, pour les seuls types déclarables au contrat.
+
+    LA GARDE DE TYPE RESTE À NOUS. tomlkit accepte un `dict` sans broncher et l'écrit
+    en table `[x]` — un type hors contrat passerait donc silencieusement, et le
+    fichier relu porterait une structure que rien dans le contrat ne décrit. C'est
+    exactement le mode d'échec ouvert que `dump_value` avait été écrit pour fermer,
+    et il ne se ferme pas tout seul en changeant d'écrivain.
+
+    Un saut de ligne n'est plus une erreur : il devient une chaîne multiligne, que la
+    lecture accepte déjà. Les autres caractères de contrôle, `\\x00` compris, sont
+    échappés par tomlkit et se relisent à l'identique — vérifié avant d'écrire ceci.
+    """
+    if isinstance(value, str):
+        return tomlkit.string(value, multiline="\n" in value)
+    if isinstance(value, bool):  # avant int : bool EST un int en Python
+        return value
+    if isinstance(value, (int, datetime.date)):
+        return value
+    if isinstance(value, (list, tuple)):
+        seq = cast("list[object] | tuple[object, ...]", value)
+        # `Array.extend` est hérité de `list` sans paramètre de type : basedpyright le
+        # rend « partially unknown ». Construire la liste puis la confier à
+        # `tomlkit.item` dit le type sans changer le rendu.
+        return tomlkit.item([toml_value(element, key) for element in seq])
+    raise SerialiseError(
+        f"champ « {key} » : type {type(value).__name__} hors contrat — "
+        "attendus : texte, date, entier, booléen, liste"
+    )
+
+
+def dump_front(fields: Mapping[str, object], raw_front: str | None = None) -> str:
+    """Le front matter écrit, en ne touchant QUE ce qui a changé.
+
+    `raw_front` n'est pas un texte à recopier : c'est le document sur lequel on
+    reprojette. Un champ dont la valeur n'a pas bougé n'est pas réécrit, donc garde
+    sa mise en forme — tableau sur plusieurs lignes, guillemets choisis, commentaire
+    posé au-dessus. C'est toute la raison d'être de tomlkit ici.
+
+    SANS `raw_front`, le document est neuf : un élément créé de toutes pièces n'a
+    aucune mise en forme à préserver, et sort donc canonique.
+
+    LE SAUT DE LIGNE FINAL EST GARANTI AVANT DE PARSER, et ce n'est pas cosmétique.
+    `split_front` rend le front matter par un `"\\n".join(…)`, donc sans retour final :
+    le dernier item du document porte alors un `trail` vide. Invisible tant qu'il
+    reste dernier — et dès qu'un réordonnancement le remonte, le champ suivant se
+    colle à lui. `migrate` écrivait ainsi `id = "x"title = "y"` en annonçant
+    « 1 changement appliqué » et en rendant 0 : une donnée valide détruite par un
+    succès annoncé, exactement ce que ce paquet existe pour rendre impossible.
+    """
+    if raw_front is None:
+        doc = tomlkit.document()
+    else:
+        doc = tomlkit.parse(raw_front if raw_front.endswith("\n") else raw_front + "\n")
+
+    # LA QUEUE SE DÉTACHE AVANT TOUT AJOUT. Une clé neuve se pose en fin de document,
+    # donc DERRIÈRE un commentaire final — et `_reordonne` la lui rattacherait alors
+    # comme si ce commentaire avait toujours été sa légende, puis l'emporterait avec
+    # elle au premier réordonnancement. C'est exactement ce que fait un `migrate` qui
+    # ajoute un champ, et ce que la règle du commentaire orphelin interdit.
+    queue = _detacher_queue(doc)
+
+    for cle, valeur in fields.items():
+        if cle not in doc or doc[cle] != valeur:
+            doc[cle] = toml_value(valeur, cle)
+
+    neuf = _reordonne(doc, fields)
+    neuf.body.extend(queue)
+    return tomlkit.dumps(neuf).strip("\n")
+
+
+def _detacher_queue(doc: tomlkit.TOMLDocument) -> list[tuple[TomlKey | None, TomlItem]]:
+    """Retire du document ce qui suit son dernier champ, et le rend.
+
+    Ce qui traîne là ne précède aucune clé : sous la règle « un commentaire appartient
+    au champ qu'il précède », personne ne le possède. Il est donc mis de côté, puis
+    reposé en fin de document — là où il a été écrit.
+    """
+    corps = doc.body
+    dernier = max((i for i, (cle, _) in enumerate(corps) if cle is not None), default=-1)
+    queue = corps[dernier + 1 :]
+    del corps[dernier + 1 :]
+    return queue
+
+
+def _reordonne(doc: tomlkit.TOMLDocument, ordre: Iterable[str]) -> tomlkit.TOMLDocument:
+    """Le document réduit aux champs donnés, dans cet ordre — sans rien reformater.
+
+    UN COMMENTAIRE APPARTIENT AU CHAMP QU'IL PRÉCÈDE, et voyage donc avec lui. C'est
+    la seule règle décidable sur un front matter plat : un commentaire posé entre
+    deux champs n'a sinon aucun propriétaire, et celui qui l'a écrit le voyait bien,
+    lui, comme la légende de ce qui suit.
+
+    D'OÙ LA SUPPRESSION PAR OMISSION : un champ absent de `ordre` n'est pas recopié,
+    et son commentaire s'en va avec lui. `migrate --drop` laissait sinon derrière lui
+    la légende d'un champ qui n'existe plus — un commentaire devenu faux, que plus
+    rien ne rattache à quoi que ce soit.
+
+    LA QUEUE A DÉJÀ ÉTÉ DÉTACHÉE par l'appelant (`_detacher_queue`, qui dit pourquoi) :
+    tout ce qui reste ici se termine par un champ, et il n'y a pas de reliquat à
+    reposer.
+
+    Les blocs sont DÉPLACÉS, jamais reconstruits : c'est ce qui distingue « remettre
+    dans l'ordre » de « réécrire », et ce qui laisse intacts les tableaux mis en
+    forme à la main.
+    """
+    blocs: dict[str, list[tuple[TomlKey | None, TomlItem]]] = {}
+    bloc: list[tuple[TomlKey | None, TomlItem]] = []
+    for cle, item in doc.body:
+        bloc.append((cle, item))
+        if cle is not None:
+            blocs[cle.key] = bloc
+            bloc = []
+
+    neuf = tomlkit.document()
+    for nom in ordre:
+        neuf.body.extend(blocs[nom])
+    return neuf
 
 
 def render_item(item: Item) -> str:
     """Le fichier tel qu'il sera écrit.
 
-    raw_front présent → reconduit à l'octet près (règle 1).
-    raw_front None    → resérialisé (règle 2).
+    Un seul chemin, sans condition : `dump_front` reprojette les champs sur le
+    document d'origine quand il y en a un, et en construit un neuf sinon.
     """
-    front = item.raw_front if item.raw_front is not None else dump_front(dict(item.fields))
+    front = dump_front(item.fields, item.raw_front)
     corps = "\n\n".join(f"## {t}\n\n{p}" for t, p in item.sections.items())
     return f"{DELIM}\n{front}\n{DELIM}\n\n{corps}\n"
 

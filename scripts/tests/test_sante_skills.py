@@ -123,3 +123,126 @@ def test_silencieux_sur_les_deux_flux_quand_tout_va_bien(
 
     assert code == 0
     assert capture.out == "" and capture.err == ""
+
+
+# ------------------------------------------------------- le venv et ses dépendances
+def poser_venv(racine: Path, *distributions: str) -> Path:
+    """Un venv jouet : le `site-packages` et les `*.dist-info` que pip et uv y posent.
+
+    Chaque distribution s'écrit « nom » ou « nom==version » ; sans version, 1.0.
+    """
+    site = racine / ".venv" / "lib" / "python3.12" / "site-packages"
+    site.mkdir(parents=True)
+    for spec in distributions:
+        nom, _, version = spec.partition("==")
+        (site / f"{nom}-{version or '1.0'}.dist-info").mkdir()
+    return site
+
+
+def test_sans_requirements_aucune_exigence(racine: Path) -> None:
+    """LA DÉCLARATION CRÉE L'EXIGENCE : un dépôt qui ne déclare rien n'a pas à se voir
+    reprocher l'absence d'un venv — sinon tout dépôt sans dépendance crierait."""
+    assert sante_skills._dependances(racine) == []
+
+
+def test_venv_absent_est_nomme_avec_la_reparation(racine: Path) -> None:
+    _ = (racine / "requirements.txt").write_text("tomlkit\n", encoding="utf-8")
+    (mal,) = sante_skills._dependances(racine)
+
+    assert "absent ou incomplet" in mal
+    assert "uv venv" in mal
+
+
+def test_dependance_declaree_mais_absente_est_nommee(racine: Path) -> None:
+    _ = (racine / "requirements.txt").write_text("tomlkit\npytest\n", encoding="utf-8")
+    _ = poser_venv(racine, "pytest")
+    (mal,) = sante_skills._dependances(racine)
+
+    assert "tomlkit déclaré" in mal   # nommée seule : pytest est là, il ne doit pas figurer
+
+
+def test_venv_complet_ne_dit_rien(racine: Path) -> None:
+    _ = (racine / "requirements.txt").write_text("tomlkit\npytest\n", encoding="utf-8")
+    _ = poser_venv(racine, "tomlkit", "pytest")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_commentaires_et_contraintes_de_version_sont_ignores(racine: Path) -> None:
+    """`tomlkit>=0.13` déclare la distribution « tomlkit » : la contrainte n'est pas
+    du nom, et un `# commentaire` n'est pas une dépendance."""
+    _ = (racine / "requirements.txt").write_text(
+        "# les écrivains TOML\ntomlkit>=0.13  # préservant\n\n", encoding="utf-8"
+    )
+    _ = poser_venv(racine, "tomlkit")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_le_nom_de_distribution_est_normalise(racine: Path) -> None:
+    """pip écrit `ruamel_yaml-…dist-info` pour « ruamel-yaml » : comparer brut ferait
+    crier le contrôle sur une dépendance pourtant installée."""
+    _ = (racine / "requirements.txt").write_text("ruamel-yaml\n", encoding="utf-8")
+    _ = poser_venv(racine, "ruamel_yaml")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_version_epinglee_divergente_est_nommee(racine: Path) -> None:
+    """UNE ÉPINGLE QU'ON NE VÉRIFIE PAS EST DÉCORATIVE. tomlkit est épinglé parce que
+    `list-dir` s'en sert comme garant de mise en forme : un changement de son rendu se
+    verrait dans le front matter de tous les éléments, pas dans une exception."""
+    _ = (racine / "requirements.txt").write_text("tomlkit==0.15.1\n", encoding="utf-8")
+    _ = poser_venv(racine, "tomlkit==0.11.0")
+    (mal,) = sante_skills._dependances(racine)
+
+    assert "tomlkit 0.11.0 au lieu de 0.15.1" in mal
+    assert "uv pip install" in mal
+
+
+def test_version_epinglee_respectee_ne_dit_rien(racine: Path) -> None:
+    _ = (racine / "requirements.txt").write_text("tomlkit==0.15.1\n", encoding="utf-8")
+    _ = poser_venv(racine, "tomlkit==0.15.1")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_contrainte_souple_ne_controle_que_la_presence(racine: Path) -> None:
+    """`>=` déclare un intervalle, pas une version : le vérifier demanderait un
+    résolveur. On ne contrôle donc que la présence, et on le dit."""
+    _ = (racine / "requirements.txt").write_text("tomlkit>=0.13\n", encoding="utf-8")
+    _ = poser_venv(racine, "tomlkit==0.15.1")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_un_nom_a_tirets_garde_sa_version(racine: Path) -> None:
+    """`ruamel_yaml-0.18.6.dist-info` : c'est le DERNIER tiret qui sépare le nom de la
+    version, sinon « ruamel » serait pris pour la distribution et « yaml » pour sa
+    version."""
+    _ = (racine / "requirements.txt").write_text("ruamel-yaml==0.18.6\n", encoding="utf-8")
+    _ = poser_venv(racine, "ruamel_yaml==0.18.6")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_une_epingle_a_marqueur_ne_controle_que_la_presence(racine: Path) -> None:
+    """Dire si `; python_version >= "3.12"` s'applique demande un résolveur. Signaler
+    une divergence sur une ligne peut-être inactive serait l'avertissement qu'on
+    apprend à ignorer — on retombe donc sur la présence seule, et on le dit."""
+    _ = (racine / "requirements.txt").write_text(
+        'tomlkit==0.15.1 ; python_version >= "3.12"\n', encoding="utf-8"
+    )
+    _ = poser_venv(racine, "tomlkit==0.11.0")
+
+    assert sante_skills._dependances(racine) == []
+
+
+def test_une_epingle_a_marqueur_exige_quand_meme_la_presence(racine: Path) -> None:
+    _ = (racine / "requirements.txt").write_text(
+        'tomlkit==0.15.1 ; python_version >= "3.12"\n', encoding="utf-8"
+    )
+    _ = poser_venv(racine)
+    (mal,) = sante_skills._dependances(racine)
+
+    assert "tomlkit" in mal

@@ -25,9 +25,43 @@ if sys.version_info < (3, 12):  # noqa: UP036
     raise SystemExit(2)
 
 import argparse
+import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import cast
+
+# LE VENV DU DÉPÔT, PAS L'INTERPRÉTEUR DU PATH, et pour la même raison que la garde
+# de version juste au-dessus : `listdir` importe tomlkit, qui ne vit que dans le venv
+# du dépôt de skills. Or `#!/usr/bin/env python3` désigne l'interpréteur du PATH —
+# ici un Python géré par Homebrew, marqué EXTERNALLY-MANAGED, où l'on n'installe
+# rien. On se ré-exécute donc dans le venv dès qu'on n'y est pas, AVANT tout import
+# de listdir : un ImportError au milieu d'un migrate serait la version 2026 du
+# « 127 muet » que sante_skills existe pour supprimer.
+#
+# UN VENV ABSENT NE FAIT RIEN ICI. C'est sante_skills qui le dit, une fois par
+# session : un point d'entrée qui refuserait de tourner sans lui rendrait le dépôt
+# incapable de se réparer lui-même.
+#
+# La comparaison porte sur `sys.prefix` et non sur `sys.executable` : dans un venv,
+# `sys.prefix` EST le venv, alors que `sys.executable` résolu retombe sur le binaire
+# partagé — deux lancements différents s'y confondraient, et la garde de récursion
+# avec eux.
+#
+# TOUT TIENT DANS UN SEUL `if`, comme la garde de version : une affectation posée au
+# niveau du module avant les imports du paquet les ferait signaler E402, alors que le
+# `if` conditionnel, lui, est admis. La forme suit la contrainte, elle ne la subit pas.
+if (
+    _venv := next(
+        (
+            a / ".venv"
+            for a in Path(__file__).resolve().parents
+            if (a / ".venv/bin/python").exists()
+        ),
+        None,
+    )
+) is not None and Path(sys.prefix).resolve() != _venv.resolve():
+    _python = str(_venv / "bin" / "python")
+    os.execv(_python, [_python, str(Path(__file__).resolve()), *sys.argv[1:]])
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
