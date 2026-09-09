@@ -62,3 +62,32 @@ Préexistant au chantier qui l'a constaté, et hors de son périmètre — celui
 sérialisation TOML, pas sur l'outillage de typage. Le report est délibéré ; ce qui ne l'était pas,
 c'est de découvrir en le clôturant que le contrôle de typage utilisé par ses propres audits était
 plus faible que ce que le dépôt déclare.
+
+## Soldé le
+
+**2026-09-09, hors chantier, sur décision de l'utilisateur** — `basedpyright` fait foi, `pyright`
+n'est plus un outil de ce dépôt. La configuration ne change pas : `typeCheckingMode: "all"` est
+correct pour l'outil retenu, et c'est l'usage de `pyright` qui était fautif.
+
+Ce qui rend la décision opposable, plutôt qu'écrite quelque part :
+
+1. la règle vit dans `OUTILLAGE.md`, à la racine — l'ancienne section « Dépendances » du contrat du
+   tracker était un mauvais endroit pour un outillage valable dans tout le dépôt, ce que montrait
+   déjà le fait que deux skills extérieurs y renvoyaient ;
+2. les **trois agents** la portent en dur (`agents/*.md`), parce que le garde-fou leur interdit tout
+   renvoi au contrat. C'est eux qui choisissaient l'outil, et c'est là que la règle manquait : les
+   trois audits de `tableaux-toml-aplatis-a-l-ecriture` ont lancé `pyright` sans que rien ne les en
+   dissuade.
+
+Établi par :
+
+- `grep -c basedpyright agents/*.md` → `implementation-auditor.md:5`, `plan-reviewer.md:2`,
+  `step-implementer.md:3` — les trois agents nomment l'outil et son lanceur ;
+- `python3 scripts/check_pipeline.py` → « Pipeline conforme », les 8 contrôles au vert, dont
+  « 4 chemins de skill cités, tous existent » et « 40 renvois entre skills, tous résolvent » après
+  recâblage des deux renvois vers `OUTILLAGE.md` ;
+- `(cd skills/list-dir && uvx --with pytest basedpyright)` → `13 errors, 0 warnings, 0 notes`,
+  identique à l'arbre `master` avant le chantier : aucune régression de typage ne subsiste.
+
+La dette restante sur ces 13 erreurs est distincte et reste ouverte :
+`basedpyright-treize-erreurs-non-tenues`.
