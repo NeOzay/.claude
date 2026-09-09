@@ -686,6 +686,66 @@ def check_renvois_skill(root: Path) -> list[Finding]:
     return findings
 
 
+# `pyright` ne se cite que pour être écarté. Ces trois formes sont les seules qui
+# l'énoncent en l'interdisant ; toute autre mention est un appel, ou une consigne qui
+# en produira un.
+# Une mention légitime écarte l'outil, et le texte qui l'écarte est souvent coupé sur
+# plusieurs lignes : le contrôle regarde donc un VOISINAGE, pas la ligne seule.
+PYRIGHT_ECARTE = (
+    "jamais",
+    "ne remplace pas",
+    "rejette",
+    "au lieu de",
+    "inopérante",
+    "fautif",
+    "mode par défaut",
+    "mode de défaillance",
+)
+PYRIGHT_FENETRE = 4
+
+
+@control(9, "pyright n'est cité que pour être écarté")
+def check_pyright(root: Path) -> list[Finding]:
+    """LE DÉPÔT N'A QU'UN VÉRIFICATEUR DE TYPES, et ce n'est pas celui qu'on croit.
+
+    `pyright` rejette le `typeCheckingMode: "all"` de `skills/list-dir`, vérifie en mode
+    par défaut et rend un décompte d'apparence normale — 4 erreurs là où `basedpyright`
+    en voit 13. Trois audits de clôture ont conclu « aucune régression de typage » sur un
+    chantier qui en introduisait trois. Le mode de défaillance est un garde-fou qui
+    répond toujours oui, et il ne se voit pas : d'où ce contrôle, qui refuse la mention
+    plutôt que d'attendre l'appel.
+    """
+    fichiers = [*markdown_files(root), *root.glob("hooks/*.sh"), *root.glob("agents/*.md")]
+    findings: list[Finding] = []
+    vus = 0
+    for fichier in sorted(set(fichiers)):
+        try:
+            lignes = fichier.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for no, ligne in enumerate(lignes, 1):
+            # « basedpyright » et « pyrightconfig.json » contiennent « pyright » : le
+            # second est un NOM DE FICHIER, et le fichier reste correct — c'est l'outil
+            # qui ne convient pas, pas sa configuration.
+            nue = ligne.replace("basedpyright", "").replace("pyrightconfig", "")
+            if "pyright" not in nue:
+                continue
+            vus += 1
+            debut, fin = max(0, no - 1 - PYRIGHT_FENETRE), no + PYRIGHT_FENETRE
+            voisinage = " ".join(lignes[debut:fin]).lower()
+            if not any(forme in voisinage for forme in PYRIGHT_ECARTE):
+                findings.append(
+                    Finding(
+                        False,
+                        f"{fichier.relative_to(root).as_posix()}:{no} cite « pyright » sans "
+                        "l'écarter — le dépôt vérifie par « uvx --with pytest basedpyright »",
+                    )
+                )
+    if not findings:
+        findings.append(Finding(True, f"{vus} mention(s) de « pyright », toutes des interdictions"))
+    return findings
+
+
 def main() -> int:
     root = repo_root()
     if root is None:
