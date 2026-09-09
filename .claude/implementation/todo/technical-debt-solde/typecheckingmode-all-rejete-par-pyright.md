@@ -89,5 +89,32 @@ Ce qui rend la décision opposable, plutôt qu'écrite quelque part :
 - `(cd skills/list-dir && uvx --with pytest basedpyright)` → `13 errors, 0 warnings, 0 notes`,
   identique à l'arbre `master` avant le chantier : aucune régression de typage ne subsiste.
 
+**Complété le 2026-09-09**, après deux dispositifs ajoutés depuis. La règle écrite ne suffisait
+pas : l'ancienne section « Dépendances » disait déjà de lancer `basedpyright`, et trois audits ont
+lancé `pyright` quand même. Ce qui manquait n'était pas le texte, mais qu'il atteigne ses lecteurs
+et qu'il résiste à l'oubli.
+
+- **La session principale le reçoit au démarrage.** `hooks/outillage-rappel.sh`, branché dans
+  `.claude/settings.json` — les settings de **projet**, versionnés avec le dépôt et chargés pour lui
+  seul, là où `~/.claude/settings.json` vaut pour tous les projets de l'utilisateur. Il émet quatre
+  lignes, pas le fichier : les lanceurs, l'interdit de `pyright`, la règle `git archive`.
+- **Le garde-fou refuse la dérive.** Contrôle 9 de `scripts/check_pipeline.py` : toute mention de
+  « pyright » dans les `.md` versionnés, les hooks et les agents doit l'écarter. Il raisonne par
+  voisinage et ignore `basedpyright` et `pyrightconfig.json`, ce dernier étant un nom de fichier.
+
+Établi par :
+
+- transcript de la session `106abb91-b2b2-415a-8f34-fef9e476182e`, ligne 6 :
+  `{"type": "hook_success", "hookName": "SessionStart:startup", …, "content": "Outillage de ce dépôt
+  (/home/debian/.claude/OUTILLAGE.md) : …"}` — le hook s'est déclenché seul, sans approbation
+  demandée, dans une session ouverte après le branchement ;
+- `python3 scripts/check_pipeline.py` → « 9. pyright n'est cité que pour être écarté ✓ 13
+  mention(s), toutes des interdictions », et l'ajout d'une ligne « Lancer `npx pyright` » à
+  `OUTILLAGE.md` la fait refuser en la nommant.
+
+**Ce qui n'est pas couvert, et qui ne peut pas l'être ainsi** : les sous-agents ne reçoivent pas
+`SessionStart`. Or ce sont eux qui avaient dérivé. Leur couverture repose entièrement sur la règle
+recopiée en dur dans `agents/*.md` — que le contrôle 9 empêche désormais de disparaître.
+
 La dette restante sur ces 13 erreurs est distincte et reste ouverte :
 `basedpyright-treize-erreurs-non-tenues`.
