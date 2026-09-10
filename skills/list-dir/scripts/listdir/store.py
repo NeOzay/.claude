@@ -31,11 +31,11 @@ from .contract import (
 from .gitcmd import git
 from .items import (
     SerialiseError,
-    dump_value,
     fence_ouverte,
     outside_fences,
     parse_sections,
     read_item,
+    toml_text,
     write_item,
 )
 from .prefill import PrefillContext, initial_field, initial_section, preview
@@ -807,8 +807,8 @@ def init_list(
         return ok(target)
 
     try:
-        nom = dump_value(name or path.name, "name")
-        desc = dump_value(description or OPTIONAL, "description")
+        nom = toml_text(name or path.name, "name")
+        desc = toml_text(description or OPTIONAL, "description")
     except SerialiseError as exc:
         return fail(f"{target}: {exc}")
     try:

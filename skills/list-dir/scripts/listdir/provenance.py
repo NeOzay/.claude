@@ -42,7 +42,7 @@ from .contract import (
     parse_contract,
 )
 from .definitions import resolve, roots
-from .items import ESCAPES, SerialiseError, dump_value
+from .items import SerialiseError, toml_text
 from .types import Contract, Origin, Result, fail, ok
 
 
@@ -294,6 +294,13 @@ def flatten(raw: Mapping[str, object]) -> dict[str, object]:
     return plat
 
 
+# Les seules séquences d'échappement qu'un nom de table TOML cité admet en plus de
+# \\ et \" — un nom vit sur une ligne, et les autres caractères de contrôle n'y ont
+# aucune écriture légale. `_refus` les rejette avant l'écriture ; `_cle`, qui sert
+# aussi à comparer deux contrats, échappe sans juger.
+ECHAPPEMENTS_DE_NOM = {"\n": "\\n", "\r": "\\r", "\t": "\\t", "\b": "\\b", "\f": "\\f"}
+
+
 def _cle(nom: str) -> str:
     """Un nom de table : nu s'il est un jeton simple, cité et ÉCHAPPÉ sinon.
 
@@ -303,9 +310,10 @@ def _cle(nom: str) -> str:
     détruit sous un succès annoncé est le mode d'échec ouvert que ce paquet existe
     pour supprimer, et l'écriture n'y fait pas exception.
 
-    LES MÊMES ÉCHAPPEMENTS QUE `dump_value`, empruntés à `items.ESCAPES` plutôt que
-    recopiés : une clé citée et une valeur citée obéissent à la même grammaire TOML,
-    et deux tables d'échappement qui se ressemblent finissent par diverger.
+    LES ÉCHAPPEMENTS VIVENT ICI, auprès de leur seul appelant. Ils étaient empruntés
+    à l'écrivain de valeurs pour ne pas tenir deux tables qui divergeraient ; cet
+    écrivain est tomlkit désormais, et il ne rend pas de table à emprunter. Ce qui est
+    échappé ici est un NOM de table, pas une valeur.
     """
     if nom and nom.replace("-", "").replace("_", "").isalnum():
         return nom
@@ -325,7 +333,7 @@ def _titre(nom: str) -> str:
     de sortir par une exception. Le refus appartient à `emit`, qui écrit.
     """
     echappe = nom.replace("\\", "\\\\").replace('"', '\\"')
-    for brut, remplace in ESCAPES.items():
+    for brut, remplace in ECHAPPEMENTS_DE_NOM.items():
         echappe = echappe.replace(brut, remplace)
     return f'"{echappe}"'
 
@@ -333,11 +341,13 @@ def _titre(nom: str) -> str:
 def _refus(cle: str) -> str:
     """La raison de ne pas écrire cette clé, ou une chaîne vide.
 
-    LE MÊME REFUS QUE `dump_value` SUR UNE VALEUR, appliqué au nom : un caractère de
-    contrôle produit un en-tête ou une affectation que `tomllib` rejette, et le contrat
-    était écrit quand même, sous un code 0. En-tête de table COMME clé terminale — la
-    seconde vient d'un contrat écrit à la main, où `parse_contract` tolère une clé
-    inconnue dans un `[fields.*]`.
+    PLUS STRICT QUE LE REFUS PORTÉ SUR UNE VALEUR, et ce n'est pas un alignement
+    manqué : l'écrivain admet les contrôles blancs dans une valeur — `\\t`, et `\\n` par
+    la forme multiligne — là où un NOM de table vit sur une ligne et n'en admet aucun.
+    Un caractère de contrôle y produit un en-tête ou une affectation que `tomllib`
+    rejette, et le contrat était écrit quand même, sous un code 0. En-tête de table
+    COMME clé terminale — la seconde vient d'un contrat écrit à la main, où
+    `parse_contract` tolère une clé inconnue dans un `[fields.*]`.
     """
     illegal = next((c for c in cle if ord(c) < 0x20 or ord(c) == 0x7F), None)
     if illegal is None:
@@ -410,7 +420,7 @@ def emit(plat: Mapping[str, object]) -> Result[str]:
                 morceaux.append(f"[{entete}]")
             for feuille, v in paires:
                 if isinstance(v, dict):
-                    # `dump_value` dirait « champ … : type dict hors contrat » : le mot
+                    # L'écrivain dirait « champ … : type dict hors contrat » : le mot
                     # est faux et la sortie tue. Une table de premier niveau que le
                     # contrat ne déclare pas traverse `parse_contract` et `validate`,
                     # mais rend tout re-semis impossible tant qu'elle est là — le dire.
@@ -423,12 +433,12 @@ def emit(plat: Mapping[str, object]) -> Result[str]:
                 # LA CLÉ TERMINALE PASSE LE MÊME CONTRÔLE QUE L'EN-TÊTE. Elle vient
                 # d'un contrat écrit à la main, où `parse_contract` tolère une clé
                 # inconnue dans un `[fields.*]` : `ma cle = "x"` s'y écrivait brute, et
-                # le contrat réémis n'était plus du TOML. `dump_value` ne juge que la
+                # le contrat réémis n'était plus du TOML. `toml_text` ne juge que la
                 # VALEUR — le nom ne lui sert qu'à se nommer dans son message.
                 refus = _refus(feuille)
                 if refus:
                     return fail(refus)
-                morceaux.append(f"{feuille} = {dump_value(v, feuille)}")
+                morceaux.append(f"{feuille} = {toml_text(v, feuille)}")
             morceaux.append("")
     except SerialiseError as exc:
         return fail(f"contrat inécrivable — {exc}")

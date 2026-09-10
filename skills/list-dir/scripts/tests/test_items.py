@@ -20,7 +20,6 @@ retour.
 
 from __future__ import annotations
 
-import datetime
 import tomllib
 from pathlib import Path
 
@@ -28,13 +27,13 @@ import pytest
 from listdir.items import (
     SerialiseError,
     dump_front,
-    dump_value,
     fence_ouverte,
     outside_fences,
     parse_sections,
     read_item,
     render_item,
     split_front,
+    toml_text,
     write_item,
 )
 from listdir.types import Item
@@ -214,60 +213,6 @@ def test_realigned_remplace_et_retire(tmp_path: Path) -> None:
     assert 'id = "z"' in aligne.render()
 
 
-@pytest.mark.parametrize(
-    ("valeur", "attendu"),
-    [
-        ("texte", '"texte"'),
-        (True, "true"),
-        (False, "false"),
-        (7, "7"),
-        (datetime.date(2026, 8, 24), "2026-08-24"),
-        (["a", "b"], '["a", "b"]'),
-        ([], "[]"),
-    ],
-)
-def test_dump_value_couvre_les_types_du_contrat(valeur: object, attendu: str) -> None:
-    assert dump_value(valeur, "champ") == attendu
-
-
-def test_bool_est_serialise_avant_int() -> None:
-    """bool EST un int en Python : l'ordre des tests du sérialiseur est ce qui décide."""
-    assert dump_value(True, "x") == "true"
-    assert dump_value(True, "x") != "1"
-
-
-@pytest.mark.parametrize(
-    ("brut", "attendu"),
-    [
-        ("a\nb", '"a\\nb"'),
-        ("a\rb", '"a\\rb"'),
-        ("a\tb", '"a\\tb"'),
-        ("a\bb", '"a\\bb"'),
-        ("a\fb", '"a\\fb"'),
-        ('un "mot"', '"un \\"mot\\""'),
-        ("c:\\chemin", '"c:\\\\chemin"'),
-    ],
-)
-def test_echappements_relisibles(brut: str, attendu: str) -> None:
-    """TOUT CE QUI EST ÉCRIT DOIT SE RELIRE : un saut de ligne non échappé fermait la
-    chaîne au milieu, et migrate écrivait un fichier que tomllib refuse en rendant 0."""
-    assert dump_value(brut, "x") == attendu
-
-
-def test_caractere_de_controle_refuse_et_nomme() -> None:
-    with pytest.raises(SerialiseError) as exc:
-        _ = dump_value("a\x00b", "champ")
-    assert "champ" in str(exc.value)
-    assert "U+0000" in str(exc.value)
-
-
-def test_type_hors_contrat_refuse_et_nomme() -> None:
-    with pytest.raises(SerialiseError) as exc:
-        _ = dump_value({"a": 1}, "champ")
-    assert "champ" in str(exc.value)
-    assert "dict" in str(exc.value)
-
-
 def test_dump_front_conserve_l_ordre() -> None:
     assert dump_front({"b": "1", "a": "2"}) == 'b = "1"\na = "2"'
 
@@ -411,8 +356,8 @@ def test_un_champ_ajoute_se_pose_a_la_place_du_contrat() -> None:
 
 
 def test_saut_de_ligne_ecrit_en_chaine_multiligne() -> None:
-    """Ce que `dump_value` refuse encore, et qu'il continue de refuser pour les
-    contrats : ici la lecture l'accepte déjà, l'écriture le sait maintenant aussi."""
+    """La règle des chaînes sur une valeur scalaire : la mise en forme est une
+    donnée, et la lecture l'accepte déjà — l'écriture le sait maintenant aussi."""
     sortie = dump_front({"texte": "deux\nlignes"})
 
     assert '"""' in sortie
@@ -420,10 +365,50 @@ def test_saut_de_ligne_ecrit_en_chaine_multiligne() -> None:
 
 
 def test_saut_de_ligne_dans_une_entree_de_tableau() -> None:
+    """DANS UN OBJET, PAS DE MULTILIGNE : une liste s'écrit sur une ligne, donc ses
+    entrées s'échappent. Ce qui est écrit se relit à l'identique dans les deux cas."""
     sortie = dump_front({"liste": ["a\nb", "court"]})
 
-    assert '"""' in sortie
+    assert '"""' not in sortie
     assert tomllib.loads(sortie)["liste"] == ["a\nb", "court"]
+
+
+def test_caractere_de_controle_non_blanc_refuse_et_nomme() -> None:
+    """La règle vaut aussi pour le front matter des éléments : blancs autorisés,
+    contrôle non blanc refusé partout, par un message qui le nomme."""
+    with pytest.raises(SerialiseError) as exc:
+        _ = dump_front({"champ": "a\x00b"})
+    assert "champ" in str(exc.value)
+    assert "U+0000" in str(exc.value)
+
+
+def test_tabulation_est_un_blanc_donc_acceptee() -> None:
+    sortie = dump_front({"champ": "a\tb"})
+
+    assert tomllib.loads(sortie)["champ"] == "a\tb"
+
+
+def test_toml_text_rend_le_membre_droit_du_egal() -> None:
+    """Le texte pour qui assemble un fichier à la main — aucune règle propre."""
+    assert toml_text("a\tb", "k") == '"a\\tb"'
+    assert toml_text(True, "k") == "true"
+    assert toml_text(["a", "b"], "k") == '["a", "b"]'
+
+
+def test_crlf_reste_relisible_donc_ne_part_pas_en_multiligne() -> None:
+    """LA CONVENTION TOML : dans une chaîne multiligne, un saut de ligne littéral est un
+    terminateur, et CRLF y est normalisé en LF à la lecture. Une valeur qui porte un
+    `\r` sort donc échappée sur une ligne, seule forme qui la relise exacte."""
+    sortie = dump_front({"texte": "a\r\nb"})
+
+    assert '"""' not in sortie
+    assert tomllib.loads(sortie)["texte"] == "a\r\nb"
+
+
+def test_retour_chariot_seul_reste_relisible() -> None:
+    sortie = dump_front({"texte": "a\rb"})
+
+    assert tomllib.loads(sortie)["texte"] == "a\rb"
 
 
 def test_type_hors_contrat_refuse_meme_par_tomlkit() -> None:

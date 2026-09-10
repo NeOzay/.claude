@@ -17,11 +17,15 @@ CE QUI L'A RENDUE INUTILE : tomlkit. L'ancienne justification — « tomllib lit
 n'écrit pas, et la stdlib n'a aucun écrivain TOML » — tenait tant qu'écrire voulait
 dire sérialiser à la main. Un parseur préservant supprime la prémisse.
 
-DEUX ÉCRIVAINS COHABITENT, et ce n'est pas un oubli : `dump_front` (tomlkit)
-n'écrit QUE le front matter des éléments, seul endroit où quelqu'un met en forme à
-la main. `dump_value` reste borné à une ligne et sert les contrats et les semences
-(`store.init_list`, `provenance`), qui sont recopiés à l'octet et n'ont donc rien à
-préserver.
+UN SEUL ÉCRIVAIN, et c'est tomlkit : `toml_value` rend la valeur, `dump_front` le
+front matter d'un élément, `toml_text` le texte pour les deux appelants qui assemblent
+un fichier à la main (`store.init_list`, `provenance.emit`). Il y en avait deux, et
+deux écrivains veut dire deux réponses possibles à « comment s'écrit cette valeur ? ».
+
+LA RÈGLE DES CHAÎNES, ET ELLE EST GÉNÉRALE : mise en forme multiligne et caractères
+blancs autorisés, SAUF dans un objet — un élément de liste s'écrit échappé sur une
+ligne, et sauf sur une valeur portant un `\\r`, que la forme multiligne normaliserait.
+Un caractère de contrôle non blanc est refusé partout, par un message qui le nomme.
 """
 
 from __future__ import annotations
@@ -163,70 +167,48 @@ def read_item(path: Path) -> Result[Item]:
 
 # ---------------------------------------------------------------- sérialisation
 class SerialiseError(Exception):
-    """Un type que le sérialiseur borné ne couvre pas."""
+    """Ce que l'écrivain refuse : un type hors contrat, un caractère de contrôle non blanc."""
 
 
-# Les seules séquences d'échappement qu'une chaîne TOML « basic » admet en plus de
-# \\ et \" — les autres caractères de contrôle n'ont aucune écriture légale sur une
-# ligne, et l'écrivain refuse plutôt que d'en inventer une.
-ESCAPES = {"\n": "\\n", "\r": "\\r", "\t": "\\t", "\b": "\\b", "\f": "\\f"}
+def _controle_non_blanc(c: str) -> bool:
+    """Un caractère de contrôle qui n'est pas un blanc. `str.isspace()` classe
+    `\\t \\n \\r \\f \\v` comme blancs, et `\\b \\x00 \\x1b \\x7f` comme non blancs."""
+    return (ord(c) < 0x20 or ord(c) == 0x7F) and not c.isspace()
 
 
-def dump_value(value: object, key: str) -> str:
-    """Une valeur TOML sur une ligne — DÉPRÉCIÉ, ne prend plus de nouvel appelant.
+def toml_value(value: object, key: str, *, multiline: bool = True) -> object:
+    """La valeur, en item tomlkit, pour les seuls types déclarables au contrat.
 
-    Remplacé par `toml_value` partout où quelqu'un met en forme à la main. Il ne
-    survit que pour les contrats et les semences (`store.init_list`, `provenance`),
-    recopiés à l'octet et qui n'ont donc rien à préserver. Sa suppression est écrite :
-    dette `deux-ecrivains-toml-coexistent`, road-map `supprimer-dump-value`.
+    LA GARDE DE TYPE RESTE À NOUS. tomlkit accepte un `dict` sans broncher et l'écrit
+    en table `[x]` — un type hors contrat passerait donc silencieusement, et le
+    fichier relu porterait une structure que rien dans le contrat ne décrit. C'est le
+    mode d'échec ouvert que ce paquet existe pour supprimer : une donnée valide
+    détruite sous un succès annoncé, et l'écriture n'y fait pas exception.
 
-    TOUT CE QUI EST ÉCRIT DOIT SE RELIRE. N'échapper que `\\` et `"` laissait un
-    saut de ligne fermer la chaîne au milieu : `migrate` écrivait alors un fichier
-    que `tomllib` refuse, en rendant « 1 changement appliqué » et le code 0 — une
-    donnée valide détruite par un succès annoncé. C'est le mode d'échec ouvert que
-    ce paquet existe pour supprimer, et il n'a pas d'exception pour l'écriture.
+    LA RÈGLE DES CHAÎNES, ET ELLE EST GÉNÉRALE : mise en forme multiligne et
+    caractères blancs autorisés, SAUF dans un objet — un élément de liste s'écrit
+    échappé sur une ligne, d'où `multiline=False` dans la récursion — et sauf sur une
+    valeur portant un `\\r`, que la forme multiligne ne relirait pas (voir plus bas).
+
+    Un caractère de contrôle non blanc est refusé partout : tomlkit l'échapperait et
+    il se relirait, mais un `\\x00` dans un champ de contrat n'est jamais une donnée
+    voulue, et le refus nommé vaut mieux qu'un fichier qu'on ne relit qu'en hexadécimal.
     """
     if isinstance(value, str):
-        out = value.replace("\\", "\\\\").replace('"', '\\"')
-        for brut, echappe in ESCAPES.items():
-            out = out.replace(brut, echappe)
-        illegal = next((c for c in out if ord(c) < 0x20 or ord(c) == 0x7F), None)
+        illegal = next((c for c in value if _controle_non_blanc(c)), None)
         if illegal is not None:
             raise SerialiseError(
                 f"champ « {key} » : caractère de contrôle U+{ord(illegal):04X} — "
                 "aucune écriture TOML sur une ligne ne le porte"
             )
-        return f'"{out}"'
-    if isinstance(value, bool):  # avant int : bool EST un int en Python
-        return "true" if value else "false"
-    if isinstance(value, int):
-        return str(value)
-    if isinstance(value, datetime.date):
-        return value.isoformat()
-    if isinstance(value, (list, tuple)):
-        seq = cast("list[object] | tuple[object, ...]", value)
-        return "[" + ", ".join(dump_value(v, key) for v in seq) + "]"
-    raise SerialiseError(
-        f"champ « {key} » : type {type(value).__name__} hors contrat — "
-        "attendus : texte, date, entier, booléen, liste"
-    )
-
-
-def toml_value(value: object, key: str) -> object:
-    """La valeur, en item tomlkit, pour les seuls types déclarables au contrat.
-
-    LA GARDE DE TYPE RESTE À NOUS. tomlkit accepte un `dict` sans broncher et l'écrit
-    en table `[x]` — un type hors contrat passerait donc silencieusement, et le
-    fichier relu porterait une structure que rien dans le contrat ne décrit. C'est
-    exactement le mode d'échec ouvert que `dump_value` avait été écrit pour fermer,
-    et il ne se ferme pas tout seul en changeant d'écrivain.
-
-    Un saut de ligne n'est plus une erreur : il devient une chaîne multiligne, que la
-    lecture accepte déjà. Les autres caractères de contrôle, `\\x00` compris, sont
-    échappés par tomlkit et se relisent à l'identique — vérifié avant d'écrire ceci.
-    """
-    if isinstance(value, str):
-        return tomlkit.string(value, multiline="\n" in value)
+        # PAS DE MULTILIGNE DÈS QU'IL Y A UN `\r`, et c'est la grammaire TOML qui le
+        # dicte : dans une chaîne `"""…"""`, un saut de ligne littéral est un TERMINATEUR
+        # de ligne, et `\r\n` y est normalisé en `\n` à la lecture — le `\r` est perdu en
+        # silence. Sur une ligne, `\r` n'a au contraire aucune écriture littérale légale :
+        # tomlkit l'échappe, et la valeur se relit exacte. TOUT CE QUI EST ÉCRIT DOIT SE
+        # RELIRE, donc une valeur qui porte un `\r` sort échappée, fût-elle multiligne.
+        en_bloc = multiline and "\n" in value and "\r" not in value
+        return tomlkit.string(value, multiline=en_bloc)
     if isinstance(value, bool):  # avant int : bool EST un int en Python
         return value
     if isinstance(value, (int, datetime.date)):
@@ -236,11 +218,20 @@ def toml_value(value: object, key: str) -> object:
         # `Array.extend` est hérité de `list` sans paramètre de type : basedpyright le
         # rend « partially unknown ». Construire la liste puis la confier à
         # `tomlkit.item` dit le type sans changer le rendu.
-        return tomlkit.item([toml_value(element, key) for element in seq])
+        return tomlkit.item([toml_value(e, key, multiline=False) for e in seq])
     raise SerialiseError(
         f"champ « {key} » : type {type(value).__name__} hors contrat — "
         "attendus : texte, date, entier, booléen, liste"
     )
+
+
+def toml_text(value: object, key: str) -> str:
+    """Le rendu texte du seul écrivain, pour qui assemble un fichier à la main.
+
+    `store.init_list` et `provenance.emit` ont besoin d'un membre droit de `=`, pas
+    d'un item tomlkit. Aucune règle ne vit ici : tout est délégué à `toml_value`.
+    """
+    return tomlkit.item(toml_value(value, key)).as_string()
 
 
 def dump_front(fields: Mapping[str, object], raw_front: str | None = None) -> str:

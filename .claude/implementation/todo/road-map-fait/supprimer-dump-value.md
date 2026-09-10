@@ -37,3 +37,14 @@ appel.
   (`skills/list-dir/scripts/listdir/items.py`), et l'en-tête du module qui explique aujourd'hui
   pourquoi les deux écrivains cohabitent — à corriger quand il n'y en aura plus qu'un
 - le chantier d'origine, une fois archivé : `tableaux-toml-aplatis-a-l-ecriture`
+
+## Fait le
+
+**2026-09-10**, chantier `supprimer-dump-value`.
+
+Archive : `.claude/implementation/done/2026-09-10-supprimer-dump-value.md`.
+
+L'entrée de dette qu'il fallait payer, `deux-ecrivains-toml-coexistent`, est sortie vers
+`technical-debt-solde/` le même jour. Le contrat de semence réémis par `provenance` a gardé son
+assemblage de texte — seul le membre droit du `=` a changé d'écrivain ; reconstruire le contrat
+comme document tomlkit a été examiné puis rejeté au cadrage.
