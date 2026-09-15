@@ -1,0 +1,10 @@
+# Configuration ruff du skill git-smart-commit, calquée sur celle de list-dir.
+#
+# Elle vit dans le skill pour voyager avec lui. line-length = 100 : les messages de
+# refus en français nomment le fichier fautif et la cause, et dépassent vite 88 colonnes.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

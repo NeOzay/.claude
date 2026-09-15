@@ -276,7 +276,6 @@ EMPREINTES: dict[str, tuple[str, ...]] = {
     "autorité-et-divergence": ("le suivi fait foi",),
     "format-détape-et-délégabilité": ("un seul tour",),  # granularité
     "contrat-des-sous-agents": ("rev-parse --show-toplevel",),  # racine du dépôt
-    "branche-et-commits": ("ramasse ce qui traîne",),  # staging
     "dates-et-listing": ("jamais devinée",),
 }
 
@@ -406,7 +405,9 @@ def check_archives(root: Path) -> list[Finding]:
     for nom in archives:
         texte = (done / nom).read_text(encoding="utf-8")
         for champ in ("plan", "brief", "audit"):
-            m = re.search(rf"^{champ}: *(\S.*)$", texte, re.MULTILINE)
+            # Commentaire `  # …` retiré, comme le lit `commit_chantier.py` : la clôture le
+            # conserve derrière le chemin réécrit, qui sinon « pointerait dans le vide ».
+            m = re.search(rf"^{champ}: *(\S.*?)(?:\s+#.*)?$", texte, re.MULTILINE)
             if m is None:
                 continue
             cible = cast("str", m.group(1)).strip()

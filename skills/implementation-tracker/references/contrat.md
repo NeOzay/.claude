@@ -1,6 +1,6 @@
 # Contrat du pipeline
 
-Les règles **partagées** par `intent-brief`, `implementation-tracker`, `git-smart-commit` et les
+Les règles **partagées** par `intent-brief`, `implementation-tracker` et les
 deux sous-agents. Chacune est définie **ici et nulle part ailleurs** ; les fichiers qui l'appliquent
 portent un renvoi ancré, jamais une copie.
 
@@ -93,11 +93,16 @@ réattribue ces noms d'un chantier à l'autre.
 | Fichier | Champs |
 |---|---|
 | `<slug>.brief.md` | `slug`, `titre`, `statut` (`brouillon` \| `validé`), `execution`, `créé` |
-| `<slug>.md` (suivi) | `slug`, `titre`, `branche`, `base`, `statut` (`en-cours` \| `bloqué` \| `terminé` \| `abandonné`), `session`, `execution`, `plan`, `brief`, `audit`, `road-map`, `créé`, `maj` |
+| `<slug>.md` (suivi) | `slug`, `titre`, `branche`, `base`, `statut` (`en-cours` \| `bloqué` \| `terminé` \| `abandonné`), `session`, `lettre`, `execution`, `plan`, `brief`, `audit`, `road-map`, `créé`, `maj` |
 | `<slug>.audit.md` | `slug` |
 
 - `branche` = `<slug>` ; `base` = la branche principale, cible de l'aplatissement final.
 - `audit` n'apparaît qu'au premier audit du chantier.
+- `session` est incrémenté **à chaque reprise**, pas à chaque étape : une étape peut être à cheval
+  sur deux sessions.
+- `lettre` nomme les tags d'étape du chantier (`AE0`, `AE1`…). Elle est attribuée à la création,
+  et le script de clôture refuse un suivi qui n'en porte pas :
+  [Tags d'étape](../../git-smart-commit/references/tags-etape.md).
 - `execution` vaut `délégué` ou `direct`. Le suivi le **reprend tel quel** du brief.
   **Une valeur absente vaut `direct`.**
 - `road-map` porte l'**`id`** de l'entrée de road-map dont le chantier est parti — pas un chemin.
@@ -176,27 +181,6 @@ l'exécution.
 > *Mode de défaillance* — un travail partiel laissé dans l'arbre par un agent arrêté en `ÉCART` est
 > voulu (il n'a pas les commandes pour revenir en arrière). Son sort se tranche **avant** toute
 > autre action, sinon le prochain commit le ramasse en silence.
-
-## Branche et commits
-
-Le chantier vit sur une branche nommée **exactement `<slug>`**, créée depuis `base`. Tous les
-commits s'y font ; ils sont aplatis en **un seul commit sur `base`** à la clôture.
-
-- Message de commit de session : `<slug>: session N — <étape en cours>`.
-- `session` est incrémenté **à chaque reprise**, pas à chaque étape : une étape peut être à cheval
-  sur deux sessions.
-- Une étape qui passe en `[x]` reçoit un **commit dédié**, même si un commit de session vient
-  d'être fait.
-- Ces commits de suivi sont **directs** : leur message est prédéterminé, ils ne passent pas par
-  `git-smart-commit`. L'aplatissement de clôture, lui, est une réécriture d'historique et suit le
-  workflow complet de ce skill.
-- **Stager les chemins, jamais `-A`** : `git add <chemins> && git commit -m "..."`.
-
-> *Mode de défaillance* — `-A` ramasse ce qui traîne dans l'arbre, y compris le travail partiel
-> d'un agent arrêté ; `-u` raterait les fichiers créés.
-
-**Jamais de commit, squash, rebase ou amend sans accord explicite de l'utilisateur** (règle
-globale, `CLAUDE.md`). Proposer, attendre, exécuter.
 
 ## Dates et listing
 

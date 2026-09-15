@@ -24,6 +24,7 @@ branche: auth-refactor      # branche d'implémentation = <slug>
 base: main                  # branche principale, cible de l'aplatissement final (Étape 5)
 statut: en-cours
 session: 3                  # incrémenté à chaque reprise (Étape 3)
+lettre: A                   # lettre des tags d'étape AE0, AE1…, attribuée à la création
 execution: délégué          # repris tel quel du brief
 plan: .claude/plans/refonte-auth-lucky-beaver.md
 brief: .claude/implementation/auth-refactor.brief.md

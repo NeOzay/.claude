@@ -162,7 +162,8 @@ committer ou les mettre de côté) avant de relancer.
    ```
 
    S'il est ignoré, le dire à l'utilisateur : sans lui, la reprise en session 3 et toute
-   délégation perdent la description des étapes. Sinon, le committer avec le fichier de suivi.
+   délégation perdent la description des étapes. Sinon, il entre dans le commit de l'état initial
+   (point 8).
 
 4. **Figer le plan** dans le fichier de suivi (gabarit : `references/gabarit-suivi.md`) : les étapes
    du plan deviennent la section `## Étapes`, et le chemin du plan va dans le champ `plan:` du
@@ -198,10 +199,15 @@ committer ou les mettre de côté) avant de relancer.
 
    ```bash
    git checkout -b <slug>
+   commit-chantier lettre
    ```
 
-   Conventions de branche, de messages et de staging :
-   [Branche et commits](references/contrat.md#branche-et-commits).
+   La lettre rendue va dans `lettre:` du frontmatter : elle nomme les tags d'étape du chantier
+   ([Tags d'étape](../git-smart-commit/references/tags-etape.md)). Pourquoi le nom de branche est
+   exact : [Branche de chantier](../git-smart-commit/references/branche-chantier.md).
+8. **Committer l'état initial** — brief, plan et suivi — par `git-smart-commit`, type 2, cas « état
+   initial » : [Commit rapide de chantier](../git-smart-commit/references/etape.md). Le tag `<L>E0`
+   qu'il pose est le point de départ des plages d'étapes.
 
 ---
 
@@ -221,8 +227,8 @@ Incrémenter `session:` de 1 dans le frontmatter — c'est ce compteur qui sert 
 de session (voir Étape 4).
 
 **Modifications non commitées détectées** (`git status --short` non vide, Étape 0) → le signaler en
-tout début de conversation et **proposer** un commit de session avant de continuer — format du
-message et méthode : [Branche et commits](references/contrat.md#branche-et-commits).
+tout début de conversation et **proposer** un commit de session avant de continuer, par
+`git-smart-commit`, type 2 : [Commit rapide de chantier](../git-smart-commit/references/etape.md).
 
 ---
 
@@ -236,7 +242,7 @@ Déclencheurs d'écriture :
 | Événement | Action |
 |---|---|
 | Étape passée en `[>]` | Si `execution: délégué` et l'étape est substantielle : déléguer à `step-implementer` (voir ci-dessous) |
-| Étape terminée | Cocher `[x]`, passer la suivante en `[>]`, **proposer un commit** (voir ci-dessous) |
+| Étape terminée | Cocher `[x]`, passer la suivante en `[>]`, **proposer le commit d'étape**, qui pose le tag `<L>E<n>` (voir ci-dessous) |
 | Blocage | Passer l'étape en `[!]` + raison, `statut: bloqué` |
 | Déblocage | Repasser en `[>]`, `statut: en-cours` |
 | Décision d'architecture arrêtée | Ligne dans le journal (voir règle ci-dessous) |
@@ -277,8 +283,8 @@ Dans le doute sur un chantier entier, basculer `execution:` à `direct` et le no
 **L'appelant reste responsable au retour** : relire le fichier de suivi avant d'y écrire.
 
 **Premier réflexe, quel que soit le `RÉSULTAT` : regarder le diff.** Le travail a été produit hors
-session — ni `git-smart-commit` (court-circuité pour les commits d'étape) ni l'utilisateur ne l'ont
-vu passer. Afficher `git status --short` et `git diff --stat`, les confronter à `FICHIERS` : un
+session — l'utilisateur ne l'a pas vu passer, et le commit d'étape de `git-smart-commit` n'analyse
+pas le diff. Afficher `git status --short` et `git diff --stat`, les confronter à `FICHIERS` : un
 fichier touché qui n'y figure pas est un écart, pas un oubli. C'est le seul regard porté sur ce
 diff, et il vient **avant** toute autre action.
 
@@ -307,8 +313,8 @@ entre deux sessions.
 ### Commits de session
 
 Une étape peut se retrouver **à cheval sur deux sessions** — interruption, ou exécution en `direct`.
-Le compteur se cale donc sur la **session**, pas sur l'étape. Format du message, cadence et règle de
-staging : [Branche et commits](references/contrat.md#branche-et-commits).
+Le compteur se cale donc sur la **session**, pas sur l'étape. Commits de session et d'étape, messages
+et tags : `git-smart-commit`, type 2 — [Commit rapide de chantier](../git-smart-commit/references/etape.md).
 
 Propre à ce skill : pour une étape déléguée, ne stager que les fichiers de `FICHIERS` rapportés par
 l'agent et le fichier de suivi — rien d'autre.
@@ -331,8 +337,8 @@ Format : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`
 
 Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée :
 lire `references/cloture.md`, section « Clôture », et suivre la procédure — **audit par
-`implementation-auditor`**, contrôle des étapes, finalisation du suivi, aplatissement via
-`git-smart-commit`, archivage en `done/`. **Pas de résumé prêt à coller** en fin de clôture.
+`implementation-auditor`**, contrôle des étapes, finalisation du suivi, puis aplatissement et
+archivage en `done/` par `git-smart-commit`, type 3. **Pas de résumé prêt à coller** en fin de clôture.
 
 **Une clôture sans avis favorable ne va pas au bout** : l'audit est le premier point de la
 procédure, pas une formalité de fin (`references/audit.md`).

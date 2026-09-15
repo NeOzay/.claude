@@ -18,6 +18,12 @@ fichier. Les règles dont l'autorité est ailleurs — `format.md` « Un éléme
 Le chantier `recopies-hors-contrat` a résorbé neuf écritures de ce type, dont deux qui se
 contredisaient sur la preuve exigée d'un `doublon`.
 
+**Complété le 2026-09-15 par `git-smart-commit-trois-commits`** (R8 et R9 de son rapport d'audit)
+— la règle de staging et l'accord avant commit sont sortis de `contrat.md` vers
+`skills/git-smart-commit/references/staging.md` et `confirmation.md` : ils ont perdu l'empreinte du
+contrôle 2. Les critères « chaque type lisible indépendamment » et « texte commun référencé, sans
+recopie » de ce chantier n'ont été jugés que par lecture et grep de motifs, faute de commande dédiée.
+
 ## Pourquoi c'est gênant
 
 Une recopie nouvelle passe au vert. C'est ainsi que la contradiction d'origine s'est installée :

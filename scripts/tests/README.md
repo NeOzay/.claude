@@ -1,22 +1,24 @@
 # Les tests Python du dépôt
 
-Deux suites `pytest`, **342 tests**, aucune dépendance déclarée ailleurs que dans cette page :
+Trois suites `pytest`, **587 tests**, aucune dépendance déclarée ailleurs que dans cette page :
 `uvx` fournit l'interpréteur et `pytest`, le dépôt ne porte ni `pyproject.toml`, ni
 `pytest.ini`, ni `requirements.txt`.
 
 | Suite | Ce qu'elle couvre | Tests |
 | --- | --- | --- |
-| `scripts/tests/` | le garde-fou `check_pipeline.py` (contrôles 1 à 8, bout en bout) et `sante_skills.py` | 101 |
-| `skills/list-dir/scripts/tests/` | le paquet `listdir` : `items`, `contract`, `store`, `loader`, la CLI en sous-processus | 241 |
+| `scripts/tests/` | le garde-fou `check_pipeline.py` (contrôles 1 à 8, bout en bout) et `sante_skills.py` | 114 |
+| `skills/list-dir/scripts/tests/` | le paquet `listdir` : `items`, `contract`, `store`, `loader`, la CLI en sous-processus | 447 |
+| `skills/git-smart-commit/scripts/tests/` | `commit_chantier.py` en sous-processus, sur un dépôt git jouet : `lettre`, `cloture`, ses refus, l'échec et la relance | 26 |
 
 ## Lancer
 
 Depuis la racine du dépôt :
 
 ```bash
-uvx pytest -q                              # les deux suites
+uvx pytest -q                              # les trois suites
 uvx pytest scripts/tests -q                # le garde-fou seul
 uvx pytest skills/list-dir/scripts/tests -q  # listdir seul
+uvx pytest skills/git-smart-commit/scripts/tests -q  # commit-chantier seul
 ```
 
 Faute de fichier de configuration, il n'y a **pas de `rootdir` déclaré ni de `testpaths`** :
@@ -27,7 +29,7 @@ collectable.
 Les linters, eux aussi depuis la racine :
 
 ```bash
-uvx ruff check scripts skills/list-dir
+uvx ruff check scripts skills/list-dir skills/git-smart-commit
 uvx --with pytest basedpyright             # `--with pytest` : sinon les imports de test manquent
 ```
 

@@ -23,6 +23,12 @@ paquet. Rien dans le code n'a bougé entre les deux sur ces lignes ; la version 
 `basedpyright 1.39.10` / `pyright 1.1.412`, et une montée de version de l'outil est la cause la
 plus probable — non vérifiée, la version d'alors n'ayant pas été consignée.
 
+**Complété le 2026-09-15 par `git-smart-commit-trois-commits`** (R1 puis R11 de son rapport
+d'audit) — lancée depuis la racine du dépôt, `uvx --with pytest basedpyright` rend **25 erreurs**,
+dans `skills/list-dir` et `scripts/tests`, liste identique à une extraction de `master` par
+`git archive`. Les vérifications des étapes 1 et 5 de ce chantier, qui enchaînent cette commande,
+sortent donc en code 1 sans régression : quatre audits de clôture successifs l'ont relevé en réserve.
+
 ## Pourquoi c'est gênant
 
 Plusieurs briefs de ce dépôt portent « `basedpyright` → 0 error » comme critère de réussite, et ce

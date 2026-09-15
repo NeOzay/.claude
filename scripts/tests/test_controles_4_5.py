@@ -49,6 +49,13 @@ def test_champs_resolvent(tmp_path: Path) -> None:
     assert [f.ok for f in findings] == [True]
 
 
+def test_commentaire_de_fin_de_ligne_ignore(tmp_path: Path) -> None:
+    """Le gabarit commente `audit:`, et la clôture garde ce commentaire derrière le chemin."""
+    _ = ecrire(tmp_path, ".claude/plans/p.md", "plan\n")
+    archive(tmp_path, "chantier.md", "audit: .claude/plans/p.md   # créé au premier audit\n")
+    assert rouges_archives(tmp_path) == []
+
+
 def test_champ_pointe_dans_le_vide(tmp_path: Path) -> None:
     archive(tmp_path, "chantier.md", "plan: .claude/plans/disparu.md\n")
     assert any("pointe dans le vide" in m for m in rouges_archives(tmp_path))
