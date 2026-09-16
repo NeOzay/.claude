@@ -18,12 +18,14 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import final, override
 
+from gabarit.check import check_item as check_file
+from gabarit.prefill import compose
+
 from .contract import (
     CONTRACT,
     LIST_DIR,
     SEED,
     TEMPLATES,
-    check_value,
     is_marker,
     load_contract,
     parse_contract,
@@ -31,14 +33,13 @@ from .contract import (
 from .gitcmd import git
 from .items import (
     SerialiseError,
-    fence_ouverte,
     outside_fences,
     parse_sections,
     read_item,
     toml_text,
     write_item,
 )
-from .prefill import PrefillContext, initial_field, initial_section, preview
+from .prefill import PrefillContext, for_item, initial_field, initial_section, preview
 from .prefill import context as prefill_context
 from .provenance import read_seed
 from .types import OPTIONAL, Change, Contract, FieldValue, Item, Result, Violation, fail, ok
@@ -142,74 +143,10 @@ class ListStore:
         Publique parce que `move` en a besoin : après un déplacement, il faut dire
         ce que le contrat d'arrivée exige d'un élément écrit pour le contrat de
         départ. Le déplacement n'en dépend pas — c'est un rappel, jamais un refus.
+
+        Le jugement est celui d'un gabarit ; la liste n'y ajoute que sa règle d'`id`.
         """
-        return [*self._check_fields(item, filled), *self._check_sections(item, filled)]
-
-    def _check_fields(self, item: Item, filled: bool) -> list[Violation]:
-        out: list[Violation] = []
-        for name in item.fields:
-            if name not in self.contract.fields:
-                out.append(Violation(item.path, f"champ « {name} »", "non déclaré au contrat"))
-
-        for name, f in self.contract.fields.items():
-            subject = f"champ « {name} »"
-            if name not in item.fields:
-                if f.required:
-                    out.append(Violation(item.path, subject, "manquant"))
-                continue
-            value = item.fields[name]
-
-            # `id` n'a jamais de marqueur : il vaut le nom du fichier, posé à la
-            # création. Le contrôler ici est ce qui empêche un renommage à la main
-            # de désolidariser l'identifiant de son support.
-            if name == "id":
-                if value != item.path.stem:
-                    out.append(
-                        Violation(
-                            item.path, subject, f"vaut « {value} », attendu « {item.path.stem} »"
-                        )
-                    )
-                continue
-
-            reason = check_value(f, value)
-            if reason:
-                out.append(Violation(item.path, subject, reason))
-            elif filled and f.required and is_marker(value):
-                out.append(Violation(item.path, subject, "à remplir"))
-        return out
-
-    def _check_sections(self, item: Item, filled: bool) -> list[Violation]:
-        out: list[Violation] = []
-        declared = set(self.contract.sections)
-        for title, corps in item.sections.items():
-            if title not in declared:
-                out.append(Violation(item.path, f"section « {title} »", "non déclarée au contrat"))
-            # LA FENCE SE SIGNALE ICI, à sa source. Un bloc jamais refermé absorbe
-            # les `## ` suivants : sans ce contrôle, les sections avalées étaient
-            # rapportées « manquantes » alors qu'elles sont écrites dans le fichier,
-            # et merge annonçait plus loin une perte qui n'existait pas.
-            ouverte = fence_ouverte(corps)
-            if ouverte is not None:
-                out.append(
-                    Violation(
-                        item.path,
-                        f"section « {title} »",
-                        f"bloc de code ouvert par « {ouverte} » et jamais refermé — "
-                        "les sections suivantes y sont absorbées",
-                    )
-                )
-
-        for title in self.contract.required_sections:
-            subject = f"section « {title} »"
-            if title not in item.sections:
-                out.append(Violation(item.path, subject, "manquante"))
-                continue
-            body = item.sections[title].strip()
-            if not body:
-                out.append(Violation(item.path, subject, "vide"))
-            elif filled and is_marker(body):
-                out.append(Violation(item.path, subject, "à remplir"))
-        return out
+        return check_file(self.contract, item, filled, fixed={"id": _id_conforme})
 
     # ------------------------------------------------------------------ écriture
     def create(self, item_id: str, **values: FieldValue) -> Result[Item]:
@@ -225,26 +162,13 @@ class ListStore:
 
         ctx = prefill_context(self.path, self.contract)
 
-        fields: dict[str, FieldValue] = {}
-        for name, f in self.contract.fields.items():
-            if name in values:
-                fields[name] = values[name]
-            elif f.type == "slug" and name == "id":
-                fields[name] = item_id
-            else:
-                initial = initial_field(f, item_id, ctx)
-                if not initial:
-                    return Result(initial.status, None, initial.message)
-                fields[name] = initial.unwrap()
-
-        sections: dict[str, str] = {}
-        for title, s in self.contract.sections.items():
-            posee = initial_section(s, item_id, ctx)
-            if not posee:
-                return Result(posee.status, None, posee.message)
-            sections[title] = posee.unwrap()
-
-        return ok(Item(path, fields, sections))
+        # L'`id` d'un contrat est imposé, pas prérempli : il vaut le nom du fichier.
+        # Une valeur passée par l'appelant l'emporte, comme sur tout autre champ.
+        fixed: dict[str, FieldValue] = dict(values)
+        id_decl = self.contract.fields.get("id")
+        if id_decl is not None and id_decl.type == "slug" and "id" not in fixed:
+            fixed["id"] = item_id
+        return compose(self.contract, path, for_item(item_id, ctx), fixed)
 
     def write(self, item: Item) -> Result[Path]:
         return write_item(item)
@@ -675,6 +599,17 @@ class ListStore:
         except OSError as exc:
             return fail(f"{target}: écriture impossible — {exc.strerror}")
         return ok(target)
+
+
+def _id_conforme(item: Item, value: object) -> str:
+    """`id` n'a jamais de marqueur : il vaut le nom du fichier, posé à la création.
+
+    Le contrôler est ce qui empêche un renommage à la main de désolidariser
+    l'identifiant de son support.
+    """
+    if value != item.path.stem:
+        return f"vaut « {value} », attendu « {item.path.stem} »"
+    return ""
 
 
 def _correspond(valeur: object, critere: FieldValue) -> bool:

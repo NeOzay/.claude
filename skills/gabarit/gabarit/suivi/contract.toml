@@ -1,0 +1,100 @@
+# Semence du fichier de suivi d'implementation-tracker.
+#
+# Reprend les champs et les sections du suivi tels que le tracker les définit
+# (skills/implementation-tracker/references/contrat.md, « Frontmatter », et
+# references/gabarit-suivi.md). Ce qui est mécaniquement connu à la création est
+# prérempli ; le reste porte son marqueur, et chaque description dit d'où vient la valeur.
+#
+# Le tracker n'est pas encore branché sur cette semence : son front matter reste en YAML
+# tant que ce branchement n'est pas fait.
+
+name = "suivi"
+description = "Fichier de suivi d'une implémentation conduite par implementation-tracker : objectif, étapes, état, décisions."
+
+[fields.slug]
+type = "slug"
+required = true
+description = "Le slug du brief, repris exactement — jamais réinventé."
+
+[fields.titre]
+type = "text"
+required = true
+description = "Le titre du chantier, repris du brief."
+
+[fields.branche]
+type = "slug"
+required = true
+description = "La branche d'implémentation : exactement le slug."
+
+[fields.base]
+type = "text"
+required = true
+description = "La branche principale d'où part le chantier, cible de l'aplatissement à la clôture."
+
+[fields.statut]
+type = "enum"
+required = true
+description = "En cours, bloqué sur une étape, terminé à la clôture, ou abandonné."
+values = ["en-cours", "bloqué", "terminé", "abandonné"]
+text = "en-cours"
+
+[fields.session]
+type = "int"
+required = true
+description = "Incrémenté à chaque reprise, pas à chaque étape."
+text = "1"
+
+[fields.lettre]
+type = "text"
+required = true
+description = "La lettre des tags d'étape (<L>E0, <L>E1…), rendue par `commit-chantier lettre` à la création."
+
+[fields.execution]
+type = "enum"
+required = true
+description = "Repris tel quel du brief : `délégué` si les étapes peuvent partir à step-implementer, `direct` sinon."
+values = ["délégué", "direct"]
+
+[fields.plan]
+type = "text"
+required = true
+description = "Le chemin du plan, tel que le harness l'a nommé à l'entrée en plan mode."
+
+[fields.brief]
+type = "text"
+description = "Le chemin du brief. Absent quand le chantier a été ouvert sans cadrage."
+
+[fields.audit]
+type = "text"
+description = "Le chemin du rapport d'audit, posé au premier audit du chantier."
+
+[fields.road-map]
+type = "slug"
+description = "L'id de l'entrée de road-map dont le chantier part, s'il en part une."
+
+[fields."créé"]
+type = "date"
+required = true
+description = "La date de création du suivi."
+command = "date +%F"
+
+[fields.maj]
+type = "date"
+required = true
+description = "La date de la dernière écriture dans le suivi, actualisée à chaque écriture."
+command = "date +%F"
+
+[sections."Objectif et périmètre"]
+required = true
+description = "Repris du brief, pas reformulé : symptôme, but, critères de réussite, hors-périmètre, signaux de dérive. Un élargissement accepté s'y ajoute, daté."
+
+[sections."Étapes"]
+required = true
+description = "Les étapes du plan, une par ligne : `- [état] N. Intitulé — <fichiers> — vérif: <commande>`. Le suivi porte l'intitulé et l'état, le plan porte le contenu."
+
+[sections."État courant"]
+required = true
+description = "Écrit pour une reprise à froid : prochaine action, vérification d'ensemble, dernier audit, notes."
+
+[sections."Journal de décisions"]
+description = "Ce qui contraint la suite, une entrée de deux à trois lignes : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`"

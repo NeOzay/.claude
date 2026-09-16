@@ -111,8 +111,8 @@ description = ""
 text = "Rien d'assumé à ce jour."   # ce texte, à la place du marqueur
 ```
 
-Types admis : `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes). Tout autre type
-est une erreur nommant le type.
+Types admis : `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes), `int` (un entier ;
+un booléen n'en est pas un). Tout autre type est une erreur nommant le type.
 
 **Une valeur de `values` est un jeton** : ni vide, ni porteuse d'espace. Le contrat est refusé
 sinon, en nommant la valeur fautive. Une valeur à blanc traverserait toute substitution de commande
@@ -181,7 +181,9 @@ L'environnement porte :
 | `LISTDIR_ROOT` | la racine du dépôt git — **absente de l'environnement** hors dépôt |
 
 Le contrat est refusé si `text` et `command` sont déclarés ensemble, si l'un des deux est vide, ou
-s'il porte sur un champ de type `list` : la valeur produite est toujours du texte.
+s'il porte sur un champ de type `list` : la valeur produite est toujours du texte. Sur un champ de
+type `int`, ce texte est converti en entier à la pose — `text = "1"` pose `1` — et refusé en le
+nommant s'il n'est pas un entier en base 10.
 
 **Échec fermé.** Une commande qui sort en code non nul interrompt l'opération, sans qu'aucun fichier
 soit écrit, en nommant le champ ou la section et la commande incriminée. Une sortie que le type

@@ -1,0 +1,12 @@
+# Configuration ruff du skill gabarit.
+#
+# Elle vit ici, et non à la racine du dépôt, pour la même raison que celle de list-dir :
+# ce skill est destiné à être déployé ailleurs, et sa configuration voyage avec lui.
+# Les deux configurations sont identiques — list-dir dépend de gabarit, et un code qui
+# passe de l'un à l'autre ne doit pas changer de règles en chemin.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

@@ -16,27 +16,19 @@ remonter nu trois appels plus loin.
 
 from __future__ import annotations
 
-import datetime
 import tomllib
 from pathlib import Path
-from typing import cast
 
-from .types import (
-    FIELD_TYPES,
-    OPTIONAL,
-    PLACEHOLDER,
-    Contract,
-    Field,
-    Origin,
-    Result,
-    Section,
-    fail,
-    nom_mal_forme,
-    ok,
-)
+from gabarit.contract import CONTRACT as CONTRACT
+from gabarit.contract import Extra, declared_fields, declared_sections, entete
+from gabarit.contract import check_value as check_value
+from gabarit.contract import field_values as field_values
+from gabarit.contract import is_marker as is_marker
+from gabarit.contract import table as _table
+
+from .types import Contract, Field, Origin, Result, fail, nom_mal_forme, ok
 
 LIST_DIR = ".list"
-CONTRACT = "contract.toml"
 TEMPLATES = "templates"
 """Les paires <nom>.toml / <nom>.md que `derive` projette, sous .list/."""
 
@@ -120,68 +112,6 @@ def load_source(base: Path, template: str = "") -> Result[tuple[Path, str, Contr
     if not lu:
         return Result(lu.status, None, lu.message)
     return ok((f, texte, lu.unwrap()))
-
-
-def field_values(contrat: Contract, champ: str, chemin: Path) -> Result[list[str]]:
-    """Les `values` déclarées d'un champ, DANS L'ORDRE DU FICHIER.
-
-    L'ORDRE EST UNE DONNÉE, PAS UN DÉTAIL DE PRÉSENTATION. Un contrat peut ranger
-    ses valeurs par ce qu'elles signifient plutôt que par l'alphabet ; les trier ici
-    détruirait exactement ce qu'une prose venait chercher en s'y référant. Rien
-    n'est trié, filtré ni jugé.
-
-    DEUX ÉCHECS NOMMÉS, et aucune liste vide sous un succès. Un champ mal
-    orthographié ou sans `values` rendrait zéro élément, et une boucle appelante
-    tournerait à vide en réussissant — précisément l'échec ouvert que ce paquet
-    existe pour supprimer.
-    """
-    field = contrat.fields.get(champ)
-    if field is None:
-        connus = ", ".join(contrat.fields) or "aucun"
-        return fail(f"{chemin}: champ « {champ} » non déclaré ; déclarés : {connus}")
-    if not field.values:
-        return fail(
-            f"{chemin}: champ « {champ} » — aucune `values` déclarée (type « {field.type} »)"
-        )
-    return ok(field.values)
-
-
-def _table(value: object, path: Path, subject: str) -> Result[dict[str, object]]:
-    """La valeur si c'est une table TOML, un échec nommé sinon."""
-    if value is None:
-        return ok({})
-    if not isinstance(value, dict):
-        return fail(f"{path}: {subject} — une table est attendue, trouvé {type(value).__name__}")
-    # cast, et non isinstance : `isinstance(x, dict)` ne dit rien des clés ni des
-    # valeurs. Les clés sont ramenées à des chaînes, les valeurs restent quelconques —
-    # c'est à l'appelant de dire ce qu'il attend de chacune.
-    return ok({str(k): v for k, v in cast("dict[object, object]", value).items()})
-
-
-def _texte(value: object, path: Path, subject: str, default: str = "") -> Result[str]:
-    """La valeur si c'est une chaîne, le défaut si elle est absente, un échec sinon."""
-    if value is None:
-        return ok(default)
-    if not isinstance(value, str):
-        return fail(f"{path}: {subject} — une chaîne est attendue, trouvé {type(value).__name__}")
-    return ok(value)
-
-
-def _liste(value: object, path: Path, subject: str) -> Result[list[str]]:
-    """La valeur si c'est une liste de chaînes, un échec nommé sinon."""
-    if value is None:
-        return ok([])
-    if not isinstance(value, list):
-        return fail(f"{path}: {subject} — une liste est attendue, trouvé {type(value).__name__}")
-    out: list[str] = []
-    for entry in cast("list[object]", value):
-        if not isinstance(entry, str):
-            return fail(
-                f"{path}: {subject} — une liste de chaînes est attendue, "
-                f"trouvé {type(entry).__name__}"
-            )
-        out.append(entry)
-    return ok(out)
 
 
 def _forme_du_nom(declared: str, path: Path) -> Result[None]:
@@ -301,45 +231,6 @@ def _origin(value: object, path: Path) -> Result[Origin | None]:
     return ok(Origin(name=declared, version=version, frozen=frozen))
 
 
-def _prefill(
-    body: dict[str, object], path: Path, subject: str, *, list_type: bool = False
-) -> Result[tuple[str | None, str | None]]:
-    """`text` et `command` d'un champ ou d'une section, validés ensemble.
-
-    Rendent `None` quand la clé est absente — à distinguer d'une chaîne vide,
-    refusée : elle ne préremplirait rien. Les deux ne peuvent être déclarées
-    ensemble ; sur un champ de type `list`, ni l'une ni l'autre n'a de sens, la
-    valeur produite étant toujours du texte que `check_value` rejetterait.
-    """
-    text_val = body.get("text")
-    if text_val is not None and not isinstance(text_val, str):
-        return fail(
-            f"{path}: {subject}, « text » — une chaîne est attendue, "
-            f"trouvé {type(text_val).__name__}"
-        )
-    command_val = body.get("command")
-    if command_val is not None and not isinstance(command_val, str):
-        return fail(
-            f"{path}: {subject}, « command » — une chaîne est attendue, "
-            f"trouvé {type(command_val).__name__}"
-        )
-
-    if text_val is not None and command_val is not None:
-        return fail(
-            f"{path}: {subject} — « text » et « command » ne peuvent être déclarés ensemble"
-        )
-    if text_val == "":
-        return fail(f"{path}: {subject}, « text » — une valeur vide ne préremplit rien")
-    if command_val == "":
-        return fail(f"{path}: {subject}, « command » — une valeur vide ne préremplit rien")
-    if list_type and (text_val is not None or command_val is not None):
-        return fail(
-            f"{path}: {subject} — « text »/« command » refusés sur un champ de type « list » : "
-            "la valeur produite est toujours du texte"
-        )
-    return ok((text_val, command_val))
-
-
 def load_contract(list_dir: Path) -> Result[Contract]:
     """Le contrat d'une liste, lu sur le disque."""
     path = contract_path(list_dir)
@@ -365,100 +256,21 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
     except tomllib.TOMLDecodeError as exc:
         return fail(f"{path}: TOML invalide — {exc}")
 
-    # NAME REMONTE EN TÊTE : le message de l'ancien format de [sections], plus bas,
+    # LE NOM PASSE EN TÊTE : le message de l'ancien format de [sections], plus bas,
     # cite le nom du contrat fautif — il lui faut donc être connu avant d'y arriver.
-    # Le résultat est capturé sous un autre nom que la variable de boucle `name`
-    # utilisée plus loin pour chaque champ, qui l'écraserait sinon.
-    contract_name = _texte(raw.get("name"), path, "« name »")
-    if not contract_name:
-        return fail(contract_name.message)
-    if not contract_name.unwrap():
-        return fail(f"{path}: champ « name » manquant — une liste se nomme")
+    tete = entete(raw, path, "une liste se nomme")
+    if not tete:
+        return fail(tete.message)
+    contract_name, contract_description = tete.unwrap()
 
-    # LA CLÉ EST EXIGÉE, PAS SON TEXTE — ici, sur chaque champ et sur chaque section.
-    # `description = ""` reste donc accepté partout. Ce qui est visé est le contrat à
-    # moitié documenté : sans ce test, `_texte` rend `""` pour une clé absente, et rien
-    # ne distingue plus « pas de texte » de « pas documenté ». Le contrôle de `name`
-    # reste avant celui-ci : un contrat anonyme s'annonce comme tel d'abord.
-    if "description" not in raw:
-        return fail(f"{path}: « description » manquante — la clé se déclare, fût-elle vide")
-    contract_description = _texte(raw.get("description"), path, "« description »")
-    if not contract_description:
-        return fail(contract_description.message)
+    fields = declared_fields(raw.get("fields"), path, Field, _source(path))
+    if not fields:
+        return fail(fields.message)
 
-    declared = _table(raw.get("fields"), path, "« fields »")
+    declared = _table(raw.get("sections"), path, "« sections »")
     if not declared:
         return fail(declared.message)
-
-    fields: dict[str, Field] = {}
-    for name, value in declared.unwrap().items():
-        decl = _table(value, path, f"champ « {name} »")
-        if not decl:
-            return fail(decl.message)
-        body = decl.unwrap()
-
-        ftype = body.get("type")
-        if ftype not in FIELD_TYPES:
-            return fail(
-                f"{path}: champ « {name} » — type « {ftype} » inconnu ; "
-                f"attendus : {', '.join(FIELD_TYPES)}"
-            )
-        # Pas de cast ni d'assert ici : le test d'appartenance ci-dessus suffit au
-        # vérificateur pour tenir ftype pour un FieldType. C'est le contrôle qui
-        # porte le typage, et non l'inverse.
-
-        values = _liste(body.get("values"), path, f"champ « {name} », « values »")
-        if not values:
-            return fail(values.message)
-        if ftype == "enum" and not values.unwrap():
-            return fail(f"{path}: champ « {name} » — un enum sans `values` n'admet rien")
-
-        # UNE VALEUR EST UN JETON, PAS UNE PHRASE. Rien n'y obligeait, et une valeur
-        # portant une espace se découpait en deux pseudo-valeurs dès qu'un appelant
-        # itérait dessus — `for c in $(list-dir contract … --values category)` en est
-        # un, et il comptait alors deux catégories fantômes à zéro sans qu'aucune
-        # commande n'échoue. La vide est refusée pour la même raison : elle traverse
-        # une substitution sans laisser de trace.
-        for v in values.unwrap():
-            if not v or v.split() != [v]:
-                return fail(
-                    f"{path}: champ « {name} », « values » — une valeur ne peut être vide "
-                    f"ni contenir d'espace, trouvé « {v} »"
-                )
-
-        if "description" not in body:
-            return fail(f"{path}: champ « {name} » — « description » manquante")
-        description = _texte(body.get("description"), path, f"champ « {name} », « description »")
-        if not description:
-            return fail(description.message)
-
-        source = body.get("from")
-        if source is not None and not isinstance(source, str):
-            return fail(
-                f"{path}: champ « {name} », « from » — un nom de champ source est attendu, "
-                f"trouvé {type(source).__name__}"
-            )
-
-        prefill = _prefill(body, path, f"champ « {name} »", list_type=ftype == "list")
-        if not prefill:
-            return fail(prefill.message)
-        text_val, command_val = prefill.unwrap()
-
-        fields[name] = Field(
-            name=name,
-            type=ftype,
-            required=bool(body.get("required", False)),
-            description=description.unwrap(),
-            values=values.unwrap(),
-            source=source,
-            text=text_val,
-            command=command_val,
-        )
-
-    declared_sections = _table(raw.get("sections"), path, "« sections »")
-    if not declared_sections:
-        return fail(declared_sections.message)
-    raw_sections = declared_sections.unwrap()
+    raw_sections = declared.unwrap()
 
     # L'ANCIEN FORMAT SE REPÈRE À CECI PRÈS : deux clés, `required` et `optional`,
     # portant chacune une LISTE de noms — une section légitimement titrée « required »
@@ -470,35 +282,13 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
             f"{path}: [sections] à l'ancien format — deux listes de noms là où une "
             "table par section est attendue. La réécriture est manuelle : voir la "
             "forme à jour dans la semence de cette liste, « list-dir contract --def "
-            f"{contract_name.unwrap()} » (« list-dir defs » liste les définitions "
+            f"{contract_name} » (« list-dir defs » liste les définitions "
             "disponibles)."
         )
 
-    sections: dict[str, Section] = {}
-    for title, value in raw_sections.items():
-        decl = _table(value, path, f"section « {title} »")
-        if not decl:
-            return fail(decl.message)
-        body = decl.unwrap()
-
-        if "description" not in body:
-            return fail(f"{path}: section « {title} » — « description » manquante")
-        description = _texte(body.get("description"), path, f"section « {title} », « description »")
-        if not description:
-            return fail(description.message)
-
-        prefill = _prefill(body, path, f"section « {title} »")
-        if not prefill:
-            return fail(prefill.message)
-        text_val, command_val = prefill.unwrap()
-
-        sections[title] = Section(
-            name=title,
-            required=bool(body.get("required", False)),
-            description=description.unwrap(),
-            text=text_val,
-            command=command_val,
-        )
+    sections = declared_sections(raw_sections, path)
+    if not sections:
+        return fail(sections.message)
 
     origin = _origin(raw.get("origin"), path)
     if not origin:
@@ -506,63 +296,31 @@ def parse_contract(text: str, path: Path) -> Result[Contract]:
 
     return ok(
         Contract(
-            name=contract_name.unwrap(),
-            description=contract_description.unwrap(),
-            fields=fields,
-            sections=sections,
+            name=contract_name,
+            description=contract_description,
+            fields=fields.unwrap(),
+            sections=sections.unwrap(),
             origin=origin.unwrap(),
         )
     )
 
 
-# ------------------------------------------------- confrontation d'une valeur au contrat
-def is_marker(value: object) -> bool:
-    """Vrai si la valeur est l'un des deux marqueurs, et rien d'autre.
+# ---------------------------------------------------------- propre à une liste
+def _source(path: Path) -> Extra:
+    """Le contrôle du `from` d'un champ : le nom du champ source d'un contrat dérivé.
 
-    Ni la chaîne vide, ni un tiret, ni None : un champ ABSENT et un champ À REMPLIR
-    sont deux états différents, et les confondre ferait passer un oubli pour une
-    intention.
+    PROPRE À UNE LISTE, joué par `gabarit.contract.parse_field` à l'endroit exact où ce
+    contrôle l'a toujours été — après la description, avant le préremplissage. `path`
+    ne sert qu'aux messages.
     """
-    return value in (PLACEHOLDER, OPTIONAL)
 
+    def controle(name: str, body: dict[str, object]) -> Result[dict[str, object]]:
+        source = body.get("from")
+        if source is not None and not isinstance(source, str):
+            return fail(
+                f"{path}: champ « {name} », « from » — un nom de champ source est attendu, "
+                f"trouvé {type(source).__name__}"
+            )
+        return ok({"source": source})
 
-def check_value(field: Field, value: object) -> str:
-    """La raison du manquement, ou une chaîne vide si la valeur convient.
-
-    LE CONTRÔLE DE TYPE EST SUSPENDU SUR UN MARQUEUR : `date = "<À REMPLIR>"` doit
-    être signalé comme *à remplir*, jamais comme *type invalide*. Un message qui
-    parle de type devant un marqueur dit au lecteur de corriger ce qui va bien.
-    """
-    if is_marker(value):
-        return ""
-
-    match field.type:
-        case "slug":
-            if not isinstance(value, str) or not value.strip():
-                return "un identifiant non vide est attendu"
-            if value != value.strip() or " " in value:
-                return f"« {value} » n'est pas un slug — ni espace ni bord blanc"
-        case "text":
-            if not isinstance(value, str):
-                return f"du texte est attendu, trouvé {type(value).__name__}"
-            if not value.strip():
-                return "vide — un champ se remplit ou porte son marqueur"
-        case "date":
-            if isinstance(value, datetime.date):
-                return ""
-            if not isinstance(value, str):
-                return f"une date est attendue, trouvé {type(value).__name__}"
-            try:
-                _ = datetime.date.fromisoformat(value)
-            except ValueError:
-                return f"« {value} » n'est pas une date ISO (AAAA-MM-JJ)"
-        case "enum":
-            if not isinstance(value, str) or value not in field.values:
-                return f"« {value} » hors des valeurs déclarées : {', '.join(field.values)}"
-        case "list":
-            if not isinstance(value, list):
-                return f"une liste est attendue, trouvé {type(value).__name__}"
-            for entry in cast("list[object]", value):
-                if not isinstance(entry, str):
-                    return f"une liste de chaînes est attendue, trouvé {type(entry).__name__}"
-    return ""
+    return controle

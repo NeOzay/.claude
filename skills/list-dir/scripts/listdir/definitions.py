@@ -33,6 +33,10 @@ alors EN SILENCE — un échec ouvert, ce que ce paquet existe pour supprimer. U
 index fixe sur `parents[…]` suppose en outre une installation en
 `~/.claude/skills/list-dir/`, que rien ne garantit.
 
+LE MÉCANISME VIT DANS `gabarit.definitions`, qui le partage avec les semences de
+gabarit sous un autre répertoire. Ce module n'y ajoute que le nom `list-dir` et le refus
+d'un nom de gabarit de liste (`technical-debt/review`), propre à une liste.
+
 LES DEUX REMONTÉES NE CHERCHENT PAS LA MÊME CHOSE, et les confondre casse le cas
 imbriqué. Un projet est un répertoire qui CONTIENT un `.claude` ; la configuration
 est un répertoire QUI EST un `.claude`. Sur ce dépôt-ci — la configuration est
@@ -43,138 +47,31 @@ mauvais répertoire.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 
-from .contract import CONTRACT
-from .types import SEPARATEUR, Result, fail, nom_mal_forme, ok
+from gabarit.definitions import CLAUDE as CLAUDE
+from gabarit.definitions import SKILLS as SKILLS
+from gabarit.definitions import Root as Root
+from gabarit.definitions import config_root as config_root
+from gabarit.definitions import definitions as definitions
+from gabarit.definitions import project_root as project_root
+from gabarit.definitions import resolve as _resolve
+from gabarit.definitions import roots as _roots
 
-CLAUDE = ".claude"
-SKILLS = "skills"
+from .types import SEPARATEUR, Result, fail, nom_mal_forme
+
 DEFS = "list-dir"
 """Le répertoire qu'une racine porte. Le nom est celui du skill : une définition de
 liste se range sous le nom de ce qui sait la lire."""
 
 
-@dataclass(frozen=True)
-class Root:
-    """Une racine de définitions, et d'où elle vient.
-
-    `origin` n'est pas cosmétique : sans elle, `defs` dirait qu'un nom est
-    définissable sans dire par qui, et deux définitions homonymes seraient
-    indiscernables dans le message qui les refuse.
-    """
-
-    path: Path
-    rank: int
-    origin: str
-
-    def names(self) -> list[str]:
-        """Les définitions présentes ici — un répertoire portant un `contract.toml`.
-
-        Un répertoire sans contrat n'est pas une définition à moitié faite : ce n'en
-        est pas une. L'ignorer ici vaut mieux que le proposer à `--def` pour échouer
-        ensuite sur un fichier manquant.
-        """
-        if not self.path.is_dir():
-            return []
-        return sorted(d.name for d in self.path.iterdir() if (d / CONTRACT).is_file())
-
-
-def project_root(start: Path) -> Path | None:
-    """Le `.claude` du premier projet trouvé en remontant depuis `start`, ou None.
-
-    Un projet est un répertoire qui CONTIENT un `.claude`. La remontée s'arrête au
-    premier, qui n'est pas nécessairement celui qu'on aurait choisi : `defs`
-    l'imprime pour que le choix soit visible plutôt que deviné.
-
-    Hors de tout projet, None — un état parfaitement légitime, pas une erreur : il
-    n'y a alors simplement rien à proposer aux rangs 1 et 2.
-    """
-    here = start.resolve()
-    for candidate in (here, *here.parents):
-        if (candidate / CLAUDE).is_dir():
-            return candidate / CLAUDE
-    return None
-
-
-def config_root(start: Path) -> Path | None:
-    """Le premier répertoire NOMMÉ `.claude` en remontant depuis `start`, ou None.
-
-    La configuration est un `.claude`, elle n'en contient pas un — c'est toute la
-    différence avec `project_root`, et elle compte : sur ce dépôt-ci, `~/.claude`
-    porte son propre `~/.claude/.claude`, si bien que la règle du projet répondrait
-    `~/.claude/.claude` là où l'ancrage du paquet veut `~/.claude`.
-
-    None quand le paquet est déployé hors de toute configuration `.claude` : les
-    rangs 3 et 4 sont alors absents, et `defs` le dit au lieu de le taire.
-    """
-    here = start.resolve()
-    for candidate in (here, *here.parents):
-        if candidate.name == CLAUDE and candidate.is_dir():
-            return candidate
-    return None
-
-
-def _pair(base: Path, rank: int, label: str) -> list[Root]:
-    """Les deux rangs d'un même `.claude` : le sien, puis ceux de ses skills."""
-    roots = [Root(base / DEFS, rank, label)]
-    skills = base / SKILLS
-    if skills.is_dir():
-        roots += [
-            Root(d / DEFS, rank + 1, f"{label}:{d.name}")
-            for d in sorted(skills.iterdir())
-            if (d / DEFS).is_dir()
-        ]
-    return roots
-
-
 def roots(cwd: Path | None = None, package: Path | None = None) -> list[Root]:
-    """Les quatre rangs, dédupliqués, du plus spécifique au plus général.
+    """Les quatre rangs des définitions de liste : voir `gabarit.definitions.roots`.
 
-    LES DEUX ANCRAGES SONT DES PARAMÈTRES, et pas des constantes lues au vol : c'est
-    ce qui rend la découverte testable sur un tmp_path. Un module qui lit `Path.cwd()`
-    en dur ne se teste qu'en changeant le répertoire courant du processus, ce qu'une
-    suite parallèle ne pardonne pas.
-
-    DÉDUPLICATION SUR CHEMIN RÉSOLU, et c'est un cas réel, pas une précaution : le
-    dépôt de configuration EST `~/.claude` et CONTIENT `~/.claude/.claude`. Une même
-    racine atteinte par les deux remontées se dénoncerait sinon comme ambiguë avec
-    elle-même.
+    L'ANCRAGE DU PAQUET RESTE CE PAQUET-CI par défaut, et non celui de `gabarit` : les
+    deux vivent aujourd'hui sous la même configuration, mais rien ne l'impose.
     """
-    found: list[Root] = []
-    projet = project_root(cwd if cwd is not None else Path.cwd())
-    if projet is not None:
-        found += _pair(projet, 1, "projet")
-    config = config_root(package if package is not None else Path(__file__).parent)
-    if config is not None:
-        found += _pair(config, 3, "config")
-
-    # Le premier vu gagne : `found` est déjà dans l'ordre de spécificité, donc
-    # l'exemplaire conservé est toujours celui du rang le plus fort.
-    vus: set[Path] = set()
-    uniques: list[Root] = []
-    for root in found:
-        resolved = root.path.resolve()
-        if resolved in vus:
-            continue
-        vus.add(resolved)
-        uniques.append(root)
-    return uniques
-
-
-def definitions(where: list[Root]) -> dict[str, list[Root]]:
-    """Tout ce qui est définissable, par nom, racines dans l'ordre de spécificité.
-
-    La valeur est une LISTE et non une racine unique : c'est elle qui porte de quoi
-    dire « le rang 1 masque le rang 4 » à `defs`, et de quoi nommer les deux fautives
-    quand elles sont à égalité.
-    """
-    par_nom: dict[str, list[Root]] = {}
-    for root in where:
-        for name in root.names():
-            par_nom.setdefault(name, []).append(root)
-    return par_nom
+    return _roots(DEFS, cwd, package if package is not None else Path(__file__).parent)
 
 
 def resolve(name: str, where: list[Root]) -> Result[Path]:
@@ -216,16 +113,4 @@ def resolve(name: str, where: list[Root]) -> Result[Path]:
             f"« list-dir contract --def {definition} --template {gabarit} » l'imprime"
         )
 
-    candidates = definitions(where).get(name, [])
-    if not candidates:
-        connues = ", ".join(sorted(definitions(where))) or "aucune"
-        return fail(f"définition « {name} » introuvable ; connues : {connues}")
-
-    best = candidates[0].rank
-    exaequo = [r for r in candidates if r.rank == best]
-    if len(exaequo) > 1:
-        chemins = ", ".join(str(r.path / name) for r in exaequo)
-        return fail(
-            f"définition « {name} » ambiguë — {len(exaequo)} racines de même rang : {chemins}"
-        )
-    return ok(candidates[0].path / name)
+    return _resolve(name, where, "définition")

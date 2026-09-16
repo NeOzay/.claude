@@ -11,8 +11,7 @@
   ],
   "extraPaths": [
     "scripts",
-    "scripts/tests",
-    "../gabarit/scripts"
+    "scripts/tests"
   ],
   "reportImplicitStringConcatenation": false,
   "reportUnusedCallResult": false,

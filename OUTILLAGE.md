@@ -12,14 +12,15 @@ l'outillage d'un dépôt n'a rien à y faire.
 
 ## Ce dont le dépôt dépend
 
-Le dépôt dépend de deux commandes, d'un interpréteur, de git et de deux linters — et de rien
+Le dépôt dépend de trois commandes, d'un interpréteur, de git et de deux linters — et de rien
 d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
 |---|---|---|
 | `list-dir` | les six registres de `todo/`, `debt-review` | `command -v list-dir` |
 | `impl-list` | l'Étape 0 du tracker, le listing des suivis | `command -v impl-list` |
-| Python ≥ 3.12 | les deux commandes (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
+| `gabarit` | le paquet que `list-dir` importe, la semence `suivi` | `command -v gabarit` |
+| Python ≥ 3.12 | `list-dir` et `gabarit` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx --with pytest basedpyright` |
 
@@ -51,7 +52,8 @@ ajouter.
 Un chemin de skill **cité** — un répertoire, un module, un fichier de référence — s'écrit
 relativement à la racine du dépôt (`skills/list-dir/scripts/`), et un renvoi documentaire vers un
 autre skill s'écrit relativement au fichier courant. Une bibliothèque importée se localise depuis
-la commande qui l'expose (`shutil.which`), jamais par une constante.
+la commande qui l'expose — son lien de `bin/`, trouvé en remontant ou par `shutil.which` —, jamais
+par une constante.
 
 > *Mode de défaillance* — les deux linters n'étant pas installés, un audit qui les appelle par leur
 > nom les rapporte « non exécutés » et rend un verdict amputé sans que rien n'échoue. C'est arrivé
