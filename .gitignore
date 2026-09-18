@@ -48,3 +48,8 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .venv/
+
+# Skills et plugins synchronisés par Claude Code depuis claude.ai : copies gérées hors
+# du dépôt, qui ne relèvent pas du garde-fou.
+skills/synced/
+plugins/synced/

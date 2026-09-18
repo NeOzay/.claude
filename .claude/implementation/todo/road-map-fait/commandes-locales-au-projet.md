@@ -48,3 +48,10 @@ Points à trancher par le chantier :
   `commit-chantier`)
 - hooks globaux, à ne pas confondre : `settings.json`, sections `SessionStart` et `PreToolUse`
 - documentation Claude Code : hooks `SessionStart` et variable `CLAUDE_ENV_FILE`
+
+## Fait le
+
+2026-09-18, par le chantier `skill-convention`. La procédure est écrite dans
+`skills/skill-convention/references/commandes-locales.md`, avec son modèle de hook
+`skills/skill-convention/modeles/commandes-locales.sh`. Archive du chantier :
+`.claude/implementation/done/2026-09-18-skill-convention.md`.

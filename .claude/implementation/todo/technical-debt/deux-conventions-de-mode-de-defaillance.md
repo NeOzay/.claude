@@ -38,7 +38,19 @@ un bloc cité se repère d'un coup d'œil et se compte au `grep`, un mode de dé
 la prose ne se retrouve qu'en lisant. Deux des treize de `list-dir` ne sont d'ailleurs plus
 identifiables par leur formulation d'origine — l'audit a dû les retrouver par leur contenu.
 
+**Tranché le 2026-09-17** par le chantier `skill-convention` : la forme retenue est **l'intégration
+au texte**, et elle est écrite dans `skills/skill-convention/references/prose.md`, section « Chaque
+règle porte son motif, dans la prose » — et non dans `contrat.md`, comme l'envisageait l'entrée :
+c'est la skill des conventions qui porte désormais les règles de rédaction. Les blocs cités
+restants deviennent donc des écarts, dénombrés le même jour : `debt-review` 17 (SKILL.md 9,
+categories.md 7, gabarit-rapport.md 1), `implementation-tracker` 17 (contrat.md 13, dette.md 2,
+road-map.md 2), `git-smart-commit` 4 (une par référence), `OUTILLAGE.md` 6.
+
 ## Pour solder
+
+Réécrire ces 44 blocs en intégrant leur contenu au texte de la règle qu'ils accompagnent, sans rien
+perdre du fond. Les voies ci-dessous sont conservées pour mémoire ; seule la première est encore
+ouverte.
 
 Trancher, puis appliquer partout :
 
