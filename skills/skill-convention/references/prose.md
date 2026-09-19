@@ -190,6 +190,33 @@ règles dont l'agent a besoin.
 **Pratiqué dans** : [`step-implementer.md`](../../../agents/step-implementer.md) ; l'exception est
 déclarée en tête de [`check_pipeline.py`](../../../scripts/check_pipeline.py).
 
+## Une phrase déclare, elle ne raconte pas
+
+Une skill s'écrit au présent, en phrases déclaratives : elle dit ce qu'elle fait, ce qu'on fait,
+et pourquoi. Elle ne raconte ni son origine, ni le constat qui l'a fait naître, ni ce qui se
+faisait avant elle : ce récit va dans le message de commit. Chaque phrase porte une règle, un
+motif ou une consigne ; une phrase qui n'en porte aucune est retirée, formule frappante comprise.
+Une phrase de récit se charge à chaque déclenchement sans rien apprendre au modèle, et un
+« jusqu'ici » lui laisse croire que deux régimes coexistent.
+
+Ce paragraphe raconte :
+
+```
+Les conventions de ce dépôt se lisaient jusqu'ici dans les skills elles-mêmes : chacune en
+pratique une partie, aucune ne les énonce. Ce skill les énonce, et **chacune cite un endroit du
+dépôt où elle est pratiquée** — une convention qu'on ne retrouve nulle part est un vœu, pas une
+convention.
+```
+
+Il déclare :
+
+```
+Ce skill énonce les conventions du dépôt. Chacune cite un endroit du dépôt où elle est pratiquée.
+```
+
+**Pratiqué dans** : ce fichier ; [skill-convention](../SKILL.md), « Ce skill décrit, il ne
+corrige pas ».
+
 ## La prose est en français
 
 Français correct, accents compris ; identifiants, commandes et termes techniques restent dans
