@@ -34,8 +34,8 @@ from typing import cast, final
 from .contract import (
     BACKUP,
     CONTRACT,
+    PATRONS,
     SEED,
-    TEMPLATES,
     list_base,
     load_contract,
     load_source,
@@ -79,12 +79,12 @@ def _peremption(list_dir: Path, origin: Origin) -> list[str]:
     devient invérifiable, et le lecteur doit savoir que le silence des lignes
     suivantes ne prouve rien.
 
-    UN GABARIT NE SE SUIT PAS, et le dire est le seul comportement honnête. Une
+    UN PATRON NE SE SUIT PAS, et le dire est le seul comportement honnête. Une
     estampille `mère/dérivée` nomme la semence d'une liste engendrée par `derive` ;
     la résoudre dans les rangs rendrait « introuvable », ce qui est faux et envoie
     chercher au mauvais endroit. Ce n'est PAS un quatrième silence : les trois de
     l'en-tête disent qu'il n'y a rien à rattraper, celui-ci dit qu'on ne sait pas.
-    Le cas ne survient que sur une dérivée dégelée à la main — le gabarit qui l'a
+    Le cas ne survient que sur une dérivée dégelée à la main — le patron qui l'a
     semée pose `frozen = true`, et `warnings` s'arrête avant d'arriver ici.
 
     ELLE PREND L'`Origin` ENTIÈRE, ET RÉTRÉCIT ELLE-MÊME. Recevoir le nom à part
@@ -96,11 +96,11 @@ def _peremption(list_dir: Path, origin: Origin) -> list[str]:
     nom = origin.name
     if nom is None:
         return []
-    if origin.template is not None:
+    if origin.patron is not None:
         return [
-            f"{list_dir} : semée par le gabarit « {nom} » — la péremption d'un gabarit "
-            f"n'est pas suivie ; « list-dir contract --def {origin.definition} --template "
-            f"{origin.template} » imprime la semence, à comparer à la main"
+            f"{list_dir} : semée par le patron « {nom} » — la péremption d'un patron "
+            f"n'est pas suivie ; « list-dir contract --def {origin.definition} --patron "
+            f"{origin.patron} » imprime la semence, à comparer à la main"
         ]
 
     trouve = resolve(nom, roots())
@@ -140,7 +140,7 @@ def _peremption(list_dir: Path, origin: Origin) -> list[str]:
 
 
 def _modifications(list_dir: Path) -> list[str]:
-    """Les fichiers qui ont bougé depuis le semis, contrat et gabarits.
+    """Les fichiers qui ont bougé depuis le semis, contrat et patrons.
 
     NE RÉSOUT AUCUNE DÉFINITION : la comparaison se fait avec `.list/semence/`, donc
     elle vaut encore là où rien n'est installé. Sans ce répertoire — liste adoptée
@@ -171,7 +171,7 @@ def _differe(semé: Path, vif: Path, *, contrat: bool) -> bool:
     toujours, sur une liste que personne n'a touchée — un avertissement permanent
     qu'on apprend à ignorer, et qui emporte les vrais avec lui.
 
-    UN GABARIT, LUI, SE COMPARE À L'OCTET. C'est une prose libre : elle n'a pas de
+    UN PATRON, LUI, SE COMPARE À L'OCTET. C'est une prose libre : elle n'a pas de
     contenu déclaré dont on pourrait faire abstraction de la forme, et deux mises en
     page différentes y sont deux textes différents.
     """
@@ -189,7 +189,7 @@ def _differe(semé: Path, vif: Path, *, contrat: bool) -> bool:
 
 
 def _fichiers(base: Path) -> set[str]:
-    """Le contrat et les gabarits d'une base, en chemins relatifs.
+    """Le contrat et les patrons d'une base, en chemins relatifs.
 
     RIEN D'AUTRE N'EST COMPARÉ : `commands/`, `semence/` et `backup/` ne viennent pas
     d'une définition, et les faire figurer ferait dire « ajouté depuis le semis » à
@@ -197,7 +197,7 @@ def _fichiers(base: Path) -> set[str]:
     """
     trouves = {CONTRACT} if (base / CONTRACT).is_file() else set()
     return trouves | {
-        f"{TEMPLATES}/{f.name}" for f in sorted((base / TEMPLATES).glob("*")) if f.is_file()
+        f"{PATRONS}/{f.name}" for f in sorted((base / PATRONS).glob("*")) if f.is_file()
     }
 
 
@@ -210,7 +210,7 @@ def _lire(path: Path) -> str | None:
 
 
 def read_seed(definition: Path) -> Result[tuple[str, dict[str, str], Contract]]:
-    """Le contrat d'une définition et ses gabarits, LUS ET VALIDÉS EN MÉMOIRE.
+    """Le contrat d'une définition et ses patrons, LUS ET VALIDÉS EN MÉMOIRE.
 
     UN SEUL LECTEUR POUR LES DEUX APPELANTS : `init` sème avec, `reseed` rattrape
     avec. Deux lectures séparées finiraient par juger différemment le même
@@ -227,9 +227,9 @@ def read_seed(definition: Path) -> Result[tuple[str, dict[str, str], Contract]]:
         return fail(f"{definition}: définition sans contrat — {CONTRACT} attendu")
     try:
         texte = contrat.read_text(encoding="utf-8")
-        gabarits = {
+        patrons = {
             f.name: f.read_text(encoding="utf-8")
-            for f in sorted((definition / TEMPLATES).glob("*"))
+            for f in sorted((definition / PATRONS).glob("*"))
             if f.is_file()
         }
     except OSError as exc:
@@ -241,7 +241,7 @@ def read_seed(definition: Path) -> Result[tuple[str, dict[str, str], Contract]]:
     lu = parse_contract(texte, contrat)
     if not lu:
         return Result(lu.status, None, lu.message)
-    return ok((texte, gabarits, lu.unwrap()))
+    return ok((texte, patrons, lu.unwrap()))
 
 
 # ------------------------------------------------------ aplatir, fusionner, réécrire
@@ -524,12 +524,12 @@ def fusionner(
     return Fusion(plat, changements, conflits)
 
 
-def fusionner_gabarits(
+def fusionner_patrons(
     base: Mapping[str, str], local: Mapping[str, str], semence: Mapping[str, str]
 ) -> tuple[dict[str, str], list[str], list[str]]:
     """La même règle, à la granularité du FICHIER ENTIER.
 
-    Un gabarit est une prose libre : il n'a pas de clés à confronter, et deux
+    Un patron est une prose libre : il n'a pas de clés à confronter, et deux
     versions d'un même paragraphe ne se fusionnent pas ligne à ligne sans inventer
     un texte que personne n'a écrit.
     """
@@ -543,8 +543,8 @@ def fusionner_gabarits(
     # liste de clés pointées venues du contrat.
     return (
         {nom: cast("str", corps) for nom, corps in fusion.plat.items()},
-        [f"gabarit {c}" for c in fusion.changements],
-        [f"gabarit {c}" for c in fusion.conflits],
+        [f"patron {c}" for c in fusion.changements],
+        [f"patron {c}" for c in fusion.conflits],
     )
 
 
@@ -599,7 +599,7 @@ def reseed(
     semence = read_seed(definition)
     if not semence:
         return Result(semence.status, None, semence.message)
-    texte_semence, gabarits_semence, contrat_semence = semence.unwrap()
+    texte_semence, patrons_semence, contrat_semence = semence.unwrap()
 
     # Même règle qu'à l'`init`, et pour la même raison : une absence n'est pas une
     # contradiction, seuls DEUX NOMS QUI SE CONTREDISENT sont refusés.
@@ -624,10 +624,10 @@ def reseed(
         return Result(ancien.status, None, ancien.message)
 
     fusion = fusionner(flatten(ancien.unwrap()), flatten(local.unwrap()), flatten(graine.unwrap()))
-    gabarits, changements_g, conflits_g = fusionner_gabarits(
-        _gabarits(seed_base(list_dir)) if _semée(list_dir) else {},
-        _gabarits(base),
-        gabarits_semence,
+    patrons, changements_g, conflits_g = fusionner_patrons(
+        _patrons(seed_base(list_dir)) if _semée(list_dir) else {},
+        _patrons(base),
+        patrons_semence,
     )
 
     conflits = fusion.conflits + conflits_g
@@ -642,7 +642,7 @@ def reseed(
         )
 
     changements = fusion.changements + changements_g
-    verbatim = fusion.plat == flatten(graine.unwrap()) and gabarits == gabarits_semence
+    verbatim = fusion.plat == flatten(graine.unwrap()) and patrons == patrons_semence
     if verbatim:
         contrat = texte_semence
     else:
@@ -658,13 +658,13 @@ def reseed(
     #
     # La garde porte sur les TROIS cibles, et pas sur la liste des changements : c'est
     # ce que les fichiers contiennent qui dit s'il y a quelque chose à écrire.
-    if not _a_ecrire(list_dir, contrat, gabarits, texte_semence, gabarits_semence):
+    if not _a_ecrire(list_dir, contrat, patrons, texte_semence, patrons_semence):
         return ok(Resemis(verbatim, changements, ecrit=False))
 
     if dry_run:
         return ok(Resemis(verbatim, changements, ecrit=False))
 
-    ecriture = _ecrire(list_dir, contrat, gabarits, gabarits_semence, texte_semence)
+    ecriture = _ecrire(list_dir, contrat, patrons, patrons_semence, texte_semence)
     if not ecriture:
         return Result(ecriture.status, None, ecriture.message)
     return ok(Resemis(verbatim, changements, ecrit=True))
@@ -673,23 +673,23 @@ def reseed(
 def _a_ecrire(
     list_dir: Path,
     contrat: str,
-    gabarits: Mapping[str, str],
+    patrons: Mapping[str, str],
     texte_semence: str,
-    gabarits_semence: Mapping[str, str],
+    patrons_semence: Mapping[str, str],
 ) -> bool:
     """Y a-t-il quoi que ce soit à changer sur le disque ?
 
     LES TROIS CIBLES SONT REGARDÉES, parce que les trois sont écrites : le contrat, les
-    gabarits, et la semence gardée. Une liste dont le contrat est déjà à jour peut très
+    patrons, et la semence gardée. Une liste dont le contrat est déjà à jour peut très
     bien porter une semence périmée — c'est l'état qu'un `reseed` interrompu laisserait.
     """
     base = list_base(list_dir)
     semence = seed_base(list_dir)
     return (
         _texte_differe(base / CONTRACT, contrat)
-        or _gabarits(base) != dict(gabarits)
+        or _patrons(base) != dict(patrons)
         or _lire(semence / CONTRACT) != texte_semence
-        or _gabarits(semence) != dict(gabarits_semence)
+        or _patrons(semence) != dict(patrons_semence)
     )
 
 
@@ -732,10 +732,10 @@ def _brut(path: Path) -> Result[dict[str, object]]:
     return ok(tomllib.loads(texte))
 
 
-def _gabarits(base: Path) -> dict[str, str]:
+def _patrons(base: Path) -> dict[str, str]:
     return {
         f.name: f.read_text(encoding="utf-8")
-        for f in sorted((base / TEMPLATES).glob("*"))
+        for f in sorted((base / PATRONS).glob("*"))
         if f.is_file()
     }
 
@@ -743,8 +743,8 @@ def _gabarits(base: Path) -> dict[str, str]:
 def _ecrire(
     list_dir: Path,
     contrat: str,
-    gabarits: Mapping[str, str],
-    gabarits_semence: Mapping[str, str],
+    patrons: Mapping[str, str],
+    patrons_semence: Mapping[str, str],
     texte_semence: str,
 ) -> Result[None]:
     """Sauvegarder, écrire, rafraîchir la semence — dans cet ordre, jamais un autre.
@@ -762,30 +762,30 @@ def _ecrire(
         backup = base / BACKUP
         if backup.exists():
             shutil.rmtree(backup)
-        (backup / TEMPLATES).mkdir(parents=True)
+        (backup / PATRONS).mkdir(parents=True)
         _ = (backup / CONTRACT).write_text(
             (base / CONTRACT).read_text(encoding="utf-8"), encoding="utf-8"
         )
-        for nom, corps in _gabarits(base).items():
-            _ = (backup / TEMPLATES / nom).write_text(corps, encoding="utf-8")
+        for nom, corps in _patrons(base).items():
+            _ = (backup / PATRONS / nom).write_text(corps, encoding="utf-8")
 
         _ = (base / CONTRACT).write_text(contrat, encoding="utf-8")
-        _poser(base, gabarits)
+        _poser(base, patrons)
 
         semence = seed_base(list_dir)
         if semence.exists():
             shutil.rmtree(semence)
         semence.mkdir(parents=True)
         _ = (semence / CONTRACT).write_text(texte_semence, encoding="utf-8")
-        _poser(semence, gabarits_semence)
+        _poser(semence, patrons_semence)
     except OSError as exc:
         return fail(f"{list_dir} : re-semis interrompu — {exc.strerror}")
     return ok(None)
 
 
-def _poser(base: Path, gabarits: Mapping[str, str]) -> None:
-    if not gabarits:
+def _poser(base: Path, patrons: Mapping[str, str]) -> None:
+    if not patrons:
         return
-    (base / TEMPLATES).mkdir(parents=True, exist_ok=True)
-    for nom, corps in gabarits.items():
-        _ = (base / TEMPLATES / nom).write_text(corps, encoding="utf-8")
+    (base / PATRONS).mkdir(parents=True, exist_ok=True)
+    for nom, corps in patrons.items():
+        _ = (base / PATRONS / nom).write_text(corps, encoding="utf-8")

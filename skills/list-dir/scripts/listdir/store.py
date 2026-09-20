@@ -24,8 +24,8 @@ from gabarit.prefill import compose
 from .contract import (
     CONTRACT,
     LIST_DIR,
+    PATRONS,
     SEED,
-    TEMPLATES,
     is_marker,
     load_contract,
     parse_contract,
@@ -404,11 +404,11 @@ class ListStore:
 
     # ---------------------------------------------------------------------- ouverture
     # ------------------------------------------------------- projection et agglomération
-    def derive(self, destination: Path | str, template: str) -> Result[ListStore]:
+    def derive(self, destination: Path | str, patron: str) -> Result[ListStore]:
         """Projette la STRUCTURE de cette liste sur une liste neuve.
 
         CE N'EST PAS UNE COPIE. Chaque élément source engendre un élément de même
-        `id`, mais son corps vient du moule `<template>.md`, jamais de la source.
+        `id`, mais son corps vient du moule `<patron>.md`, jamais de la source.
         Une fiche qui porterait la prose de l'élément qu'elle instruit en serait un
         doublon éditable, et la source unique serait perdue. La fiche ne porte que
         du contenu neuf — c'est ce qui la rend légitimement éditable.
@@ -425,10 +425,10 @@ class ListStore:
         if not sources.unwrap():
             return fail(f"{self.path}: aucun élément — il n'y a rien à projeter")
 
-        moule = self.template(template)
+        moule = self.patron(patron)
         if not moule:
             return Result(moule.status, None, moule.message)
-        contract_text, gabarit = moule.unwrap()
+        contract_text, sections = moule.unwrap()
 
         target = Path(destination)
         if target.exists():
@@ -436,7 +436,7 @@ class ListStore:
             # répertoires distincts. Écraser ferait disparaître un travail déjà fait.
             return fail(f"{target}: existe déjà — derive ne fusionne ni ne met à jour")
 
-        # TOUT EST CONSTRUIT EN MÉMOIRE D'ABORD. Un gabarit incohérent découvert
+        # TOUT EST CONSTRUIT EN MÉMOIRE D'ABORD. Un patron incohérent découvert
         # après un mkdir laisserait une destination à moitié bâtie, que la tentative
         # suivante refuserait comme « existe déjà » : l'utilisateur serait coincé
         # entre une erreur qu'il a corrigée et un répertoire qu'il n'a pas créé.
@@ -454,7 +454,7 @@ class ListStore:
 
         fiches: list[Item] = []
         for source in sources.unwrap():
-            built = self._project(source, derived, gabarit, ctx)
+            built = self._project(source, derived, sections, ctx)
             if not built:
                 return Result(built.status, None, built.message)
             fiches.append(built.unwrap())
@@ -471,31 +471,31 @@ class ListStore:
                 return Result(written.status, None, written.message)
         return ok(derived)
 
-    def template(self, name: str) -> Result[tuple[str, Mapping[str, str]]]:
+    def patron(self, name: str) -> Result[tuple[str, Mapping[str, str]]]:
         """La paire `<name>.toml` / `<name>.md` de cette liste.
 
-        Les deux sont exigés, et celui qui manque est nommé : un gabarit à moitié
+        Les deux sont exigés, et celui qui manque est nommé : un patron à moitié
         présent produirait une liste sans contrat ou des fiches sans sections, deux
         états qu'on ne découvrirait qu'à l'usage.
         """
-        directory = self.path / LIST_DIR / TEMPLATES
-        contrat, gabarit = directory / f"{name}.toml", directory / f"{name}.md"
-        for f in (contrat, gabarit):
+        directory = self.path / LIST_DIR / PATRONS
+        contrat, patron = directory / f"{name}.toml", directory / f"{name}.md"
+        for f in (contrat, patron):
             if not f.is_file():
-                return fail(f"{f}: gabarit « {name} » incomplet — ce fichier manque")
+                return fail(f"{f}: patron « {name} » incomplet — ce fichier manque")
         try:
             texte = contrat.read_text(encoding="utf-8")
-            corps = gabarit.read_text(encoding="utf-8")
+            corps = patron.read_text(encoding="utf-8")
         except OSError as exc:
-            return fail(f"{directory}: gabarit illisible — {exc.strerror}")
-        # parse_sections ignore ce qui précède le premier « ## » : le gabarit peut
+            return fail(f"{directory}: patron illisible — {exc.strerror}")
+        # parse_sections ignore ce qui précède le premier « ## » : le patron peut
         # porter un front matter ou n'en porter aucun, seules ses sections comptent.
         # Le front matter d'une fiche est injecté depuis le contrat cible, pour ne
         # pas avoir à tenir la même liste de champs dans le .toml et dans le .md.
         return ok((texte, parse_sections(corps)))
 
     def _project(
-        self, source: Item, derived: ListStore, gabarit: Mapping[str, str], ctx: PrefillContext
+        self, source: Item, derived: ListStore, sections: Mapping[str, str], ctx: PrefillContext
     ) -> Result[Item]:
         fields: dict[str, object] = {}
         for name, f in derived.contract.fields.items():
@@ -515,7 +515,7 @@ class ListStore:
                 )
             else:
                 fields[name] = source.fields.get(f.source, f.marker)
-        return ok(Item(derived.path / f"{source.id}.md", fields, dict(gabarit)))
+        return ok(Item(derived.path / f"{source.id}.md", fields, dict(sections)))
 
     def merge_text(self) -> Result[str]:
         """L'aggloméré, en mémoire. La conservation est vérifiée avant de rendre.
@@ -670,10 +670,10 @@ def init_list(
         paquet où un contenu de contrat l'est. Réduit au strict minimum — un `id`,
         un `title`, une section — pour être complété à la main, jamais pour servir
         de modèle à quoi que ce soit.
-      - UNE DÉFINITION → SON CONTRAT, COPIÉ TEL QUEL, et ses gabarits avec lui.
+      - UNE DÉFINITION → SON CONTRAT, COPIÉ TEL QUEL, et ses patrons avec lui.
 
-    POURQUOI UNE DÉFINITION PEUT CE QU'UN GABARIT NE POUVAIT PAS. Un gabarit vit
-    dans le `.list/templates/` d'une liste EXISTANTE, et `init` s'adresse justement
+    POURQUOI UNE DÉFINITION PEUT CE QU'UN PATRON NE POUVAIT PAS. Un patron vit
+    dans le `.list/patrons/` d'une liste EXISTANTE, et `init` s'adresse justement
     au cas où aucune liste n'existe : il ne pouvait donc pas en venir. Une définition
     vit hors de tout répertoire-liste (cf. definitions.py) — c'est exactement ce qui
     la rend disponible quand il n'y a encore rien.
@@ -714,7 +714,7 @@ def init_list(
         lu = read_seed(Path(definition))
         if not lu:
             return Result(lu.status, None, lu.message)
-        texte, gabarits, contrat = lu.unwrap()
+        texte, patrons, contrat = lu.unwrap()
 
         # UNE ABSENCE N'EST PAS UNE CONTRADICTION : une définition sans `[origin]`
         # reste utilisable et sème une liste sans provenance, que l'avertissement
@@ -733,10 +733,10 @@ def init_list(
             for base in (target.parent, target.parent / SEED):
                 base.mkdir(parents=True, exist_ok=True)
                 _ = (base / CONTRACT).write_text(texte, encoding="utf-8")
-                if gabarits:
-                    (base / TEMPLATES).mkdir(exist_ok=True)
-                    for nom, corps in gabarits.items():
-                        _ = (base / TEMPLATES / nom).write_text(corps, encoding="utf-8")
+                if patrons:
+                    (base / PATRONS).mkdir(exist_ok=True)
+                    for nom, corps in patrons.items():
+                        _ = (base / PATRONS / nom).write_text(corps, encoding="utf-8")
         except OSError as exc:
             return fail(f"{target}: écriture impossible — {exc.strerror}")
         return ok(target)

@@ -12,7 +12,7 @@ category = "<OPTIONNEL>"
 Le contrôle 2 de `check_pipeline.py` (`EMPREINTES`) protège une phrase verbatim par section de
 `contrat.md`, et vérifie qu'elle apparaît exactement une fois dans `skills/`. Il ne couvre que ce
 fichier. Les règles dont l'autorité est ailleurs — `format.md` « Un élément », `operations.md`
-« Déplacer un élément », `dette.md` « Ce qu'une entrée porte », `templates/review.md`, `debt-review/SKILL.md`
+« Déplacer un élément », `dette.md` « Ce qu'une entrée porte », `patrons/review.md`, `debt-review/SKILL.md`
 Étape 3 — ne sont protégées par rien.
 
 Le chantier `recopies-hors-contrat` a résorbé neuf écritures de ce type, dont deux qui se

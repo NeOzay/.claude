@@ -11,7 +11,7 @@ category = "<OPTIONNEL>"
 
 L'audit `tomllib` de tous les contrats du dépôt, joué à la clôture du chantier
 `description-obligatoire-partout`, en trouve quatre que `validate` refuserait : ceux des
-`.list/backup/` des trois registres de dette, et le `templates/review.toml` de `technical-debt`.
+`.list/backup/` des trois registres de dette, et le `patrons/review.toml` de `technical-debt`.
 Tous pour la même raison — un `[fields.id]` sans `description`.
 
 C'est exactement le périmètre que le plan a délibérément laissé intact : un backup est

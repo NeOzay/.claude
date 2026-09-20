@@ -13,7 +13,7 @@ import tomllib
 from pathlib import Path
 
 from jouet import ecrire
-from listdir.contract import BACKUP, CONTRACT, LIST_DIR, SEED, TEMPLATES, load_contract
+from listdir.contract import BACKUP, CONTRACT, LIST_DIR, PATRONS, SEED, load_contract
 from listdir.provenance import emit, flatten, reseed, warnings
 from listdir.store import init_list
 
@@ -41,12 +41,12 @@ description = "ce qui a été observé"
 """
 
 
-def semer(tmp_path: Path, contrat: str = SEMENCE, gabarit: str = "") -> tuple[Path, Path]:
+def semer(tmp_path: Path, contrat: str = SEMENCE, patron: str = "") -> tuple[Path, Path]:
     """Une définition au rang 1, et la liste qu'elle vient de semer."""
     definition = tmp_path / ".claude" / "list-dir" / "jouet"
     _ = ecrire(definition, CONTRACT, contrat)
-    if gabarit:
-        _ = ecrire(definition, f"{TEMPLATES}/revue.md", gabarit)
+    if patron:
+        _ = ecrire(definition, f"{PATRONS}/revue.md", patron)
     cible = tmp_path / "liste"
     _ = init_list(cible, definition=definition).unwrap()
     os.chdir(tmp_path)
@@ -154,7 +154,7 @@ def test_liste_gelee_est_refusee_puis_degelee(tmp_path: Path) -> None:
 
 
 def test_la_sauvegarde_garde_l_etat_d_avant(tmp_path: Path) -> None:
-    definition, cible = semer(tmp_path, gabarit="## Revue\n")
+    definition, cible = semer(tmp_path, patron="## Revue\n")
     avant = contrat_de(cible)
     _ = ecrire(definition, CONTRACT, SEMENCE.replace("version = 1", "version = 2"))
 
@@ -162,7 +162,7 @@ def test_la_sauvegarde_garde_l_etat_d_avant(tmp_path: Path) -> None:
 
     backup = cible / LIST_DIR / BACKUP
     assert (backup / CONTRACT).read_text(encoding="utf-8") == avant
-    assert (backup / TEMPLATES / "revue.md").read_text(encoding="utf-8") == "## Revue\n"
+    assert (backup / PATRONS / "revue.md").read_text(encoding="utf-8") == "## Revue\n"
 
 
 def test_la_semence_gardee_est_rafraichie(tmp_path: Path) -> None:
@@ -190,14 +190,14 @@ def test_dry_run_rapporte_sans_rien_ecrire(tmp_path: Path) -> None:
     assert not (cible / LIST_DIR / BACKUP).exists()
 
 
-def test_gabarit_de_la_semence_est_repris(tmp_path: Path) -> None:
-    definition, cible = semer(tmp_path, gabarit="## Revue\n")
-    _ = ecrire(definition, f"{TEMPLATES}/revue.md", "## Revue remaniée\n")
+def test_patron_de_la_semence_est_repris(tmp_path: Path) -> None:
+    definition, cible = semer(tmp_path, patron="## Revue\n")
+    _ = ecrire(definition, f"{PATRONS}/revue.md", "## Revue remaniée\n")
 
     fait = reseed(cible, definition).unwrap()
 
-    assert any("gabarit revue.md" in c for c in fait.changements)
-    assert (cible / LIST_DIR / TEMPLATES / "revue.md").read_text(
+    assert any("patron revue.md" in c for c in fait.changements)
+    assert (cible / LIST_DIR / PATRONS / "revue.md").read_text(
         encoding="utf-8"
     ) == "## Revue remaniée\n"
 
@@ -296,14 +296,14 @@ def test_suppression_locale_survit_a_un_re_semis(tmp_path: Path) -> None:
     assert "version = 2" in contrat_de(cible)
 
 
-def test_gabarit_supprime_localement_survit_a_un_re_semis(tmp_path: Path) -> None:
-    definition, cible = semer(tmp_path, gabarit="## Revue\n")
-    (cible / LIST_DIR / TEMPLATES / "revue.md").unlink()
+def test_patron_supprime_localement_survit_a_un_re_semis(tmp_path: Path) -> None:
+    definition, cible = semer(tmp_path, patron="## Revue\n")
+    (cible / LIST_DIR / PATRONS / "revue.md").unlink()
     _ = ecrire(definition, CONTRACT, SEMENCE.replace("version = 1", "version = 2"))
 
     _ = reseed(cible, definition).unwrap()
 
-    assert not (cible / LIST_DIR / TEMPLATES / "revue.md").exists()
+    assert not (cible / LIST_DIR / PATRONS / "revue.md").exists()
     assert "version = 2" in contrat_de(cible)
 
 

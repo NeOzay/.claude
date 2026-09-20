@@ -22,7 +22,7 @@ import tomllib
 from pathlib import Path
 from typing import cast
 
-from jouet import CONTRAT, GABARIT_MD, GABARIT_TOML, ecrire, element, monter_liste
+from jouet import CONTRAT, PATRON_MD, PATRON_TOML, ecrire, element, monter_liste
 from listdir import open_list
 from listdir.store import ListStore, init_list
 from listdir.types import OPTIONAL, PLACEHOLDER, Change
@@ -431,24 +431,24 @@ def test_une_definition_donne_son_contrat_a_la_liste(tmp_path: Path) -> None:
     assert open_list(tmp_path / "neuve").unwrap().contract.name == "jouet"
 
 
-def test_les_gabarits_de_la_definition_suivent(tmp_path: Path) -> None:
+def test_les_patrons_de_la_definition_suivent(tmp_path: Path) -> None:
     """Sans eux, `derive` échouerait sur une liste pourtant amorcée — et l'échec
     ne se verrait qu'au moment de projeter, loin de l'amorçage qui l'a causé."""
     src = semence(tmp_path / "defs/jouet")
-    _ = ecrire(src, "templates/revue.toml", GABARIT_TOML)
-    _ = ecrire(src, "templates/revue.md", GABARIT_MD)
+    _ = ecrire(src, "patrons/revue.toml", PATRON_TOML)
+    _ = ecrire(src, "patrons/revue.md", PATRON_MD)
 
     _ = init_list(tmp_path / "neuve", definition=src).unwrap()
-    templates = tmp_path / "neuve/.list/templates"
-    assert sorted(f.name for f in templates.iterdir()) == ["revue.md", "revue.toml"]
+    patrons = tmp_path / "neuve/.list/patrons"
+    assert sorted(f.name for f in patrons.iterdir()) == ["revue.md", "revue.toml"]
 
 
-def test_une_definition_sans_gabarit_s_amorce(tmp_path: Path) -> None:
-    """`templates/` est facultatif : la plupart des listes ne dérivent jamais."""
+def test_une_definition_sans_patron_s_amorce(tmp_path: Path) -> None:
+    """`patrons/` est facultatif : la plupart des listes ne dérivent jamais."""
     src = semence(tmp_path / "defs/jouet")
     _ = init_list(tmp_path / "neuve", definition=src).unwrap()
 
-    assert not (tmp_path / "neuve/.list/templates").exists()
+    assert not (tmp_path / "neuve/.list/patrons").exists()
     assert open_list(tmp_path / "neuve").unwrap().validate().unwrap() == []
 
 

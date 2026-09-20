@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 from jouet import ecrire
-from listdir.contract import CONTRACT, LIST_DIR, SEED, TEMPLATES, load_contract, parse_contract
+from listdir.contract import CONTRACT, LIST_DIR, PATRONS, SEED, load_contract, parse_contract
 from listdir.provenance import warnings
 from listdir.store import init_list
 from listdir.types import Contract, Result
@@ -105,32 +105,32 @@ def test_def_avec_espace_refusee() -> None:
     assert "espace" in r.message
 
 
-def test_nom_de_gabarit_admis() -> None:
-    """« mère/dérivée » nomme le gabarit d'une définition — la semence d'une dérivée."""
+def test_nom_de_patron_admis() -> None:
+    """« mère/dérivée » nomme le patron d'une définition — la semence d'une dérivée."""
     r = contrat('\n[origin]\ndef = "technical-debt/review"\nversion = 1\nfrozen = true\n')
     origin = r.unwrap().origin
     assert origin is not None
     assert origin.name == "technical-debt/review"
     assert origin.definition == "technical-debt"
-    assert origin.template == "review"
+    assert origin.patron == "review"
 
 
-def test_nom_simple_ne_vise_aucun_gabarit() -> None:
+def test_nom_simple_ne_vise_aucun_patron() -> None:
     origin = contrat('\n[origin]\ndef = "technical-debt"\nversion = 1\n').unwrap().origin
     assert origin is not None
     assert origin.definition == "technical-debt"
-    assert origin.template is None
+    assert origin.patron is None
 
 
 def test_sans_semence_les_deux_parts_sont_absentes() -> None:
     origin = contrat("\n[origin]\ndef = false\n").unwrap().origin
     assert origin is not None
     assert origin.definition is None
-    assert origin.template is None
+    assert origin.patron is None
 
 
 def test_trois_segments_refuses() -> None:
-    """Les gabarits vivent à plat dans `templates/` : un troisième segment ne vise rien."""
+    """Les patrons vivent à plat dans `patrons/` : un troisième segment ne vise rien."""
     for nom in ("a/b/c", "a//b"):
         r = contrat(f'\n[origin]\ndef = "{nom}"\nversion = 1\n')
         assert not r, nom
@@ -145,7 +145,7 @@ def test_segment_vide_refuse() -> None:
 
 
 def test_remontee_de_chemin_refusee() -> None:
-    """C'est un nom, pas un chemin : `..` sortirait de `templates/`."""
+    """C'est un nom, pas un chemin : `..` sortirait de `patrons/`."""
     for nom in ("../x", "a/..", "./a", "a/."):
         r = contrat(f'\n[origin]\ndef = "{nom}"\nversion = 1\n')
         assert not r, nom
@@ -214,7 +214,7 @@ def test_init_depuis_une_definition_copie_et_garde_la_semence(tmp_path: Path) ->
     seconde, intacte : c'est le point de référence de `reseed`."""
     definition = tmp_path / "def"
     _ = ecrire(definition, CONTRACT, SEMEE)
-    _ = ecrire(definition, f"{TEMPLATES}/revue.md", "## Revue\n")
+    _ = ecrire(definition, f"{PATRONS}/revue.md", "## Revue\n")
     cible = tmp_path / "neuve"
 
     _ = init_list(cible, definition=definition).unwrap()
@@ -222,7 +222,7 @@ def test_init_depuis_une_definition_copie_et_garde_la_semence(tmp_path: Path) ->
     base = cible / LIST_DIR
     assert (base / CONTRACT).read_text(encoding="utf-8") == SEMEE
     assert (base / SEED / CONTRACT).read_text(encoding="utf-8") == SEMEE
-    assert (base / SEED / TEMPLATES / "revue.md").read_text(encoding="utf-8") == "## Revue\n"
+    assert (base / SEED / PATRONS / "revue.md").read_text(encoding="utf-8") == "## Revue\n"
 
 
 def test_from_estampille_comme_def(tmp_path: Path) -> None:
@@ -327,10 +327,10 @@ def test_frozen_tait_la_peremption(tmp_path: Path) -> None:
     assert dits(cible) == []
 
 
-def test_estampille_de_gabarit_ne_se_dit_pas_introuvable(tmp_path: Path) -> None:
+def test_estampille_de_patron_ne_se_dit_pas_introuvable(tmp_path: Path) -> None:
     """Une dérivée dégelée à la main ne doit pas s'entendre envoyer au mauvais endroit.
 
-    Le gel du gabarit fait taire ce cas en temps normal ; il reste que le message,
+    Le gel du patron fait taire ce cas en temps normal ; il reste que le message,
     quand on l'atteint, doit dire la vérité plutôt que « définition introuvable ».
     """
     definition, cible = semer(tmp_path)
@@ -342,9 +342,9 @@ def test_estampille_de_gabarit_ne_se_dit_pas_introuvable(tmp_path: Path) -> None
     _chdir(tmp_path)
     assert definition.is_dir()
 
-    (dit,) = [d for d in dits(cible) if "péremption d'un gabarit" in d]
+    (dit,) = [d for d in dits(cible) if "péremption d'un patron" in d]
     assert "introuvable dans les quatre rangs" not in dit
-    assert "list-dir contract --def semee --template review" in dit
+    assert "list-dir contract --def semee --patron review" in dit
 
 
 def test_semence_introuvable_dit_que_la_peremption_est_invérifiable(tmp_path: Path) -> None:
@@ -384,13 +384,13 @@ def test_contrat_modifie_localement_est_dit_sans_resoudre_la_definition(tmp_path
     assert any("modifié localement" in d for d in dits(cible))
 
 
-def test_gabarit_modifie_localement_est_dit(tmp_path: Path) -> None:
+def test_patron_modifie_localement_est_dit(tmp_path: Path) -> None:
     definition = tmp_path / ".claude" / "list-dir" / "semee"
     _ = ecrire(definition, CONTRACT, BASE + '\n[origin]\ndef = "semee"\nversion = 1\n')
-    _ = ecrire(definition, f"{TEMPLATES}/revue.md", "## Revue\n")
+    _ = ecrire(definition, f"{PATRONS}/revue.md", "## Revue\n")
     cible = tmp_path / "liste"
     _ = init_list(cible, definition=definition).unwrap()
-    _ = ecrire(cible, f"{LIST_DIR}/{TEMPLATES}/revue.md", "## Revue remaniée\n")
+    _ = ecrire(cible, f"{LIST_DIR}/{PATRONS}/revue.md", "## Revue remaniée\n")
     _chdir(tmp_path)
 
     assert any("revue.md" in d and "modifié localement" in d for d in dits(cible))

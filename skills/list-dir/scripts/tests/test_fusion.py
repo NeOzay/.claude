@@ -15,7 +15,7 @@ import tomllib
 from pathlib import Path
 
 from listdir.contract import parse_contract
-from listdir.provenance import emit, flatten, fusionner, fusionner_gabarits
+from listdir.provenance import emit, flatten, fusionner, fusionner_patrons
 
 CONTRAT = """name = "jouet"
 description = "liste-jouet des tests"
@@ -183,28 +183,28 @@ def test_l_ordre_emis_est_celui_de_la_semence_puis_du_local() -> None:
     assert cles.index("fields.reviewed.type") < cles.index("fields.propre.type")
 
 
-def test_les_gabarits_se_fusionnent_par_fichier_entier() -> None:
+def test_les_patrons_se_fusionnent_par_fichier_entier() -> None:
     """Une prose libre n'a pas de clés : deux versions d'un paragraphe ne se
     recollent pas ligne à ligne sans inventer un texte que personne n'a écrit."""
     base = {"revue.md": "## Revue\n"}
     local = {"revue.md": "## Revue\n", "propre.md": "## Local\n"}
     semence = {"revue.md": "## Revue remaniée\n"}
 
-    fusionnes, changements, conflits = fusionner_gabarits(base, local, semence)
+    fusionnes, changements, conflits = fusionner_patrons(base, local, semence)
 
     assert conflits == []
     assert fusionnes == {"revue.md": "## Revue remaniée\n", "propre.md": "## Local\n"}
-    assert any("gabarit revue.md" in c for c in changements)
+    assert any("patron revue.md" in c for c in changements)
 
 
-def test_un_gabarit_modifie_des_deux_cotes_est_un_conflit() -> None:
+def test_un_patron_modifie_des_deux_cotes_est_un_conflit() -> None:
     base = {"revue.md": "## Revue\n"}
     local = {"revue.md": "## Revue locale\n"}
     semence = {"revue.md": "## Revue remaniée\n"}
 
-    _, _, conflits = fusionner_gabarits(base, local, semence)
+    _, _, conflits = fusionner_patrons(base, local, semence)
 
-    assert conflits == ["gabarit revue.md — modifiée des deux côtés"]
+    assert conflits == ["patron revue.md — modifiée des deux côtés"]
 
 
 def test_une_cle_supprimee_localement_reste_supprimee() -> None:
@@ -234,12 +234,12 @@ def test_une_cle_supprimee_localement_et_modifiee_dans_la_semence_est_un_conflit
     ]
 
 
-def test_un_gabarit_supprime_localement_reste_supprime() -> None:
+def test_un_patron_supprime_localement_reste_supprime() -> None:
     base = {"revue.md": "## Revue\n"}
     local: dict[str, str] = {}
     semence = {"revue.md": "## Revue\n"}
 
-    fusionnes, _, conflits = fusionner_gabarits(base, local, semence)
+    fusionnes, _, conflits = fusionner_patrons(base, local, semence)
 
     assert (fusionnes, conflits) == ({}, [])
 

@@ -29,12 +29,12 @@ from gabarit.contract import table as _table
 from .types import Contract, Field, Origin, Result, fail, nom_mal_forme, ok
 
 LIST_DIR = ".list"
-TEMPLATES = "templates"
+PATRONS = "patrons"
 """Les paires <nom>.toml / <nom>.md que `derive` projette, sous .list/."""
 
 SEED = "semence"
 """La semence intacte, telle qu'elle était au dernier semis : le point de référence
-de `reseed`. Elle a la FORME D'UNE DÉFINITION — un contrat et ses gabarits — ce qui
+de `reseed`. Elle a la FORME D'UNE DÉFINITION — un contrat et ses patrons — ce qui
 la rend lisible par `load_source` sans une ligne de plus."""
 
 BACKUP = "backup"
@@ -47,7 +47,7 @@ def contract_path(list_dir: Path) -> Path:
 
 
 def list_base(list_dir: Path) -> Path:
-    """Le répertoire d'une liste qui porte `contract.toml` et `templates/`.
+    """Le répertoire d'une liste qui porte `contract.toml` et `patrons/`.
 
     L'ÉQUIVALENT POUR UNE DÉFINITION EST LA DÉFINITION ELLE-MÊME. C'est toute la
     différence entre les deux, et la seule : une fois la base obtenue, plus rien ne
@@ -57,35 +57,35 @@ def list_base(list_dir: Path) -> Path:
     return list_dir / LIST_DIR
 
 
-def source_path(base: Path, template: str = "") -> Result[Path]:
-    """Le fichier de contrat d'une base : le sien, ou celui d'un de ses gabarits.
+def source_path(base: Path, patron: str = "") -> Result[Path]:
+    """Le fichier de contrat d'une base : le sien, ou celui d'un de ses patrons.
 
-    LE NOM DE GABARIT EST UN NOM, PAS UN CHEMIN. `--template ../contract` sortirait
-    sinon de `templates/` — sans danger pour une lecture, mais l'aide annonce « le
-    `<nom>.toml` de `templates/` », et une commande qui rend autre chose que ce
+    LE NOM DE PATRON EST UN NOM, PAS UN CHEMIN. `--patron ../contract` sortirait
+    sinon de `patrons/` — sans danger pour une lecture, mais l'aide annonce « le
+    `<nom>.toml` de `patrons/` », et une commande qui rend autre chose que ce
     qu'elle annonce est un échec ouvert de plus.
 
     L'ABSENCE EST DITE AVEC LE CHEMIN COMPLET, et non avec le nom de la cible : une
-    définition mal orthographiée, une liste sans `.list/` et un gabarit inexistant
+    définition mal orthographiée, une liste sans `.list/` et un patron inexistant
     se distinguent alors d'un coup d'œil, sans avoir à reconstruire le chemin de
     tête.
     """
-    if not template:
+    if not patron:
         f = base / CONTRACT
         return ok(f) if f.is_file() else fail(f"{f}: contrat introuvable")
 
-    if template != Path(template).name or template in (".", ".."):
+    if patron != Path(patron).name or patron in (".", ".."):
         return fail(
-            f"gabarit « {template} » — un nom est attendu, pas un chemin : "
-            f"le fichier est cherché dans {TEMPLATES}/"
+            f"patron « {patron} » — un nom est attendu, pas un chemin : "
+            f"le fichier est cherché dans {PATRONS}/"
         )
-    f = base / TEMPLATES / f"{template}.toml"
+    f = base / PATRONS / f"{patron}.toml"
     if not f.is_file():
-        return fail(f"{f}: gabarit « {template} » introuvable — ce fichier manque")
+        return fail(f"{f}: patron « {patron} » introuvable — ce fichier manque")
     return ok(f)
 
 
-def load_source(base: Path, template: str = "") -> Result[tuple[Path, str, Contract]]:
+def load_source(base: Path, patron: str = "") -> Result[tuple[Path, str, Contract]]:
     """Le fichier de contrat d'une base, son texte BRUT, et le contrat qu'il déclare.
 
     LE TEXTE EST RENDU TEL QUEL, commentaires compris : ils portent souvent le
@@ -100,7 +100,7 @@ def load_source(base: Path, template: str = "") -> Result[tuple[Path, str, Contr
     déjà parsé ici, et rien ne garantirait qu'il le fasse avec le même chemin dans
     les messages.
     """
-    chemin = source_path(base, template)
+    chemin = source_path(base, patron)
     if not chemin:
         return Result(chemin.status, None, chemin.message)
     f = chemin.unwrap()
@@ -246,7 +246,7 @@ def load_contract(list_dir: Path) -> Result[Contract]:
 def parse_contract(text: str, path: Path) -> Result[Contract]:
     """Le même contrat, depuis un texte déjà en mémoire.
 
-    Séparé de la lecture pour que `derive` puisse juger un gabarit AVANT de créer
+    Séparé de la lecture pour que `derive` puisse juger un patron AVANT de créer
     quoi que ce soit : un contrat refusé après un mkdir laisserait une destination
     à moitié construite, que la tentative suivante refuserait comme « existe déjà ».
     `path` ne sert qu'aux messages — il nomme le fichier fautif.

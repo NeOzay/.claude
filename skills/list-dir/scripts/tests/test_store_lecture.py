@@ -45,7 +45,7 @@ def test_repertoire_sans_contrat_n_est_pas_une_liste(tmp_path: Path) -> None:
 
 # ----------------------------------------------------------------------- paths
 def test_seuls_les_md_de_la_racine_sont_des_elements(liste: Path) -> None:
-    _ = ecrire(liste, ".list/templates/revue.md", "## X\n")
+    _ = ecrire(liste, ".list/patrons/revue.md", "## X\n")
     _ = ecrire(liste, "sous/dossier/autre.md", "## X\n")
     _ = ecrire(liste, "notes.txt", "pas un élément")
 

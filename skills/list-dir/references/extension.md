@@ -38,7 +38,7 @@ lst.create(id, **champs)            # Result[Item]
 lst.write(item)                     # Result[Path]
 lst.validate(filled=False)          # Result[list[Violation]] — vide = conforme
 lst.move(id, cible)                 # Result[Path] — git mv seul
-lst.derive(dst, template)           # Result[ListStore]
+lst.derive(dst, patron)           # Result[ListStore]
 lst.merge(out)                      # Result[Path]
 ```
 

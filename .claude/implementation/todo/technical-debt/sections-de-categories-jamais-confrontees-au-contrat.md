@@ -10,13 +10,13 @@ category = "pertinent"
 ## Constat
 
 `skills/debt-review/references/categories.md` consacre une section `## ` à chaque valeur du champ
-`category`, déclarée par `skills/implementation-tracker/list-dir/technical-debt/templates/review.toml`.
+`category`, déclarée par `skills/implementation-tracker/list-dir/technical-debt/patrons/review.toml`.
 Chaque section porte le **sens** d'une catégorie — ce qui y entre, la preuve exigée, la destination
 — et ce sens ne vit nulle part ailleurs. Mais l'**ensemble** qu'elles forment, lui, est une copie
 de la liste `values`.
 
 Le chantier `renvoi-contrat-des-categories` a supprimé les recopies voisines : `gabarit-rapport.md`
-renvoie désormais à `list-dir contract --def technical-debt --template review --values category`,
+renvoie désormais à `list-dir contract --def technical-debt --patron review --values category`,
 et la boucle des piles de `SKILL.md` tire sa liste de la même commande. Ce cas-ci a été écarté par
 arbitrage : la prose porte du jugement, qu'un renvoi ne remplace pas.
 
@@ -39,7 +39,7 @@ divergence. `--values category` rend la comparaison faisable en une ligne, ce qu
 cas avant ce chantier :
 
 ```bash
-diff <(list-dir contract --def technical-debt --template review --values category) \
+diff <(list-dir contract --def technical-debt --patron review --values category) \
      <(grep -oP '^## .*— `\K[a-z-]+' skills/debt-review/references/categories.md)
 ```
 

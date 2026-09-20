@@ -15,22 +15,23 @@ gabarit/
     └── contract.toml    obligatoire — sans lui, ce n'est pas une semence
 ```
 
-Le contrat a la forme de celui d'une liste — `name`, `description`, `[fields.*]`,
-`[sections.*]`, `text`/`command` : [Le contrat](../../list-dir/references/format.md#le-contrat).
-Deux différences :
+Ce que le contrat déclare — `name`, `description`, `[fields.*]`, `[sections.*]`, les six types,
+`text`/`command` : [Le contrat](format.md#le-contrat). Une liste `list-dir` en porte un de même
+forme, avec deux différences :
 
 - **aucun `id` n'est imposé** : un gabarit n'est pas lié au nom de son fichier. Un suivi archivé
   sous `done/<date>-<slug>.md` ne porte plus le nom de son slug, et reste conforme ;
 - **le champ `gabarit` est réservé** à l'estampille. Une semence qui le déclare est refusée à la
   lecture.
 
-`from`, `[origin]` et `templates/` n'ont de sens que pour une liste : une semence de gabarit les
+`from`, `[origin]` et `patrons/` n'ont de sens que pour une liste : une semence de gabarit les
 ignore.
 
 ## Où elle est cherchée
 
-Les quatre racines de list-dir, sous un répertoire `gabarit/` au lieu de `list-dir/` — le
-mécanisme est partagé, les espaces de noms ne se mélangent pas :
+**Quatre rangs**, du plus spécifique au plus général. Le répertoire qui les porte dit qui sait les
+lire : `gabarit/` ici, `list-dir/` pour les définitions de liste — le mécanisme est le même, les
+espaces de noms ne se mélangent pas.
 
 | # | Racine |
 |---|---|
@@ -39,9 +40,25 @@ mécanisme est partagé, les espaces de noms ne se mélangent pas :
 | 3 | `<config>/gabarit/<nom>/` |
 | 4 | `<config>/skills/*/gabarit/<nom>/` |
 
-Ancrages, précédence et ambiguïté sont ceux des définitions de liste :
-[Les quatre racines](../../list-dir/references/definitions.md#les-quatre-racines). `gabarit defs`
-imprime les ancrages retenus, le rang et l'origine de chaque semence, et ce qui en masque quoi.
+**Découverte par le système de fichiers**, jamais par un registre à tenir à jour : un registre se
+désynchronise, une arborescence non. Un répertoire sans `contract.toml` n'est pas une semence à
+moitié faite — ce n'en est pas une, et elle n'est pas proposée.
+
+**Les deux ancrages sortent de la même remontée, mais ne cherchent pas la même chose** : un
+*projet* est un répertoire qui **contient** un `.claude` ; une *configuration* est un répertoire
+qui **est** un `.claude`. Sur un dépôt dont la configuration est `~/.claude` et qui porte son
+propre `~/.claude/.claude`, une règle unique ferait répondre la même chose aux deux questions, et
+l'un des deux rangs viserait le mauvais répertoire. Les racines atteintes deux fois sont
+dédupliquées sur leur chemin résolu, l'exemplaire du rang le plus fort étant conservé.
+
+**La spécificité prime, et masquer n'est pas un conflit** : le rang 1 masque le rang 4, et c'est un
+succès. Une **ambiguïté ne se déclare qu'à rang égal** — deux skills qui définissent le même nom —,
+et la commande échoue en nommant les deux chemins ; choisir en silence ferait dépendre le résultat
+de l'ordre de parcours d'un répertoire. Un nom que personne ne porte échoue en listant les noms
+connus, plutôt qu'un « introuvable » sec qui obligerait à aller lire l'arborescence.
+
+`gabarit defs` imprime les ancrages retenus, le rang et l'origine de chaque semence, et ce qui en
+masque quoi.
 
 `--from <chemin>` prend une semence à un chemin, sans passer par les rangs.
 

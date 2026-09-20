@@ -15,10 +15,10 @@ Un **gabarit** est un fichier Markdown à front matter TOML (`+++`), dont les ch
 sont déclarés par un **contrat**. Une **semence** est un répertoire qui porte ce contrat. `gabarit`
 pose le fichier, prérempli de tout ce qui est mécaniquement connu, et le vérifie ensuite.
 
-**Une list-dir est une liste de gabarits.** Le format d'un fichier, le contrat et le préremplissage
-sont exactement ceux d'un élément de liste, et `list-dir` les tient de ce paquet :
-[Le contrat](../list-dir/references/format.md#le-contrat). Ce qui n'appartient qu'à une liste —
-l'`id` égal au nom du fichier, `.list/`, `from`, `[origin]`, `reseed` — reste dans list-dir.
+**Une list-dir est une liste de gabarits.** Le format d'un fichier, le contrat, les types admis,
+les marqueurs et le préremplissage sont déclarés ici — [`references/format.md`](references/format.md) —
+et `list-dir` les tient de ce paquet. Ce qui n'appartient qu'à une liste — l'`id` égal au nom du
+fichier, `.list/`, `from`, `[origin]`, `reseed` — reste dans list-dir.
 
 **Partage des rôles** : les commandes font la structure — poser, vérifier, imprimer un contrat.
 Remplir reste au modèle, qui écrit directement dans le fichier ; `check` repasse après.
@@ -43,9 +43,10 @@ stderr ; **2** erreur d'appel. Un avertissement sort sur stderr sans toucher au 
 `gabarit contract <nom>` : chaque champ et chaque section y porte sa description. Un marqueur dit
 qu'il faut écrire, jamais quoi écrire.
 
-**Deux verdicts**, ceux de `list-dir validate`. Sans `--filled`, la structure seule : les marqueurs
-sont légitimes. Avec, plus aucun `<À REMPLIR>` là où le contrat exige quelque chose — les
-facultatifs restés `<OPTIONNEL>` ne sont jamais réclamés.
+**Deux verdicts.** Sans `--filled`, la structure seule : les marqueurs sont légitimes. Avec, plus
+aucun `<À REMPLIR>` là où le contrat exige quelque chose — les facultatifs restés `<OPTIONNEL>` ne
+sont jamais réclamés. `list-dir validate` rend les mêmes, en les tenant d'ici :
+[Les deux verdicts](references/format.md#les-deux-verdicts).
 
 **Rien n'est écrasé ni écrit à moitié** : `new` refuse un fichier existant, et une commande de
 préremplissage qui échoue n'écrit rien.
@@ -57,8 +58,12 @@ résout. `check` s'en sert pour la retrouver, et c'est ce qui permet de vérifie
 dire d'autre que son chemin — même après un renommage ou un déplacement. Le nom est réservé, et
 jamais compté comme champ non déclaré.
 
-Semences, racines, estampille et environnement du préremplissage :
-[`references/semences.md`](references/semences.md).
+Deux références, une par sujet — à lire au moment d'en avoir besoin, pas d'avance :
+
+| Fichier | Ce qu'il porte | Lire quand |
+|---|---|---|
+| [`references/format.md`](references/format.md) | le fichier et son front matter, le contrat, les six types, le préremplissage, les marqueurs, les deux verdicts | on écrit une semence, ou on juge un fichier posé |
+| [`references/semences.md`](references/semences.md) | forme d'une semence, les quatre rangs, l'estampille, l'environnement du préremplissage | on range une semence, ou on cherche pourquoi un nom se résout ailleurs |
 
 ## Les semences livrées
 

@@ -22,7 +22,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from jouet import CONTRAT, ELEMENT, GABARIT_TOML, ecrire, monter_gabarit, monter_liste
+from jouet import CONTRAT, ELEMENT, PATRON_TOML, ecrire, monter_liste, monter_patron
 
 CLI = Path(__file__).resolve().parent.parent / "list-dir.py"
 
@@ -496,45 +496,45 @@ def test_contract_def_au_contrat_casse_est_refuse(tmp_path: Path) -> None:
     assert r.out == ""
 
 
-# ----------------------------------------------- contract : --template
-def test_contract_template_sur_une_liste(tmp_path: Path) -> None:
-    liste = monter_gabarit(liste_sur_disque(tmp_path))
-    r = lancer("contract", str(liste), "--template", "revue")
+# ----------------------------------------------- contract : --patron
+def test_contract_patron_sur_une_liste(tmp_path: Path) -> None:
+    liste = monter_patron(liste_sur_disque(tmp_path))
+    r = lancer("contract", str(liste), "--patron", "revue")
 
     assert r.code == 0
-    assert r.out.rstrip("\n") == GABARIT_TOML.rstrip("\n")
+    assert r.out.rstrip("\n") == PATRON_TOML.rstrip("\n")
 
 
-def test_contract_template_sur_une_definition(tmp_path: Path) -> None:
+def test_contract_patron_sur_une_definition(tmp_path: Path) -> None:
     """Le cas qui a justifié l'option : la liste engendrée par `derive` n'existe pas
-    encore, mais son contrat, lui, est déjà là — dans les gabarits de la semence."""
+    encore, mais son contrat, lui, est déjà là — dans les patrons de la semence."""
     definition = poser_definition(tmp_path, "jouet")
-    _ = ecrire(definition, "templates/revue.toml", GABARIT_TOML)
-    r = lancer("contract", "--def", "jouet", "--template", "revue", cwd=tmp_path)
+    _ = ecrire(definition, "patrons/revue.toml", PATRON_TOML)
+    r = lancer("contract", "--def", "jouet", "--patron", "revue", cwd=tmp_path)
 
     assert r.code == 0
-    assert r.out.rstrip("\n") == GABARIT_TOML.rstrip("\n")
+    assert r.out.rstrip("\n") == PATRON_TOML.rstrip("\n")
 
 
-def test_contract_template_inexistant(tmp_path: Path) -> None:
+def test_contract_patron_inexistant(tmp_path: Path) -> None:
     liste = liste_sur_disque(tmp_path)
-    r = lancer("contract", str(liste), "--template", "absent")
+    r = lancer("contract", str(liste), "--patron", "absent")
 
     assert r.code == 1
     assert "absent" in r.err
     assert r.out == ""
 
 
-def test_contract_template_ne_reclame_pas_le_md(tmp_path: Path) -> None:
+def test_contract_patron_ne_reclame_pas_le_md(tmp_path: Path) -> None:
     """Seul le `.toml` est exigé : cette commande ne rend pas le `.md`, et réclamer
     un fichier qu'on n'imprime pas ferait échouer une impression pour une raison
     étrangère à elle. C'est la différence assumée avec `derive`, qui exige la paire."""
     liste = liste_sur_disque(tmp_path)
-    _ = ecrire(liste, ".list/templates/seule.toml", GABARIT_TOML)
-    r = lancer("contract", str(liste), "--template", "seule")
+    _ = ecrire(liste, ".list/patrons/seule.toml", PATRON_TOML)
+    r = lancer("contract", str(liste), "--patron", "seule")
 
     assert r.code == 0
-    assert r.out.rstrip("\n") == GABARIT_TOML.rstrip("\n")
+    assert r.out.rstrip("\n") == PATRON_TOML.rstrip("\n")
 
 
 # ------------------------------------------------- contract : --values
@@ -582,20 +582,20 @@ def test_contract_values_champ_sans_values(tmp_path: Path) -> None:
     assert "aucune `values`" in r.err
 
 
-def test_contract_values_sur_une_definition_et_son_gabarit(tmp_path: Path) -> None:
+def test_contract_values_sur_une_definition_et_son_patron(tmp_path: Path) -> None:
     """Le cas visé par le chantier : lire les valeurs d'un contrat que `derive`
     n'a pas encore semé nulle part."""
     definition = poser_definition(tmp_path, "jouet")
-    gabarit = (
-        GABARIT_TOML
+    patron = (
+        PATRON_TOML
         + '\n[fields.verdict_enum]\ntype = "enum"\nvalues = ["a", "b", "c"]\ndescription = ""\n'
     )
-    _ = ecrire(definition, "templates/revue.toml", gabarit)
+    _ = ecrire(definition, "patrons/revue.toml", patron)
     r = lancer(
         "contract",
         "--def",
         "jouet",
-        "--template",
+        "--patron",
         "revue",
         "--values",
         "verdict_enum",
@@ -606,12 +606,12 @@ def test_contract_values_sur_une_definition_et_son_gabarit(tmp_path: Path) -> No
     assert r.out == "a\nb\nc\n"
 
 
-def test_contract_template_refuse_un_chemin(tmp_path: Path) -> None:
-    """`--template ../contract` sortirait de `templates/`. Sans danger pour une
-    lecture, mais l'aide annonce « le `<nom>.toml` de `templates/` » : une commande
+def test_contract_patron_refuse_un_chemin(tmp_path: Path) -> None:
+    """`--patron ../contract` sortirait de `patrons/`. Sans danger pour une
+    lecture, mais l'aide annonce « le `<nom>.toml` de `patrons/` » : une commande
     qui rend autre chose que ce qu'elle annonce est un échec ouvert de plus."""
-    liste = monter_gabarit(liste_sur_disque(tmp_path))
-    r = lancer("contract", str(liste), "--template", "../contract")
+    liste = monter_patron(liste_sur_disque(tmp_path))
+    r = lancer("contract", str(liste), "--patron", "../contract")
 
     assert r.code == 1
     assert r.out == ""

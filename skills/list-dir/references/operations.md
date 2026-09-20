@@ -93,8 +93,8 @@ réponse, pas une erreur — contrairement à `merge`, qui perdrait un élément
 
 ## Listes dérivées
 
-`derive` **projette la structure** d'une liste sur une liste neuve. Le gabarit vit dans la liste
-source, sous `.list/templates/`, et va par paire :
+`derive` **projette la structure** d'une liste sur une liste neuve. Le patron vit dans la liste
+source, sous `.list/patrons/`, et va par paire :
 
 - `<nom>.toml` → copié en `<dst>/.list/contract.toml` ; la destination devient une liste ordinaire
 - `<nom>.md` → le moule du corps, une copie par élément source
@@ -130,21 +130,21 @@ values = ["retenu", "écarté"]
 
 L'`id` est reporté d'office — c'est le seul lien entre une fiche dérivée et son élément d'origine.
 `derive` ne transforme, ne concatène et ne calcule rien : un champ nommé par `from` est recopié, un
-champ sans `from` reçoit le marqueur de son statut, et les sections viennent du gabarit `.md`, pas
+champ sans `from` reçoit le marqueur de son statut, et les sections viennent du patron `.md`, pas
 du contrat.
 
-Tout est construit **en mémoire avant la moindre écriture** : un gabarit incohérent ne laisse
+Tout est construit **en mémoire avant la moindre écriture** : un patron incohérent ne laisse
 aucune destination à moitié bâtie, qu'une seconde tentative refuserait comme « existe déjà ».
 
-**La dérivée reçoit son estampille du gabarit**, comme toute liste reçoit la sienne de sa semence :
-`derive` recopie le `<nom>.toml` verbatim, et n'écrit pas une ligne de `[origin]`. Un gabarit qui
+**La dérivée reçoit son estampille du patron**, comme toute liste reçoit la sienne de sa semence :
+`derive` recopie le `<nom>.toml` verbatim, et n'écrit pas une ligne de `[origin]`. Un patron qui
 porte la table sème donc une liste qui sait d'où elle vient, sous la forme `mère/dérivée`
-([`def` prend deux formes](../references/provenance.md#def-prend-deux-formes-et-la-seconde-nomme-un-gabarit)) ;
-un gabarit muet sème une liste muette, à qui `validate` réclamera une adoption.
+([`def` prend deux formes](../references/provenance.md#def-prend-deux-formes-et-la-seconde-nomme-un-patron)) ;
+un patron muet sème une liste muette, à qui `validate` réclamera une adoption.
 
 **`derive` n'écrit pas de `.list/semence/`.** Une liste dérivée est gelée par convention, et une
 liste gelée n'a rien à rattraper : le point de référence d'un `reseed` qui n'aura jamais lieu ne
-serait qu'une copie de plus à tenir à jour. C'est aussi pourquoi la version d'un gabarit ne se
+serait qu'une copie de plus à tenir à jour. C'est aussi pourquoi la version d'un patron ne se
 compare à rien — ce que `validate` dit plutôt que de le taire.
 
 **`derive` projette, `move` déplace.** `move` fait changer un fichier de liste — `git mv`,

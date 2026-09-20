@@ -14,6 +14,20 @@ projetées par `derive` (`references/operations.md`, section de `derive` ; `--te
 composites `mère/dérivée`). Le chantier `fichier-seme` a donné le même nom au skill et au paquet
 Python dont list-dir dépend désormais (`skills/gabarit/`).
 
+## Soldé le
+
+**2026-09-20, chantier `deux-sens-de-gabarit`** — le moule de `derive` s'appelle désormais
+**patron**, dans le code, dans la prose et sur le disque : `PATRONS = "patrons"`
+(`listdir/contract.py`), `.list/patrons/`, `--patron`. « Gabarit » ne désigne plus que le fichier
+préstructuré posé depuis une semence, et le paquet qui le pose.
+Établi par : `grep -rni 'template' skills/list-dir skills/debt-review` → aucune occurrence ;
+`grep -rn 'gabarit' skills/list-dir/references skills/list-dir/SKILL.md` → 22 lignes, toutes
+désignant le paquet `gabarit` ou le fichier posé (« Une liste est une liste de gabarits », « Un
+élément ne porte pas d'estampille `gabarit` », les renvois vers `../../gabarit/`), aucune un moule ;
+`ls .claude/implementation/todo/technical-debt/.list/patrons/` → `review.md`, `review.toml` ;
+`list-dir derive .claude/implementation/todo/technical-debt "$T/revue" --patron review && list-dir
+validate "$T/revue"` → « 69 fiche(s) à instruire », puis « 69 élément(s) conformes au contrat ».
+
 ## Pourquoi c'est gênant
 
 Tant que list-dir ne documente pas sa dépendance, les deux sens ne se croisent pas. Le jour où

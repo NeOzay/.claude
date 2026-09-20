@@ -14,7 +14,7 @@ sous-processus huit d'entre elles — `init`, `new`, `validate --filled`, `list`
 `move`, `help`. Deux échappent à ce second regard : `derive` et `migrate`.
 
 Ce qui reste donc non couvert est propre à leur façade : le `register()` de chacune, le nom de
-leurs drapeaux et leurs valeurs par défaut — `--template` (requis), `--drop`, `--dry-run`. Un
+leurs drapeaux et leurs valeurs par défaut — `--patron` (requis), `--drop`, `--dry-run`. Un
 drapeau renommé, ou passé de `store_true` à autre chose, ne ferait échouer aucun test.
 
 ## Pourquoi c'est gênant
@@ -31,7 +31,7 @@ celle sur laquelle l'utilisateur agit directement.
 
 Deux ou trois cas ajoutés à `skills/list-dir/scripts/tests/test_entree_cli.py`, sur le modèle des
 huit autres : `migrate <liste> --dry-run` n'écrit rien et sort 0, `migrate <liste> --drop` retire,
-`derive <src> <dst> --template <nom>` crée et sort 0, `derive` sans `--template` sort 2.
+`derive <src> <dst> --patron <nom>` crée et sort 0, `derive` sans `--patron` sort 2.
 
 Solde établi par `uvx pytest skills/list-dir/scripts/tests/test_entree_cli.py -q` vert avec ces cas.
 

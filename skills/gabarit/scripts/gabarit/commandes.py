@@ -149,8 +149,9 @@ def check(
     semence imposée qui contredit l'estampille est acceptée — c'est une demande
     explicite — mais dite, sur le canal des avertissements.
 
-    DEUX VERDICTS, comme `list-dir validate` : sans `filled`, la structure seule ; avec,
-    plus aucun marqueur là où le contrat exige quelque chose.
+    DEUX VERDICTS : sans `filled`, la structure seule ; avec, plus aucun marqueur là où
+    le contrat exige quelque chose. `list-dir validate` rend les mêmes, en les tenant
+    d'ici.
     """
     lu = read_item(fichier)
     if not lu:

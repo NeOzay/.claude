@@ -97,7 +97,7 @@ def element(
     return ecrire(liste, f"{item_id}.md", f"+++\n{front or defaut}+++\n\n{corps}")
 
 
-GABARIT_TOML = """name = "revue"
+PATRON_TOML = """name = "revue"
 description = "fiches de revue"
 
 [fields.id]
@@ -124,7 +124,7 @@ required = false
 description = ""
 """
 
-GABARIT_MD = """+++
+PATRON_MD = """+++
 un front matter que derive ignore
 +++
 
@@ -138,13 +138,13 @@ un front matter que derive ignore
 """
 
 
-def monter_gabarit(
+def monter_patron(
     liste: Path,
     nom: str = "revue",
-    contrat: str = GABARIT_TOML,
-    corps: str = GABARIT_MD,
+    contrat: str = PATRON_TOML,
+    corps: str = PATRON_MD,
 ) -> Path:
-    """La paire `<nom>.toml` / `<nom>.md` sous `.list/templates/` de la liste SOURCE."""
-    _ = ecrire(liste, f".list/templates/{nom}.toml", contrat)
-    _ = ecrire(liste, f".list/templates/{nom}.md", corps)
+    """La paire `<nom>.toml` / `<nom>.md` sous `.list/patrons/` de la liste SOURCE."""
+    _ = ecrire(liste, f".list/patrons/{nom}.toml", contrat)
+    _ = ecrire(liste, f".list/patrons/{nom}.md", corps)
     return liste

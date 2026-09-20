@@ -9,7 +9,7 @@ Deux objets, et un seul est écrit à la main.
 
 Le modèle **instruit**, la commande **agglomère**. Rien de ce qui suit n'est un format à respecter
 en écrivant du texte : la structure vient du contrat
-`.claude/implementation/todo/technical-debt/.list/templates/review.toml`, lu par `derive`, et
+`.claude/implementation/todo/technical-debt/.list/patrons/review.toml`, lu par `derive`, et
 `validate` la fait respecter.
 
 ---
@@ -50,10 +50,10 @@ category = "<À REMPLIR>"
 - `category` — une des valeurs **déclarées par le contrat**, en ASCII kebab-case. Le contrat refuse
   toute valeur hors de la liste, donc une faute de frappe échoue à `validate` au lieu de se ranger
   dans une pile fantôme. Les lire — la liste de revue n'existant pas encore, le renvoi vise le
-  gabarit source :
+  patron source :
 
   ```bash
-  list-dir contract --def technical-debt --template review --values category
+  list-dir contract --def technical-debt --patron review --values category
   ```
 
   Ce que chacune veut dire et la preuve qu'elle exige : `categories.md`. Ce fichier-ci ne les
@@ -68,7 +68,7 @@ double emploi avec le registre. `show` va lire l'entrée quand il faut la relire
 
 **Les quatre sections** — trois requises, `Arbitrage` facultative. Ce que chacune attend est dit
 au contrat de la liste de revue, que `list-dir contract <revue>` imprime ; la semence de fiche
-([`templates/review.md`](../../implementation-tracker/list-dir/technical-debt/templates/review.md))
+([`patrons/review.md`](../../implementation-tracker/list-dir/technical-debt/patrons/review.md))
 n'ajoute que les cas qui n'y tiennent pas. Ce fichier-ci ne recopie ni l'un ni l'autre — même
 raison que pour les catégories.
 

@@ -1,7 +1,7 @@
 """Définitions de listes : où les trouver, et laquelle gagne.
 
 UNE DÉFINITION EST LE CONTENU D'UN FUTUR `.list/` — un `contract.toml`, et un
-`templates/` facultatif. Elle vit hors de tout répertoire-liste, ce qui est
+`patrons/` facultatif. Elle vit hors de tout répertoire-liste, ce qui est
 exactement ce qui la rend utilisable au moment où aucune liste n'existe encore.
 
 DÉCOUVERTE PAR LE SYSTÈME DE FICHIERS, jamais par un registre à tenir à jour :
@@ -35,7 +35,7 @@ index fixe sur `parents[…]` suppose en outre une installation en
 
 LE MÉCANISME VIT DANS `gabarit.definitions`, qui le partage avec les semences de
 gabarit sous un autre répertoire. Ce module n'y ajoute que le nom `list-dir` et le refus
-d'un nom de gabarit de liste (`technical-debt/review`), propre à une liste.
+d'un nom de patron de liste (`technical-debt/review`), propre à une liste.
 
 LES DEUX REMONTÉES NE CHERCHENT PAS LA MÊME CHOSE, et les confondre casse le cas
 imbriqué. Un projet est un répertoire qui CONTIENT un `.claude` ; la configuration
@@ -78,8 +78,8 @@ def resolve(name: str, where: list[Root]) -> Result[Path]:
     """Le répertoire de définition retenu pour `name`.
 
     QUATRE ISSUES, et pas une de plus :
-      - un nom de GABARIT — `technical-debt/review` — → échec disant ce qu'il est. Un
-        gabarit n'est pas une définition : il ne s'amorce ni ne se rattrape, il
+      - un nom de PATRON — `technical-debt/review` — → échec disant ce qu'il est. Un
+        patron n'est pas une définition : il ne s'amorce ni ne se rattrape, il
         transforme une liste qui existe déjà. Le chercher dans les rangs rendrait
         « introuvable » sur un nom parfaitement valide, et enverrait chercher là où
         il n'a jamais été ;
@@ -93,7 +93,7 @@ def resolve(name: str, where: list[Root]) -> Result[Path]:
         une commande inconnue. Un « introuvable » sec obligerait à aller lire
         l'arborescence pour trouver l'orthographe exacte.
 
-    LE REFUS DU GABARIT VIENT EN PREMIER, et c'est ce qui donne son message à
+    LE REFUS DU PATRON VIENT EN PREMIER, et c'est ce qui donne son message à
     `init --def a/b` comme à `reseed --def a/b` : un seul point de contrôle pour tous
     ceux qui résolvent un nom, plutôt qu'un contrôle par appelant qui finirait par
     manquer au dernier arrivé.
@@ -102,15 +102,15 @@ def resolve(name: str, where: list[Root]) -> Result[Path]:
         motif = nom_mal_forme(name)
         if motif is not None:
             # LA FORME SE JUGE AVANT LE SENS, sans quoi le refus conseille une commande
-            # qui ne marchera pas : « --def technical-debt/ » nommerait un gabarit vide,
-            # et « --def a/b/c » un gabarit « b/c » qui ne peut pas exister.
+            # qui ne marchera pas : « --def technical-debt/ » nommerait un patron vide,
+            # et « --def a/b/c » un patron « b/c » qui ne peut pas exister.
             return fail(f"« {name} » n'est pas un nom de semence : {motif}")
-        definition, _, gabarit = name.partition(SEPARATEUR)
+        definition, _, patron = name.partition(SEPARATEUR)
         return fail(
-            f"« {name} » nomme le gabarit « {gabarit} » de la définition « {definition} », "
-            "pas une définition — un gabarit ne s'amorce ni ne se rattrape ; il projette une "
-            f"liste existante (« list-dir derive <src> <dst> --template {gabarit} »), et "
-            f"« list-dir contract --def {definition} --template {gabarit} » l'imprime"
+            f"« {name} » nomme le patron « {patron} » de la définition « {definition} », "
+            "pas une définition — un patron ne s'amorce ni ne se rattrape ; il projette une "
+            f"liste existante (« list-dir derive <src> <dst> --patron {patron} »), et "
+            f"« list-dir contract --def {definition} --patron {patron} » l'imprime"
         )
 
     return _resolve(name, where, "définition")

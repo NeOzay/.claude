@@ -9,12 +9,16 @@ category = "pertinent"
 
 ## Constat
 
+**Vocabulaire, 2026-09-20** — cette entrée dit « gabarit » et « templates/ » au sens du moule de
+`derive`, renommé **patron** depuis (chantier `deux-sens-de-gabarit`). L'identifiant et le titre
+n'ont pas été changés.
+
 La lecture des gabarits d'une définition — `_read_definition`, aujourd'hui dans
 `listdir/provenance.py` — les collecte par `sorted((definition / TEMPLATES).glob("*"))`, filtré par
-`f.is_file()`. Tout **sous-répertoire** de `templates/` est donc ignoré, sans message et sans code
+`f.is_file()`. Tout **sous-répertoire** de `patrons/` est donc ignoré, sans message et sans code
 non nul : `init --def` sort 0 et rend une liste à laquelle il manque des gabarits.
 
-Aucune des définitions embarquées n'est concernée — `technical-debt/templates/` ne porte que
+Aucune des définitions embarquées n'est concernée — `technical-debt/patrons/` ne porte que
 `review.toml` et `review.md`, deux fichiers plats. Aucun test ne couvre le cas, et la docstring ne
 le mentionne pas.
 
@@ -35,7 +39,7 @@ pour supprimer — `list-dir.py` : « ÉCHEC FERMÉ […] Jamais de succès sile
 
 ## Pour solder
 
-Trancher ce que `templates/` accepte, et le faire dire par le code :
+Trancher ce que `patrons/` accepte, et le faire dire par le code :
 
 - **arborescence plate seulement** → `_read_definition` refuse en nommant le sous-répertoire
   trouvé, et la docstring comme `definitions.md` le déclarent ;

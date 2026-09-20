@@ -9,8 +9,11 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
+**Vocabulaire, 2026-09-20** — cette entrée dit « gabarit » au sens du moule de `derive`, renommé
+**patron** depuis (chantier `deux-sens-de-gabarit`). L'identifiant n'a pas été changé.
+
 `provenance._poser` écrit les gabarits fusionnés mais n'efface jamais : un fichier présent dans
-`.list/templates/` et absent de la semence y reste, et aucun re-semis ne peut le retirer.
+`.list/patrons/` et absent de la semence y reste, et aucun re-semis ne peut le retirer.
 
 Le comportement est cohérent avec la règle générale — ce que la semence ne porte plus est gardé
 sur place — mais la documentation ne l'énonce que pour les clés du contrat. La table de fusion

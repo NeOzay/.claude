@@ -5,14 +5,14 @@ liste à la main, et pas assez pour recréer une liste dont le contrat est connu
 ([Le contrat](../references/format.md#le-contrat)). Une **définition** comble ce trou.
 
 Une définition est un répertoire dont le contenu **est** ce qui va dans le futur `.list/` — le
-contrat et ses gabarits, rien d'autre. Une liste semée y ajoute ensuite ce qui ne vient pas d'une
+contrat et ses patrons, rien d'autre. Une liste semée y ajoute ensuite ce qui ne vient pas d'une
 définition : ses commandes, sa semence gardée, sa sauvegarde.
 
 ```
 list-dir/
 └── recettes/            le nom de la définition
     ├── contract.toml          obligatoire — sans lui, ce n'est pas une définition
-    └── templates/             facultatif, copié tel quel s'il existe
+    └── patrons/               facultatif, copié tel quel s'il existe
         ├── review.toml
         └── review.md
 ```
@@ -23,8 +23,8 @@ list-dir init <cible> --def recettes         # résolu par son nom, dans les rac
 list-dir init <cible> --from <chemin>        # ou pris à un chemin, tel quel
 ```
 
-**Pourquoi une définition peut ce qu'un gabarit ne pouvait pas** : un gabarit vit dans le
-`.list/templates/` d'une liste *existante*, et `init` s'adresse justement au cas où aucune liste
+**Pourquoi une définition peut ce qu'un patron ne pouvait pas** : un patron vit dans le
+`.list/patrons/` d'une liste *existante*, et `init` s'adresse justement au cas où aucune liste
 n'existe. Une définition vit hors de tout répertoire-liste — c'est exactement ce qui la rend
 disponible quand il n'y a encore rien.
 
@@ -100,13 +100,13 @@ rend ce que la commande rendrait.
 | `contract --def <nom>` | `<définition>/contract.toml` | une **semence**, appliquée à rien |
 | `contract --from <chemin>` | idem, sans passer par les rangs | idem |
 
-`--template <nom>` vise le `<nom>.toml` de `templates/` au lieu du contrat, dans les trois cas.
+`--patron <nom>` vise le `<nom>.toml` de `patrons/` au lieu du contrat, dans les trois cas.
 
 **Une prose doit dire laquelle des deux elle décrit.** Renvoyer à une définition alors qu'une
 liste existe et a divergé décrit ce qui *aurait été* semé, pas ce qui s'applique — c'est le mode de
 défaillance ci-dessus, déplacé d'un cran. Le renvoi à une définition se justifie quand la liste
 **n'existe pas encore** au moment de la lecture : une liste engendrée par `derive` n'a de contrat
-qu'après coup, et son gabarit source est le seul fichier déjà là.
+qu'après coup, et son patron source est le seul fichier déjà là.
 
 `--values <champ>` rend les valeurs déclarées d'un champ, une par ligne et **dans l'ordre du
 fichier**. Il extrait : rien n'est trié, filtré ni jugé. Un champ inconnu ou sans `values` est un

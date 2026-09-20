@@ -22,7 +22,7 @@ ma-liste/
 ├── .list/
 │   ├── contract.toml     ce que doit contenir un élément
 │   ├── commands/         commandes propres à cette liste
-│   └── templates/        gabarits pour `derive`
+│   └── patrons/          patrons pour `derive`
 ├── premier-element.md
 └── second-element.md
 ```
@@ -36,8 +36,16 @@ un fichier quand il corrige une section. `validate` repasse après.
 
 ## Prérequis
 
-**Python ≥ 3.12**, stdlib seule — aucune dépendance à installer. Les commandes le vérifient au
-démarrage et sortent en code non nul si la version est inférieure.
+**Python ≥ 3.12** — les commandes le vérifient au démarrage et sortent en code non nul si la
+version est inférieure.
+
+**Le paquet [`gabarit`](../gabarit/SKILL.md)**, et rien d'autre hors de la stdlib. Une liste est
+une liste de gabarits : le format d'un fichier, le contrat, les six types, le préremplissage et les
+marqueurs viennent de lui, et `listdir` les réexporte plutôt que de les redéfinir
+([Le format d'un gabarit](../gabarit/references/format.md)). Il est localisé au premier
+`bin/gabarit` trouvé en remontant, puis dans le `PATH` ; absent, l'import échoue en le nommant,
+plutôt que de laisser tomber un `ImportError` sur un module interne. La dépendance ne va que dans
+ce sens — `gabarit` n'importe jamais `listdir`.
 
 ## Les treize commandes
 
@@ -53,13 +61,13 @@ list-dir show <liste> <id>
 list-dir contract <liste>                    # le contrat EN VIGUEUR de cette liste
 list-dir contract --def <nom>                # ... ou celui d'une définition, résolue par son nom
 list-dir contract --from <chemin>            # ... ou d'un répertoire de définition, tel quel
-list-dir contract <cible> --template <nom>   # ... le gabarit <nom>.toml plutôt que le contrat
+list-dir contract <cible> --patron <nom>     # ... le patron <nom>.toml plutôt que le contrat
 list-dir contract <cible> --values <champ>   # les valeurs déclarées d'un champ, une par ligne
 list-dir validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
 list-dir migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
 list-dir reseed <liste> [--def <nom>|--from <chemin>] [--force] [--dry-run]  # rattrape le contrat
 list-dir move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
-list-dir derive <src> <dst> --template <nom> # projette une liste sur une liste neuve
+list-dir derive <src> <dst> --patron <nom>   # projette une liste sur une liste neuve
 list-dir merge <liste> [--out <fichier>]     # agglomère, conservation vérifiée
 ```
 
@@ -68,7 +76,7 @@ est vérifiée au démarrage de chaque session par `scripts/sante_skills.py` —
 retester dans un bloc.
 
 **Amorcer une liste quand aucune n'existe.** `init` seul rend un squelette minimal, à compléter à
-la main. Une **définition** — un `contract.toml` et ses gabarits, rangés sous `list-dir/<nom>/` —
+la main. Une **définition** — un `contract.toml` et ses patrons, rangés sous `list-dir/<nom>/` —
 donne à la place un contrat complet, et `init --def <nom>` la trouve sans qu'on ait à dire où elle
 est. Quatre racines sont fouillées, du projet vers la configuration ; la plus spécifique gagne, et
 deux racines de même rang qui portent le même nom font échouer la commande en les nommant.
@@ -81,7 +89,7 @@ stderr quand la définition a évolué depuis, sans jamais changer son code de r
 périmée n'a aucun élément fautif. `reseed` rattrape **sur ordre**, par une fusion à trois points qui
 préserve les décisions locales et refuse en nommant les clés quand les deux côtés ont modifié la
 même — `--force` ne fait que dégeler. Une liste antérieure à ce dispositif s'adopte par `reseed
---def <nom>`. Une liste engendrée par `derive` la reçoit de son **gabarit**, sous un nom composite
+--def <nom>`. Une liste engendrée par `derive` la reçoit de son **patron**, sous un nom composite
 `mère/dérivée` qui dit où retrouver la semence sans jamais se résoudre — et gelée, parce qu'une
 dérivée est jetable. Table, formes du nom, avertissements, règle de fusion :
 `references/provenance.md`.
@@ -91,7 +99,7 @@ sa propre copie du contrat, et c'est elle seule que les commandes appliquent —
 l'imprime. Rien ne les resynchronise ensuite : une liste qu'un projet a délibérément redéfinie ne se
 fait pas rattraper par la définition qui l'a semée. `contract --def`/`--from` imprime la semence,
 justement parce qu'une liste engendrée par `derive` n'a de contrat qu'après coup — une prose écrite
-d'avance n'a que le gabarit source à quoi renvoyer. Forme d'une définition, les quatre racines, la
+d'avance n'a que le patron source à quoi renvoyer. Forme d'une définition, les quatre racines, la
 règle de précédence, ce que chaque cible engage : `references/definitions.md`.
 
 **Un élément posé ne dit pas ce qu'il attend.** Avant de remplir un élément, lire
@@ -104,7 +112,10 @@ répertoire de la liste, ou son premier ancêtre existant quand `derive` ne l'a 
 valeur est posée à la place du marqueur, à la création comme en migration. Un champ prérempli est
 une valeur ordinaire — `validate --filled` ne le réclame pas. Une commande qui échoue interrompt
 l'opération sans rien écrire, en la nommant, et `migrate --dry-run` n'en exécute aucune — au prix
-de ne pas pouvoir annoncer celle qui échouera.
+de ne pas pouvoir annoncer celle qui échouera. Les deux clés et leurs refus sont ceux d'un gabarit
+([Préremplir un champ ou une section](../gabarit/references/format.md#préremplir-un-champ-ou-une-section)) ;
+ce qu'une liste y ajoute — les `LISTDIR_*`, le répertoire d'exécution — est dans
+`references/format.md`.
 
 **Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un
 coup tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au
@@ -144,7 +155,7 @@ Cinq références, une par sujet — chacune fait autorité sur le sien, les aut
 
 | Fichier | Ce qu'il porte |
 |---|---|
-| `references/format.md` | structure d'un répertoire-liste, format d'un élément, contrat, préremplissage, marqueurs |
+| `references/format.md` | structure d'un répertoire-liste, et ce qu'une liste ajoute à un gabarit : l'`id`, `from`, `[origin]`, les `LISTDIR_*` |
 | `references/definitions.md` | amorcer depuis une définition : les quatre racines, la précédence, l'autorité bornée à l'`init`, ce que `contract` vise |
 | `references/provenance.md` | la table `[origin]`, les deux formes de `def`, ce dont `validate` avertit, `reseed`, l'adoption |
 | `references/operations.md` | `validate`, `migrate`, `move`, `list`, `derive`, `merge` |

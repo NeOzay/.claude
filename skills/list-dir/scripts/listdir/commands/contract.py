@@ -14,9 +14,9 @@ doit dire laquelle des deux elle décrit.
 
 POURQUOI `--def`/`--from` EXISTENT MALGRÉ ÇA : une liste engendrée par `derive`
 n'existe qu'après coup. Une prose qui la décrit d'avance ne peut pas renvoyer à son
-contrat — il n'y en a pas encore. Le gabarit source, lui, est là dès le départ.
+contrat — il n'y en a pas encore. Le patron source, lui, est là dès le départ.
 
-`--template <nom>` VISE LE `<nom>.toml` DE `templates/` au lieu du contrat. C'est un
+`--patron <nom>` VISE LE `<nom>.toml` DE `patrons/` au lieu du contrat. C'est un
 NOM, pas un chemin — la règle est portée par `contract.source_path`. Seul le `.toml`
 est exigé : cette commande ne rend pas le `.md`, et réclamer un fichier qu'on
 n'imprime pas ferait échouer une impression pour une raison étrangère à elle.
@@ -76,7 +76,7 @@ def register(parser: argparse.ArgumentParser) -> None:
         "--from", dest="depuis", default="", help="une définition, par son chemin"
     )
     parser.add_argument(
-        "--template", default="", help="le gabarit <nom>.toml de templates/, au lieu du contrat"
+        "--patron", default="", help="le patron <nom>.toml de patrons/, au lieu du contrat"
     )
     parser.add_argument(
         "--values",
@@ -112,7 +112,7 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
     if not base:
         return utils.fail(base.message, base.status)
 
-    lu = load_source(base.unwrap(), cast("str", args.template))
+    lu = load_source(base.unwrap(), cast("str", args.patron))
     if not lu:
         return utils.fail(lu.message)
     chemin, texte, contrat = lu.unwrap()

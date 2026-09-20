@@ -1,4 +1,4 @@
-# Contrat de la liste de revue engendrée par `derive <src> <dst> --template review`.
+# Contrat de la liste de revue engendrée par `derive <src> <dst> --patron review`.
 #
 # Une fiche par entrée du registre, et rien de la prose de l'entrée : la fiche ne
 # porte que du jugement, qui n'existe nulle part ailleurs. C'est ce qui la rend
@@ -7,13 +7,13 @@
 name = "revue"
 description = "Revue du registre de dette — une fiche par entrée, un verdict par fiche"
 
-# LA PROVENANCE D'UNE LISTE ENGENDRÉE PAR CE GABARIT. `derive` la recopie avec le
+# LA PROVENANCE D'UNE LISTE ENGENDRÉE PAR CE PATRON. `derive` la recopie avec le
 # reste — il n'en écrit pas une ligne, exactement comme `init` reçoit l'estampille
 # d'une définition sans jamais l'écrire lui-même.
 #
-# LE NOM EST COMPOSITE parce qu'un gabarit n'est pas une définition : il vit dans le
-# `templates/` de « technical-debt », et c'est là qu'on le retrouve
-# (« list-dir contract --def technical-debt --template review »). Le nom le DIT, il
+# LE NOM EST COMPOSITE parce qu'un patron n'est pas une définition : il vit dans le
+# `patrons/` de « technical-debt », et c'est là qu'on le retrouve
+# (« list-dir contract --def technical-debt --patron review »). Le nom le DIT, il
 # ne se résout pas : « --def technical-debt/review » est refusé en le disant.
 #
 # `frozen = true` PARCE QU'UNE REVUE EST JETABLE. Elle est dérivée le matin, instruite

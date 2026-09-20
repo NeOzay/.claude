@@ -30,45 +30,45 @@ Une liste née à la main n'a rien à rattraper, et l'absence de réponse se dis
 
 ---
 
-## `def` prend deux formes, et la seconde nomme un gabarit
+## `def` prend deux formes, et la seconde nomme un patron
 
-Une liste engendrée par `derive` n'est pas semée par une définition : sa semence est le **gabarit**
+Une liste engendrée par `derive` n'est pas semée par une définition : sa semence est le **patron**
 `<nom>.toml` d'une définition. `def` le dit sous la forme `mère/dérivée` :
 
 ```toml
 [origin]
-def = "technical-debt/review"   # le gabarit « review » de la définition « technical-debt »
-version = 1                     # celle du GABARIT, sans rapport avec celle de sa définition
+def = "technical-debt/review"   # le patron « review » de la définition « technical-debt »
+version = 1                     # celle du PATRON, sans rapport avec celle de sa définition
 frozen = true                   # la norme d'une liste jetable — voir plus bas
 ```
 
 | Forme | Ce qu'elle nomme | Ce qu'on peut en faire |
 |---|---|---|
 | `technical-debt` | une définition, cherchée dans les quatre rangs | `init --def`, `reseed --def`, `contract --def` |
-| `technical-debt/review` | le gabarit `review` de cette définition | **rien** : elle se lit, elle ne se résout pas |
+| `technical-debt/review` | le patron `review` de cette définition | **rien** : elle se lit, elle ne se résout pas |
 
 **Le nom composite DIT, il ne résout pas.** `--def technical-debt/review` est refusé en le disant :
-un gabarit ne s'amorce ni ne se rattrape, il projette une liste qui existe déjà. Ce qu'il donne au
+un patron ne s'amorce ni ne se rattrape, il projette une liste qui existe déjà. Ce qu'il donne au
 lecteur, c'est de quoi retrouver la semence sans la chercher —
-`list-dir contract --def technical-debt --template review` l'imprime, et les deux moitiés du nom
+`list-dir contract --def technical-debt --patron review` l'imprime, et les deux moitiés du nom
 sont exactement les deux arguments à taper.
 
 Sans cette forme, la seule façon de faire taire l'avertissement d'adoption sur une liste dérivée
 serait `def = false`, c'est-à-dire lui faire déclarer qu'elle n'a pas de semence. Elle en a une ;
-ce serait un mensonge, et il effacerait la seule trace du gabarit qui l'a produite.
+ce serait un mensonge, et il effacerait la seule trace du patron qui l'a produite.
 
-**Deux segments, pas trois**, chacun non vide et différent de `.` et `..` — les gabarits vivent à
-plat dans `templates/`. La forme est vérifiée à la lecture du contrat, sans rien ouvrir : une
+**Deux segments, pas trois**, chacun non vide et différent de `.` et `..` — les patrons vivent à
+plat dans `patrons/`. La forme est vérifiée à la lecture du contrat, sans rien ouvrir : une
 estampille se relit sur une machine où la définition n'est pas installée, et une forme qu'on ne
 jugerait qu'à l'ouverture ne s'y jugerait jamais. Un `def = "technical-debt/revue"` fautif
 échouerait sinon en silence — le gel tait la péremption, et `reseed` n'est jamais appelé sur une
 liste jetable.
 
-**`frozen = true` est la norme d'une liste dérivée**, et c'est le gabarit qui le déclare, comme il
+**`frozen = true` est la norme d'une liste dérivée**, et c'est le patron qui le déclare, comme il
 déclare le reste de l'estampille. Une liste de revue est dérivée, instruite, agglomérée puis
 archivée : il n'y a rien à y rattraper, et une liste qu'on ne rattrapera jamais n'a pas à s'entendre
 rappeler qu'elle pourrait l'être. Sur une dérivée qu'on aurait dégelée à la main, `validate` dit que
-la péremption d'un gabarit **n'est pas suivie** — plutôt que de le chercher dans les rangs, où il
+la péremption d'un patron **n'est pas suivie** — plutôt que de le chercher dans les rangs, où il
 n'a jamais été.
 
 ## Ce que `validate` avertit
@@ -82,12 +82,12 @@ suivent le contrat qu'elle porte, et c'est celui-là que les commandes appliquen
 | pas de table `[origin]` | aucune provenance déclarée, et le geste d'adoption |
 | `def = false` | rien |
 | `frozen = true` | rien |
-| `def` nomme un gabarit (`mère/dérivée`) | la péremption d'un gabarit n'est pas suivie, et le `contract --def … --template …` qui imprime la semence |
+| `def` nomme un patron (`mère/dérivée`) | la péremption d'un patron n'est pas suivie, et le `contract --def … --patron …` qui imprime la semence |
 | définition introuvable dans les quatre rangs | péremption invérifiable, avec le nom cherché |
 | semence sans `[origin]`, ou illisible | dit avec le fichier fautif |
 | version de la semence plus haute | « contrat périmé — semé en v2, en v5 », et `reseed` |
 | version de la semence plus basse | état anormal, dit tel quel |
-| contrat ou gabarit modifié depuis le semis | fichier par fichier |
+| contrat ou patron modifié depuis le semis | fichier par fichier |
 
 La dernière ligne se lit dans `.list/semence/` et **ne résout aucune définition** : elle vaut encore
 là où le skill qui porte la définition n'est pas installé. Sans ce répertoire — liste adoptée, ou
@@ -130,7 +130,7 @@ toujours une liste que personne n'a touchée. La décision de réécrire suit la
 commentaire ajouté sur place ne fait pas réécrire le contrat, donc ne se perd pas.
 
 La granularité est la **clé TOML** (`fields.category.values`), pas le bloc `[fields.x]` : un conflit
-sur une description n'emporte pas le type du champ avec lui. Les gabarits, eux, se comparent par
+sur une description n'emporte pas le type du champ avec lui. Les patrons, eux, se comparent par
 **fichier entier** — une prose libre n'a pas de clés à confronter.
 
 **Ce qui ne s'écrit pas se refuse.** Un contrat qu'on ne peut pas réémettre — une valeur d'un type

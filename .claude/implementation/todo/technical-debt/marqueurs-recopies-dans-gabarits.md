@@ -9,7 +9,10 @@ category = "pertinent"
 
 ## Constat
 
-`todo/technical-debt/.list/templates/review.md` écrit `<À REMPLIR>` et `<OPTIONNEL>` en dur, quatre
+**Vocabulaire, 2026-09-20** — cette entrée dit « gabarit » au sens du moule de `derive`, renommé
+**patron** depuis (chantier `deux-sens-de-gabarit`). L'identifiant n'a pas été changé.
+
+`todo/technical-debt/.list/patrons/review.md` écrit `<À REMPLIR>` et `<OPTIONNEL>` en dur, quatre
 fois au total. La Vérification #9 du plan, qui exige une définition unique de chaque marqueur, ne
 balaie que `skills/list-dir/scripts/` : elle est aveugle à ce fichier.
 
@@ -28,7 +31,7 @@ aucune commande ne la vérifie.
 
 Deux voies, à trancher :
 
-- étendre le contrôle de définition unique aux gabarits `.list/templates/` de toutes les listes, en
+- étendre le contrôle de définition unique aux gabarits `.list/patrons/` de toutes les listes, en
   acceptant que le marqueur y soit **cité** mais en exigeant qu'il corresponde à la constante ;
 - ou faire poser les marqueurs par `derive` plutôt que par le corps du gabarit — le `.md` ne
   porterait que les titres de section, les corps venant de `PLACEHOLDER` / `OPTIONAL`.

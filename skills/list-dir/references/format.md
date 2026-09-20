@@ -1,7 +1,12 @@
 # Le format d'une liste
 
-Ce qu'est un répertoire-liste, ce qu'est un élément, et ce que le contrat déclare. Tout ce qui
-suit est mécaniquement vérifiable par `validate`.
+Ce qu'est un répertoire-liste, et ce qu'une liste ajoute à un gabarit. Tout ce qui suit est
+mécaniquement vérifiable par `validate`.
+
+**Une liste est une liste de gabarits.** Le format d'un fichier, le contrat, les six types admis,
+le préremplissage et les marqueurs sont déclarés par `gabarit`, dont ce paquet dépend :
+[Le format d'un gabarit](../../gabarit/references/format.md). Ce fichier-ci ne porte que ce qu'une
+liste y ajoute — l'`id` égal au nom du fichier, `.list/`, `from`, `[origin]`.
 
 ---
 
@@ -13,15 +18,15 @@ ma-liste/
 │   ├── contract.toml          contrat : champs, sections, description
 │   ├── commands/              commandes propres à cette liste
 │   │   └── close.py
-│   ├── templates/             gabarits pour `derive`
+│   ├── patrons/               patrons pour `derive`
 │   │   ├── review.toml
 │   │   └── review.md
 │   ├── semence/               la semence intacte, au dernier semis
 │   │   ├── contract.toml
-│   │   └── templates/
+│   │   └── patrons/
 │   └── backup/                ce que le dernier `reseed` a remplacé
 │       ├── contract.toml
-│       └── templates/
+│       └── patrons/
 ├── premier-element.md
 └── second-element.md
 ```
@@ -42,7 +47,9 @@ projeter zéro élément se lirait comme « rien à traiter ».
 
 ## Un élément
 
-Un fichier Markdown à front matter TOML, délimité par `+++`.
+Un gabarit, plus une règle d'identité :
+[Un gabarit](../../gabarit/references/format.md#un-gabarit) donne le format du fichier — Markdown à
+front matter TOML délimité par `+++`, sections en `##`, dates et listes natives.
 
 ```markdown
 +++
@@ -61,82 +68,33 @@ refs = ["R4"]
 …prose…
 ```
 
-- `id` est **toujours** égal au nom de fichier, sans l'extension. C'est la seule identité.
-- Le front matter est du TOML : dates et listes sont natives, les valeurs texte prennent des
-  guillemets. Une erreur de syntaxe est localisée à la ligne.
-- Les titres de section sont des `##`.
+- `id` est **toujours** égal au nom de fichier, sans l'extension. C'est la seule identité, et c'est
+  ce qu'une liste ajoute à un gabarit, qui n'en impose aucune.
+- Un élément ne porte pas d'estampille `gabarit` : c'est le contrat de sa liste qui fait foi, et
+  `[origin]` dit d'où ce contrat vient.
 
 ---
 
 ## Le contrat
 
-`.list/contract.toml`, dans la liste elle-même. Il déclare ce qu'un élément doit contenir.
+`.list/contract.toml`, dans la liste elle-même. Il déclare ce qu'un élément doit contenir, et a la
+forme de celui d'une semence de gabarit — `name`, `description`, `[fields.*]`, `[sections.*]`, les
+six types, `text`/`command`, `description` exigée partout :
+[Le contrat](../../gabarit/references/format.md#le-contrat).
 
-```toml
-name = "ma-liste"
-description = "À quoi sert cette liste"
+Quatre ajouts lui sont propres.
 
-[fields.id]
-type = "slug"          # toujours obligatoire, toujours égal au nom de fichier
-description = ""
+**`[fields.id]` est toujours déclaré, toujours obligatoire**, et sa valeur est le nom du fichier.
 
-[fields.title]
-type = "text"
-required = true
-description = ""
+**`from` projette un champ** d'une liste source sur une liste dérivée. Un gabarit seul n'a pas de
+source, et n'a donc pas de `from` : [Listes dérivées](../references/operations.md#listes-dérivées).
 
-[fields.date]
-type = "date"
-required = true
-description = "date du constat, jamais modifiée"
-command = "date +%F"   # la sortie de cette commande, à la place du marqueur
+**`[origin]` dit d'où la liste vient** — sa semence, sa version, un gel éventuel. Le contrat d'une
+définition la porte, et la copie l'emporte avec le reste :
+[Provenance et péremption](../references/provenance.md#provenance-et-péremption).
 
-[fields.category]
-type = "enum"
-required = false
-description = ""
-values = ["a-traiter", "doublon", "sans-objet"]
-
-[sections."Constat"]
-required = true
-description = "ce qui a été observé, factuel, sans remède"
-
-[sections."Pour solder"]
-required = true
-description = "ce qu'il faut faire pour que la dette disparaisse"
-
-[sections."Assumé"]
-required = false
-description = ""
-text = "Rien d'assumé à ce jour."   # ce texte, à la place du marqueur
-```
-
-Types admis : `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes), `int` (un entier ;
-un booléen n'en est pas un). Tout autre type est une erreur nommant le type.
-
-**Une valeur de `values` est un jeton** : ni vide, ni porteuse d'espace. Le contrat est refusé
-sinon, en nommant la valeur fautive. Une valeur à blanc traverserait toute substitution de commande
-en se découpant — `contract … --values category` la rend bien sur une ligne, mais un appelant qui
-boucle dessus compterait deux catégories fantômes, chacune à zéro, sans qu'aucune commande
-n'échoue ; une valeur vide, elle, disparaîtrait sans laisser de trace.
-
-**Une section se déclare en table, une par section**, sur le modèle de `[fields.*]` : le titre est
-la clé, `required` dit si elle est obligatoire (défaut `false`), `description` dit ce qu'il faut y
-écrire. C'est l'ordre du TOML qui ordonne les sections dans un élément créé — pas un tri par
-`required`.
-
-**`description` est exigée partout** — sur chaque `[fields.*]`, sur chaque `[sections.*]`, et à la
-racine du contrat. Elle manque : le contrat est refusé, en nommant l'endroit.
-
-**C'est la clé qui est exigée, pas son texte** : `description = ""` est accepté aux trois endroits.
-Un champ ou une section qu'on n'a pas su décrire sur le moment reste donc déclarable — mais il
-reste aussi *visible* comme non documenté, ce qui est précisément l'objet de la règle. Sans elle,
-une clé absente et une clé vide rendaient toutes deux `""`, et un contrat à moitié documenté
-traversait `validate` sans un mot. C'est `list-dir contract <liste>` qui sert ces descriptions,
-celles des champs comme celles des sections.
-
-**L'ancien format à deux listes** — un unique `[sections]` portant deux listes de noms, `required`
-et `optional` — est refusé, avec un message nommant la liste à migrer. La réécriture est manuelle :
+**L'ancien format à deux listes est refusé** — un unique `[sections]` portant deux listes de noms,
+`required` et `optional` —, avec un message nommant la liste à migrer. La réécriture est manuelle :
 aucune commande ne la fait, et la semence de la liste est l'endroit où corriger. Tolérer les deux
 formes en lecture, ce serait les laisser diverger : la documentation d'une section n'existerait que
 dans l'une des deux écritures, et rien ne dirait laquelle fait foi.
@@ -146,22 +104,17 @@ soldés est une liste sœur avec son propre contrat, pas un champ `soldé = true
 un champ se change par une écriture, porté par le répertoire il se change par un renommage, que
 l'historique conserve.
 
+**Avant de remplir un élément, lire `list-dir contract <liste>`** — le contrat réellement appliqué,
+pas la définition qui l'a semé.
+
 ### Préremplir un champ ou une section
 
-Deux clés facultatives, sur `[fields.*]` comme sur `[sections.*]` :
-
-| Clé | Ce qu'elle pose à la place du marqueur |
-|---|---|
-| `text` | le texte, **littéral** — aucune substitution, ni `{{id}}` ni `$VAR` |
-| `command` | la sortie standard d'une commande Bash, débarrassée de ses blancs de bord |
-
+Les deux clés `text` et `command`, leur exclusion mutuelle, leurs refus et l'échec fermé sont ceux
+d'un gabarit :
+[Préremplir un champ ou une section](../../gabarit/references/format.md#préremplir-un-champ-ou-une-section).
 Elles s'appliquent **partout où un champ ou une section est posé pour la première fois** : `new`,
 `migrate` sur un champ ou une section absents, `derive` sur un champ sans `from`. Une valeur déjà
-écrite n'est jamais recalculée.
-
-**Un champ prérempli est une valeur ordinaire** : `validate --filled` ne le réclame pas, et `merge`
-la fait sortir. C'est tout l'objet de ces deux clés — ce qui est mécaniquement connu n'a pas à être
-relu.
+écrite n'est jamais recalculée, et `merge` fait sortir une valeur préremplie comme une autre.
 
 La commande tourne **dans le répertoire de la liste** — ou, si celui-ci n'existe pas encore, dans
 son premier ancêtre qui existe. Le cas se produit en `derive`, qui construit toutes ses fiches en
@@ -170,7 +123,7 @@ répertoire courant de la commande est ailleurs. Une commande qui lit le disque 
 cwd — `ls | wc -l` — n'y rendra donc pas la même chose qu'à `new`. `LISTDIR_ROOT` est résolue
 depuis ce même répertoire.
 
-L'environnement porte :
+L'environnement porte, à la place des `GABARIT_*` :
 
 | Variable | Valeur |
 |---|---|
@@ -180,19 +133,9 @@ L'environnement porte :
 | `LISTDIR_CONTRACT` | le `name` du contrat |
 | `LISTDIR_ROOT` | la racine du dépôt git — **absente de l'environnement** hors dépôt |
 
-Le contrat est refusé si `text` et `command` sont déclarés ensemble, si l'un des deux est vide, ou
-s'il porte sur un champ de type `list` : la valeur produite est toujours du texte. Sur un champ de
-type `int`, ce texte est converti en entier à la pose — `text = "1"` pose `1` — et refusé en le
-nommant s'il n'est pas un entier en base 10.
+Trois limites propres à une liste :
 
-**Échec fermé.** Une commande qui sort en code non nul interrompt l'opération, sans qu'aucun fichier
-soit écrit, en nommant le champ ou la section et la commande incriminée. Une sortie que le type
-déclaré refuse — `date` sur autre chose qu'une date ISO — est refusée de la même façon : à la
-création, jamais laissée écrire un front matter que `validate` recalera ensuite.
-
-Trois limites à connaître :
-
-- **`derive` ne préremplit pas les sections d'une fiche** : elles viennent du gabarit `.md`, pas du
+- **`derive` ne préremplit pas les sections d'une fiche** : elles viennent du patron `.md`, pas du
   contrat. Seuls les champs sans `from` y passent par `text`/`command`.
 - **un essai de migration n'exécute aucune `command`**, ce qui a une contrepartie :
   [Quand le contrat change](../references/operations.md#quand-le-contrat-change).
@@ -203,33 +146,15 @@ Trois limites à connaître :
 
 ## Les marqueurs
 
-Un élément créé par `new`, ou une fiche créée par `derive`, porte **tout** le contrat : chaque champ
-et chaque section y figure, même facultatif. Ce qu'on ne voit pas n'est jamais rempli.
+Les deux marqueurs, ce qu'ils disent, et ce que `--filled` réclame ou ignore sont ceux d'un
+gabarit : [Les marqueurs](../../gabarit/references/format.md#les-marqueurs). Un élément créé par
+`new`, ou une fiche créée par `derive`, porte **tout** le contrat — chaque champ et chaque section,
+même facultatif. Ce qu'on ne voit pas n'est jamais rempli.
 
-**Un marqueur dit qu'il faut écrire, jamais quoi écrire.** Aucune `description` du contrat n'est
-reportée dans l'élément : `<À REMPLIR>` sous `## Constat` ne rappelle pas que la section veut un
-constat factuel sans remède. C'est `list-dir contract <liste>` qui la sert — le contrat réellement
-appliqué, à lire avant de remplir.
+**Seul `id` échappe aux deux** : il est renseigné à la création, puisqu'il est le nom du fichier.
 
-Deux constantes, définies une seule fois dans `listdir/types.py` :
-
-| Déclaré au contrat | Marqueur posé | `validate --filled` |
-|---|---|---|
-| champ `required = true` | `<À REMPLIR>` | le réclame |
-| champ `required = false` | `<OPTIONNEL>` | l'ignore |
-| section `required = true` | `<À REMPLIR>` | la réclame |
-| section `required = false` | `<OPTIONNEL>` | l'ignore |
-
-Seul `id` échappe aux deux : il est renseigné à la création, puisqu'il est le nom du fichier. Un
-champ ou une section portant `text` ou `command` y échappe aussi — il reçoit sa valeur, pas un
-marqueur, et `validate --filled` ne le réclame donc jamais (voir « Préremplir un champ ou une
-section »).
-
-Rien d'autre ne marque un vide — ni chaîne vide, ni champ omis, ni tiret. Un champ **absent** et un
-champ **à remplir** sont deux états différents.
-
-Sur un champ portant `<À REMPLIR>`, le contrôle de type est suspendu : `date = "<À REMPLIR>"` est
-signalé comme *à remplir*, jamais comme *type invalide* — le message doit dire quoi faire.
+C'est `list-dir contract <liste>` qui sert les descriptions du contrat — un marqueur dit qu'il faut
+écrire, jamais quoi écrire.
 
 **`merge` exige `--filled`** et omet de sa sortie les sections restées à `<OPTIONNEL>` : elles ont
 joué leur rôle de guide et n'ont rien à dire dans un document final.

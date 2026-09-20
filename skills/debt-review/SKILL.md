@@ -169,12 +169,12 @@ Un argument `@chemin` désigne un autre registre que celui par défaut.
 
 ```bash
 R=".claude/implementation/done/revues/$(date +%F)"
-list-dir derive "$T/technical-debt" "$R" --template review
+list-dir derive "$T/technical-debt" "$R" --patron review
 list-dir validate "$R"
 ```
 
 `derive` crée exactement une fiche par entrée du registre — **à cet instant, et à cet instant
-seul.** Ce qu'il reporte et depuis quels gabarits :
+seul.** Ce qu'il reporte et depuis quels patrons :
 [Listes dérivées](../list-dir/references/operations.md#listes-dérivées).
 
 Ce que `merge` vérifiera plus tard est autre chose : il recompte les blocs rendus face aux

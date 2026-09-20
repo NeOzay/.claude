@@ -9,8 +9,11 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
+**Vocabulaire, 2026-09-20** — cette entrée dit « gabarit » au sens du moule de `derive`, renommé
+**patron** depuis (chantier `deux-sens-de-gabarit`). L'identifiant n'a pas été changé.
+
 Depuis le chantier `provenance-listes-derivees`, un gabarit déclare sa propre estampille
-(`templates/review.toml`, `[origin] def = "technical-debt/review"`, `version`, `frozen = true`) et
+(`patrons/review.toml`, `[origin] def = "technical-debt/review"`, `version`, `frozen = true`) et
 `derive` la recopie dans la liste engendrée. Cette `version` n'est **jamais confrontée à quoi que
 ce soit** : `operations.md` le dit en toutes lettres — « la version d'un gabarit ne se compare à
 rien ». Deux chemins la ferment, et ils se recouvrent : le gel déclaré par le gabarit fait sortir
@@ -38,7 +41,7 @@ Deux issues, exclusives :
 - soit retirer `version` de l'estampille d'un gabarit, puisque rien ne la lit — ce qui suppose
   d'assouplir `_origin`, qui l'exige aujourd'hui dès que `def` est un nom ;
 - soit la faire suivre : sur une liste dérivée non gelée, résoudre la définition-mère, lire le
-  `templates/<nom>.toml` et comparer, comme `_peremption` le fait déjà pour une définition.
+  `patrons/<nom>.toml` et comparer, comme `_peremption` le fait déjà pour une définition.
 
 ## Assumé
 

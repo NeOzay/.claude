@@ -15,6 +15,18 @@ ses références n'en disent rien : la dépendance n'est écrite que dans `OUTIL
 dépôt dépend ». Le `ruff.toml` de list-dir le présente pourtant comme « destiné à être déployé
 ailleurs ».
 
+## Soldé le
+
+**2026-09-20, chantier `deux-sens-de-gabarit`** — `skills/list-dir/SKILL.md` porte une section
+« Prérequis » qui nomme le paquet `gabarit`, dit comment il est localisé (premier `bin/gabarit` en
+remontant, puis le `PATH`), ce qui arrive s'il manque, et que la dépendance ne va que dans ce sens.
+`references/format.md` a perdu le socle — format, contrat, six types, préremplissage, marqueurs —
+et renvoie à `../../gabarit/references/format.md`, qui en est désormais l'autorité unique.
+Établi par : `grep -n 'gabarit' skills/list-dir/SKILL.md` → 8 lignes, dont l. 42-48 dans
+« Prérequis » ; `.venv/bin/python scripts/check_pipeline.py` → « Pipeline conforme », 109 renvois
+entre skills résolus ; `.venv/bin/python -m pytest skills/list-dir/scripts/tests
+skills/gabarit/scripts/tests -q` → 508 passed.
+
 ## Pourquoi c'est gênant
 
 Un déploiement de list-dir seul échoue désormais à l'import. L'échec est fermé et nommé

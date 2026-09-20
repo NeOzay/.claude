@@ -7,7 +7,7 @@ CE QUE CE FICHIER CADRE :
     porterait la prose de l'élément qu'elle instruit en serait un doublon éditable,
     et la source unique serait perdue. Le seul emprunt est déclaratif : un champ
     portant `from`.
-  · TOUT EST CONSTRUIT EN MÉMOIRE D'ABORD. Un gabarit incohérent découvert après un
+  · TOUT EST CONSTRUIT EN MÉMOIRE D'ABORD. Un patron incohérent découvert après un
     mkdir laisserait une destination à moitié bâtie, que la tentative suivante
     refuserait comme « existe déjà » — l'utilisateur coincé entre une erreur qu'il a
     corrigée et un répertoire qu'il n'a pas créé.
@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from jouet import GABARIT_TOML, ecrire, element, monter_gabarit
+from jouet import PATRON_TOML, ecrire, element, monter_patron
 from listdir import open_list
 from listdir.contract import load_contract
 from listdir.provenance import warnings
@@ -32,9 +32,9 @@ def ouvrir(chemin: Path) -> ListStore:
     return open_list(chemin).unwrap()
 
 
-# --------------------------------------------------------------------- template
-def test_gabarit_complet_est_lu(liste: Path) -> None:
-    contrat, sections = ouvrir(monter_gabarit(liste)).template("revue").unwrap()
+# --------------------------------------------------------------------- patron
+def test_patron_complet_est_lu(liste: Path) -> None:
+    contrat, sections = ouvrir(monter_patron(liste)).patron("revue").unwrap()
     assert 'name = "revue"' in contrat
     assert list(sections) == ["Avis", "Remarque"]
 
@@ -42,21 +42,21 @@ def test_gabarit_complet_est_lu(liste: Path) -> None:
 def test_le_front_matter_du_moule_est_ignore(liste: Path) -> None:
     """Seules ses SECTIONS comptent : le front matter d'une fiche vient du contrat
     cible, pour ne pas tenir la même liste de champs dans le .toml et dans le .md."""
-    _, sections = ouvrir(monter_gabarit(liste)).template("revue").unwrap()
+    _, sections = ouvrir(monter_patron(liste)).patron("revue").unwrap()
     assert "un front matter que derive ignore" not in "".join(sections)
 
 
-def test_gabarit_a_moitie_present_nomme_le_fichier_manquant(liste: Path) -> None:
-    _ = ecrire(liste, ".list/templates/revue.toml", GABARIT_TOML)
-    r = ouvrir(liste).template("revue")
+def test_patron_a_moitie_present_nomme_le_fichier_manquant(liste: Path) -> None:
+    _ = ecrire(liste, ".list/patrons/revue.toml", PATRON_TOML)
+    r = ouvrir(liste).patron("revue")
 
     assert not r
     assert "revue.md" in r.message
     assert "incomplet" in r.message
 
 
-def test_gabarit_inconnu(liste: Path) -> None:
-    r = ouvrir(monter_gabarit(liste)).template("absent")
+def test_patron_inconnu(liste: Path) -> None:
+    r = ouvrir(monter_patron(liste)).patron("absent")
     assert not r
     assert "absent" in r.message
 
@@ -66,13 +66,13 @@ def test_derive_engendre_une_fiche_par_element(liste: Path, tmp_path: Path) -> N
     _ = element(liste, "second")
     cible = tmp_path / "revues"
 
-    derivee = ouvrir(monter_gabarit(liste)).derive(cible, "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(cible, "revue").unwrap()
     assert [p.name for p in derivee.paths()] == ["premier.md", "second.md"]
 
 
 def test_le_corps_vient_du_moule_jamais_de_la_source(liste: Path, tmp_path: Path) -> None:
     """LE POINT CENTRAL : sans cela la fiche serait un doublon éditable de la source."""
-    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(tmp_path / "revues", "revue").unwrap()
     fiche = derivee.get("premier").unwrap()
 
     assert list(fiche.sections) == ["Avis", "Remarque"]
@@ -81,12 +81,12 @@ def test_le_corps_vient_du_moule_jamais_de_la_source(liste: Path, tmp_path: Path
 
 
 def test_un_champ_portant_from_recoit_la_valeur_source(liste: Path, tmp_path: Path) -> None:
-    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(tmp_path / "revues", "revue").unwrap()
     assert derivee.get("premier").unwrap().fields["title"] == "Le premier élément"
 
 
 def test_un_champ_sans_from_recoit_son_marqueur(liste: Path, tmp_path: Path) -> None:
-    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(tmp_path / "revues", "revue").unwrap()
     assert derivee.get("premier").unwrap().fields["verdict"] == PLACEHOLDER
 
 
@@ -95,13 +95,13 @@ def test_un_champ_sans_from_mais_preremplissable_recoit_sa_valeur(
 ) -> None:
     """MÊME RÈGLE QU'À LA CRÉATION : un champ du contrat cible sans `from`, mais
     portant `text`/`command`, reçoit cette valeur — pas son marqueur."""
-    contrat = GABARIT_TOML.replace(
+    contrat = PATRON_TOML.replace(
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
         'text = "Non instruit."\n',
     )
     derivee = (
-        ouvrir(monter_gabarit(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
+        ouvrir(monter_patron(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
     )
 
     assert derivee.get("premier").unwrap().fields["verdict"] == "Non instruit."
@@ -111,27 +111,27 @@ def test_un_champ_sans_from_portant_command_recoit_la_sortie(liste: Path, tmp_pa
     """LE CWD DES COMMANDES N'EST PAS LA DESTINATION : `derive` calcule tout en
     mémoire avant d'écrire, et sa destination n'existe donc pas encore. Une
     commande lancée depuis ce répertoire échouerait sur chaque champ prérempli."""
-    contrat = GABARIT_TOML.replace(
+    contrat = PATRON_TOML.replace(
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
         'command = "echo instruit"\n',
     )
     derivee = (
-        ouvrir(monter_gabarit(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
+        ouvrir(monter_patron(liste, contrat=contrat)).derive(tmp_path / "revues", "revue").unwrap()
     )
 
     assert derivee.get("premier").unwrap().fields["verdict"] == "instruit"
 
 
 def test_une_command_qui_echoue_en_derive_n_ecrit_rien(liste: Path, tmp_path: Path) -> None:
-    contrat = GABARIT_TOML.replace(
+    contrat = PATRON_TOML.replace(
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
         'command = "false"\n',
     )
     cible = tmp_path / "revues"
 
-    r = ouvrir(monter_gabarit(liste, contrat=contrat)).derive(cible, "revue")
+    r = ouvrir(monter_patron(liste, contrat=contrat)).derive(cible, "revue")
 
     assert not r
     assert "false" in r.message
@@ -140,47 +140,47 @@ def test_une_command_qui_echoue_en_derive_n_ecrit_rien(liste: Path, tmp_path: Pa
 
 def test_id_est_reporte_d_office(liste: Path, tmp_path: Path) -> None:
     """Le seul lien entre une fiche et l'élément qu'elle instruit."""
-    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(tmp_path / "revues", "revue").unwrap()
     assert derivee.get("premier").unwrap().fields["id"] == "premier"
 
 
 def test_une_liste_derivee_est_conforme_et_pas_remplie(liste: Path, tmp_path: Path) -> None:
-    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(tmp_path / "revues", "revue").unwrap()
 
     assert derivee.validate().unwrap() == []
     assert derivee.validate(filled=True).unwrap() != []
 
 
-def test_une_derivee_d_un_gabarit_estampille_ne_dit_rien(liste: Path, tmp_path: Path) -> None:
+def test_une_derivee_d_un_patron_estampille_ne_dit_rien(liste: Path, tmp_path: Path) -> None:
     """C'est le symptôme qui a ouvert ce chantier : une liste de revue naissait sans
     provenance, et `validate` réclamait à chaque fois une adoption qui n'a pas de sens
-    sur une liste jetable. L'estampille voyage avec le gabarit, comme toute estampille
+    sur une liste jetable. L'estampille voyage avec le patron, comme toute estampille
     voyage avec sa semence — `derive` n'en écrit pas une ligne."""
     estampille = '\n[origin]\ndef = "jouet/revue"\nversion = 1\nfrozen = true\n'
-    source = monter_gabarit(liste, contrat=GABARIT_TOML + estampille)
+    source = monter_patron(liste, contrat=PATRON_TOML + estampille)
     derivee = ouvrir(source).derive(tmp_path / "revues", "revue").unwrap()
 
     contrat = load_contract(derivee.path).unwrap()
     origin = contrat.origin
     assert origin is not None
-    assert (origin.definition, origin.template) == ("jouet", "revue")
+    assert (origin.definition, origin.patron) == ("jouet", "revue")
     assert warnings(derivee.path, contrat) == []
 
 
 def test_une_derivee_sans_estampille_reclame_toujours_une_adoption(
     liste: Path, tmp_path: Path
 ) -> None:
-    """Le pendant : rien n'est posé d'office. Un gabarit muet sème une liste muette,
+    """Le pendant : rien n'est posé d'office. Un patron muet sème une liste muette,
     et c'est l'avertissement d'adoption qui le dit."""
-    derivee = ouvrir(monter_gabarit(liste)).derive(tmp_path / "revues", "revue").unwrap()
+    derivee = ouvrir(monter_patron(liste)).derive(tmp_path / "revues", "revue").unwrap()
 
     dits = warnings(derivee.path, load_contract(derivee.path).unwrap())
     assert any("aucune provenance déclarée" in d for d in dits)
 
 
 def test_from_qui_ne_nomme_aucun_champ_source(liste: Path, tmp_path: Path) -> None:
-    faux = GABARIT_TOML.replace('from = "title"', 'from = "inexistant"')
-    _ = monter_gabarit(liste, contrat=faux)
+    faux = PATRON_TOML.replace('from = "title"', 'from = "inexistant"')
+    _ = monter_patron(liste, contrat=faux)
     cible = tmp_path / "revues"
 
     r = ouvrir(liste).derive(cible, "revue")
@@ -192,16 +192,16 @@ def test_from_qui_ne_nomme_aucun_champ_source(liste: Path, tmp_path: Path) -> No
 def test_un_echec_ne_laisse_aucune_destination(liste: Path, tmp_path: Path) -> None:
     """L'ATOMICITÉ : sinon la tentative suivante refuserait un répertoire que
     l'utilisateur n'a pas créé, après qu'il a corrigé son erreur."""
-    faux = GABARIT_TOML.replace('from = "title"', 'from = "inexistant"')
-    _ = monter_gabarit(liste, contrat=faux)
+    faux = PATRON_TOML.replace('from = "title"', 'from = "inexistant"')
+    _ = monter_patron(liste, contrat=faux)
     cible = tmp_path / "revues"
 
     assert not ouvrir(liste).derive(cible, "revue")
     assert not cible.exists()
 
 
-def test_un_gabarit_au_contrat_incoherent_ne_cree_rien(liste: Path, tmp_path: Path) -> None:
-    _ = monter_gabarit(
+def test_un_patron_au_contrat_incoherent_ne_cree_rien(liste: Path, tmp_path: Path) -> None:
+    _ = monter_patron(
         liste,
         contrat='name = "revue"\ndescription = ""\n\n[fields.c]\ntype = "enum"\ndescription = ""\n',
     )
@@ -218,14 +218,14 @@ def test_destination_existante_refusee(liste: Path, tmp_path: Path) -> None:
     """derive ne fusionne ni ne met à jour : écraser ferait disparaître un travail fait."""
     cible = tmp_path / "revues"
     cible.mkdir()
-    r = ouvrir(monter_gabarit(liste)).derive(cible, "revue")
+    r = ouvrir(monter_patron(liste)).derive(cible, "revue")
 
     assert not r
     assert "ne fusionne ni ne met à jour" in r.message
 
 
 def test_liste_source_vide_refusee(liste_vide: Path, tmp_path: Path) -> None:
-    r = ouvrir(monter_gabarit(liste_vide)).derive(tmp_path / "revues", "revue")
+    r = ouvrir(monter_patron(liste_vide)).derive(tmp_path / "revues", "revue")
     assert not r
     assert "il n'y a rien à projeter" in r.message
 
