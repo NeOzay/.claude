@@ -1,6 +1,8 @@
 ---
 paths:
   - "**/.claude/**/*.py"
+  - "scripts/**/*.py"
+  - "skills/*/scripts/**/*.py"
 ---
 
 # Convention de code Python

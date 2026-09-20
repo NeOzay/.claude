@@ -1,15 +1,12 @@
 ---
 name: skill-convention
 description: >
-  Conventions de maintien de la configuration Claude Code : la configuration globale
-  (~/.claude) et les configurations locales à un projet. Couvre la prose d'une skill
-  (structure, renvois, description, modes de défaillance), le code Python (via
-  rules/claude-python-style.md), les documents posés depuis un gabarit, la mémoire structurée en
-  registres, et la mise à disposition de commandes à un agent — globales par une skill de
-  ~/.claude/skills, locales à un projet par .claude/bin/ et un hook SessionStart. Se déclenche
-  dès qu'il s'agit d'écrire ou de relire une skill, d'écrire du Python dans ce dépôt, de poser
-  un document ou un registre, ou de donner à un agent une commande propre à un projet. Ne
-  corrige aucune skill.
+  Conventions de maintien de ma configuration Claude Code, globale (~/.claude) comme locale à un
+  projet : prose d'une skill, code Python, documents posés depuis un gabarit, mémoire tenue en
+  registres, commandes mises à la disposition d'un agent. Se déclenche à l'écriture ou à la
+  relecture d'un `SKILL.md`, d'un fichier de `references/` ou de tout autre fichier d'une skill,
+  à la pose d'un document ou d'un registre, et dès qu'un projet doit fournir une nouvelle commande à un
+  agent. Ne corrige aucune skill.
 ---
 
 # skill-convention — les conventions de ma configuration
@@ -41,8 +38,8 @@ skill y mène.
 
 | Sujet | Autorité | Lire quand |
 |---|---|---|
-| Prose d'une skill | [`references/prose.md`](references/prose.md) | on écrit ou relit un `SKILL.md` ou une référence |
-| Code Python | `rules/claude-python-style.md`, chargé au contact d'un `*.py` sous un répertoire `.claude/` — pas sur le Python de ce dépôt-ci (dette `regle-python-ne-se-charge-pas-sur-ce-depot`) | on écrit du Python |
+| Prose d'une skill | [`references/prose.md`](references/prose.md), vers lequel `rules/skill-prose.md` renvoie au contact d'un fichier de skill | on écrit ou relit un `SKILL.md` ou une référence |
+| Code Python | `rules/claude-python-style.md`, chargé au contact d'un `*.py` — par chemin relatif sur ce dépôt-ci, par `**/.claude/**` ailleurs | on écrit du Python |
 | Poser un document depuis un contrat | [gabarit](../gabarit/SKILL.md) | on crée un fichier structuré à remplir |
 | Tenir un registre | [list-dir](../list-dir/SKILL.md) | on crée, valide, filtre ou migre une liste de fichiers |
 | Commandes à la disposition d'un agent | [`references/commandes-locales.md`](references/commandes-locales.md) | une skill ou un projet doit fournir une commande |
