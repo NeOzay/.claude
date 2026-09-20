@@ -92,7 +92,7 @@ Par un `list-dir move`, jamais par un champ — l'état est porté par le réper
 donnée au registre de dette ([Un état, pas un journal](dette.md#un-état-pas-un-journal)). Deux
 sorties, et elles ne se déclenchent pas de la même façon :
 
-**À la clôture d'un chantier**, quand le suivi porte un `road-map:` — c'est-à-dire quand le chantier
+**À la clôture d'un chantier**, quand le suivi porte un `road-map` — c'est-à-dire quand le chantier
 est parti de cette entrée. L'orchestrateur déplace vers `road-map-fait/` et écrit la section
 `Fait le`. Le geste est décrit là où il s'exécute : `cloture.md`, point 2.
 
@@ -105,7 +105,7 @@ n'en produirait pas — elle produirait de la preuve creuse, qui se lit comme un
 Un chantier **abandonné** ne fait rien sortir : la tâche n'a pas été faite, et l'abandon est
 précisément ce qui la remet en attente.
 
-## Le champ `road-map:`
+## Le champ `road-map`
 
 Quand un chantier part d'une entrée, le suivi porte son `id` — [Frontmatter](contrat.md#frontmatter)
 en donne la forme. Deux conséquences qui ne se devinent pas :

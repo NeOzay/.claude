@@ -106,7 +106,7 @@ def test_create_pose_la_sortie_de_command(tmp_path: Path) -> None:
     liste = monter_liste(tmp_path / "jouet", CONTRAT_PREREMPLI)
     item = ouvrir(liste).create("neuf").unwrap()
 
-    assert item.fields["date"] == datetime.date.today().isoformat()
+    assert item.fields["date"] == datetime.date.today()
 
 
 def test_create_pose_le_texte_litteral_d_une_section(tmp_path: Path) -> None:
@@ -202,7 +202,7 @@ def test_migrate_pose_la_valeur_preremplie_sur_un_champ_absent(tmp_path: Path) -
     changes = ouvrir(liste).migrate().unwrap()
 
     posee = ouvrir(liste).get("a").unwrap()
-    assert posee.fields["date"] == datetime.date.today().isoformat()
+    assert posee.fields["date"] == datetime.date.today()
     assert posee.sections["Constat"] == "Section posée automatiquement."
     assert f"a.md: champ « date » — ajouté, {datetime.date.today().isoformat()}" in actes(changes)
 

@@ -19,8 +19,10 @@ produit deux fichiers différents pour le même besoin, et l'écart ne se voit q
 Un gabarit se nomme par sa semence, jamais par un chemin ; la semence est le seul endroit où la
 structure est écrite.
 
-**Pratiqué dans** : [gabarit](../../gabarit/SKILL.md) et sa semence `suivi`
-([`gabarit/suivi/contract.toml`](../../gabarit/gabarit/suivi/contract.toml)) ;
+**Pratiqué dans** : [gabarit](../../gabarit/SKILL.md) et ses semences `brief` et `suivi`
+([`gabarit/suivi/contract.toml`](../../gabarit/gabarit/suivi/contract.toml)), posées et vérifiées
+par [intent-brief](../../intent-brief/SKILL.md) et
+[implementation-tracker](../../implementation-tracker/SKILL.md) ;
 [debt-review](../../debt-review/references/gabarit-rapport.md) pour son rapport de revue.
 
 ## Une mémoire se tient en registre
@@ -71,8 +73,8 @@ lue d'avance occupe le contexte pendant toute la procédure, et une référence 
 pas dit est lue d'avance par prudence.
 
 **Pratiqué dans** : [git-smart-commit](../../git-smart-commit/SKILL.md) ;
-[implementation-tracker](../../implementation-tracker/SKILL.md), section « Gabarit du fichier de
-suivi ».
+[implementation-tracker](../../implementation-tracker/SKILL.md), dont l'Étape 5 ne fait lire
+`references/cloture.md` qu'à la clôture.
 
 ## Une règle, un seul endroit
 

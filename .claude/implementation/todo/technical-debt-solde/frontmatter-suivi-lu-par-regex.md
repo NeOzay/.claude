@@ -37,3 +37,15 @@ test rejette une valeur ambiguë au lieu de la tronquer.
 Hors périmètre de `git-smart-commit-trois-commits` : changer le format touche le contrat, le gabarit,
 le garde-fou et les archives. La lecture par regex reprend celle du contrôle 5, et les tests du
 script couvrent le commentaire de fin de ligne.
+
+## Soldé le
+
+**2026-09-19, chantier `pipeline-gabarit`** — le front matter des fiches est du TOML entre `+++` ;
+`commit_chantier.py` et le contrôle 5 de `check_pipeline.py` le lisent par un lecteur unique,
+`skills/implementation-tracker/scripts/fiche.py` (`tomllib`, YAML en repli pour les seules
+archives), et la clôture le réécrit par `gabarit`. Reste, assumé : `gabarit.items` découpe aussi le
+bloc `+++` pour réécrire, parce que `fiche.py` doit rester en bibliothèque standard pour le
+garde-fou.
+Établi par : `.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_fiche.py
+-k "double or diese"` → 3 passés (clé en double refusée, ` #` lu intact) ; `grep -c "def
+frontmatter\|def remplacer_champ\|re.search(rf\"^{champ}"` sur les deux lecteurs → 0 et 0.

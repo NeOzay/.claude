@@ -1,12 +1,9 @@
 # Semence du fichier de suivi d'implementation-tracker.
 #
-# Reprend les champs et les sections du suivi tels que le tracker les définit
-# (skills/implementation-tracker/references/contrat.md, « Frontmatter », et
-# references/gabarit-suivi.md). Ce qui est mécaniquement connu à la création est
-# prérempli ; le reste porte son marqueur, et chaque description dit d'où vient la valeur.
-#
-# Le tracker n'est pas encore branché sur cette semence : son front matter reste en YAML
-# tant que ce branchement n'est pas fait.
+# Le suivi est posé à l'Étape 2 du tracker, une fois le plan validé, maintenu pendant
+# l'implémentation, archivé en `done/` à la clôture. Ce qui est mécaniquement connu à la
+# création est prérempli ; le reste porte son marqueur, et chaque description dit d'où vient
+# la valeur. La skill n'en décrit pas la structure : elle renvoie ici.
 
 name = "suivi"
 description = "Fichier de suivi d'une implémentation conduite par implementation-tracker : objectif, étapes, état, décisions."
@@ -52,7 +49,10 @@ description = "La lettre des tags d'étape (<L>E0, <L>E1…), rendue par `commit
 [fields.execution]
 type = "enum"
 required = true
-description = "Repris tel quel du brief : `délégué` si les étapes peuvent partir à step-implementer, `direct` sinon."
+description = """
+Repris tel quel du brief :
+- `délégué` : les étapes substantielles partent à step-implementer ;
+- `direct` : elles se font dans la session."""
 values = ["délégué", "direct"]
 
 [fields.plan]
@@ -86,15 +86,46 @@ command = "date +%F"
 
 [sections."Objectif et périmètre"]
 required = true
-description = "Repris du brief, pas reformulé : symptôme, but, critères de réussite, hors-périmètre, signaux de dérive. Un élargissement accepté s'y ajoute, daté."
+description = """
+Repris du brief, pas reformulé, en cinq blocs :
+- `**Symptôme** :`
+- `**But** :`
+- `**Critères de réussite** :`
+- `**Hors-périmètre** :`
+- `**Signaux de dérive** :`
+
+Sans symptôme, la section a perdu le lien avec l'intention d'origine : c'est lui qui montre
+qu'on a construit la bonne solution au mauvais problème.
+Un élargissement accepté s'y ajoute, daté."""
 
 [sections."Étapes"]
 required = true
-description = "Les étapes du plan, une par ligne : `- [état] N. Intitulé — <fichiers> — vérif: <commande>`. Le suivi porte l'intitulé et l'état, le plan porte le contenu."
+description = """
+Les étapes du plan, une par ligne :
+  - [état] N. Intitulé — <fichiers> — vérif: <commande>
+
+État :
+- `[ ]` à faire ;
+- `[>]` en cours ;
+- `[x]` fait ;
+- `[!]` bloqué, suivi de la raison.
+
+Le suivi porte l'intitulé et l'état, le plan porte le contenu."""
 
 [sections."État courant"]
 required = true
-description = "Écrit pour une reprise à froid : prochaine action, vérification d'ensemble, dernier audit, notes."
+description = """
+Écrit pour une reprise à froid, en quatre lignes :
+- `**Prochaine action** :` lisible sans relire le plan ;
+- `**Vérification** :` la commande d'ensemble, distincte de celles des étapes ;
+- `**Dernier audit** :` `<sha> — <VERDICT> — <date>`, ou `aucun` ;
+- `**Notes** :`
+
+Un verdict sans SHA ne se rattache à rien : le code a bougé depuis. Le raisonnement de l'audit
+vit dans son rapport, pas ici."""
 
 [sections."Journal de décisions"]
-description = "Ce qui contraint la suite, une entrée de deux à trois lignes : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`"
+description = """
+Ce qui contraint la suite — choix d'architecture, trade-offs, dépendances, verdict d'audit
+défavorable —, jamais les micro-choix. Une entrée de deux à trois lignes :
+  - **<date>** — décision. *Pourquoi* : … *Rejeté* : …"""

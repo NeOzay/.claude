@@ -1,0 +1,11 @@
+# Configuration ruff du skill implementation-tracker.
+#
+# Elle vit ici, et non à la racine du dépôt : la skill est déployable ailleurs, et sa
+# configuration voyage avec elle. Identique à celle de gabarit, dont `fiche.py` partage le
+# format de fiche : un code qui passe de l'un à l'autre ne change pas de règles en chemin.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

@@ -11,6 +11,7 @@ l'environnement `LISTDIR_*` : présence et valeur de chacune, et l'absence de
 
 from __future__ import annotations
 
+import datetime
 import subprocess
 from pathlib import Path
 
@@ -60,7 +61,9 @@ def test_section_text_pose_la_valeur_litterale(liste_vide: Path) -> None:
 def test_champ_command_pose_la_sortie_strippee(liste_vide: Path) -> None:
     ctx = context(liste_vide, _contrat_vide())
     r = initial_field(champ(type="date", command="echo '  2026-01-01  '"), "premier", ctx)
-    assert r.unwrap() == "2026-01-01"
+    # Une date préremplie est posée en `datetime.date`, comme une date saisie : c'est
+    # ce qui lui vaut la même graphie nue à l'écriture.
+    assert r.unwrap() == datetime.date(2026, 1, 1)
 
 
 def test_section_command_pose_la_sortie_strippee(liste_vide: Path) -> None:

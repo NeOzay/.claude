@@ -19,11 +19,11 @@ une réserve, jamais une supposition tranchée en silence.
 ## Entrée
 
 L'appelant te fournit : chemins absolus du fichier de suivi et du brief, nom de la branche de base
-(`base:`), nom de la branche de chantier (`<slug>`), SHA de `HEAD` sur cette branche, et le type
+(`base`), nom de la branche de chantier (`<slug>`), SHA de `HEAD` sur cette branche, et le type
 d'audit — `intermédiaire` ou `clôture`.
 
 **Les chemins qu'il te donne sont absolus** ; ceux que tu liras à l'intérieur des fichiers (champ
-`plan:`) et celui de ton propre rapport sont relatifs à la racine du dépôt. **L'appelant peut te la
+`plan`) et celui de ton propre rapport sont relatifs à la racine du dépôt. **L'appelant peut te la
 donner ; sinon, calcule-la** par `git rev-parse --show-toplevel`. Le répertoire courant n'est pas nécessairement cette racine :
 résous-la avant d'écrire quoi que ce soit, sinon ton rapport atterrit à côté.
 
@@ -34,7 +34,7 @@ Lis dans cet ordre, avant toute chose :
 2. **Le suivi** — `## Objectif et périmètre`, les étapes et leur état, le journal de décisions. **En
    cas de divergence avec le brief, le suivi fait foi** : il est tenu à jour, le brief est figé au
    jour du cadrage. Un périmètre élargi et daté dans le suivi est un périmètre légitime.
-3. **Le plan** — chemin dans le champ `plan:` du frontmatter du suivi. Il porte le contenu des
+3. **Le plan** — chemin dans le champ `plan` du frontmatter du suivi. Il porte le contenu des
    étapes, que le suivi n'a qu'en intitulé.
 4. **Le diff du chantier** — `git diff <base>...<slug>` (trois points : ce que la branche a ajouté,
    pas ce que la base a bougé pendant ce temps). Prends d'abord `--stat`, puis lis le contenu.

@@ -90,34 +90,34 @@ réattribue ces noms d'un chantier à l'autre.
 
 ## Frontmatter
 
-| Fichier | Champs |
-|---|---|
-| `<slug>.brief.md` | `slug`, `titre`, `statut` (`brouillon` \| `validé`), `execution`, `créé` |
-| `<slug>.md` (suivi) | `slug`, `titre`, `branche`, `base`, `statut` (`en-cours` \| `bloqué` \| `terminé` \| `abandonné`), `session`, `lettre`, `execution`, `plan`, `brief`, `audit`, `road-map`, `créé`, `maj` |
-| `<slug>.audit.md` | `slug` |
+Les champs d'un brief et d'un suivi, leurs valeurs admises et ce que chacun porte sont déclarés par
+leur semence, et nulle part ailleurs : `gabarit contract brief`, `gabarit contract suivi`. La
+fiche est posée par `gabarit new` et vérifiée par `gabarit check --filled` ; une structure recopiée
+d'un modèle en prose divergerait du contrat sans que rien ne le signale. Le front matter est du
+TOML entre `+++`. Seules les archives de `done/` antérieures aux semences restent en YAML `---`,
+lues en repli et jamais réécrites. Le rapport d'audit `<slug>.audit.md` n'a pas de semence : son
+front matter ne porte que `slug`.
 
-- `branche` = `<slug>` ; `base` = la branche principale, cible de l'aplatissement final.
-- `audit` n'apparaît qu'au premier audit du chantier.
+Ce qui suit est ce que les champs **font** au pipeline, et que leur description ne suffit pas à
+garantir :
+
 - `session` est incrémenté **à chaque reprise**, pas à chaque étape : une étape peut être à cheval
   sur deux sessions.
-- `lettre` nomme les tags d'étape du chantier (`AE0`, `AE1`…). Elle est attribuée à la création,
-  et le script de clôture refuse un suivi qui n'en porte pas :
-  [Tags d'étape](../../git-smart-commit/references/tags-etape.md).
-- `execution` vaut `délégué` ou `direct`. Le suivi le **reprend tel quel** du brief.
-  **Une valeur absente vaut `direct`.**
-- `road-map` porte l'**`id`** de l'entrée de road-map dont le chantier est parti — pas un chemin.
-  Absent quand le chantier ne part d'aucune entrée, ce qui est le cas courant. Il n'est **pas**
-  réécrit à l'archivage : il ne désigne aucun fichier qui bouge vers `done/`. C'est lui qui dit à la
-  clôture quoi déplacer vers `road-map-fait/` ([Road-map](road-map.md#le-champ-road-map)).
+- `lettre` est attribuée à la création, et le script de clôture refuse un suivi qui n'en porte
+  pas : [Tags d'étape](../../git-smart-commit/references/tags-etape.md).
+- `execution` est repris **tel quel** du brief. **Une valeur absente vaut `direct`** : la lire
+  comme « délégable » enverrait un exécutant en contexte isolé sur un chantier dont personne n'a
+  jugé la délégabilité, sans hors-périmètre ni signaux de dérive écrits, donc sans rien qui
+  l'arrête ni personne à qui demander.
+- `audit` n'apparaît qu'au premier audit du chantier.
+- `plan`, `brief` et `audit` sont réécrits vers leurs chemins `done/` **pendant l'archivage**.
+  Sans cela ils pointeraient vers des fichiers qui n'existent plus, ou pire, vers le plan d'un
+  autre chantier — ce qui a l'air de fonctionner.
+- `road-map` porte l'**`id`** de l'entrée dont le chantier est parti, pas un chemin : il n'est
+  **pas** réécrit à l'archivage, puisqu'il ne désigne aucun fichier qui bouge vers `done/`. C'est
+  lui qui dit à la clôture quoi déplacer vers `road-map-fait/`
+  ([Road-map](road-map.md#le-champ-road-map)).
 - `maj` est actualisé à chaque écriture dans le suivi, en même temps que le contenu.
-
-> *Mode de défaillance* — lire un `execution` absent comme « délégable » enverrait un exécutant en
-> contexte isolé sur un chantier dont personne n'a jugé la délégabilité : sans hors-périmètre ni
-> signaux de dérive écrits, il n'a rien qui l'arrête et personne à qui demander.
-
-> *Mode de défaillance* — les champs `plan`, `brief` et `audit` sont réécrits vers leurs chemins
-> `done/` **pendant l'archivage**. Sans cela ils pointent vers des fichiers qui n'existent plus, ou
-> pire, vers le plan d'un autre chantier — ce qui a l'air de fonctionner.
 
 ## Autorité et divergence
 

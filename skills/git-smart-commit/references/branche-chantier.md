@@ -1,7 +1,7 @@
 # Branche de chantier
 
 Un chantier vit sur une branche nommée **exactement `<slug>`**, créée depuis la branche principale,
-notée `base:` dans le frontmatter du suivi. Tous les commits du chantier s'y font.
+notée `base` dans le frontmatter du suivi. Tous les commits du chantier s'y font.
 
 - **Livré** → la branche est aplatie en **un seul commit sur `base`**, puis supprimée.
 - **Abandonné** → la branche n'est **jamais** aplatie dans `base`.

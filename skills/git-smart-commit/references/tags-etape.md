@@ -5,7 +5,7 @@ Chaque chantier porte une **lettre**, et chaque étape livrée un tag `<lettre>E
 
 ## Lettre
 
-Attribuée à la création du chantier, avant son premier commit, et notée dans `lettre:` du
+Attribuée à la création du chantier, avant son premier commit, et notée dans `lettre` du
 frontmatter du suivi :
 
 ```bash

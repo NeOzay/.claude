@@ -1,0 +1,107 @@
+# Semence du brief d'intention d'intent-brief.
+#
+# Le brief est posé en brouillon à l'Étape 2 d'intent-brief, alimenté au fil du cadrage, puis
+# figé à la validation. Chaque description dit ce que le champ ou la section porte, et d'où
+# vient la valeur : la skill n'en décrit pas la structure, elle renvoie ici.
+
+name = "brief"
+description = """
+Brief d'intention d'un chantier, cadré par intent-brief avant le plan : intention, critères,
+bornes, contraintes. Une page au plus — au-delà, c'est un plan déguisé."""
+
+[fields.slug]
+type = "slug"
+required = true
+description = """
+Kebab-case, court. Arrêté au brief, il ne change plus : le suivi, l'audit et le plan archivé le
+reprennent exactement."""
+
+[fields.titre]
+type = "text"
+required = true
+description = "Le chantier en une ligne, dans les mots de l'utilisateur."
+
+[fields.statut]
+type = "enum"
+required = true
+description = """
+- `brouillon` : pendant le cadrage, le brief sert de registre ;
+- `validé` : l'utilisateur a validé, le brief est figé et la suite s'écrit dans le suivi."""
+values = ["brouillon", "validé"]
+text = "brouillon"
+
+[fields.execution]
+type = "enum"
+required = true
+description = """
+- `délégué` : les étapes prévisibles se borneront à des fichiers nommés, avec une commande de
+  vérification chacune ;
+- `direct` : sinon, et dès qu'une incertitude est reportée ou que les signaux de dérive sont
+  vides — un exécutant isolé n'aurait ni personne à qui demander, ni rien qui l'arrête.
+
+Repris tel quel par le suivi."""
+values = ["délégué", "direct"]
+
+[fields."créé"]
+type = "date"
+required = true
+description = "La date de création du brief."
+command = "date +%F"
+
+[sections.Intention]
+required = true
+description = """
+Deux lignes :
+- `**Symptôme** :` ce qui est vécu, dans les mots de l'utilisateur ;
+- `**But** :` ce qu'on veut obtenir, en une ou deux phrases.
+
+Si l'un ne répond pas à l'autre, c'est le premier désalignement : le dire avant d'écrire.
+Le symptôme est ce qui permet, trois sessions plus tard, de voir qu'on a construit la bonne
+solution au mauvais problème."""
+
+[sections."Critères de réussite"]
+required = true
+description = """
+Une puce par critère, observable et vérifiable.
+Une commande plutôt qu'une phrase : une commande se rejoue."""
+
+[sections."Hors-périmètre"]
+required = true
+description = """
+Une puce par exclusion explicite : ce qu'on ne fait PAS dans ce chantier.
+Personne ne le formule spontanément : il se demande."""
+
+[sections."Signaux de dérive"]
+required = true
+description = """
+Une puce par signal : à quoi on reconnaît, en lisant le diff, qu'on part dans la mauvaise
+direction. Repris dans le suivi comme déclencheur d'arrêt.
+
+Axe non posé : `— non abordé`, et y revenir — c'est le seul contenu du brief qui reste actif
+pendant l'implémentation."""
+
+[sections."Contraintes connues de l'utilisateur"]
+required = true
+description = """
+Une puce par contrainte que le dépôt ne dit pas — rien de ce que le code montre déjà :
+  - **<Nature>** : la contrainte (source)
+
+Natures usuelles : **Historique**, **Intouchable**, **Réutiliser**, **Rejeté d'emblée**,
+**Existant**, **Décision**.
+
+Chaque puce de cette section et des signaux de dérive porte sa source :
+- `(dit)` : dite par l'utilisateur ;
+- `(dépôt: <chemin ou sha>)` : vérifiée dans le dépôt.
+
+Une puce sans source est une supposition, à retirer."""
+
+[sections."Incertitudes à lever en plan"]
+required = true
+description = """
+Le registre des ambiguïtés. Chacune y entre dès qu'elle apparaît, dans sa formulation
+d'origine, et en sort :
+- levée : la réponse part dans la section concernée ;
+- tranchée : la décision est écrite, en **Décision** des contraintes ;
+- reportée : elle reste ici, mission explicite du plan.
+
+Aucune : `— aucune`."""

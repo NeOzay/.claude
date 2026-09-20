@@ -3,10 +3,10 @@ name: gabarit
 description: >
   Crée un fichier préstructuré à remplir depuis une semence, hors de toute liste, et le vérifie
   ensuite contre elle. Fournit quatre commandes (new, check, contract, defs), des semences
-  réutilisables résolues par leur nom — dont `suivi`, le fichier de suivi d'implementation-tracker —
-  et la bibliothèque Python sur laquelle list-dir est construit. Se déclenche dès qu'il s'agit de
-  poser un fichier depuis un contrat, de dire ce qu'il attend, ou de vérifier qu'il est rempli.
-  Ne juge aucun contenu.
+  réutilisables résolues par leur nom — dont `brief` et `suivi`, les fiches d'intent-brief et
+  d'implementation-tracker — et la bibliothèque Python sur laquelle list-dir est construit. Se
+  déclenche dès qu'il s'agit de poser un fichier depuis un contrat, de dire ce qu'il attend, ou de
+  vérifier qu'il est rempli. Ne juge aucun contenu.
 ---
 
 # gabarit — un fichier préstructuré, depuis une semence
@@ -64,6 +64,7 @@ Semences, racines, estampille et environnement du préremplissage :
 
 | Semence | Ce qu'elle pose |
 |---|---|
+| `brief` | le brief d'intention d'intent-brief — `skills/gabarit/gabarit/brief/` |
 | `suivi` | le fichier de suivi d'implementation-tracker — `skills/gabarit/gabarit/suivi/` |
 
 ## La bibliothèque

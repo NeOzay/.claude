@@ -20,7 +20,7 @@ changées** :
 git diff --shortstat <base>...<slug>
 ```
 
-Trois points, comme le diff que l'auditeur lira : deux points compteraient aussi ce que `base:` a
+Trois points, comme le diff que l'auditeur lira : deux points compteraient aussi ce que `base` a
 bougé pendant le chantier, et le seuil se déclencherait sur des lignes que l'audit ne regarde pas.
 
 Proposer alors un audit intermédiaire, en indiquant **le nombre d'étapes restantes** — c'est ce qui
@@ -43,7 +43,7 @@ générales de l'appel — chemins absolus, racine du dépôt, ce qu'on ne recop
 
 Propre à l'audit, en plus des chemins du suivi et du brief :
 
-- `base:` et `<slug>` (nom de la branche de chantier),
+- `base` et `<slug>` (nom de la branche de chantier),
 - SHA de `HEAD` sur la branche (`git rev-parse HEAD`),
 - le type d'audit : `intermédiaire` ou `clôture`.
 
@@ -58,8 +58,8 @@ verdict rendu sans exécution vaut celui qu'on cherchait à remplacer.
 Puis, dans tous les cas, **inscrire dans le suivi** :
 
 - `## État courant` → `**Dernier audit** : <sha> — <VERDICT> — <date>`
-- frontmatter → `audit: .claude/implementation/<slug>.audit.md`, au premier audit du chantier
-- `maj:` actualisé.
+- frontmatter → `audit = ".claude/implementation/<slug>.audit.md"`, au premier audit du chantier
+- `maj` actualisé.
 
 Le raisonnement reste dans `<slug>.audit.md` : le suivi porte le verdict, le fichier d'audit porte
 le pourquoi.
@@ -73,7 +73,7 @@ raisonnement complet : `dette.md`, « Un état, pas un journal ».
 |---|---|
 | `FAVORABLE` | La clôture continue. |
 | `RÉSERVES` | Restituer les réserves à l'utilisateur et **le laisser trancher** entre clore avec, ou traiter d'abord. Ne pas décider à sa place. |
-| `DÉFAVORABLE` | `statut: bloqué`, verdict et SHA au journal. **Ne pas toucher aux étapes** : le traitement des remarques se décide au cas par cas avec l'utilisateur. La clôture s'arrête là. |
+| `DÉFAVORABLE` | `statut = "bloqué"`, verdict et SHA au journal. **Ne pas toucher aux étapes** : le traitement des remarques se décide au cas par cas avec l'utilisateur. La clôture s'arrête là. |
 
 Un verdict défavorable n'est pas un échec du chantier : c'est l'information qui manquait. Le
 corriger en silence, ou requalifier ses constats en détails, annule tout le dispositif.

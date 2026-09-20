@@ -217,15 +217,13 @@ départ — à une condition, qui tient à ce qu'est `move`
 d'abord, écrire la preuve ensuite, dans un second commit.** Mêlés, l'historique de l'entrée
 s'arrête au jour du solde.
 
-L'entrée déplacée reçoit alors sa section `## Soldé le` :
+L'entrée déplacée reçoit alors la section de solde que son nouveau contrat déclare
+(`list-dir contract "$T/technical-debt-solde"`). Ce que la description du contrat ne peut pas
+montrer, c'est la forme de la preuve — date, chantier, puis la commande et sa sortie réelle :
 
-```markdown
-## Soldé le
-
-**2026-09-02, chantier `listing-fix`** — les listings filtrent désormais sur le nom du fichier.
-Établi par : `ls .claude/implementation/*.md | grep -vE 'brief|audit'` → 2 lignes, aucun
-`.brief.md` ni `.audit.md` remonté.
-```
+> **2026-09-02, chantier `listing-fix`** — les listings filtrent désormais sur le nom du fichier.
+> Établi par : `ls .claude/implementation/*.md | grep -vE 'brief|audit'` → 2 lignes, aucun
+> `.brief.md` ni `.audit.md` remonté.
 
 **Sans commande exécutée et sa sortie réelle, l'entrée reste dans le registre.** C'est le même
 principe que le point d'intégrité de l'auditeur : celui qui vient de faire le travail est le plus
@@ -246,15 +244,12 @@ une dette.
 list-dir move "$T/technical-debt" <id> "$T/technical-debt-ecarte"
 ```
 
-Elle reçoit sa section `## Écartée le`, motif compris :
+Elle reçoit la section de mise à l'écart que son nouveau contrat déclare
+(`list-dir contract "$T/technical-debt-ecarte"`), motif compris :
 
-```markdown
-## Écartée le
-
-**2026-09-02 — non pertinent** — le hook `rtk` ne réécrit plus les `ls`, la colonne de taille a
-disparu.
-Établi par : `git log -1 --format=%H -- hooks/rtk.sh` → aucun commit, le hook a été supprimé.
-```
+> **2026-09-02 — non pertinent** — le hook `rtk` ne réécrit plus les `ls`, la colonne de taille a
+> disparu.
+> Établi par : `git log -1 --format=%H -- hooks/rtk.sh` → aucun commit, le hook a été supprimé.
 
 Motifs admis, et rien d'autre : **non pertinent**, **doublon**, **pas une dette**. Pour un doublon,
 la ligne `Établi par` cite l'**`id` de l'entrée conservée** au lieu d'une commande — c'est la seule

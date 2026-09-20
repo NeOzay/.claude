@@ -1,7 +1,7 @@
 # Type 3 — aplatissement d'un chantier
 
 Clôture d'un chantier conduit par `implementation-tracker` : toute la branche `<slug>` devient **un
-seul commit sur `base:`**, les fichiers du chantier partent en `done/`, puis la branche et ses tags
+seul commit sur `base`**, les fichiers du chantier partent en `done/`, puis la branche et ses tags
 sont supprimés. Branche : [`branche-chantier.md`](branche-chantier.md). Tags :
 [`tags-etape.md`](tags-etape.md).
 
@@ -30,7 +30,7 @@ message.
    `ÉCHEC` → **s'arrêter net** et rendre la main avec la sortie du script, sans rien réparer
    d'office. Elle dit ce qui est fait, ce qui reste, et où l'on se trouve :
    - *toujours sur `<slug>`* → la même commande se relance telle quelle, après accord ;
-   - *sur `base:`, aplatissement entamé* → les gestes restants se font à la main, dans l'ordre
+   - *sur `base`, aplatissement entamé* → les gestes restants se font à la main, dans l'ordre
      affiché, chacun présenté et accordé.
 5. **Rendre compte** en deux ou trois lignes : commit produit, branche et tags supprimés. Le push
    reste à la main de l'utilisateur.
@@ -41,23 +41,23 @@ Refus, tous **avant la première écriture** :
 
 - lancement hors d'un dépôt git, ou hors de sa racine ;
 - branche courante différente de `<slug>` ;
-- suivi introuvable, sans frontmatter fermé, ou sans `base:`, `lettre:`, `plan:`, `statut:` ou `maj:` ;
-- `lettre:` qui n'est pas une lettre de A à Z ;
+- suivi introuvable, sans frontmatter fermé, ou sans `base`, `lettre`, `plan`, `statut` ou `maj` ;
+- `lettre` qui n'est pas une lettre de A à Z ;
 - plan ou branche de base introuvable ;
 - fichier modifié ou non suivi qui n'est pas une annexe du chantier (suivi, brief, audit, plan,
   `todo/`) ;
 - fichier de message introuvable, message vide, titre de plus de 50 caractères, ligne 2 non vide ;
 - une cible `done/<date>-…` déjà présente ;
-- un conflit prévisible entre `<slug>` et `base:` (`git merge-tree`).
+- un conflit prévisible entre `<slug>` et `base` (`git merge-tree`).
 
 Puis, dans l'ordre :
 
-1. sur `<slug>` : `statut: terminé`, `maj:` du jour, indexation de toutes les annexes présentes, et
+1. sur `<slug>` : `statut = "terminé"`, `maj` du jour, indexation de toutes les annexes présentes, et
    commit `<slug>: finalisation du suivi` s'il y a quelque chose à committer — une relance le trouve
    déjà fait ;
 2. `git checkout <base>` et `git merge --squash <slug>` ;
 3. `git mv` du suivi, du brief, de l'audit et du plan vers `done/<date>-<slug>[.brief|.audit|.plan].md`,
-   et réécriture des champs `plan:`, `brief:` et `audit:` du suivi archivé ;
+   et réécriture des champs `plan`, `brief` et `audit` du suivi archivé ;
 4. `git commit -F <fichier>`, `git branch -D <slug>`, `git tag -d` des tags de sa lettre.
 
 Pourquoi chacun de ces gestes :
@@ -79,9 +79,9 @@ présenté et accordé ([`confirmation.md`](confirmation.md)), stagés par chemi
 ([`staging.md`](staging.md)). La décision — raison, dette, sort de la branche — appartient à
 l'appelant ; seuls les gestes sont ici.
 
-1. **Sur `<slug>`**, une fois le suivi passé en `statut: abandonné` : commit
+1. **Sur `<slug>`**, une fois le suivi passé en `statut = "abandonné"` : commit
    `<slug>: abandon` du suivi.
-2. **Sur `base:`**, l'archivage. `git checkout <base>`, puis selon la décision :
+2. **Sur `base`**, l'archivage. `git checkout <base>`, puis selon la décision :
 
    - *tout jeter* — ramener depuis la branche le suivi, le brief, l'audit et le plan présents,
      les archiver sous le slug, réécrire leurs champs, puis supprimer branche et tags :

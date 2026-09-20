@@ -43,7 +43,8 @@ Le cadrage a un coût. Il ne se justifie pas pour :
 Dans ces cas : le dire en une ligne et renvoyer directement à `/implementation-tracker`, qui sait
 ouvrir un chantier sans brief. **Sortie anticipée** également si, après l'Étape 2, l'utilisateur
 valide la restitution sans correction et qu'aucune ambiguïté n'est ouverte : proposer un brief
-minimal (intention + hors-périmètre) et passer à l'Étape 6.
+minimal — intention et hors-périmètre, les autres sections à `— non abordé` — et passer à
+l'Étape 5.
 
 ## Règle du sourçage
 
@@ -105,7 +106,7 @@ et pas de narration fichier par fichier.
 
 - **l'entrée de `road-map/` dont part la demande**, s'il y en a une : c'est un point de départ déjà
   écrit, et sa section `Références` **est** le début de cette reconnaissance. Retenir son `id` — il
-  ira dans le `road-map:` du futur suivi, et c'est lui qui fera sortir l'entrée à la clôture
+  ira dans le `road-map` du futur suivi, et c'est lui qui fera sortir l'entrée à la clôture
   ([Road-map](../implementation-tracker/references/road-map.md#le-champ-road-map))
 - `CLAUDE.md` du projet, `README`, conventions locales
 - fichiers concernés par la demande
@@ -138,8 +139,15 @@ Puis **arrêter le slug**, tiré de l'argument ou du sujet. Il nomme le fichier 
 **le brief fait autorité**, le fichier de suivi le reprendra tel quel. Forme et conséquence :
 [Arborescence et nommage](../implementation-tracker/references/contrat.md#arborescence-et-nommage).
 
-**Créer le brief en `statut: brouillon`** (gabarit : `references/gabarit-brief.md`), rempli de ce
-qui est déjà établi. Il sert de registre à partir d'ici.
+**Poser le brief** depuis sa semence, qui le crée en brouillon :
+
+```bash
+gabarit new brief .claude/implementation/<slug>.brief.md
+gabarit contract brief
+```
+
+Le contrat dit ce que chaque champ et chaque section attend : le lire avant de remplir, puis y
+écrire ce qui est déjà établi. Le brief sert de registre à partir d'ici.
 
 ## Étape 3 — Questions ouvertes, une par tour
 
@@ -173,17 +181,21 @@ Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à tran
 
 Puis :
 
-1. **Trancher la délégabilité** et l'écrire dans `execution:`, au frontmatter du brief — champ,
-   valeurs et défaut :
-   [Frontmatter](../implementation-tracker/references/contrat.md#frontmatter).
+1. **Trancher la délégabilité** et l'écrire dans le champ `execution` du brief, selon ce que sa
+   description dit de chaque valeur (`gabarit contract brief`). Une incertitude reportée ou des
+   signaux de dérive vides imposent `direct` : un exécutant en sous-agent n'a personne à qui poser
+   la question, il tranchera seul, et sans signaux il n'a rien qui l'arrête.
+2. **Vérifier le brief** contre sa semence :
 
-   `délégué` si les étapes prévisibles se borneront à des fichiers nommés, avec une commande de
-   vérification chacune. `direct` sinon — et `direct` dès qu'il reste une incertitude reportée ou
-   que `## Signaux de dérive` est vide : un exécutant en sous-agent n'a personne à qui poser la
-   question, il tranchera seul, et sans signaux il n'a rien qui l'arrête.
-2. Restituer les trois sections décisives — intention, hors-périmètre, incertitudes — et pointer
+   ```bash
+   gabarit check .claude/implementation/<slug>.brief.md --filled
+   ```
+
+   Un échec nomme ce qui reste à remplir : le brief ne se présente pas à la validation tant qu'il
+   n'est pas conforme. Un axe resté vide s'écrit `— non abordé`, jamais une supposition.
+3. Restituer les trois sections décisives — intention, hors-périmètre, incertitudes — et pointer
    le fichier pour le reste. Ne pas recopier le brief entier.
-3. Sur validation : `statut: validé`. Le brief est figé.
+4. Sur validation : `statut` passe à `validé`. Le brief est figé.
 
 Le brief tient en une page. S'il déborde, c'est un plan déguisé.
 
@@ -216,6 +228,6 @@ même chose ne peuvent que diverger.
 Ce qui fait foi en cas de divergence, et où s'écrit un périmètre qui change réellement :
 [Autorité et divergence](../implementation-tracker/references/contrat.md#autorité-et-divergence).
 
-Ce que le suivi reprend du brief à sa création (Étape 2 d'`implementation-tracker`) :
-`## Objectif et périmètre` — symptôme, but, critères, hors-périmètre et **signaux de dérive**, ces
-derniers devenant un déclencheur d'arrêt pendant l'implémentation.
+Ce que le suivi reprend du brief à sa création (Étape 2 d'`implementation-tracker`) : toute la
+section `## Objectif et périmètre`, dont la semence `suivi` déclare les blocs. Les **signaux de
+dérive** y deviennent un déclencheur d'arrêt pendant l'implémentation.

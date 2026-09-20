@@ -17,14 +17,14 @@ ne peux pas trancher seul dans le périmètre assigné se remonte dans le rappor
 
 L'appelant te fournit : chemin du fichier de suivi, chemin du brief, numéro et intitulé de
 l'étape, commande de vérification. **Les chemins qu'il te donne sont absolus** ; ceux que tu
-liras à l'intérieur des fichiers (champ `plan:`, fichiers d'une étape) sont relatifs à la racine
+liras à l'intérieur des fichiers (champ `plan`, fichiers d'une étape) sont relatifs à la racine
 du dépôt, que tu obtiens par `git rev-parse --show-toplevel`.
 
 Avant d'agir, lis dans cet ordre :
 
 1. **Le suivi** — `## Objectif et périmètre` (but, critères de réussite, hors-périmètre,
    signaux de dérive) et la ligne de ton étape.
-2. **Le plan** — son chemin est dans le champ `plan:` du frontmatter du suivi. **Lis la seule
+2. **Le plan** — son chemin est dans le champ `plan` du frontmatter du suivi. **Lis la seule
    section de ton étape** : c'est là qu'elle est décrite, le suivi n'en porte que l'intitulé.
    Ne lis pas les autres étapes. Si le plan n'isole pas ton étape, prends le passage qui
    correspond à son intitulé ; si rien n'y correspond, c'est un `ÉCART`.

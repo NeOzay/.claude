@@ -22,6 +22,7 @@ section) et, pour `command`, la commande incriminée. Rien n'est avalé.
 
 from __future__ import annotations
 
+import datetime
 import os
 import re
 import subprocess
@@ -29,7 +30,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from .contract import check_value
+from .contract import check_value, is_marker
 from .gitcmd import git
 from .types import Contract, Field, FieldValue, Item, Result, Section, fail, ok
 
@@ -152,6 +153,16 @@ def initial_field(f: Field, ctx: Contexte) -> Result[FieldValue]:
         return fail(
             f"{ctx.lieu}: champ « {f.name} » — valeur issue de {origine} refusée : {reason}"
         )
+
+    # UNE DATE SE POSE NUE, comme celles qui sont saisies : `text` et `command` ne rendent
+    # que des chaînes, et l'écrivain rendrait `jour = "2026-08-31"` là où il écrit
+    # `2026-08-31` pour un `datetime.date`. Sans cette conversion, une même liste porte
+    # deux graphies du même champ selon l'origine de la valeur, toutes deux valides — donc
+    # rien n'échoue, et un `grep '^jour = 2026'` n'en attrape que la moitié.
+    # APRÈS `check_value`, qui a déjà refusé ce qui n'est pas une date ISO. Un marqueur,
+    # que `check_value` laisse passer par construction, reste une chaîne.
+    if f.type == "date" and isinstance(value, str) and not is_marker(value):
+        value = datetime.date.fromisoformat(value)
     return ok(value)
 
 

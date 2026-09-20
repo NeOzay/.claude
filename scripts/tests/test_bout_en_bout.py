@@ -16,7 +16,7 @@ from pathlib import Path
 
 import check_pipeline
 import pytest
-from check_pipeline import LISTER, main
+from check_pipeline import LECTEUR, LISTER, main
 from depot_jouet import CONTRAT_REL, ecrire
 
 CONTRAT = """# Contrat
@@ -55,6 +55,7 @@ def depot_sain(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
     _ = ecrire(tmp_path, CONTRAT_REL, CONTRAT)
     _ = ecrire(tmp_path, LISTER, LISTER_FIDELE)
+    _ = ecrire(tmp_path, LECTEUR, (Path(__file__).resolve().parents[2] / LECTEUR).read_text())
     # Un exécutable de skill s'appelle par sa commande, et par rien d'autre : le
     # contrôle 6 refuse le chemin relatif, le contrôle 7 refuse l'ancrage sur le HOME.
     # Le dépôt-jouet doit donc exposer sa commande comme le vrai dépôt le fait.

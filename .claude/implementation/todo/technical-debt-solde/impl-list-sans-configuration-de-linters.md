@@ -24,3 +24,10 @@ l'écart invisible tant qu'il n'est pas modifié.
 
 Copier `ruff.toml` et `pyrightconfig.json` depuis `gabarit`, les ajuster aux chemins de la skill, et
 vérifier que les deux linters lancés depuis `skills/implementation-tracker/` sortent à 0.
+
+## Soldé le
+
+**2026-09-19, chantier `pipeline-gabarit`** — `skills/implementation-tracker/` porte son
+`ruff.toml` et son `pyrightconfig.json`, copiés de `gabarit`.
+Établi par : depuis `skills/implementation-tracker/`, `uvx ruff check .` → « All checks
+passed! » ; `uvx --with pytest basedpyright` → « 0 errors, 0 warnings, 0 notes ».

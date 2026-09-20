@@ -6,7 +6,7 @@ DEUX SOUS-COMMANDES :
 - `lettre` : la première lettre de A à Z qu'aucun tag d'étape `<L>E<n>` n'occupe. Elle nomme
   les tags d'un chantier (`AE0`, `AE1`…) et se note dans le frontmatter de son suivi.
 - `cloture <slug> --message <fichier> [--dry-run]` : finalise le suivi, aplatit la
-  branche `<slug>` en un commit unique sur `base:`, archive les fichiers du chantier en
+  branche `<slug>` en un commit unique sur `base`, archive les fichiers du chantier en
   `done/`, puis supprime la branche et ses tags.
 
 AUCUN JUGEMENT ICI. Compacter le journal, rédiger le message, décider de clore : tout
@@ -23,20 +23,45 @@ rien. Un échec git APRÈS la première écriture arrête tout et affiche l'éta
 défaire : une clôture à moitié défaite par un script est plus difficile à reprendre
 qu'une clôture arrêtée net.
 
-Stdlib seule : le script doit tourner avec n'importe quel Python 3.12 du PATH.
+LE FRONT MATTER DU SUIVI EST DU TOML, lu par `fiche.lire_front` — le lecteur que partage le
+garde-fou — et réécrit par `gabarit`, dont la reprojection ne touche que les champs changés.
+Un suivi encore en YAML `---` est refusé : seules les archives de `done/` le sont, et elles
+ne se ferment plus. Les deux bibliothèques se localisent par les commandes de `bin/` qui les
+exposent, `impl-list` et `gabarit`, et seule la clôture les charge : `lettre` tourne partout.
+
+LE VENV DU DÉPÔT PORTE `tomlkit`, dont l'écrivain de `gabarit` a besoin : le script s'y
+réexécute, comme `gabarit-cli.py`.
 """
 
 from __future__ import annotations
 
+import os
+import sys
+from pathlib import Path
+
+# Voir `list-dir.py` pour le raisonnement : `sys.prefix` et non `sys.executable`, un seul
+# `if` pour ne pas déclencher E402, et un venv absent qui ne bloque rien.
+if (
+    _venv := next(
+        (
+            a / ".venv"
+            for a in Path(__file__).resolve().parents
+            if (a / ".venv/bin/python").exists()
+        ),
+        None,
+    )
+) is not None and Path(sys.prefix).resolve() != _venv.resolve():
+    _python = str(_venv / "bin" / "python")
+    os.execv(_python, [_python, str(Path(__file__).resolve()), *sys.argv[1:]])
+
 import argparse
 import datetime
 import re
+import shutil
 import string
 import subprocess
-import sys
 from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
 from typing import cast
 
 IMPLEMENTATION = Path(".claude/implementation")
@@ -93,50 +118,63 @@ def lettre_libre() -> str:
 
 
 # ------------------------------------------------------------------------ clôture
-def frontmatter(texte: str) -> dict[str, str]:
-    """Les champs `clé: valeur` du frontmatter, commentaire `  # …` retiré.
+def bibliotheques() -> None:
+    """Rend importables `fiche` et `gabarit`, depuis les commandes de `bin/` qui les exposent."""
+    for commande in ("impl-list", "gabarit"):
+        chemin = shutil.which(commande)
+        if chemin is None:
+            raise Refus(
+                f"commande « {commande} » introuvable dans le PATH :"
+                " ajouter bin/ au profil du shell"
+            )
+        repertoire = str(Path(chemin).resolve().parent)
+        if repertoire not in sys.path:
+            sys.path.insert(0, repertoire)
+    # IMPORTÉES ICI, AVANT TOUTE ÉCRITURE : un import qui échouerait au premier geste
+    # laisserait `--dry-run` annoncer une clôture impossible, puis une trace Python brute.
+    try:
+        import fiche  # noqa: F401  # pyright: ignore[reportUnusedImport]
+        import gabarit.items  # noqa: F401  # pyright: ignore[reportUnusedImport]
+    except ImportError as exc:
+        # LE MODULE MANQUANT DIT LA CAUSE, quel qu'il soit : une bibliothèque du dépôt que
+        # sa commande de bin/ ne mène pas, ou une dépendance que l'interpréteur n'a pas — le
+        # plus souvent parce que le venv du dépôt, qui les porte, n'a pas été trouvé.
+        if exc.name in ("fiche", "gabarit"):
+            raise Refus(
+                f"bibliothèque « {exc.name} » introuvable depuis les commandes de bin/"
+            ) from None
+        raise Refus(
+            f"dépendance « {exc.name} » absente de {sys.executable} : le .venv du dépôt, qui"
+            " la porte, est manquant ou incomplet"
+        ) from None
 
-    Lecture ligne à ligne, sans dépendance : le frontmatter d'un suivi est plat, et le
-    garde-fou du dépôt le lit déjà de cette façon.
-    """
-    lignes = texte.splitlines()
-    if not lignes or lignes[0].strip() != "---":
-        raise Refus("pas de frontmatter : la première ligne du suivi doit être « --- »")
-    champs: dict[str, str] = {}
-    for ligne in lignes[1:]:
-        if ligne.strip() == "---":
-            return champs
-        m = re.match(r"^(?P<cle>[\w-]+): *(?P<valeur>.*?)(?:\s+#.*)?$", ligne)
-        if m is not None and m.group("valeur"):
-            champs[m.group("cle")] = m.group("valeur")
-    # Nommer CE défaut : lu comme vide, le frontmatter ferait accuser le premier champ
-    # requis d'être absent, alors qu'il est là et que c'est la clôture qui manque.
-    raise Refus("frontmatter non fermé : aucune ligne « --- » ne le termine")
+
+def lire_suivi(suivi: Path) -> dict[str, str]:
+    """Les champs du front matter TOML du suivi. Un YAML, ou un front matter illisible, refuse."""
+    from fiche import FrontMatterError, lire_front
+
+    try:
+        front = lire_front(suivi.read_text(encoding="utf-8"))
+    except FrontMatterError as exc:
+        raise Refus(f"{suivi} : {exc}") from None
+    if front.format != "toml":
+        raise Refus(
+            f"{suivi} : front matter YAML « --- ». Un suivi vivant se pose par"
+            " `gabarit new suivi` : y reporter ses champs et ses sections, puis relancer"
+        )
+    return front.champs
 
 
-def remplacer_champ(texte: str, cle: str, valeur: str) -> str:
-    """Réécrit la ligne `cle:` du frontmatter. Le reste du fichier n'est pas touché.
+def reecrire(fichier: Path, champs: dict[str, object]) -> None:
+    """Réécrit des champs du front matter par `gabarit` ; le reste du fichier n'est pas touché."""
+    from gabarit.items import read_item, write_item
 
-    LE MOTIF EST CELUI DU LECTEUR : `cle:` suivi ou non d'une espace. Un champ que
-    `frontmatter` sait lire est un champ qu'on sait réécrire — sinon `maj:2026-01-01`
-    serait lu, jamais réécrit, et le suivi archivé garderait sa valeur sans un mot. Seule
-    la valeur change : un commentaire `  # …` en fin de ligne est conservé.
-    Un champ introuvable lève `Echec` : un fichier laissé inchangé en silence est le
-    défaut que ce script existe pour ne pas avoir.
-    """
-    fin = texte.find("\n---", 3)
-    if fin < 0:
-        raise Echec(f"frontmatter non fermé : « {cle}: » ne peut pas être réécrit")
-    tete, reste = texte[:fin], texte[fin:]
-    tete, n = re.subn(
-        rf"(?m)^{re.escape(cle)}:.*?(?P<commentaire>\s+#.*)?$",
-        lambda m: f"{cle}: {valeur}{m.group('commentaire') or ''}",
-        tete,
-        count=1,
-    )
-    if n == 0:
-        raise Echec(f"champ « {cle}: » introuvable dans le frontmatter")
-    return tete + reste
+    lu = read_item(fichier)
+    if not lu:
+        raise Echec(lu.message)
+    ecrit = write_item(lu.unwrap().with_fields(**champs))
+    if not ecrit:
+        raise Echec(ecrit.message)
 
 
 @dataclass(frozen=True)
@@ -200,13 +238,13 @@ def preparer(slug: str, message: Path) -> Cloture:
     suivi = IMPLEMENTATION / f"{slug}.md"
     if not suivi.is_file():
         raise Refus(f"suivi introuvable : {suivi}")
-    champs = frontmatter(suivi.read_text(encoding="utf-8"))
+    champs = lire_suivi(suivi)
     for requis in ("base", "lettre", "plan", "statut", "maj"):
         if requis not in champs:
-            raise Refus(f"{suivi} : champ « {requis}: » absent du frontmatter")
+            raise Refus(f"{suivi} : champ « {requis} » absent du front matter")
     base, lettre = champs["base"], champs["lettre"]
     if not re.fullmatch(r"[A-Z]", lettre):
-        raise Refus(f"{suivi} : « lettre: {lettre} » n'est pas une lettre de A à Z")
+        raise Refus(f"{suivi} : lettre = « {lettre} » n'est pas une lettre de A à Z")
     if git("rev-parse", "--verify", "--quiet", f"refs/heads/{base}").returncode != 0:
         raise Refus(f"branche de base introuvable : {base}")
     plan = Path(champs["plan"])
@@ -271,11 +309,11 @@ def decrire(c: Cloture) -> str:
         f"Branche aplatie : {c.slug} → un commit sur {c.base}",
         "Commits réunis :",
         *(f"  {ligne}" for ligne in (c.plage.splitlines() or ["(aucun)"])),
-        f"Commit préalable sur {c.slug} : « {c.slug}: finalisation du suivi » (statut: terminé)",
+        f"Commit préalable sur {c.slug} : « {c.slug}: finalisation du suivi » (statut = terminé)",
         "Déplacements :",
         *(f"  {s} → {t}" for s, t in c.deplacements),
         "Champs réécrits dans le suivi archivé :",
-        *(f"  {k}: {v}" for k, v in c.champs.items()),
+        *(f"  {k} = {v}" for k, v in c.champs.items()),
         f"Branche supprimée : {c.slug}",
         f"Tags supprimés : {' '.join(c.tags) or '(aucun)'}",
         "Message :",
@@ -285,15 +323,12 @@ def decrire(c: Cloture) -> str:
 
 
 def finaliser(c: Cloture) -> None:
-    """Point 3 — sur la branche : `statut: terminé`, `maj:` du jour, commit des annexes.
+    """Point 3 — sur la branche : `statut` à terminé, `maj` du jour, commit des annexes.
 
     Toutes les annexes présentes sont indexées : non suivies, elles resteraient hors de
     l'aplatissement ; suivies et modifiées, elles feraient refuser le changement de branche.
     """
-    texte = c.suivi.read_text(encoding="utf-8")
-    texte = remplacer_champ(texte, "statut", "terminé")
-    texte = remplacer_champ(texte, "maj", c.date)
-    _ = c.suivi.write_text(texte, encoding="utf-8")
+    reecrire(c.suivi, {"statut": "terminé", "maj": datetime.date.fromisoformat(c.date)})
     a_indexer = [s.as_posix() for s, _ in c.deplacements]
     if TODO.is_dir():
         a_indexer.append(TODO.as_posix())
@@ -310,10 +345,7 @@ def archiver(c: Cloture) -> None:
     DONE.mkdir(parents=True, exist_ok=True)
     for source, cible in c.deplacements:
         _ = git_ecriture("mv", source.as_posix(), cible.as_posix())
-    texte = c.suivi_archive.read_text(encoding="utf-8")
-    for champ, cible in c.champs.items():
-        texte = remplacer_champ(texte, champ, cible)
-    _ = c.suivi_archive.write_text(texte, encoding="utf-8")
+    reecrire(c.suivi_archive, dict(c.champs))
     _ = git_ecriture("add", "--", c.suivi_archive.as_posix())
 
 
@@ -384,6 +416,7 @@ def main(argv: list[str]) -> int:
         if commande == "lettre":
             print(lettre_libre())
             return 0
+        bibliotheques()
         cloture = preparer(cast("str", args.slug), cast("Path", args.message))
         print(decrire(cloture))
         if cast("bool", args.dry_run):

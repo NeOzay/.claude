@@ -324,28 +324,43 @@ def check_empreintes(root: Path) -> list[Finding]:
 
 
 LISTER = "skills/implementation-tracker/scripts/impl_list.py"
+LECTEUR = "skills/implementation-tracker/scripts/fiche.py"
 IMPLEMENTATION = ".claude/implementation"
 ANNEXES = (".brief.md", ".audit.md", ".plan.md")
 
 
-def charger_suivis(root: Path) -> Callable[[Path], list[str]] | None:
-    """La fonction `suivis()` du LISTER **du dépôt audité**, ou None s'il est absent.
+def charger(root: Path, relatif: str, fonction: str) -> Callable[..., object] | None:
+    """La fonction `fonction` du module `relatif` **du dépôt audité**, ou None s'il manque.
 
     Copie du dépôt, jamais la skill installée : le garde-fou doit juger ce que le diff
     contient — sur un clone ailleurs, viser $HOME validerait un fichier étranger au
     chantier. Et on importe plutôt qu'on ne sous-processe : c'est le même code que la
     CLI, les deux ne peuvent donc pas diverger.
     """
-    chemin = root / LISTER
+    chemin = root / relatif
     if not chemin.is_file():
         return None
-    spec = importlib.util.spec_from_file_location("_impl_list_audite", chemin)
+    nom = f"_audite_{chemin.stem}"
+    spec = importlib.util.spec_from_file_location(nom, chemin)
     if spec is None or spec.loader is None:
         return None
     module = importlib.util.module_from_spec(spec)
+    # Enregistré avant exécution : `dataclass` résout les annotations d'un module par
+    # `sys.modules`, et un module absent de la table y lève à l'import.
+    sys.modules[nom] = module
     spec.loader.exec_module(module)
-    fn = getattr(module, "suivis", None)
-    return cast("Callable[[Path], list[str]]", fn) if callable(fn) else None
+    fn = getattr(module, fonction, None)
+    return fn if callable(fn) else None
+
+
+def charger_suivis(root: Path) -> Callable[[Path], list[str]] | None:
+    """La fonction `suivis()` du LISTER du dépôt audité."""
+    return cast("Callable[[Path], list[str]] | None", charger(root, LISTER, "suivis"))
+
+
+def charger_lecteur(root: Path) -> Callable[[str], object] | None:
+    """La fonction `lire_front()` du lecteur de fiches du dépôt audité."""
+    return charger(root, LECTEUR, "lire_front")
 
 
 @control(3, "Filtre de listing des suivis")
@@ -401,17 +416,21 @@ def check_archives(root: Path) -> list[Finding]:
     if not archives:
         return [Finding(False, "aucun suivi archivé examiné — contrôle sans objet")]
 
+    lire_front = charger_lecteur(root)
+    if lire_front is None:
+        return [Finding(False, f"lecteur de fiches absent ou sans lire_front() : {LECTEUR}")]
+
     findings: list[Finding] = []
     for nom in archives:
-        texte = (done / nom).read_text(encoding="utf-8")
+        try:
+            front = lire_front((done / nom).read_text(encoding="utf-8"))
+        except ValueError as exc:
+            findings.append(Finding(False, f"{nom} → front matter illisible : {exc}"))
+            continue
+        champs = cast("dict[str, str]", getattr(front, "champs", {}))
         for champ in ("plan", "brief", "audit"):
-            # Commentaire `  # …` retiré, comme le lit `commit_chantier.py` : la clôture le
-            # conserve derrière le chemin réécrit, qui sinon « pointerait dans le vide ».
-            m = re.search(rf"^{champ}: *(\S.*?)(?:\s+#.*)?$", texte, re.MULTILINE)
-            if m is None:
-                continue
-            cible = cast("str", m.group(1)).strip()
-            if not (root / cible).is_file():
+            cible = champs.get(champ, "").strip()
+            if cible and not (root / cible).is_file():
                 findings.append(
                     Finding(False, f"{nom} → {champ}: pointe dans le vide ({cible})")
                 )

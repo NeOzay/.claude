@@ -12,6 +12,8 @@ Pas de `conftest.py` : les suites du dépôt ne partagent jamais un nom de modul
 from __future__ import annotations
 
 import datetime
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -19,6 +21,11 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(__file__).resolve().parent.parent / "commit_chantier.py"
+# Le `bin/` DU DÉPÔT TESTÉ, en tête du PATH : la clôture charge `fiche` et `gabarit` depuis
+# les commandes qui les exposent. Sans lui, les tests dépendraient du profil de la machine, et
+# sur un clone ils éprouveraient les bibliothèques installées au lieu de celles du clone.
+BIN = SCRIPT.parents[3] / "bin"
+ENV = {**os.environ, "PATH": f"{BIN}{os.pathsep}{os.environ.get('PATH', '')}"}
 SLUG = "chantier-jouet"
 BASE = "principale"
 PLAN = ".claude/plans/plan-genere.md"
@@ -28,19 +35,20 @@ AUDIT = f".claude/implementation/{SLUG}.audit.md"
 DATE = datetime.date.today().isoformat()
 DONE = ".claude/implementation/done"
 
-SUIVI_TEXTE = f"""---
-slug: {SLUG}
-titre: Un chantier jouet
-branche: {SLUG}
-base: {BASE}               # branche principale
-statut: en-cours
-session: 2
-lettre: A
-plan: {PLAN}
-brief: {BRIEF}
-créé: 2026-01-01
-maj: 2026-01-02
----
+SUIVI_TEXTE = f"""+++
+gabarit = "suivi"
+slug = "{SLUG}"
+titre = "Un chantier jouet"
+branche = "{SLUG}"
+base = "{BASE}"               # branche principale
+statut = "en-cours"
+session = 2
+lettre = "A"
+plan = "{PLAN}"
+brief = "{BRIEF}"
+"créé" = 2026-01-01
+maj = 2026-01-02
++++
 
 ## Étapes
 
@@ -62,7 +70,12 @@ def ecrire(depot: Path, rel: str, contenu: str) -> None:
 
 def lancer(depot: Path, *argv: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT), *argv], cwd=depot, capture_output=True, text=True, check=False
+        [sys.executable, str(SCRIPT), *argv],
+        cwd=depot,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=ENV,
     )
 
 
@@ -161,11 +174,11 @@ def test_cloture_aplatit_archive_et_nettoie(depot: Path) -> None:
     for rel in (SUIVI, BRIEF, PLAN):
         assert not (depot / rel).exists()
     texte = suivi.read_text(encoding="utf-8")
-    assert "statut: terminé\n" in texte
-    assert f"maj: {DATE}\n" in texte
-    assert f"plan: {DONE}/{DATE}-{SLUG}.plan.md\n" in texte
-    assert f"brief: {DONE}/{DATE}-{SLUG}.brief.md\n" in texte
-    assert "base: principale               # branche principale\n" in texte
+    assert 'statut = "terminé"\n' in texte
+    assert f"maj = {DATE}\n" in texte
+    assert f'plan = "{DONE}/{DATE}-{SLUG}.plan.md"\n' in texte
+    assert f'brief = "{DONE}/{DATE}-{SLUG}.brief.md"\n' in texte
+    assert 'base = "principale"               # branche principale\n' in texte
 
     assert SLUG not in git(depot, "branch", "--list")
     assert git(depot, "tag", "--list") == ""
@@ -177,7 +190,7 @@ def test_cloture_accepte_un_audit_non_suivi(depot: Path) -> None:
     assert proc.returncode == 0, proc.stderr
     archive = f"{DONE}/{DATE}-{SLUG}.audit.md"
     assert git(depot, "ls-files", archive).strip() == archive
-    assert f"audit: {archive}" not in (depot / DONE / f"{DATE}-{SLUG}.md").read_text(
+    assert "audit =" not in (depot / DONE / f"{DATE}-{SLUG}.md").read_text(
         encoding="utf-8"
     )  # le champ n'existait pas : rien n'est inventé
 
@@ -235,22 +248,23 @@ def test_refus_sur_modification_etrangere(depot: Path) -> None:
 
 
 def test_refus_sans_lettre_au_frontmatter(depot: Path) -> None:
-    ecrire(depot, SUIVI, SUIVI_TEXTE.replace("lettre: A\n", ""))
+    ecrire(depot, SUIVI, SUIVI_TEXTE.replace('lettre = "A"\n', ""))
     assert "lettre" in refuse(depot, "--message", message(depot))
 
 
 def test_refus_sans_maj_au_frontmatter(depot: Path) -> None:
-    ecrire(depot, SUIVI, SUIVI_TEXTE.replace("maj: 2026-01-02\n", ""))
+    ecrire(depot, SUIVI, SUIVI_TEXTE.replace("maj = 2026-01-02\n", ""))
     assert "maj" in refuse(depot, "--message", message(depot))
 
 
 def test_refus_si_le_plan_est_introuvable(depot: Path) -> None:
-    ecrire(depot, SUIVI, SUIVI_TEXTE.replace(f"plan: {PLAN}", "plan: .claude/plans/absent.md"))
+    absent = SUIVI_TEXTE.replace(f'plan = "{PLAN}"', 'plan = ".claude/plans/absent.md"')
+    ecrire(depot, SUIVI, absent)
     assert "plan introuvable" in refuse(depot, "--message", message(depot))
 
 
 def test_refus_si_la_base_est_introuvable(depot: Path) -> None:
-    ecrire(depot, SUIVI, SUIVI_TEXTE.replace(f"base: {BASE}", "base: inexistante"))
+    ecrire(depot, SUIVI, SUIVI_TEXTE.replace(f'base = "{BASE}"', 'base = "inexistante"'))
     assert "base introuvable" in refuse(depot, "--message", message(depot))
 
 
@@ -262,6 +276,7 @@ def test_refus_hors_de_la_racine_du_depot(depot: Path) -> None:
         capture_output=True,
         text=True,
         check=False,
+        env=ENV,
     )
     assert proc.returncode == 1
     assert "racine du dépôt" in proc.stderr
@@ -269,16 +284,16 @@ def test_refus_hors_de_la_racine_du_depot(depot: Path) -> None:
 
 
 # --------------------------------------------------------- champs du frontmatter
-def test_un_champ_colle_a_ses_deux_points_est_reecrit(depot: Path) -> None:
-    colle = SUIVI_TEXTE.replace("maj: 2026-01-02", "maj:2026-01-02").replace(
-        f"plan: {PLAN}", f"plan:{PLAN}"
-    )
-    ecrire(depot, SUIVI, colle)
-    proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
-    assert proc.returncode == 0, proc.stderr
-    texte = (depot / DONE / f"{DATE}-{SLUG}.md").read_text(encoding="utf-8")
-    assert f"maj: {DATE}\n" in texte
-    assert f"plan: {DONE}/{DATE}-{SLUG}.plan.md\n" in texte
+def test_refus_d_un_suivi_yaml(depot: Path) -> None:
+    """Un suivi vivant est posé par `gabarit` : seules les archives restent en YAML."""
+    ecrire(depot, SUIVI, "---\nslug: x\nbase: principale\n---\n")
+    assert "gabarit new suivi" in refuse(depot, "--message", message(depot))
+
+
+def test_refus_d_une_cle_en_double(depot: Path) -> None:
+    """Une valeur ambiguë refuse la clôture au lieu d'être lue, puis réécrite, tronquée."""
+    ecrire(depot, SUIVI, SUIVI_TEXTE.replace('lettre = "A"\n', 'lettre = "A"\nlettre = "B"\n'))
+    assert "TOML invalide" in refuse(depot, "--message", message(depot))
 
 
 def test_le_registre_non_suivi_entre_dans_l_aplatissement(depot: Path) -> None:
@@ -333,8 +348,8 @@ def test_relance_quand_la_finalisation_est_deja_commitee(depot: Path) -> None:
     ecrire(
         depot,
         SUIVI,
-        SUIVI_TEXTE.replace("statut: en-cours", "statut: terminé").replace(
-            "maj: 2026-01-02", f"maj: {DATE}"
+        SUIVI_TEXTE.replace('statut = "en-cours"', 'statut = "terminé"').replace(
+            "maj = 2026-01-02", f"maj = {DATE}"
         ),
     )
     _ = git(depot, "add", SUIVI)
@@ -345,24 +360,83 @@ def test_relance_quand_la_finalisation_est_deja_commitee(depot: Path) -> None:
 
 
 def test_refus_nomme_un_frontmatter_non_ferme(depot: Path) -> None:
-    ecrire(depot, SUIVI, SUIVI_TEXTE.replace("maj: 2026-01-02\n---\n", "maj: 2026-01-02\n"))
+    ecrire(depot, SUIVI, SUIVI_TEXTE.replace("maj = 2026-01-02\n+++\n", "maj = 2026-01-02\n"))
     assert "non fermé" in refuse(depot, "--message", message(depot))
 
 
 def test_la_reecriture_conserve_le_commentaire_de_fin_de_ligne(depot: Path) -> None:
-    commente = SUIVI_TEXTE.replace("maj: 2026-01-02", "maj: 2026-01-02   # à chaque écriture")
+    commente = SUIVI_TEXTE.replace("maj = 2026-01-02", "maj = 2026-01-02   # à chaque écriture")
     ecrire(depot, SUIVI, commente)
     proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
     assert proc.returncode == 0, proc.stderr
     texte = (depot / DONE / f"{DATE}-{SLUG}.md").read_text(encoding="utf-8")
-    assert f"maj: {DATE}   # à chaque écriture\n" in texte
+    assert f"maj = {DATE}   # à chaque écriture\n" in texte
 
 
 def test_un_chemin_commente_est_reecrit_sans_perdre_son_commentaire(depot: Path) -> None:
-    commente = SUIVI_TEXTE.replace(f"plan: {PLAN}", f"plan: {PLAN}   # plan du harness")
+    commente = SUIVI_TEXTE.replace(f'plan = "{PLAN}"', f'plan = "{PLAN}"   # plan du harness')
     ecrire(depot, SUIVI, commente)
     proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
     assert proc.returncode == 0, proc.stderr
     texte = (depot / DONE / f"{DATE}-{SLUG}.md").read_text(encoding="utf-8")
-    assert f"plan: {DONE}/{DATE}-{SLUG}.plan.md   # plan du harness\n" in texte
+    assert f'plan = "{DONE}/{DATE}-{SLUG}.plan.md"   # plan du harness\n' in texte
 
+
+def test_un_diese_dans_un_chemin_n_est_pas_un_commentaire(depot: Path) -> None:
+    """Ce que l'ancien lecteur tronquait : ` #` y ouvrait un commentaire."""
+    plan = ".claude/plans/plan #2.md"
+    ecrire(depot, plan, "plan\n")
+    ecrire(depot, SUIVI, SUIVI_TEXTE.replace(f'plan = "{PLAN}"', f'plan = "{plan}"'))
+    _ = git(depot, "add", "-A")
+    _ = git(depot, "commit", "-q", "-m", "plan renommé")
+    proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
+    assert proc.returncode == 0, proc.stderr
+    assert (depot / DONE / f"{DATE}-{SLUG}.plan.md").read_text(encoding="utf-8") == "plan\n"
+
+
+def test_refus_si_une_bibliotheque_manque(depot: Path, tmp_path: Path) -> None:
+    """Une commande de bin/ qui ne mène à aucune bibliothèque refuse avant toute écriture."""
+    faux = tmp_path / "faux-bin"
+    faux.mkdir()
+    for commande in ("impl-list", "gabarit"):
+        _ = (faux / commande).write_text("#!/bin/sh\n", encoding="utf-8")
+        (faux / commande).chmod(0o755)
+    avant = instantane(depot)
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), "cloture", SLUG, "--message", message(depot), "--dry-run"],
+        cwd=depot,
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, "PATH": f"{faux}{os.pathsep}/usr/bin{os.pathsep}/bin"},
+    )
+    assert proc.returncode == 1
+    assert proc.stderr.startswith("REFUS : bibliothèque « fiche » introuvable")
+    assert instantane(depot) == avant
+
+
+def test_refus_nomme_une_dependance_absente(depot: Path, tmp_path: Path) -> None:
+    """Hors du venv, `tomlkit` manque : le refus le nomme, lui et l'interpréteur."""
+    python = shutil.which("python3", path="/usr/bin:/bin")
+    if python is None or subprocess.run(
+        [python, "-c", "import sys\nif sys.version_info < (3, 12): sys.exit(2)\nimport tomlkit"],
+        capture_output=True,
+        check=False,
+    ).returncode != 1:
+        pytest.skip("aucun python3 >= 3.12 sans tomlkit sous /usr/bin")
+    # Le script, copié hors du dépôt : aucun .venv parmi ses ancêtres, pas de réexécution.
+    script = tmp_path / "seul" / "commit_chantier.py"
+    script.parent.mkdir()
+    _ = script.write_text(SCRIPT.read_text(encoding="utf-8"), encoding="utf-8")
+    avant = instantane(depot)
+    proc = subprocess.run(
+        [python, str(script), "cloture", SLUG, "--message", message(depot), "--dry-run"],
+        cwd=depot,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=ENV,
+    )
+    assert proc.returncode == 1
+    assert proc.stderr.startswith("REFUS : dépendance « tomlkit » absente de ")
+    assert instantane(depot) == avant

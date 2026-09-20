@@ -110,7 +110,7 @@ committer ou les mettre de côté) avant de relancer.
    Un brief validé existe déjà pour ce chantier → le lire et passer directement au point 2.
 
    **Pas de brief** (cadrage jugé inutile, cf. « Quand ne pas cadrer » d'`intent-brief`) →
-   `brief:` omis et **`execution: direct` imposé** : sans hors-périmètre ni signaux de dérive
+   `brief` omis et **`execution = "direct"` imposé** : sans hors-périmètre ni signaux de dérive
    écrits, un exécutant isolé n'a aucune borne. Remplir `## Objectif et périmètre` avec
    l'utilisateur, en une passe.
 
@@ -163,27 +163,43 @@ committer ou les mettre de côté) avant de relancer.
 
    S'il est ignoré, le dire à l'utilisateur : sans lui, la reprise en session 3 et toute
    délégation perdent la description des étapes. Sinon, il entre dans le commit de l'état initial
-   (point 8).
+   (point 9).
 
-4. **Figer le plan** dans le fichier de suivi (gabarit : `references/gabarit-suivi.md`) : les étapes
-   du plan deviennent la section `## Étapes`, et le chemin du plan va dans le champ `plan:` du
-   frontmatter.
+4. **Créer la branche d'implémentation** nommée exactement `<slug>`, à partir de la branche
+   courante — la **branche principale**, qui ira dans le champ `base` du suivi — et obtenir la
+   lettre des tags d'étape, qui ira dans le champ `lettre` :
 
-   Format d'une étape, granularité, conditions de délégabilité :
+   ```bash
+   git checkout -b <slug>
+   commit-chantier lettre
+   ```
+
+   La lettre nomme les tags d'étape du chantier
+   ([Tags d'étape](../git-smart-commit/references/tags-etape.md)). Pourquoi le nom de branche est
+   exact : [Branche de chantier](../git-smart-commit/references/branche-chantier.md).
+5. **Poser le suivi** depuis sa semence, puis lire ce que chaque champ et chaque section attend :
+
+   ```bash
+   gabarit new suivi .claude/implementation/<slug>.md
+   gabarit contract suivi
+   ```
+
+   **Figer le plan** dans le suivi : ses étapes deviennent la section `Étapes`, et son chemin va
+   dans le champ `plan`. Format d'une étape, granularité, conditions de délégabilité :
    [Format d'étape et délégabilité](references/contrat.md#format-détape-et-délégabilité).
 
    **C'est ici que les étapes trop grosses se découpent**, pas en cours de route — le renvoi
    ci-dessus dit pourquoi.
-5. **Reprendre exactement le slug du brief**, jamais le réinventer — règle et conséquence :
+6. **Reprendre exactement le slug du brief**, jamais le réinventer — règle et conséquence :
    [Arborescence et nommage](references/contrat.md#arborescence-et-nommage).
-6. **Reprendre `## Objectif et périmètre` du brief**, ne pas le réinventer : symptôme, but,
-   critères de réussite, hors-périmètre **et signaux de dérive** viennent du brief, tels qu'ils
-   ont été validés. Renseigner `brief:` dans le frontmatter, ainsi que `execution:` — repris tel
-   quel du brief. Champs, valeurs et défauts : [Frontmatter](references/contrat.md#frontmatter).
+7. **Reprendre l'objectif et le périmètre du brief**, ne pas les réinventer : la semence déclare
+   les blocs de cette section, et leur contenu vient du brief tel qu'il a été validé.
+   Les champs `brief` et `execution` en viennent aussi, ce dernier tel quel.
+   Règles des champs : [Frontmatter](references/contrat.md#frontmatter).
 
-   **Chantier parti d'une entrée de `road-map/`** → renseigner `road-map:` avec son `id`, relevé
-   par `intent-brief` à la reconnaissance. C'est la seule chose qui fera sortir l'entrée à la
-   clôture ; omis, elle y restera indéfiniment
+   **Chantier parti d'une entrée de `road-map/`** → renseigner le champ `road-map` avec son `id`,
+   relevé par `intent-brief` à la reconnaissance. C'est la seule chose qui fera sortir l'entrée à
+   la clôture ; omis, elle y restera indéfiniment
    ([Road-map](references/road-map.md#le-champ-road-map)).
 
    Le **symptôme** est ce qui permet, trois sessions plus tard, de voir qu'on a construit la
@@ -193,19 +209,16 @@ committer ou les mettre de côté) avant de relancer.
 
    Le brief n'est plus modifié ensuite — ce qu'on fait d'une intention qui change en cours de
    route : [Autorité et divergence](references/contrat.md#autorité-et-divergence).
-7. **Créer la branche d'implémentation** nommée exactement `<slug>`, à partir de la branche courante.
-   Cette branche courante est la **branche principale** : la noter dans le champ `base:` du
-   frontmatter, et `<slug>` dans `branche:`.
+8. **Vérifier le suivi** contre sa semence :
 
    ```bash
-   git checkout -b <slug>
-   commit-chantier lettre
+   gabarit check .claude/implementation/<slug>.md --filled
    ```
 
-   La lettre rendue va dans `lettre:` du frontmatter : elle nomme les tags d'étape du chantier
-   ([Tags d'étape](../git-smart-commit/references/tags-etape.md)). Pourquoi le nom de branche est
-   exact : [Branche de chantier](../git-smart-commit/references/branche-chantier.md).
-8. **Committer l'état initial** — brief, plan et suivi — par `git-smart-commit`, type 2, cas « état
+   **Un échec arrête la création** : pas de commit de l'état initial, pas d'implémentation. Il
+   nomme ce qui reste à remplir ; le compléter, puis relancer. Un suivi incomplet se relit à froid
+   trois sessions plus tard, et c'est là que le trou coûte.
+9. **Committer l'état initial** — brief, plan et suivi — par `git-smart-commit`, type 2, cas « état
    initial » : [Commit rapide de chantier](../git-smart-commit/references/etape.md). Le tag `<L>E0`
    qu'il pose est le point de départ des plages d'étapes.
 
@@ -220,10 +233,10 @@ Lire le fichier en entier, puis restituer en quelques lignes — pas de récitat
 - les blocages éventuels,
 - les commandes de vérification à rejouer.
 
-Comparer `branche:` du frontmatter à la branche git courante. **Divergence → le signaler**, ne pas
+Comparer le champ `branche` du front matter à la branche git courante. **Divergence → le signaler**, ne pas
 corriger le fichier d'office (l'utilisateur peut avoir volontairement changé de branche).
 
-Incrémenter `session:` de 1 dans le frontmatter — c'est ce compteur qui sert aux messages de commit
+Incrémenter `session` de 1 dans le frontmatter — c'est ce compteur qui sert aux messages de commit
 de session (voir Étape 4).
 
 **Modifications non commitées détectées** (`git status --short` non vide, Étape 0) → le signaler en
@@ -235,20 +248,20 @@ tout début de conversation et **proposer** un commit de session avant de contin
 ## Étape 4 — Maintenir le fichier pendant la session
 
 Le fichier est mis à jour **en continu**, sans que l'utilisateur ait à le demander. Relire le fichier
-avant chaque écriture. Toujours actualiser `maj:` en même temps que le contenu.
+avant chaque écriture. Toujours actualiser `maj` en même temps que le contenu.
 
 Déclencheurs d'écriture :
 
 | Événement | Action |
 |---|---|
-| Étape passée en `[>]` | Si `execution: délégué` et l'étape est substantielle : déléguer à `step-implementer` (voir ci-dessous) |
+| Étape passée en `[>]` | Si `execution = "délégué"` et l'étape est substantielle : déléguer à `step-implementer` (voir ci-dessous) |
 | Étape terminée | Cocher `[x]`, passer la suivante en `[>]`, **proposer le commit d'étape**, qui pose le tag `<L>E<n>` (voir ci-dessous) |
-| Blocage | Passer l'étape en `[!]` + raison, `statut: bloqué` |
-| Déblocage | Repasser en `[>]`, `statut: en-cours` |
+| Blocage | Passer l'étape en `[!]` + raison, `statut = "bloqué"` |
+| Déblocage | Repasser en `[>]`, `statut = "en-cours"` |
 | Décision d'architecture arrêtée | Ligne dans le journal (voir règle ci-dessous) |
 | Le plan ne colle plus au réel | **Modifier les étapes** et le dire. Ne jamais bricoler en silence |
 | **Signal de dérive du brief déclenché** | **S'arrêter**, le nommer, en reparler avant de continuer |
-| Diff `base:`↔`<slug>` au-delà de 400 lignes | **Proposer** un audit intermédiaire, étapes restantes à l'appui (`references/audit.md`) |
+| Diff `base`↔`<slug>` au-delà de 400 lignes | **Proposer** un audit intermédiaire, étapes restantes à l'appui (`references/audit.md`) |
 | Demande hors-périmètre | Le signaler, proposer soit d'élargir le périmètre (voir ci-dessous), soit une nouvelle impl |
 | Problème constaté hors du périmètre | Le noter au journal — il ira au registre de dette à la clôture (`references/dette.md`) |
 
@@ -260,14 +273,14 @@ brief, pas reformulé » : [Autorité et divergence](references/contrat.md#autor
 
 ### Délégation d'étape
 
-Quand `execution: délégué` et que l'étape passée en `[>]` est substantielle, elle **est** confiée
+Quand `execution = "délégué"` et que l'étape passée en `[>]` est substantielle, elle **est** confiée
 au sous-agent `step-implementer` (Sonnet, contexte isolé). Deux bénéfices distincts : les lectures
 de fichiers et les diffs restent dans l'agent au lieu de gonfler la session, et l'exécution sort
 du modèle de cadrage.
 
 Lui transmettre : chemins **absolus** du suivi et du brief, numéro et intitulé de l'étape, commande
 de vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même le suivi, le plan (via
-`plan:`) et le brief : [Contrat des sous-agents](references/contrat.md#contrat-des-sous-agents).
+`plan`) et le brief : [Contrat des sous-agents](references/contrat.md#contrat-des-sous-agents).
 
 **Ne pas déléguer** :
 
@@ -278,7 +291,7 @@ de vérification de l'étape. **Ne rien recopier d'autre** — il lit lui-même 
 - une étape **déjà entamée** et interrompue par une fin de session : la terminer en direct
   ([Format d'étape et délégabilité](references/contrat.md#format-détape-et-délégabilité)).
 
-Dans le doute sur un chantier entier, basculer `execution:` à `direct` et le noter au journal.
+Dans le doute sur un chantier entier, basculer `execution` à `direct` et le noter au journal.
 
 **L'appelant reste responsable au retour** : relire le fichier de suivi avant d'y écrire.
 
@@ -290,10 +303,10 @@ diff, et il vient **avant** toute autre action.
 
 | `RÉSULTAT` | Action |
 |---|---|
-| `TERMINÉ` | Cocher `[x]`, actualiser `maj:`, consigner les `DÉCISIONS`, proposer le commit |
+| `TERMINÉ` | Cocher `[x]`, actualiser `maj`, consigner les `DÉCISIONS`, proposer le commit |
 | `ÉCART` | Remonter à l'utilisateur sans rien corriger d'office, comme toute divergence plan/réel |
 | `DÉRIVE` | S'arrêter, nommer le signal déclenché, en reparler avant de continuer |
-| `BLOQUÉ` | Passer l'étape en `[!]` + raison, `statut: bloqué` |
+| `BLOQUÉ` | Passer l'étape en `[!]` + raison, `statut = "bloqué"` |
 
 **Sur `ÉCART`, `DÉRIVE` ou `BLOQUÉ`, l'agent a laissé derrière lui un travail inachevé.** Trancher
 son sort avec l'utilisateur **avant de faire quoi que ce soit d'autre** : garder en l'état, ou
@@ -347,12 +360,4 @@ procédure, pas une formalité de fin (`references/audit.md`).
 
 Sur `/implementation-tracker abandon`, ou quand l'utilisateur renonce au chantier : lire
 `references/cloture.md`, section « Abandon ». Un chantier abandonné n'est **jamais** aplati dans
-`base:` ; il est archivé avec sa raison, et le sort de sa branche se décide avec l'utilisateur.
-
----
-
-## Gabarit du fichier de suivi
-
-Voir `references/gabarit-suivi.md` — à lire au moment de créer le fichier (Étape 2), pas avant.
-
-Légende des cases : `[ ]` à faire · `[>]` en cours · `[x]` fait · `[!]` bloqué
+`base` ; il est archivé avec sa raison, et le sort de sa branche se décide avec l'utilisateur.

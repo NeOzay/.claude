@@ -26,3 +26,12 @@ par rien, alors que `gabarit check` rendrait le verdict.
 Faire poser le fichier de suivi par `gabarit new suivi`, puis `gabarit check` à la fin de l'Étape 2
 d'`implementation-tracker` ; ne garder `references/gabarit-suivi.md` que si la semence ne couvre pas
 tout, et dire alors laquelle des deux fait foi.
+
+## Soldé le
+
+**2026-09-19, chantier `pipeline-gabarit`** — le tracker pose le suivi par `gabarit new suivi` et
+le vérifie par `gabarit check --filled` avant le commit de l'état initial ; le modèle Markdown
+est supprimé, la semence est la seule structure.
+Établi par : `gabarit check .claude/implementation/pipeline-gabarit.md --filled` → « rempli et
+conforme à la semence « suivi » », code 0 ; `test ! -e
+skills/implementation-tracker/references/gabarit-suivi.md` → absent.

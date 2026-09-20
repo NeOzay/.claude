@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from check_pipeline import LISTER, check_agents, check_archives
+from check_pipeline import LECTEUR, LISTER, check_agents, check_archives
 from depot_jouet import ecrire
 from test_controle_3 import LISTER_FIDELE
 
@@ -37,9 +37,19 @@ def test_aucun_agent(tmp_path: Path) -> None:
     assert any("aucun agent examiné" in m for m in rouges_agents(tmp_path))
 
 
-def archive(root: Path, nom: str, frontmatter: str) -> None:
+# Le VRAI lecteur, recopié dans le dépôt-jouet : c'est son jugement du front matter que le
+# contrôle 5 emploie, et un faux lecteur n'éprouverait que lui-même.
+LECTEUR_REEL = (Path(__file__).resolve().parents[2] / LECTEUR).read_text(encoding="utf-8")
+
+
+def archive(root: Path, nom: str, frontmatter: str, delimiteur: str = "---") -> None:
     _ = ecrire(root, LISTER, LISTER_FIDELE)
-    _ = ecrire(root, f".claude/implementation/done/{nom}", f"---\n{frontmatter}---\n\ncorps\n")
+    _ = ecrire(root, LECTEUR, LECTEUR_REEL)
+    _ = ecrire(
+        root,
+        f".claude/implementation/done/{nom}",
+        f"{delimiteur}\n{frontmatter}{delimiteur}\n\ncorps\n",
+    )
 
 
 def test_champs_resolvent(tmp_path: Path) -> None:
@@ -71,3 +81,26 @@ def test_aucune_archive(tmp_path: Path) -> None:
     _ = ecrire(tmp_path, LISTER, LISTER_FIDELE)
     (tmp_path / ".claude/implementation/done").mkdir(parents=True)
     assert any("contrôle sans objet" in m for m in rouges_archives(tmp_path))
+
+
+def test_archive_toml_resout(tmp_path: Path) -> None:
+    _ = ecrire(tmp_path, ".claude/plans/p.md", "plan\n")
+    archive(tmp_path, "chantier.md", 'gabarit = "suivi"\nplan = ".claude/plans/p.md"\n', "+++")
+    assert [f.ok for f in check_archives(tmp_path)] == [True]
+
+
+def test_archive_toml_pointe_dans_le_vide(tmp_path: Path) -> None:
+    archive(tmp_path, "chantier.md", 'brief = ".claude/implementation/disparu.md"\n', "+++")
+    assert any("brief: pointe dans le vide" in m for m in rouges_archives(tmp_path))
+
+
+def test_archive_illisible(tmp_path: Path) -> None:
+    """Une clé en double se dit, au lieu d'être lue au mieux."""
+    archive(tmp_path, "chantier.md", 'plan = "a.md"\nplan = "b.md"\n', "+++")
+    assert any("front matter illisible" in m for m in rouges_archives(tmp_path))
+
+
+def test_lecteur_absent(tmp_path: Path) -> None:
+    archive(tmp_path, "chantier.md", "slug: x\n")
+    (tmp_path / LECTEUR).unlink()
+    assert any("lecteur de fiches absent" in m for m in rouges_archives(tmp_path))

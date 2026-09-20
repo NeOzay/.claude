@@ -31,7 +31,7 @@ d'origine a disparu, en rejouant les commandes plutôt qu'en concluant sur mémo
 moment où l'on peut voir qu'on a construit la bonne solution au mauvais problème — et la raison
 pour laquelle ce regard est confié à un agent qui n'a pas écrit le code.
 
-**Sans avis favorable, la clôture s'arrête ici.** `DÉFAVORABLE` → `statut: bloqué`, verdict au
+**Sans avis favorable, la clôture s'arrête ici.** `DÉFAVORABLE` → `statut = "bloqué"`, verdict au
 journal, rendre la main. `RÉSERVES` → l'utilisateur tranche entre clore avec, ou traiter d'abord ;
 ne pas décider à sa place, et ne pas requalifier une réserve en détail pour pouvoir continuer.
 
@@ -70,7 +70,7 @@ L'entrée déplacée reçoit ensuite sa section `## Soldé le`, portant la comma
 l'établit. Sans cette sortie réelle, l'entrée reste. **Le déplacement et l'écriture de la preuve ne
 partagent jamais un commit** — le motif est au registre ([Solder](dette.md#solder)).
 
-**Si le suivi porte un `road-map:`**, le chantier est parti d'une entrée de road-map : la sortir
+**Si le suivi porte un `road-map`**, le chantier est parti d'une entrée de road-map : la sortir
 vers `road-map-fait/`, par `move` et jamais à la main, puis lui écrire sa section `## Fait le` —
 date, slug du chantier, et le chemin de son archive dans `done/`.
 
@@ -104,14 +104,14 @@ erreur, et l'écriture se perd. C'est un chemin d'échec silencieux — le seul 
 ### 3. Finaliser le fichier de suivi
 
 **Sur la branche `<slug>`** : compacter le journal. C'est le seul geste de jugement de ce point ;
-`statut: terminé` et le commit de finalisation sont faits par le script, au point suivant.
+`statut = "terminé"` et le commit de finalisation sont faits par le script, au point suivant.
 
 ### 4. Aplatir et archiver
 
 Par `git-smart-commit`, type 3 :
 [Aplatissement d'un chantier](../../git-smart-commit/references/aplatissement.md). Message écrit dans
 un fichier, dry-run présenté, accord, puis `commit-chantier cloture` : tous les commits de `<slug>`
-deviennent **un seul commit sur `base:`**, suivi, brief, audit et plan partent en `done/`, la branche
+deviennent **un seul commit sur `base`**, suivi, brief, audit et plan partent en `done/`, la branche
 et ses tags sont supprimés.
 
 **`REFUS` ou `ÉCHEC` du script → s'arrêter net** et rendre la main. Une clôture à moitié faite est
@@ -137,7 +137,7 @@ tous les listings suivants.
 
 1. **Demander la raison** et l'écrire au journal — c'est la seule information que l'abandon
    produit, et celle qui évitera de rouvrir le même chantier dans trois mois.
-2. `statut: abandonné`, `maj:` à jour. Committer sur la branche `<slug>` :
+2. `statut = "abandonné"`, `maj` à jour. Committer sur la branche `<slug>` :
    [Abandon](../../git-smart-commit/references/aplatissement.md#abandon).
 3. **Proposer** de verser au registre de dette ce que l'abandon laisse ouvert — le problème qui
    restait à traiter, la raison de l'abandon à l'appui (`references/dette.md`). Proposer, jamais
@@ -145,21 +145,21 @@ tous les listings suivants.
    entrée écrite d'office serait exactement le bruit que le registre doit éviter.
 
    On décide **ici**, on écrit au point 4. Même raison qu'au point 2 de la clôture : le registre
-   n'a de valeur que sur `base:`, et l'abandon n'y passe qu'au point suivant.
+   n'a de valeur que sur `base`, et l'abandon n'y passe qu'au point suivant.
 
-   **Une entrée de road-map, elle, ne bouge pas** : un `road-map:` au frontmatter d'un chantier
+   **Une entrée de road-map, elle, ne bouge pas** : un `road-map` au frontmatter d'un chantier
    abandonné reste dans `road-map/`. La tâche n'a pas été faite, et l'abandon est précisément ce
    qui la remet en attente. La sortir vers `road-map-ecarte/` demanderait une décision distincte —
    celle de ne plus vouloir la tâche, et non celle de renoncer à ce chantier-ci.
 4. **Décider du sort du travail avec l'utilisateur**, sans rien supposer :
-   - *tout jeter* → archiver les fichiers du chantier en `done/` sur `base:`, puis supprimer la
+   - *tout jeter* → archiver les fichiers du chantier en `done/` sur `base`, puis supprimer la
      branche et ses tags ;
    - *garder la branche* → ne rien supprimer, archiver seulement le suivi ; le dire clairement.
 
    Gestes et commits de l'une et l'autre :
    [Abandon](../../git-smart-commit/references/aplatissement.md#abandon).
 
-   Les **deux** branches de ce choix passent sur `base:` — *tout jeter* pour y archiver, *garder la
+   Les **deux** branches de ce choix passent sur `base` — *tout jeter* pour y archiver, *garder la
    branche* pour y déposer le suivi. C'est là, et seulement là, qu'on écrit l'entrée décidée au
    point 3 :
 
@@ -170,7 +170,7 @@ tous les listings suivants.
    puis on la joint au commit d'archivage. Si *garder la branche* n'avait rien d'autre à
    committer, ce commit existe quand même : il porte l'entrée.
 
-   Écrite sur `<slug>`, elle n'atteindrait jamais `base:` : la branche est soit supprimée, soit
+   Écrite sur `<slug>`, elle n'atteindrait jamais `base` : la branche est soit supprimée, soit
    conservée sans jamais être aplatie (point 5). C'est le même chemin d'échec silencieux qu'au
    point 2 de la clôture, et il se ferme de la même façon.
-5. Ne **jamais** aplatir un chantier abandonné dans `base:` : il n'a pas vocation à y entrer.
+5. Ne **jamais** aplatir un chantier abandonné dans `base` : il n'a pas vocation à y entrer.

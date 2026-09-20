@@ -15,6 +15,17 @@ category = "pertinent"
 Une même liste porte deux graphies du même champ selon l'origine de la valeur — sur le cas porteur
 du chantier, `command = "date +%F"`.
 
+## Soldé le
+
+**2026-09-20, chantier `pipeline-gabarit`** — `gabarit.prefill.initial_field` convertit en
+`datetime.date` la valeur d'un champ de type `date` issue de `text` ou de `command`, après
+`check_value` et sans toucher aux marqueurs. L'écrivain rend donc la même graphie nue qu'une date
+saisie, pour `gabarit` comme pour `list-dir`, qui délègue à ce module.
+Établi par : `.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_date.py` → 10 passés,
+dont `test_la_graphie_ne_depend_pas_de_l_origine_de_la_valeur` et
+`test_une_date_preremplie_ecrite_se_relit_date` ; `gabarit new suivi "$T/s2.md" && grep -n '^maj'
+"$T/s2.md"` → `maj = 2026-09-20`, sans guillemets.
+
 ## Pourquoi c'est gênant
 
 Les deux formes sont valides pour `check_value`, qui accepte `str` comme `datetime.date` : rien
