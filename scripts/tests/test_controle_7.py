@@ -56,6 +56,19 @@ def test_chemin_relatif_existant(tmp_path: Path) -> None:
     assert rouges(tmp_path) == []
 
 
+def test_ancre_ignoree_sur_un_fichier_existant(tmp_path: Path) -> None:
+    """Un lien Markdown ancré depuis un `.md` de la racine : `LEXIQUE.md` en porte."""
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "## Une section\n")
+    _ = ecrire(tmp_path, "LEXIQUE.md", "[x](skills/x/SKILL.md#une-section)\n")
+    assert rouges(tmp_path) == []
+
+
+def test_ancre_sur_un_fichier_inexistant(tmp_path: Path) -> None:
+    _ = ecrire(tmp_path, "skills/x/SKILL.md", "Rien.\n")
+    _ = ecrire(tmp_path, "LEXIQUE.md", "[x](skills/x/disparu.md#section)\n")
+    assert any("chemin de skill inexistant : skills/x/disparu.md" in m for m in rouges(tmp_path))
+
+
 def test_chemin_relatif_inexistant(tmp_path: Path) -> None:
     _ = ecrire(tmp_path, "skills/x/SKILL.md", "Voir `skills/x/scripts/disparu.py`.\n")
     assert any("chemin de skill inexistant" in m for m in rouges(tmp_path))

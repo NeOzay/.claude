@@ -1,0 +1,10 @@
+# Configuration ruff du skill lexique.
+#
+# Elle vit ici, et non à la racine du dépôt : la skill est déployable ailleurs, et sa
+# configuration voyage avec elle. Identique à celle de gabarit.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

@@ -51,6 +51,14 @@
             "command": "python3 $HOME/.claude/scripts/sante_skills.py"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/skills/lexique/scripts/lexique-cli.py session"
+          }
+        ]
       }
     ],
     "PreToolUse": [

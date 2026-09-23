@@ -1,23 +1,17 @@
 {
   "typeCheckingMode": "all",
+  "venvPath": "../..",
+  "venv": ".venv",
   "pythonVersion": "3.12",
   "include": [
-    "skills",
     "scripts"
   ],
   "exclude": [
-    "plugins",
-    "**/node_modules",
     "**/__pycache__"
   ],
   "extraPaths": [
-    "skills/list-dir/scripts",
     "scripts",
-    "scripts/tests",
-    "skills/list-dir/scripts/tests",
-    "skills/implementation-tracker/scripts",
-    "skills/gabarit/scripts",
-    "skills/lexique/scripts"
+    "scripts/tests"
   ],
   "reportImplicitStringConcatenation": false,
   "reportUnusedCallResult": false,

@@ -4,7 +4,7 @@ title = "Le hook SessionStart porte la dernière constante ancrée sur le HOME, 
 date = 2026-08-29
 source = "Identifié par `resolution-chemin-skill`, R1 du rapport d'audit."
 reviewed = 2026-09-06
-category = "pertinent"
+category = "aggravee"
 +++
 
 ## Constat
@@ -18,6 +18,15 @@ assumée. La fiche `technical-debt-solde/chemin-skill-code-en-dur.md` énumère 
 couvre pas et ne la mentionne pas.
 
 Établi par : `grep -n 'sante_skills' settings.json` → la ligne du hook porte `$HOME/.claude/`.
+
+**Aggravée le 2026-09-23** par le chantier `lexique` : un second hook `SessionStart`,
+`python3 $HOME/.claude/skills/lexique/scripts/lexique-cli.py session`, porte une seconde constante
+ancrée sur le `HOME`, pour la même raison d'amorçage. Ce n'est donc plus « la seule » constante —
+et elle ne l'était déjà pas : le hook `PreToolUse` d'`intent-brief-gate.sh` et la `statusLine`
+sont ancrés de même.
+
+Établi par : `grep -n '\$HOME/.claude' settings.json` → quatre lignes : deux hooks `SessionStart`
+(`sante_skills.py`, `lexique-cli.py session`), le hook `intent-brief-gate.sh`, la `statusLine`.
 
 ## Pourquoi c'est gênant
 

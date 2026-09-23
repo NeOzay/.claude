@@ -45,6 +45,7 @@ skill y mène.
 | Commandes à la disposition d'un agent | [`references/commandes-locales.md`](references/commandes-locales.md) | une skill ou un projet doit fournir une commande |
 | Lancer les outils du dépôt, exposer un exécutable | [Outillage du dépôt](../../OUTILLAGE.md) | on lance un linter, on ajoute un lien dans `bin/` |
 | Dates, nommage, frontmatter du pipeline | [Contrat du pipeline](../implementation-tracker/references/contrat.md) | on écrit un brief, un suivi, une archive |
+| Sens des mots | `LEXIQUE.md` à la racine, et la skill [lexique](../lexique/SKILL.md) pour le tenir | on emploie, propose ou définit un terme |
 
 Les fichiers de `rules/` ne sont pas cités par lien : ils vivent hors de `skills/`, et Claude Code
 les charge seul, d'après leur champ `paths`.

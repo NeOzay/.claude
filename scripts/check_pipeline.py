@@ -610,7 +610,9 @@ def check_chemins_skill(root: Path) -> list[Finding]:
         for ligne_no, ligne in enumerate(md.read_text(encoding="utf-8").splitlines(), 1):
             for m in CHEMIN_SKILL.finditer(ligne):
                 brut = m.group("home") or m.group("rel")
-                rel = cast("str", brut).rstrip("/")
+                # L'ANCRE N'EST PAS UN MORCEAU DU CHEMIN : `skills/x/SKILL.md#section` cite
+                # un fichier qui existe. Ce contrôle juge le fichier, pas la section.
+                rel = cast("str", brut).split("#", 1)[0].rstrip("/")
                 if m.group("home") is not None and not rel.startswith("skills/"):
                     continue  # `$HOME/.claude/…` hors skills/ : pas notre affaire ici
                 if any(c in rel for c in "<>*…"):
