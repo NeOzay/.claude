@@ -163,21 +163,28 @@ def _blocs(lignes: list[str]) -> list[list[tuple[int, str]]]:
     return blocs
 
 
-def lire(chemin: Path, niveau: str) -> Result[list[Terme]]:
-    """Les termes d'un lexique. Un fichier absent n'en porte aucun ; un fichier malformé échoue.
+def _ligne(chemin: Path, niveau: str, numero: int, ligne: str) -> Terme | str:
+    """Valide une ligne du corps du tableau : rend son `Terme`, ou la faute qui l'invalide."""
+    cellules = _cellules(ligne)
+    if len(cellules) != len(ENTETE):
+        return f"{chemin}:{numero} : {len(cellules)} cellules, {len(ENTETE)} attendues."
+    terme, definition, lien = cellules
+    if not (terme and definition and lien):
+        return f"{chemin}:{numero} : cellule vide."
+    if not _LIEN.search(lien):
+        return f"{chemin}:{numero} : « {terme} » sans lien Markdown `[…](…)`."
+    if not terme[0].isupper():
+        return f"{chemin}:{numero} : « {terme} » doit commencer par une majuscule."
+    return Terme(niveau, terme, definition, lien, numero)
 
-    Toutes les fautes sont relevées d'un coup, une par ligne du message, pour qu'une correction
-    ne révèle pas la suivante.
+
+def _tableau(chemin: Path, blocs: list[list[tuple[int, str]]]) -> Result[list[tuple[int, str]]]:
+    """Valide qu'il n'y a qu'un tableau, avec son en-tête et sa séparation ; rend son corps.
+
+    Un en-tête fautif n'empêche pas de lire le corps : sa faute voyage dans `message` même sur un
+    succès (status 0), pour que `lire_valides()` la combine à celles des lignes. Un nombre de
+    tableaux autre qu'un, ou une séparation absente, coupe court : le corps n'est pas délimité.
     """
-    if not chemin.is_file():
-        return Result(0, [])
-    try:
-        texte = chemin.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return Result(1, message=f"{chemin} : pas en UTF-8, illisible.")
-    except OSError as e:
-        return Result(1, message=f"{chemin} : illisible ({e.strerror}).")
-    blocs = _blocs(texte.splitlines())
     if len(blocs) != 1:
         compte = "aucun tableau" if not blocs else f"{len(blocs)} tableaux"
         return Result(1, message=f"{chemin} : {compte}, un seul attendu.")
@@ -190,28 +197,54 @@ def lire(chemin: Path, niveau: str) -> Result[list[Terme]]:
     if not reste or not all(_SEPARATEUR.fullmatch(c) for c in _cellules(reste[0][1])):
         fautes.append(f"{chemin}:{n_entete + 1} : ligne de séparation `|---|---|---|` attendue.")
         return Result(1, message="\n".join(fautes))
+    return Result(0, reste[1:], message="\n".join(fautes))
 
-    termes: list[Terme] = []
-    for numero, ligne in reste[1:]:
-        cellules = _cellules(ligne)
-        if len(cellules) != len(ENTETE):
-            fautes.append(f"{chemin}:{numero} : {len(cellules)} cellules, {len(ENTETE)} attendues.")
-            continue
-        terme, definition, lien = cellules
-        if not (terme and definition and lien):
-            fautes.append(f"{chemin}:{numero} : cellule vide.")
-            continue
-        if not _LIEN.search(lien):
-            fautes.append(f"{chemin}:{numero} : « {terme} » sans lien Markdown `[…](…)`.")
-            continue
-        if not terme[0].isupper():
-            fautes.append(f"{chemin}:{numero} : « {terme} » doit commencer par une majuscule.")
-            continue
-        termes.append(Terme(niveau, terme, definition, lien, numero))
 
+def lire(chemin: Path, niveau: str) -> Result[list[Terme]]:
+    """Les termes d'un lexique. Un fichier absent n'en porte aucun ; un fichier malformé échoue.
+
+    Toutes les fautes sont relevées d'un coup, une par ligne du message, pour qu'une correction
+    ne révèle pas la suivante. C'est `lire_valides()` qui lit : la moindre faute la fait échouer.
+    """
+    r = lire_valides(chemin, niveau)
+    if r.value is None:
+        return Result(1, message=r.message)
+    termes, fautes = r.value
     if fautes:
         return Result(1, message="\n".join(fautes))
     return Result(0, termes)
+
+
+def lire_valides(chemin: Path, niveau: str) -> Result[tuple[list[Terme], list[str]]]:
+    """Les termes lisibles d'un lexique, tolérant aux lignes fautives ; les fautes à part.
+
+    Une faute de frappe sur une ligne ne doit pas couper toute la complétion : seul un fichier
+    illisible (pas en UTF-8, ou `OSError`) échoue. Un en-tête fautif est une faute, mais les lignes
+    valides sous lui restent servies. Sans ligne de séparation, ou avec un nombre de tableaux autre
+    qu'un, le corps n'est pas délimité : zéro terme, et la faute.
+    """
+    if not chemin.is_file():
+        return Result(0, ([], []))
+    try:
+        texte = chemin.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return Result(1, message=f"{chemin} : pas en UTF-8, illisible.")
+    except OSError as e:
+        return Result(1, message=f"{chemin} : illisible ({e.strerror}).")
+
+    t = _tableau(chemin, _blocs(texte.splitlines()))
+    if t.value is None:
+        return Result(0, ([], [t.message]))
+    fautes = [t.message] if t.message else []
+
+    termes: list[Terme] = []
+    for numero, ligne in t.value:
+        resultat = _ligne(chemin, niveau, numero, ligne)
+        if isinstance(resultat, str):
+            fautes.append(resultat)
+        else:
+            termes.append(resultat)
+    return Result(0, (termes, fautes))
 
 
 def controler(global_: list[Terme], local: list[Terme]) -> list[str]:
@@ -313,3 +346,59 @@ def annonce_session(fichier_global: Path, fichier_local: Path, projet: Path) -> 
             *(f"  · {a}" for a in alertes),
         ]
     return "\n".join(parties) + "\n"
+
+
+def localiser(fichier_global: Path, fichier_local: Path, niveau: str) -> Result[Path]:
+    """Le chemin d'un lexique à ouvrir, ou pourquoi il n'y en a pas à ce niveau.
+
+    Le local n'existe pas quand il est le global lui-même (`_est_le_global`) : l'ouvrir serait
+    ouvrir deux fois le même fichier sous un autre nom.
+    """
+    if niveau == GLOBAL:
+        if fichier_global.is_file():
+            return Result(0, fichier_global)
+        return Result(1, message=f"aucun lexique global ({fichier_global} absent).")
+    if _est_le_global(fichier_local, fichier_global):
+        return Result(1, message=f"pas de lexique local : {fichier_local} est le lexique global.")
+    if not fichier_local.is_file():
+        return Result(1, message=f"{fichier_local} n'existe pas.")
+    return Result(0, fichier_local)
+
+
+@dataclass(frozen=True)
+class Service:
+    """Ce qu'un consommateur externe (Neovim) reçoit d'un couple de lexiques.
+
+    `erreurs` porte les niveaux illisibles (pas en UTF-8, ou inaccessibles) ; `signalements` les
+    fautes de structure et de ligne, et les constats de `controler()` sur ce qui a été servi.
+    """
+
+    termes: list[Terme]
+    signalements: list[str]
+    erreurs: list[str]
+
+
+def servir(fichier_global: Path, fichier_local: Path) -> Service:
+    """Les termes servables des deux lexiques, tolérant aux fautes de ligne d'un niveau lisible.
+
+    Un niveau illisible n'empêche pas de servir l'autre : une commande qui alimente la
+    complétion d'un éditeur doit rester utile même quand un lexique est cassé.
+    """
+    g = lire_valides(fichier_global, GLOBAL)
+    if _est_le_global(fichier_local, fichier_global):
+        lo: Result[tuple[list[Terme], list[str]]] = Result(0, ([], []))
+    else:
+        lo = lire_valides(fichier_local, LOCAL)
+
+    termes_g, fautes_g = g.value if g.value is not None else ([], [])
+    termes_lo, fautes_lo = lo.value if lo.value is not None else ([], [])
+    termes = termes_g + termes_lo
+    signalements = fautes_g + fautes_lo + controler(termes_g, termes_lo)
+    erreurs = [r.message for r in (g, lo) if not r]
+    return Service(termes, signalements, erreurs)
+
+
+def definir(termes: list[Terme], terme: str) -> list[Terme]:
+    """Les termes qui correspondent à `terme`, à la casse et aux espaces près."""
+    cle = normaliser(terme)
+    return [t for t in termes if t.cle == cle]

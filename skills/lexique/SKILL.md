@@ -3,10 +3,10 @@ name: lexique
 description: >
   Tient les lexiques qui fixent le sens des mots : le global (`LEXIQUE.md` à la racine de la
   configuration) et le local d'un projet (`.claude/LEXIQUE.md`), deux tableaux
-  `Terme | Définition | Lien`. Fournit la commande `lexique` (init, liste, session). Se déclenche dès
-  qu'il s'agit de proposer, ajouter, modifier ou retirer un terme, d'amorcer le lexique local d'un
-  projet, ou de savoir si un terme est déjà réservé. N'écrit aucun terme sans l'accord de
-  l'utilisateur.
+  `Terme | Définition | Lien`. Fournit la commande `lexique` (init, liste, session, chemin, termes,
+  definition). Se déclenche dès qu'il s'agit de proposer, ajouter, modifier ou retirer un terme,
+  d'amorcer le lexique local d'un projet, ou de savoir si un terme est déjà réservé. N'écrit aucun
+  terme sans l'accord de l'utilisateur.
 ---
 
 # lexique — tenir un lexique
@@ -16,6 +16,9 @@ charge à chaque session : elles font autorité. Ce fichier dit comment tenir un
 
 **Partage des rôles** : la commande vérifie le format et les réservations. Le modèle propose les
 termes et rédige les définitions ; l'utilisateur tranche.
+
+`chemin`, `termes` et `definition` alimentent `skills/lexique/nvim/lexique.lua`, la commande
+`:Lexique` d'un chantier en cours ; elles ne servent à rien d'autre.
 
 ## Format
 
@@ -40,9 +43,12 @@ besoin ; un tableau dans un bloc de code est un exemple, et ne compte pas :
 ## La commande
 
 ```bash
-lexique init [--projet DIR]    # pose .claude/LEXIQUE.md, en-tête seul
-lexique liste [--projet DIR]   # termes global puis local : niveau, terme, lien
-lexique session                # le lexique local du projet, pour le hook SessionStart
+lexique init [--projet DIR]                # pose .claude/LEXIQUE.md, en-tête seul
+lexique liste [--projet DIR]               # termes global puis local : niveau, terme, lien
+lexique session                            # le lexique local du projet, pour le hook SessionStart
+lexique chemin [--global] [--projet DIR]   # le chemin du lexique à ouvrir, pour Neovim
+lexique termes [--projet DIR]              # un terme par ligne, global puis local, pour Neovim
+lexique definition TERME [--projet DIR]    # la définition d'un terme, pour Neovim
 ```
 
 `lexique` est un lien de `bin/` vers `scripts/lexique-cli.py`, résolu par le `PATH`.
@@ -61,6 +67,15 @@ lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`
   de démarrer. Ses alertes vont dans sa sortie, donc dans le contexte. Le projet est
   `$CLAUDE_PROJECT_DIR` tel quel — le sous-projet ouvert, dans un monodépôt —, ou le répertoire
   courant.
+- `chemin` échoue fermé : **0** le fichier existe, son chemin sur stdout ; **1** aucun global à
+  cet endroit, ou local absent, ou local égal au global — pourquoi, sur stderr.
+- `termes` échoue fermé : **0** un terme par ligne, global puis local, même sur un lexique non
+  conforme — ses constats et ses lignes fautives sortent sur stderr sans changer le code ; **1**
+  un niveau illisible (pas en UTF-8, ou inaccessible), l'autre niveau servi quand même.
+- `definition TERME` échoue fermé : **0** au moins une correspondance,
+  `niveau\tterme\tdéfinition` par ligne, à la casse et aux espaces près (« Signal de dérive » =
+  « signal  de dérive ») ; **1** aucune. Constats, fautes et erreurs de lecture vont sur stderr
+  dans les deux cas.
 
 ## Proposer, modifier ou retirer un terme
 
