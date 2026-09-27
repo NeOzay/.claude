@@ -13,9 +13,9 @@ DEUX RÉGIMES D'ÉCHEC POUR SEPT COMMANDES :
   lexique vide ou absent se dit sur stderr, sans toucher au code ;
 - `session` échoue OUVERT — sortie 0 quoi qu'il arrive : c'est un hook `SessionStart`, et un
   rappel n'a jamais de raison d'empêcher une session de démarrer. Ses alertes vont au contexte.
-- `chemin`, `termes`, `definition` et `definitions` échouent fermé et alimentent
-  `skills/lexique/nvim/lexique.lua` : aucune autre commande ne lit, ne parse ou ne localise un
-  `LEXIQUE.md` pour Neovim.
+- `chemin`, `termes`, `definition` et `definitions` échouent fermé et alimentent `:Lexique`,
+  dans la configuration Neovim (`~/.config/nvim/lua/lexique.lua`) : aucune autre commande ne
+  lit, ne parse ou ne localise un `LEXIQUE.md` pour Neovim.
 
 PAS DE RÉ-EXÉCUTION DANS LE VENV, contrairement à `gabarit-cli.py` : le module n'a que la stdlib
 pour horizon, et le hook doit rester rapide.

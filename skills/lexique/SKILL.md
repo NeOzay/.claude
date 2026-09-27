@@ -17,8 +17,8 @@ charge à chaque session : elles font autorité. Ce fichier dit comment tenir un
 **Partage des rôles** : la commande vérifie le format et les réservations. Le modèle propose les
 termes et rédige les définitions ; l'utilisateur tranche.
 
-`chemin`, `termes`, `definition` et `definitions` alimentent `skills/lexique/nvim/lexique.lua`,
-la commande `:Lexique` d'un chantier en cours ; elles ne servent à rien d'autre.
+`chemin`, `termes`, `definition` et `definitions` alimentent la commande `:Lexique` de la
+configuration Neovim (`~/.config/nvim/lua/lexique.lua`) ; elles ne servent à rien d'autre.
 
 ## Format
 
