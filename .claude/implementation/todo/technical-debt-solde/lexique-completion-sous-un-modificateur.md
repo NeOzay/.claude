@@ -14,6 +14,14 @@ rien, alors que la commande elle-même s'exécute.
 Établi par : `getcompletion("silent Lexique Sig", "cmdline")` → `{}`, audit de clôture de
 `lexique-nvim` (`a30c7ce`).
 
+## Soldé le
+
+**Soldé le 2026-09-27 par le chantier `integrer-commande-lexique` de `~/.config/nvim`** — la
+version intégrée (`lua/lexique.lua`, `AE4` = `10a8193`) isole l'argument à partir du nom de la
+commande, non du début de la ligne.
+Établi par : `nvim --headless -c 'lua print(vim.inspect(vim.fn.getcompletion("silent Lexique Sig",
+"cmdline")))' -c 'qa!'`, lancé depuis `~/.config/nvim` → `{ "Signal de dérive" }`.
+
 ## Pourquoi c'est gênant
 
 Une complétion muette passe pour une absence de terme : l'utilisateur croit le lexique vide ou
