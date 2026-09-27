@@ -17,8 +17,8 @@ rien, alors que la commande elle-même s'exécute.
 ## Soldé le
 
 **Soldé le 2026-09-27 par le chantier `integrer-commande-lexique` de `~/.config/nvim`** — la
-version intégrée (`lua/lexique.lua`, `AE4` = `10a8193`) isole l'argument à partir du nom de la
-commande, non du début de la ligne.
+version intégrée (`~/.config/nvim/lua/lexique.lua`, `M.complete`) isole l'argument à partir du
+nom de la commande, non du début de la ligne.
 Établi par : `nvim --headless -c 'lua print(vim.inspect(vim.fn.getcompletion("silent Lexique Sig",
 "cmdline")))' -c 'qa!'`, lancé depuis `~/.config/nvim` → `{ "Signal de dérive" }`.
 
