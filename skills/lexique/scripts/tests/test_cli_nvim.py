@@ -1,4 +1,4 @@
-"""`lexique chemin`, `termes`, `definition` : ce que Neovim reçoit de la CLI."""
+"""`lexique chemin`, `termes`, `definition`, `definitions` : ce que Neovim reçoit de la CLI."""
 
 import subprocess
 import sys
@@ -52,6 +52,26 @@ def test_termes_ligne_fautive_servie_a_part(ecrire: Ecrire, tmp_path: Path) -> N
     r = _cli("termes", projet=tmp_path / "p")
     assert r.returncode == 0, r.stderr
     assert "Zorglubage" in r.stdout.splitlines()
+    assert "cellules" in r.stderr
+
+
+def test_definitions_global_puis_local(ecrire: Ecrire, tmp_path: Path) -> None:
+    ecrire("p/.claude/LEXIQUE.md", "| Zorglubage | Un terme local. | [x](x) |\n")
+    r = _cli("definitions", projet=tmp_path / "p")
+    assert r.returncode == 0, r.stderr
+    lignes = r.stdout.splitlines()
+    assert lignes[-1] == "local\tZorglubage\tUn terme local."
+    assert all(ligne.startswith("global\t") for ligne in lignes[:-1])
+
+
+def test_definitions_ligne_fautive_servie_a_part(ecrire: Ecrire, tmp_path: Path) -> None:
+    ecrire(
+        "p/.claude/LEXIQUE.md",
+        "| Zorglubage | Un terme inventé. | [x](x) |\n| Autre | sans lien |\n",
+    )
+    r = _cli("definitions", projet=tmp_path / "p")
+    assert r.returncode == 0, r.stderr
+    assert "local\tZorglubage\tUn terme inventé." in r.stdout.splitlines()
     assert "cellules" in r.stderr
 
 

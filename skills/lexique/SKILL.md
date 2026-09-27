@@ -4,7 +4,7 @@ description: >
   Tient les lexiques qui fixent le sens des mots : le global (`LEXIQUE.md` à la racine de la
   configuration) et le local d'un projet (`.claude/LEXIQUE.md`), deux tableaux
   `Terme | Définition | Lien`. Fournit la commande `lexique` (init, liste, session, chemin, termes,
-  definition). Se déclenche dès qu'il s'agit de proposer, ajouter, modifier ou retirer un terme,
+  definition, definitions). Se déclenche dès qu'il s'agit de proposer, ajouter, modifier ou retirer un terme,
   d'amorcer le lexique local d'un projet, ou de savoir si un terme est déjà réservé. N'écrit aucun
   terme sans l'accord de l'utilisateur.
 ---
@@ -17,8 +17,8 @@ charge à chaque session : elles font autorité. Ce fichier dit comment tenir un
 **Partage des rôles** : la commande vérifie le format et les réservations. Le modèle propose les
 termes et rédige les définitions ; l'utilisateur tranche.
 
-`chemin`, `termes` et `definition` alimentent `skills/lexique/nvim/lexique.lua`, la commande
-`:Lexique` d'un chantier en cours ; elles ne servent à rien d'autre.
+`chemin`, `termes`, `definition` et `definitions` alimentent `skills/lexique/nvim/lexique.lua`,
+la commande `:Lexique` d'un chantier en cours ; elles ne servent à rien d'autre.
 
 ## Format
 
@@ -49,6 +49,7 @@ lexique session                            # le lexique local du projet, pour le
 lexique chemin [--global] [--projet DIR]   # le chemin du lexique à ouvrir, pour Neovim
 lexique termes [--projet DIR]              # un terme par ligne, global puis local, pour Neovim
 lexique definition TERME [--projet DIR]    # la définition d'un terme, pour Neovim
+lexique definitions [--projet DIR]         # chaque terme et sa définition, pour Neovim
 ```
 
 `lexique` est un lien de `bin/` vers `scripts/lexique-cli.py`, résolu par le `PATH`.
@@ -76,6 +77,9 @@ lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`
   `niveau\tterme\tdéfinition` par ligne, à la casse et aux espaces près (« Signal de dérive » =
   « signal  de dérive ») ; **1** aucune. Constats, fautes et erreurs de lecture vont sur stderr
   dans les deux cas.
+- `definitions` échoue fermé, comme `termes` : **0** `niveau\tterme\tdéfinition` par ligne,
+  global puis local, même sur un lexique non conforme ; **1** un niveau illisible, l'autre servi
+  quand même.
 
 ## Proposer, modifier ou retirer un terme
 

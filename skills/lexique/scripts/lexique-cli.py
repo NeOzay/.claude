@@ -7,13 +7,13 @@ le résultat en code de sortie.
 LE NOM PORTE UN TIRET, comme `gabarit-cli.py` : il n'est pas importable, et ne dispute pas son
 nom au module `lexique` rangé à côté. La commande s'appelle `lexique` par son lien de `bin/`.
 
-DEUX RÉGIMES D'ÉCHEC POUR SIX COMMANDES :
+DEUX RÉGIMES D'ÉCHEC POUR SEPT COMMANDES :
 - `init` échoue fermé — 0 lexique posé, son chemin sur stdout ; 1 fichier déjà présent ;
 - `liste` échoue fermé — 0 conforme, 1 constat ou lexique malformé, 2 erreur d'appel ; un
   lexique vide ou absent se dit sur stderr, sans toucher au code ;
 - `session` échoue OUVERT — sortie 0 quoi qu'il arrive : c'est un hook `SessionStart`, et un
   rappel n'a jamais de raison d'empêcher une session de démarrer. Ses alertes vont au contexte.
-- `chemin`, `termes` et `definition` échouent fermé et alimentent
+- `chemin`, `termes`, `definition` et `definitions` échouent fermé et alimentent
   `skills/lexique/nvim/lexique.lua` : aucune autre commande ne lit, ne parse ou ne localise un
   `LEXIQUE.md` pour Neovim.
 
@@ -98,6 +98,17 @@ def _termes(projet: Path) -> int:
     return 1 if s.erreurs else 0
 
 
+def _definitions(projet: Path) -> int:
+    s = servir(chemin_global(), chemin_local(projet))
+    for t in s.termes:
+        print(f"{t.niveau}\t{t.terme}\t{t.definition}")
+    for m in s.signalements:
+        sys.stderr.write(m + "\n")
+    for e in s.erreurs:
+        sys.stderr.write(e + "\n")
+    return 1 if s.erreurs else 0
+
+
 def _definition(projet: Path, terme: str) -> int:
     s = servir(chemin_global(), chemin_local(projet))
     for m in s.signalements:
@@ -141,6 +152,10 @@ def main() -> int:
     definition = sous.add_parser("definition", help="la définition d'un terme, pour Neovim")
     definition.add_argument("--projet", type=Path, help="défaut : la racine git d'ici, ou ici")
     definition.add_argument("terme", help="à la casse et aux espaces près")
+    definitions = sous.add_parser(
+        "definitions", help="chaque terme et sa définition, global puis local, pour Neovim"
+    )
+    definitions.add_argument("--projet", type=Path, help="défaut : la racine git d'ici, ou ici")
     args = parser.parse_args()
 
     commande = cast("str", args.commande)
@@ -155,6 +170,8 @@ def main() -> int:
         return _termes(projet)
     if commande == "definition":
         return _definition(projet, cast("str", args.terme))
+    if commande == "definitions":
+        return _definitions(projet)
     return _liste(projet)
 
 
