@@ -75,5 +75,6 @@ n'existe dans le dépôt aujourd'hui », ce qui était faux avant même ce chant
 mort est réalisé hors de `skills/`, où le contrôle ne regarde pas.
 Établi par : `grep -rl 'contrat.md#autorité)' --include='*.md' .claude` → 2 fichiers de `done/`,
 alors que la section réelle est « Autorité et divergence », d'ancre `#autorité-et-divergence`
-(`grep -c '^## Autorité et divergence' contrat.md` → 1). Renvoi mort, hors de la portée du contrôle
-1. `#ancre` est dans le même cas. Ces deux-là sont en prose d'exemple, ce qui atténue sans annuler.
+(`grep -c '^## Autorité et divergence' contrat.md` → 1). Renvoi mort, hors de la portée du
+contrôle 1. `#ancre` est dans le même cas. Ces deux-là sont en prose d'exemple, ce qui atténue
+sans annuler.

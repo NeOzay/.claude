@@ -1,0 +1,29 @@
+# Configuration rumdl du dépôt : le formateur Markdown.
+#
+# Il ne touche qu'aux espaces et à l'enroulement de la prose. Chaque règle désactivée
+# ci-dessous réécrivait le sens d'un document lors de l'essai du 2026-10-04 :
+#
+# MD025 — un seul titre de niveau 1 : il rétrogradait `#` en `##` et `##` en `###`,
+#         ce qui casse les sections `## ` que `list-dir` découpe.
+# MD038 — espaces dans un span de code : il réduisait `` `## ` `` en `` `##` ``,
+#         alors que l'espace fait partie de ce qui est cité.
+# MD040 — langue d'un bloc de code : il ajoutait `text` à chaque bloc nu, sans rien
+#         apprendre au lecteur.
+# MD064 — espaces consécutifs : il réduisait « signal  de dérive », dont le double
+#         espace est l'exemple même de `skills/lexique/SKILL.md`.
+
+[global]
+disable = ["MD025", "MD038", "MD040", "MD064"]
+# Archives figées : elles relatent un état passé, et ne se réécrivent pas.
+exclude = [".claude/implementation/done", "archive"]
+
+[MD013]
+# La prose s'enroule à 100 colonnes, et `rumdl fmt` réenroule un paragraphe dont une
+# ligne dépasse : sans le reflow, une entrée écrite d'une traite sur une seule ligne
+# passait tous les contrôles. Tableaux, blocs de code et titres en sont exemptés, car
+# ils ne se coupent pas sans changer de sens.
+line-length = 100
+code-blocks = false
+tables = false
+headings = false
+reflow = true

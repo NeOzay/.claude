@@ -12,8 +12,8 @@ l'outillage d'un dépôt n'a rien à y faire.
 
 ## Ce dont le dépôt dépend
 
-Le dépôt dépend de quatre commandes, d'un interpréteur, de git et de deux linters — et de rien
-d'autre :
+Le dépôt dépend de quatre commandes, d'un interpréteur, de git, de deux linters et d'un formateur
+Markdown — et de rien d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
 |---|---|---|
@@ -24,6 +24,7 @@ d'autre :
 | Python ≥ 3.12 | `list-dir`, `gabarit` et `shadow-skill` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification et le formatage du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` |
+| `rumdl` | le formatage du Markdown versionné | **absent du `PATH`** : se lance par `uvx rumdl fmt .`, et `uvx rumdl fmt --check .` pour vérifier |
 
 **Ces commandes sont des liens de `bin/`, résolus par le `PATH`.** Rien ne les cite par leur
 chemin : un chemin de plus serait un point d'édition de plus, que le prochain déplacement
@@ -131,6 +132,25 @@ TMP=$(mktemp -d); git archive <base> | tar -x -C "$TMP"
 **Les sous-agents portent ces règles en dur**, recopiées dans `agents/*.md` plutôt que renvoyées
 ici : le garde-fou leur interdit tout renvoi au contrat du pipeline, pour qu'ils restent lisibles
 seuls. C'est la seule duplication voulue de ce fichier.
+
+## Formater le Markdown
+
+**`uvx rumdl fmt .` avant de commiter du Markdown, et `rumdl fmt` seul.** Le formateur ne touche
+qu'aux espaces et à l'enroulement : lignes vides autour des listes, des titres et des blocs de code,
+espaces en fin de ligne, et prose réenroulée à 100 colonnes dès qu'une ligne dépasse. Tableaux,
+blocs de code et titres n'en sont pas réenroulés. `.rumdl.toml`, à la racine, désactive chaque
+règle qui réécrivait le sens d'un document, en nommant pourquoi, et exclut les archives figées de
+`done/` et `archive/`.
+
+**`rumdl check` n'est pas un contrôle du dépôt.** Il signale des écarts que le formateur ne corrige
+pas — ancres HTML, fichiers sans titre de tête — et sort non nul sur un dépôt sain. Un contrôle qui
+échoue toujours apprend à ignorer son verdict.
+
+> *Mode de défaillance* — mdformat et Prettier ont été essayés avant lui, le 2026-10-04. mdformat
+> échappait les Marqueurs (`<À REMPLIR>` devenait `\<À REMPLIR>`, que `gabarit check` ne reconnaît
+> plus) ; Prettier réalignait chaque tableau, si bien qu'une ligne modifiée réécrivait le tableau
+> entier. Avant d'élargir la configuration, vérifier sur une copie que `list-dir validate`,
+> `gabarit check` et les tests rendent le même résultat qu'avant.
 
 ## Les tests
 
