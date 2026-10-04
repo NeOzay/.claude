@@ -9,11 +9,11 @@ category = "pertinent"
 
 ## Constat
 
-le point 3 de l'Étape 2 de `skills/implementation-tracker/SKILL.md` (« Faire relire le
-plan avant de le présenter ») fait appeler `plan-reviewer` avant `ExitPlanMode`, en s'appuyant
+le point 3 de la Phase 2 de `skills/implementation-tracker/references/creation.md` (« Faire relire
+le plan avant de le présenter ») fait appeler `plan-reviewer` avant `ExitPlanMode`, en s'appuyant
 sur le fait que « le harness assigne un fichier de plan dès l'entrée en plan mode et en autorise
-l'écriture ». C'est vrai aujourd'hui, vérifié pendant ce
-chantier, mais aucun repli n'est écrit si le harness change.
+l'écriture ». C'est vrai aujourd'hui, vérifié pendant ce chantier, mais aucun repli n'est écrit si
+le harness change.
 
 ## Pourquoi c'est gênant
 

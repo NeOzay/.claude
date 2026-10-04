@@ -12,15 +12,18 @@ l'outillage d'un dépôt n'a rien à y faire.
 
 ## Ce dont le dépôt dépend
 
-Le dépôt dépend de quatre commandes, d'un interpréteur, de git, de deux linters et d'un formateur
+Le dépôt dépend de sept commandes, d'un interpréteur, de git, de deux linters et d'un formateur
 Markdown — et de rien d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
 |---|---|---|
 | `list-dir` | les six registres de `todo/`, `debt-review` | `command -v list-dir` |
-| `impl-list` | l'Étape 0 du tracker, le listing des suivis | `command -v impl-list` |
+| `impl-list` | la Phase 0 du tracker, le listing des suivis | `command -v impl-list` |
 | `gabarit` | le paquet que `list-dir` importe, la semence `suivi` | `command -v gabarit` |
 | `shadow-skill` | la recherche des Shadow-skills au brief, au plan et à la reprise d'un Chantier | `command -v shadow-skill` |
+| `contexte` | la taille du contexte d'une session, écrite par la statusline, lue par l'agent d'un Chantier | `command -v contexte` |
+| `commit-chantier` | la lettre des tags d'étape et l'aplatissement d'un Chantier à sa Clôture, par `git-smart-commit` | `command -v commit-chantier` |
+| `lexique` | la tenue des lexiques, et `:Lexique` dans Neovim | `command -v lexique` |
 | Python ≥ 3.12 | `list-dir`, `gabarit` et `shadow-skill` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification et le formatage du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` |

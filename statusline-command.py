@@ -17,8 +17,15 @@ class ModelInfo(TypedDict, total=False):
     display_name: str
 
 
+class CurrentUsage(TypedDict, total=False):
+    input_tokens: int
+    cache_creation_input_tokens: int
+    cache_read_input_tokens: int
+
+
 class ContextWindow(TypedDict, total=False):
     used_percentage: float
+    current_usage: CurrentUsage
 
 
 class RateWindow(TypedDict, total=False):
@@ -31,6 +38,7 @@ class RateLimits(TypedDict, total=False):
 
 
 class StatuslineInput(TypedDict, total=False):
+    session_id: str
     workspace: Workspace
     cwd: str
     model: ModelInfo
@@ -57,11 +65,38 @@ def git_branch(cwd: str) -> str | None:
             capture_output=True,
             text=True,
             timeout=2,
+            check=False,
         )
         branch = out.stdout.strip()
         return branch if out.returncode == 0 and branch else None
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         return None
+
+
+def ecrire_contexte(session: str | None, usage: CurrentUsage | None) -> None:
+    """Transmet la taille du contexte à la commande `contexte`, que l'agent interroge.
+
+    La statusline est seule à la recevoir. EN SILENCE QUOI QU'IL ARRIVE : une mesure perdue
+    se signale à la lecture, une statusline qui échoue n'affiche plus rien.
+    """
+    if not session or usage is None:
+        return
+    # LE CALCUL EST DANS LE `try` : l'entrée n'est pas garantie — un `null` ou un champ d'un
+    # autre type lève TypeError ou AttributeError, qui éteindraient toute la statusline.
+    try:
+        tokens = (
+            usage.get("input_tokens", 0)
+            + usage.get("cache_creation_input_tokens", 0)
+            + usage.get("cache_read_input_tokens", 0)
+        )
+        subprocess.run(
+            ["contexte", "ecrire", session, str(tokens)],
+            capture_output=True,
+            timeout=2,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError, TypeError, AttributeError):
+        pass
 
 
 def main() -> None:
@@ -73,6 +108,7 @@ def main() -> None:
     model: str | None = model_info.get("display_name")
     context_window = data.get("context_window") or {}
     ctx: float | None = context_window.get("used_percentage")
+    ecrire_contexte(data.get("session_id"), context_window.get("current_usage"))
     rate_limits = data.get("rate_limits") or {}
     five_hour: RateWindow = rate_limits.get("five_hour") or {}
     five_pct: float | None = five_hour.get("used_percentage")
@@ -105,7 +141,7 @@ def main() -> None:
         try:
             with open(caveman_flag) as f:
                 mode = f.read().strip()
-        except Exception:
+        except (OSError, UnicodeDecodeError):
             mode = ""
         caveman_text: str
         if mode in ("full", ""):

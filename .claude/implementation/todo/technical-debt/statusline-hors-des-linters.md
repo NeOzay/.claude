@@ -27,6 +27,11 @@ suffirait donc plus à rendre la ligne vraie.
 `pyrightconfig.json` vaut `skills` et `scripts`, jamais la racine. C'est le seul `.py` versionné
 qu'aucun des deux linters ne couvre vraiment — l'un l'ignore, l'autre échoue dessus.
 
+**Mesuré le 2026-10-04 :** le Chantier `contexte-tracker` a corrigé les 3 erreurs de
+`statusline-command.py` (`PLW1510`, 2 × `BLE001`). `uvx ruff check statusline-command.py` et
+`uvx --with pytest basedpyright statusline-command.py` passent. `uvx ruff check .` rend 2 erreurs,
+toutes sous `skills/list-dir`, et `pyrightconfig.json` n'inclut toujours pas la racine.
+
 ## Pourquoi c'est gênant
 
 la commande documentée doit pouvoir être lancée telle quelle par quelqu'un d'autre. Celle-ci sort

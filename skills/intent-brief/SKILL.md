@@ -225,13 +225,13 @@ Le brief précède le suivi et ne le remplace pas : le brief porte l'intention e
 le suivi porte les étapes et leur avancement, mis à jour en continu.
 
 La coupure est nette : **ce skill s'arrête au brief validé.** Le plan, sa relecture par
-`plan-reviewer` et le figeage des étapes appartiennent tous à l'Étape 2 d'`implementation-tracker`.
+`plan-reviewer` et le figeage des étapes appartiennent tous à la Phase 2 d'`implementation-tracker`.
 Un brief qui déborde sur le plan reprend le travail que le tracker refera — et deux versions d'une
 même chose ne peuvent que diverger.
 
 Ce qui fait foi en cas de divergence, et où s'écrit un périmètre qui change réellement :
 [Autorité et divergence](../implementation-tracker/references/contrat.md#autorité-et-divergence).
 
-Ce que le suivi reprend du brief à sa création (Étape 2 d'`implementation-tracker`) : toute la
+Ce que le suivi reprend du brief à sa création (Phase 2 d'`implementation-tracker`) : toute la
 section `## Objectif et périmètre`, dont la semence `suivi` déclare les blocs. Les **signaux de
 dérive** y deviennent un déclencheur d'arrêt pendant l'implémentation.

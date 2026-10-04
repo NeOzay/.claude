@@ -2,7 +2,7 @@
 """Liste les fichiers de SUIVI d'un répertoire d'implémentation, un nom par ligne.
 
 PORTÉE : ne remonte que les suivis — ni `.brief.md`, ni `.audit.md`, ni `.plan.md`.
-Utilisé par implementation-tracker (Étape 0 et Cas C), et par le garde-fou
+Utilisé par implementation-tracker (Phase 0 et Cas C), et par le garde-fou
 `scripts/check_pipeline.py`, qui importe `suivis()` plutôt que de relancer un
 processus : c'est ce qui garantit que le contrôle juge le filtre réellement en
 service. Voir ../references/contrat.md, section « Dates et listing ».

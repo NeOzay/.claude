@@ -311,7 +311,7 @@ refuse toute autre valeur.
 ## Lecture
 
 Le pipeline n'ouvre jamais le registre de lui-même : ni `intent-brief` au cadrage, ni le tracker à
-l'Étape 0. Il l'alimente, l'utilisateur le consulte — typiquement quand il cherche un sujet de
+la Phase 0. Il l'alimente, l'utilisateur le consulte — typiquement quand il cherche un sujet de
 chantier.
 
 ```bash

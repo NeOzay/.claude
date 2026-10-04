@@ -11,7 +11,7 @@ category = "<OPTIONNEL>"
 
 `commit-chantier lettre` rend la première lettre de A à Z sans tag d'étape `<L>E<n>` dans le dépôt.
 La lettre n'est donc réservée qu'à la pose du tag `<L>E0`, au commit de l'état initial
-(`implementation-tracker` Étape 2, point 8). Deux chantiers créés avant que l'un d'eux ait posé son
+(`implementation-tracker` Phase 2, point 9). Deux chantiers créés avant que l'un d'eux ait posé son
 `E0` reçoivent la même lettre. `etape.md` (« Si le tag existe déjà, git refuse ») arrête le second,
 mais après son commit.
 
@@ -23,7 +23,7 @@ un chantier né sous l'ancienne procédure et sans `AE0`.
 
 Une collision produit un commit d'étape sans tag, puis des plages `<L>E<n>` mêlant deux chantiers,
 et une clôture qui supprime les tags de l'autre (`git tag -d` des tags de sa lettre). Le chemin
-n'ayant jamais été exercé, rien ne dit que la séquence du point 8 tient en pratique.
+n'ayant jamais été exercé, rien ne dit que la séquence du point 9 tient en pratique.
 
 ## Pour solder
 

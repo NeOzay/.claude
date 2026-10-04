@@ -18,7 +18,7 @@ Ce fichier ne fait qu'orienter. Chaque type de commit a sa procédure dans un fi
 | Demande | Type | Procédure |
 |---|---|---|
 | Un commit des changements en cours, sans autre précision | 1 — commit ordinaire | [`references/hors-chantier.md`](references/hors-chantier.md) |
-| Un commit sur la branche d'un chantier : état initial, session ou étape terminée | 2 — commit rapide de chantier | [`references/etape.md`](references/etape.md) |
+| Un commit sur la branche d'un chantier : état initial, session, étape terminée ou Passation | 2 — commit rapide de chantier | [`references/etape.md`](references/etape.md) |
 | La clôture d'un chantier (aplatir sa branche sur la base), ou son abandon | 3 — aplatissement | [`references/aplatissement.md`](references/aplatissement.md) |
 
 Dans le doute, c'est le type 1.

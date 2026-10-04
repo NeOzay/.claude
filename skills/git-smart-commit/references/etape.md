@@ -7,13 +7,14 @@ lettre, le cas, et les chemins à stager.
 Branche et nom : [`branche-chantier.md`](branche-chantier.md). Lettre et tags :
 [`tags-etape.md`](tags-etape.md).
 
-## Les trois cas
+## Les quatre cas
 
 | Cas | Quand | Message | Tag |
 |---|---|---|---|
 | État initial | à la création, une fois brief, plan et suivi écrits | `<slug>: E0 — état initial` | `<L>E0` |
 | Session | à la reprise sur un arbre modifié, ou en fin de session | `<slug>: session N — <étape en cours>` | aucun |
 | Étape | quand l'étape n passe en `[x]`, même juste après un commit de session | `<slug>: E<n> — <intitulé de l'étape>` | `<L>E<n>` |
+| Passation | la Passation acceptée, une fois la section `## Passation` du suivi réécrite | `<slug>: passation — session N, après <L>E<n>` | aucun |
 
 `N` est la valeur de `session` au frontmatter du suivi.
 

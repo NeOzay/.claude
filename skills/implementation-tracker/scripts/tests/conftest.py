@@ -1,6 +1,6 @@
 """Fixtures des tests des scripts d'implementation-tracker.
 
-sys.path vise `scripts/`, ce qui rend `import fiche` disponible.
+sys.path vise `scripts/`, ce qui rend `import fiche` et `import contexte` disponibles.
 """
 
 from __future__ import annotations

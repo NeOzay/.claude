@@ -9,7 +9,7 @@ category = "pertinent"
 
 ## Constat
 
-l'Étape 2 d'`implementation-tracker` refuse de créer un chantier si l'arbre n'est pas
+la Phase 2 d'`implementation-tracker` refuse de créer un chantier si l'arbre n'est pas
 propre, avec une exception explicite pour les `*.brief.md` produits par `intent-brief`. Or le flux
 normal produit **aussi** un plan non suivi dans `.claude/plans/`, que la clause ne mentionne pas.
 
@@ -25,7 +25,7 @@ refusera de démarrer.
 
 ## Pour solder
 
-étendre l'exception au plan dans l'Étape 2 du tracker.
+étendre l'exception au plan dans la Phase 2 du tracker.
 
 ## Assumé
 

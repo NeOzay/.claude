@@ -208,9 +208,9 @@ relatif **gardé par un test d'existence portant sur ce même script**, quand ce
 légitimement local au dépôt.
 
 > *Mode de défaillance* — un skill s'invoque depuis n'importe quel projet, où un `scripts/` local
-> n'existe pas : l'appel relatif y renvoie code 127 et une **sortie vide**, que l'Étape 1 du tracker
-> lit comme « aucune implémentation en cours » avant de proposer d'en créer une — en ignorant les
-> chantiers réellement présents. Constaté à l'audit du 2026-08-14.
+> n'existe pas : l'appel relatif y renvoie code 127 et une **sortie vide**, que la Phase 1 du
+> tracker lit comme « aucune implémentation en cours » avant de proposer d'en créer une — en
+> ignorant les chantiers réellement présents. Constaté à l'audit du 2026-08-14.
 
 > *Mode de défaillance* — le hook `rtk` réécrit `ls` en ajoutant une colonne de taille en fin de
 > ligne, ce qui empêche toute ancre `$` de matcher : un `grep -vE '\.(brief|audit)\.md$'` écrit en

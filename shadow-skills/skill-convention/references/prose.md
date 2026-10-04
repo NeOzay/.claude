@@ -75,7 +75,7 @@ lue d'avance occupe le contexte pendant toute la procédure, et une référence 
 pas dit est lue d'avance par prudence.
 
 **Pratiqué dans** : [git-smart-commit](../../../skills/git-smart-commit/SKILL.md) ;
-[implementation-tracker](../../../skills/implementation-tracker/SKILL.md), dont l'Étape 5 ne fait
+[implementation-tracker](../../../skills/implementation-tracker/SKILL.md), dont la Phase 5 ne fait
 lire `references/cloture.md` qu'à la clôture.
 
 ## Une règle, un seul endroit

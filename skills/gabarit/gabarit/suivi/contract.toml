@@ -1,6 +1,6 @@
 # Semence du fichier de suivi d'implementation-tracker.
 #
-# Le suivi est posé à l'Étape 2 du tracker, une fois le plan validé, maintenu pendant
+# Le suivi est posé à la Phase 2 du tracker, une fois le plan validé, maintenu pendant
 # l'implémentation, archivé en `done/` à la clôture. Ce qui est mécaniquement connu à la
 # création est prérempli ; le reste porte son marqueur, et chaque description dit d'où vient
 # la valeur. La skill n'en décrit pas la structure : elle renvoie ici.
@@ -130,6 +130,19 @@ description = """
 
 Un verdict sans SHA ne se rattache à rien : le code a bougé depuis. Le raisonnement de l'audit
 vit dans son rapport, pas ici."""
+
+[sections."Passation"]
+description = """
+Ce que la session qui s'arrête transmet à la suivante à la Passation, et qu'aucun autre fichier
+ne dit, en trois blocs :
+- `**Écrite** :` `session <N>, après <L>E<n>` — la session qui l'écrit et le dernier tag d'Étape
+  posé ;
+- `**En cours** :` le travail entamé, dans son état exact, ou « rien » ;
+- `**À savoir** :` ce que la session a appris, absent du Suivi, du Plan et du code.
+
+Réécrite à chaque Passation, jamais complétée ; `**Écrite** :` dit de quand elle date. Quand elle
+est à jour, c'est la reprise d'implementation-tracker qui le juge, et elle seule. Tant qu'aucune
+Passation n'a eu lieu, la section reste à son marqueur."""
 
 [sections."Journal de décisions"]
 description = """
