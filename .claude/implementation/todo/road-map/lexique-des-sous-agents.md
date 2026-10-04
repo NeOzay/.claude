@@ -18,7 +18,8 @@ reçoivent `CLAUDE.md` (general-purpose, agents de `agents/`) et lesquels non (`
 
 ## Références
 
-- `skills/lexique/instructions.md`, `LEXIQUE.md`, `skills/lexique/scripts/lexique-cli.py` (`session`)
+- `skills/lexique/instructions.md`, `LEXIQUE.md`, `skills/lexique/scripts/lexique-cli.py`
+  (`session`)
 - `settings.json`, hooks `SessionStart`
 - `hooks/outillage-rappel.sh`, en-tête : les sous-agents ne reçoivent pas `SessionStart`
 - `skills/skill-convention/references/prose.md`, section « Un sous-agent recopie ses règles »

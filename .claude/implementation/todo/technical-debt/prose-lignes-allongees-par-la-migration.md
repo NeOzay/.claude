@@ -9,11 +9,16 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-La migration de `skill-convention` a réécrit les liens de `shadow-skills/skill-convention/references/prose.md` (`../../` devient `../../../skills/`) sans rejustifier les paragraphes. Au 2026-10-04, une dizaine de lignes y dépassent 100 colonnes, alors que leurs voisines s'arrêtent avant.
+La migration de `skill-convention` a réécrit les liens de
+`shadow-skills/skill-convention/references/prose.md` (`../../` devient `../../../skills/`) sans
+rejustifier les paragraphes. Au 2026-10-04, une dizaine de lignes y dépassent 100 colonnes, alors
+que leurs voisines s'arrêtent avant.
 
 ## Pourquoi c'est gênant
 
-Le fichier qui énonce les conventions de prose du dépôt ne les tient plus dans sa forme. Le rendu n'est pas touché, mais un diff futur sur ces paragraphes mélangera rejustification et changement de fond.
+Le fichier qui énonce les conventions de prose du dépôt ne les tient plus dans sa forme. Le rendu
+n'est pas touché, mais un diff futur sur ces paragraphes mélangera rejustification et changement de
+fond.
 
 ## Pour solder
 

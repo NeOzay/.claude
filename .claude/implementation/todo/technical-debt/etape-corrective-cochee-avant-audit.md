@@ -27,16 +27,16 @@ formuler ces étapes avec une vérification portant sur le **correctif** plutôt
 sur le verdict à venir (`grep -n "rev-parse" agents/implementation-auditor.md`), et le dire dans
 `cloture.md`.
 
-**Élargi le 2026-08-14 par `contrat-pipeline`** — le même ordonnancement rend **structurellement
-invérifiable** tout critère de réussite portant sur le registre de dette. Le solde s'écrit au point 2
-de `cloture.md`, donc après l'audit : aucun audit ne pourra jamais constater que les entrées sont
-passées dans `technical-debt-solde.md`. Les trois audits du chantier ont chacun signalé ce critère
-comme non atteint, sans qu'aucune correction soit possible.
+**Élargi le 2026-08-14 par `contrat-pipeline`** — le même ordonnancement rend
+**structurellement invérifiable** tout critère de réussite portant sur le registre de dette. Le
+solde s'écrit au point 2 de `cloture.md`, donc après l'audit : aucun audit ne pourra jamais
+constater que les entrées sont passées dans `technical-debt-solde.md`. Les trois audits du chantier
+ont chacun signalé ce critère comme non atteint, sans qu'aucune correction soit possible.
 
 **Pour solder, complété** — les critères de réussite portant sur un geste postérieur à l'audit
 doivent être écrits comme tels au brief, ou déplacés vers une vérification post-clôture. La
-formulation actuelle oblige tout auditeur à rendre `RÉSERVES` sur un point que le dispositif interdit
-d'atteindre au moment où il juge.
+formulation actuelle oblige tout auditeur à rendre `RÉSERVES` sur un point que le dispositif
+interdit d'atteindre au moment où il juge.
 
 ## Assumé
 

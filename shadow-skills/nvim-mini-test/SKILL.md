@@ -87,6 +87,7 @@ running tests. Clone them the same way mini.test is cloned above.
 
 > **Note:** If mini.test is cloned into `deps/`, make sure to add `deps/` to your
 > `.gitignore` so it isn't committed:
+>
 > ```
 > /deps/
 > ```
@@ -133,6 +134,7 @@ return T
 ```
 
 Key rules:
+
 - Always `return T` at the end of the file
 - Test names are string keys on the set — make them descriptive
 - Use `MiniTest.expect` for assertions, not raw `assert()`
@@ -336,5 +338,8 @@ jobs:
 
 ## Références
 
-- [`references/mini-test-api.md`](references/mini-test-api.md) : the full API, including screenshot testing and child process methods.
-- [`references/examples.md`](references/examples.md) : exhaustive code examples covering every test type (parametrize, child process, screenshots, async, busted-style, skip/finally, n_retry, data, custom collection…).
+- [`references/mini-test-api.md`](references/mini-test-api.md) : the full API, including screenshot
+  testing and child process methods.
+- [`references/examples.md`](references/examples.md) : exhaustive code examples covering every test
+  type (parametrize, child process, screenshots, async, busted-style, skip/finally, n_retry, data,
+  custom collection…).

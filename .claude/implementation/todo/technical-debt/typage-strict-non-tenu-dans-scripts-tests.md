@@ -12,8 +12,8 @@ source = "chantier `skill-convention`, étape 7 — confrontation du Python à `
 privé du module qu'il vérifie. Les autres fichiers de `scripts/` et les paquets `gabarit` et
 `list-dir` passent sans erreur sous la même commande.
 
-`rules/claude-python-style.md` pose le typage strict — basedpyright en `typeCheckingMode: "all"` — sans
-exempter les tests, et `pyrightconfig.json` de la racine inclut bien `scripts`.
+`rules/claude-python-style.md` pose le typage strict — basedpyright en `typeCheckingMode: "all"` —
+sans exempter les tests, et `pyrightconfig.json` de la racine inclut bien `scripts`.
 
 ## Pourquoi c'est gênant
 

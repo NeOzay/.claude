@@ -19,10 +19,9 @@ que l'appelant fournit sans la mentionner, l'agent la calculant lui-même juste 
 **Soldé le 2026-08-15 par le chantier `contrat-pipeline`** — la règle est définie une seule fois,
 dans `contrat.md`, section « Contrat des sous-agents » : « l'appelant peut la donner, sinon l'agent
 la calcule ». `audit.md` renvoie à cette section au lieu d'énumérer une liste divergente, et l'agent
-porte la même formulation.
-Établi par : `grep -n -A1 "peut te la" agents/implementation-auditor.md` → l. 26-27, « **L'appelant
-peut te la donner ; sinon, calcule-la** » ; et `grep -n "Contrat des sous-agents" …/references/audit.md`
-→ l. 42, renvoi ancré au lieu de la liste.
+porte la même formulation. Établi par : `grep -n -A1 "peut te la" agents/implementation-auditor.md`
+→ l. 26-27, « **L'appelant peut te la donner ; sinon, calcule-la** » ; et
+`grep -n "Contrat des sous-agents" …/references/audit.md` → l. 42, renvoi ancré au lieu de la liste.
 
 ## Pourquoi c'est gênant
 

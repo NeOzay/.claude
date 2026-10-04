@@ -1,6 +1,8 @@
 # Différences entre emmylua_ls et lua_ls (LuaLS)
 
-Ce document décrit les différences notables entre le serveur EmmyLua Analyzer Rust (`emmylua_ls`) et le Lua Language Server de Sumneko/LuaLS (`lua_ls`). Les deux sont des LSP pour Lua mais ils divergent sur plusieurs points.
+Ce document décrit les différences notables entre le serveur EmmyLua Analyzer Rust (`emmylua_ls`) et
+le Lua Language Server de Sumneko/LuaLS (`lua_ls`). Les deux sont des LSP pour Lua mais ils
+divergent sur plusieurs points.
 
 ## Table des matières
 
@@ -35,7 +37,8 @@ Ce document décrit les différences notables entre le serveur EmmyLua Analyzer 
 
 ### Fichier de configuration
 
-emmylua_ls utilise `.emmyrc.json` comme fichier principal, mais reconnaît aussi `.luarc.json` pour faciliter la migration.
+emmylua_ls utilise `.emmyrc.json` comme fichier principal, mais reconnaît aussi `.luarc.json` pour
+faciliter la migration.
 
 Les structures de configuration diffèrent significativement :
 
@@ -92,7 +95,8 @@ Les deux utilisent la même structure wrappée sous `Lua` dans les settings LSP 
 - `runtime.pluginArgs` : Arguments du plugin.
 - `completion.workspaceWord` : Complétion par mots du workspace.
 - `diagnostics.libraryFiles` : Diagnostic dans les fichiers de bibliothèque.
-- `format.enable` : Formateur intégré activable (EmmyLuaCodeStyle est intégré dans emmylua_ls par défaut).
+- `format.enable` : Formateur intégré activable (EmmyLuaCodeStyle est intégré dans emmylua_ls par
+  défaut).
 
 ---
 
@@ -100,7 +104,9 @@ Les deux utilisent la même structure wrappée sous `Lua` dans les settings LSP 
 
 Les annotations suivantes sont supportées par les deux serveurs avec un comportement compatible :
 
-`@class`, `@field`, `@param`, `@return`, `@type`, `@alias`, `@generic`, `@overload`, `@async`, `@deprecated`, `@private`, `@protected`, `@package`, `@diagnostic`, `@cast`, `@operator`, `@nodiscard`, `@version`, `@see`, `@enum`, `@vararg`, `@meta`
+`@class`, `@field`, `@param`, `@return`, `@type`, `@alias`, `@generic`, `@overload`, `@async`,
+`@deprecated`, `@private`, `@protected`, `@package`, `@diagnostic`, `@cast`, `@operator`,
+`@nodiscard`, `@version`, `@see`, `@enum`, `@vararg`, `@meta`
 
 ---
 
@@ -188,7 +194,8 @@ local AAA = {
 
 ### @as
 
-Cast inline dans une expression (lua_ls). emmylua_ls utilise `--[[@as Type]]` à la place (syntaxe commentaire de bloc).
+Cast inline dans une expression (lua_ls). emmylua_ls utilise `--[[@as Type]]` à la place (syntaxe
+commentaire de bloc).
 
 ```lua
 -- lua_ls :
@@ -203,7 +210,9 @@ Spécifie le module d'un fichier (lua_ls uniquement).
 
 ### Plugins Lua
 
-lua_ls supporte un système de plugins écrits en Lua qui peuvent modifier le comportement du serveur (complétion, diagnostics, etc.). emmylua_ls ne supporte **pas** et ne prévoit **pas** de supporter les plugins, pour des raisons de performances, de taille binaire et de sécurité.
+lua_ls supporte un système de plugins écrits en Lua qui peuvent modifier le comportement du serveur
+(complétion, diagnostics, etc.). emmylua_ls ne supporte **pas** et ne prévoit **pas** de supporter
+les plugins, pour des raisons de performances, de taille binaire et de sécurité.
 
 ---
 
@@ -211,9 +220,13 @@ lua_ls supporte un système de plugins écrits en Lua qui peuvent modifier le co
 
 C'est la différence architecturale la plus importante :
 
-**lua_ls** : Supporte des plugins Lua qui peuvent transformer l'analyse, ajouter de la complétion personnalisée, ou modifier les diagnostics. Le système d'addons permet d'installer des bibliothèques de types tierces.
+**lua_ls** : Supporte des plugins Lua qui peuvent transformer l'analyse, ajouter de la complétion
+personnalisée, ou modifier les diagnostics. Le système d'addons permet d'installer des bibliothèques
+de types tierces.
 
-**emmylua_ls** : Aucun support de plugins et aucun projet d'en ajouter. Le mainteneur a explicitement rejeté cette possibilité pour les raisons suivantes :
+**emmylua_ls** : Aucun support de plugins et aucun projet d'en ajouter. Le mainteneur a
+explicitement rejeté cette possibilité pour les raisons suivantes :
+
 - Impact négatif sur les performances
 - Augmentation de la taille du binaire (runtime de scripting)
 - Problèmes de lifetime Rust avec le partage de données vers un runtime de scripting
@@ -224,7 +237,8 @@ C'est la différence architecturale la plus importante :
 
 ## Performances
 
-emmylua_ls est généralement plus rapide que lua_ls grâce à l'implémentation Rust. Les avantages les plus notables :
+emmylua_ls est généralement plus rapide que lua_ls grâce à l'implémentation Rust. Les avantages les
+plus notables :
 
 - Analyse initiale plus rapide sur les gros projets
 - Meilleure utilisation mémoire
@@ -237,7 +251,8 @@ En contrepartie, lua_ls peut être plus flexible grâce à son système de plugi
 
 ## Diagnostics
 
-Les deux serveurs offrent des diagnostics similaires mais avec des noms différents dans certains cas. Voici les correspondances principales :
+Les deux serveurs offrent des diagnostics similaires mais avec des noms différents dans certains
+cas. Voici les correspondances principales :
 
 | Concept | emmylua_ls | lua_ls |
 |---|---|---|
@@ -290,13 +305,17 @@ La syntaxe de contrôle inline est identique :
 
 1. **Installer emmylua_ls** : `cargo install emmylua_ls` ou via Mason.
 
-2. **Renommer/adapter la config** : Si vous avez un `.luarc.json`, emmylua_ls le reconnaît. Sinon, créer un `.emmyrc.json` basé sur votre configuration lua_ls.
+2. **Renommer/adapter la config** : Si vous avez un `.luarc.json`, emmylua_ls le reconnaît. Sinon,
+   créer un `.emmyrc.json` basé sur votre configuration lua_ls.
 
-3. **Adapter les settings Neovim** : La structure `settings.Lua.*` est compatible. Les options spécifiques à lua_ls (comme `checkThirdParty`) seront ignorées.
+3. **Adapter les settings Neovim** : La structure `settings.Lua.*` est compatible. Les options
+   spécifiques à lua_ls (comme `checkThirdParty`) seront ignorées.
 
-4. **Vérifier les annotations** : Les annotations de base sont compatibles. Si vous utilisez `@module` ou des fonctionnalités de plugins lua_ls, une adaptation sera nécessaire.
+4. **Vérifier les annotations** : Les annotations de base sont compatibles. Si vous utilisez
+   `@module` ou des fonctionnalités de plugins lua_ls, une adaptation sera nécessaire.
 
-5. **Remplacer les addons** : Si vous utilisiez des addons lua_ls pour des bibliothèques tierces, convertissez-les en entrées `workspace.library` dans la configuration emmylua_ls.
+5. **Remplacer les addons** : Si vous utilisiez des addons lua_ls pour des bibliothèques tierces,
+   convertissez-les en entrées `workspace.library` dans la configuration emmylua_ls.
 
 6. **Désactiver lua_ls** : S'assurer qu'un seul LSP est actif pour éviter les diagnostics dupliqués.
 

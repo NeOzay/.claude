@@ -42,12 +42,14 @@ git status --short
 impl-list .claude/implementation
 ```
 
-Le script ne remonte que les fichiers de suivi. **Ne jamais réécrire ce filtre en ligne** — pourquoi :
+Le script ne remonte que les fichiers de suivi. **Ne jamais réécrire ce filtre en ligne** —
+pourquoi :
 [Dates et listing](references/contrat.md#dates-et-listing).
 
 **Ne rien créer sans confirmation** dans ces deux cas :
 
-- `NON_GIT` → demander à l'utilisateur s'il veut quand même un fichier de suivi (il ne sera pas versionné).
+- `NON_GIT` → demander à l'utilisateur s'il veut quand même un fichier de suivi (il ne sera pas
+  versionné).
 - `.claude/implementation/` absent → demander confirmation avant de créer l'arborescence.
 
 Dans les deux cas : poser la question, attendre la réponse, ne pas supposer.
@@ -94,12 +96,12 @@ Aucun fichier existant → proposer directement la création.
 
 ## Étape 2 — Création (nouvelle implémentation)
 
-**Prérequis : arbre de travail propre.** Si `git status --short` (Étape 0) n'est pas vide, **ne pas
-créer** de nouvelle implémentation. **Exception : les `*.brief.md`.** Un brief produit par
+**Prérequis : arbre de travail propre.** Si `git status --short` (Étape 0) n'est pas vide,
+**ne pas créer** de nouvelle implémentation. **Exception : les `*.brief.md`.** Un brief produit par
 `intent-brief` avant l'appel au tracker apparaît en `??` sans être une modification étrangère au
-chantier — l'ignorer dans ce contrôle. Arrêter et indiquer qu'il ne doit y avoir aucune modification en
-cours avant de démarrer un nouveau chantier — sinon les premiers commits de session mélangeraient des
-changements étrangers à l'implémentation. Laisser l'utilisateur traiter ces modifications (les
+chantier — l'ignorer dans ce contrôle. Arrêter et indiquer qu'il ne doit y avoir aucune modification
+en cours avant de démarrer un nouveau chantier — sinon les premiers commits de session mélangeraient
+des changements étrangers à l'implémentation. Laisser l'utilisateur traiter ces modifications (les
 committer ou les mettre de côté) avant de relancer.
 
 1. **Cadrer l'intention avant de planifier** — invoquer le skill `intent-brief`. Il produit
@@ -113,7 +115,6 @@ committer ou les mettre de côté) avant de relancer.
    `brief` omis et **`execution = "direct"` imposé** : sans hors-périmètre ni signaux de dérive
    écrits, un exécutant isolé n'a aucune borne. Remplir `## Objectif et périmètre` avec
    l'utilisateur, en une passe.
-
 2. **Entrer en plan mode** (`EnterPlanMode`), avec le brief comme cadre : rappeler
    explicitement au plan les critères de réussite, le hors-périmètre et les incertitudes à
    lever. Explorer le code et construire le plan normalement — c'est le flux natif qui fait
@@ -130,16 +131,16 @@ committer ou les mettre de côté) avant de relancer.
    l'entrée en plan mode et en autorise l'écriture : y écrire le plan, puis lancer le sous-agent
    `plan-reviewer` **avant `ExitPlanMode`**.
 
-   Lui transmettre trois chemins **absolus** — racine du dépôt, fichier de plan, brief — et **rien
-   d'autre** : il lit tout lui-même.
+   Lui transmettre trois chemins **absolus** — racine du dépôt, fichier de plan, brief — et
+   **rien d'autre** : il lit tout lui-même.
    [Contrat des sous-agents](references/contrat.md#contrat-des-sous-agents).
 
    **Pas de brief** → le lui dire explicitement : il ne jugera alors que la qualité du plan.
 
-   Pourquoi avant, et non après : celui qui vient d'écrire le plan est le plus mal placé pour
-   juger sa propre conformité — il relit son intention, pas son texte. Et un plan approuvé par
-   l'utilisateur puis contredit dans la foulée coûte un aller-retour entier. `ExitPlanMode`
-   présente donc **le plan et le verdict ensemble**.
+   Pourquoi avant, et non après : celui qui vient d'écrire le plan est le plus mal placé pour juger
+   sa propre conformité — il relit son intention, pas son texte. Et un plan approuvé par
+   l'utilisateur puis contredit dans la foulée coûte un aller-retour entier. `ExitPlanMode` présente
+   donc **le plan et le verdict ensemble**.
 
    | `VERDICT` | Action |
    |---|---|
@@ -147,29 +148,27 @@ committer ou les mettre de côté) avant de relancer.
    | `RÉSERVES` | Présenter le plan **avec** les constats — l'utilisateur valide en les connaissant |
    | `NON CONFORME` | Présenter le plan avec le verdict, et laisser l'utilisateur trancher entre corriger le plan et élargir le brief |
 
-   **Ne jamais corriger le plan d'office** sur un verdict, quel qu'il soit. L'écart entre le plan
-   et le brief est précisément l'information qu'on paie en lançant l'agent : l'effacer avant que
+   **Ne jamais corriger le plan d'office** sur un verdict, quel qu'il soit. L'écart entre le plan et
+   le brief est précisément l'information qu'on paie en lançant l'agent : l'effacer avant que
    l'utilisateur l'ait vue détruit ce qu'on cherchait. Seuls les défauts de rédaction relevés en
    `QUALITÉ` — une citation fausse, une commande de vérification inopérante — se corrigent sans
    arbitrage, et se disent quand même.
 
-   Le plan est persisté dans `.claude/plans/` (voir `plansDirectory`), sous un nom **généré par le
-   harness**, sans rapport avec le slug. Son chemin est donné à l'entrée en plan mode et confirmé
-   dans la sortie d'`ExitPlanMode` : le prendre là, jamais par `ls -t` — dès qu'un second plan
-   existe, la date de modification désigne le mauvais fichier.
+   Le plan est persisté dans `.claude/plans/` (voir `plansDirectory`), sous un nom
+   **généré par le harness**, sans rapport avec le slug. Son chemin est donné à l'entrée en plan
+   mode et confirmé dans la sortie d'`ExitPlanMode` : le prendre là, jamais par `ls -t` — dès qu'un
+   second plan existe, la date de modification désigne le mauvais fichier.
 
-   **Le plan doit être versionné.** C'est lui qui porte le contenu des étapes — le suivi n'en a
-   que les intitulés, et `step-implementer` va y lire la description de son étape. Vérifier qu'il
-   n'est pas ignoré :
+   **Le plan doit être versionné.** C'est lui qui porte le contenu des étapes — le suivi n'en a que
+   les intitulés, et `step-implementer` va y lire la description de son étape. Vérifier qu'il n'est
+   pas ignoré :
 
    ```bash
    git check-ignore -q .claude/plans/<fichier>.md && echo "IGNORÉ — le signaler"
    ```
 
-   S'il est ignoré, le dire à l'utilisateur : sans lui, la reprise en session 3 et toute
-   délégation perdent la description des étapes. Sinon, il entre dans le commit de l'état initial
-   (point 9).
-
+   S'il est ignoré, le dire à l'utilisateur : sans lui, la reprise en session 3 et toute délégation
+   perdent la description des étapes. Sinon, il entre dans le commit de l'état initial (point 9).
 4. **Créer la branche d'implémentation** nommée exactement `<slug>`, à partir de la branche
    courante — la **branche principale**, qui ira dans le champ `base` du suivi — et obtenir la
    lettre des tags d'étape, qui ira dans le champ `lettre` :
@@ -241,8 +240,8 @@ Lire le fichier en entier, puis restituer en quelques lignes — pas de récitat
 - les blocages éventuels,
 - les commandes de vérification à rejouer.
 
-Comparer le champ `branche` du front matter à la branche git courante. **Divergence → le signaler**, ne pas
-corriger le fichier d'office (l'utilisateur peut avoir volontairement changé de branche).
+Comparer le champ `branche` du front matter à la branche git courante. **Divergence → le signaler**,
+ne pas corriger le fichier d'office (l'utilisateur peut avoir volontairement changé de branche).
 
 Incrémenter `session` de 1 dans le frontmatter — c'est ce compteur qui sert aux messages de commit
 de session (voir Étape 4).
@@ -259,8 +258,8 @@ tout début de conversation et **proposer** un commit de session avant de contin
 
 ## Étape 4 — Maintenir le fichier pendant la session
 
-Le fichier est mis à jour **en continu**, sans que l'utilisateur ait à le demander. Relire le fichier
-avant chaque écriture. Toujours actualiser `maj` en même temps que le contenu.
+Le fichier est mis à jour **en continu**, sans que l'utilisateur ait à le demander. Relire le
+fichier avant chaque écriture. Toujours actualiser `maj` en même temps que le contenu.
 
 Déclencheurs d'écriture :
 
@@ -338,8 +337,9 @@ entre deux sessions.
 ### Commits de session
 
 Une étape peut se retrouver **à cheval sur deux sessions** — interruption, ou exécution en `direct`.
-Le compteur se cale donc sur la **session**, pas sur l'étape. Commits de session et d'étape, messages
-et tags : `git-smart-commit`, type 2 — [Commit rapide de chantier](../git-smart-commit/references/etape.md).
+Le compteur se cale donc sur la **session**, pas sur l'étape. Commits de session et d'étape,
+messages et tags : `git-smart-commit`, type 2 —
+[Commit rapide de chantier](../git-smart-commit/references/etape.md).
 
 Propre à ce skill : pour une étape déléguée, ne stager que les fichiers de `FICHIERS` rapportés par
 l'agent et le fichier de suivi — rien d'autre.
@@ -360,10 +360,11 @@ Format : `- **date** — décision. *Pourquoi* : … *Rejeté* : …`
 
 ## Étape 5 — Clôture
 
-Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée :
-lire `references/cloture.md`, section « Clôture », et suivre la procédure — **audit par
-`implementation-auditor`**, contrôle des étapes, finalisation du suivi, puis aplatissement et
-archivage en `done/` par `git-smart-commit`, type 3. **Pas de résumé prêt à coller** en fin de clôture.
+Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée : lire
+`references/cloture.md`, section « Clôture », et suivre la procédure —
+**audit par `implementation-auditor`**, contrôle des étapes, finalisation du suivi, puis
+aplatissement et archivage en `done/` par `git-smart-commit`, type 3.
+**Pas de résumé prêt à coller** en fin de clôture.
 
 **Une clôture sans avis favorable ne va pas au bout** : l'audit est le premier point de la
 procédure, pas une formalité de fin (`references/audit.md`).

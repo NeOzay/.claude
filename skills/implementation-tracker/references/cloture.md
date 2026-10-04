@@ -96,10 +96,10 @@ ne s'ajoute pas.
 git add .claude/implementation/todo/
 ```
 
-Au premier usage, ces fichiers ne sont **pas suivis** par git. Le script d'aplatissement du
-point 4 indexe `todo/` dès son premier commit, mais rien ne garantit qu'il l'atteigne : un `REFUS`,
-ou une clôture reportée, laisse sans ce `git add` le registre hors de tout commit, sans une seule
-erreur, et l'écriture se perd. C'est un chemin d'échec silencieux — le seul type qui ne se rattrape pas.
+Au premier usage, ces fichiers ne sont **pas suivis** par git. Le script d'aplatissement du point 4
+indexe `todo/` dès son premier commit, mais rien ne garantit qu'il l'atteigne : un `REFUS`, ou une
+clôture reportée, laisse sans ce `git add` le registre hors de tout commit, sans une seule erreur,
+et l'écriture se perd. C'est un chemin d'échec silencieux — le seul type qui ne se rattrape pas.
 
 ### 3. Finaliser le fichier de suivi
 
@@ -109,10 +109,10 @@ erreur, et l'écriture se perd. C'est un chemin d'échec silencieux — le seul 
 ### 4. Aplatir et archiver
 
 Par `git-smart-commit`, type 3 :
-[Aplatissement d'un chantier](../../git-smart-commit/references/aplatissement.md). Message écrit dans
-un fichier, dry-run présenté, accord, puis `commit-chantier cloture` : tous les commits de `<slug>`
-deviennent **un seul commit sur `base`**, suivi, brief, audit et plan partent en `done/`, la branche
-et ses tags sont supprimés.
+[Aplatissement d'un chantier](../../git-smart-commit/references/aplatissement.md). Message écrit
+dans un fichier, dry-run présenté, accord, puis `commit-chantier cloture` : tous les commits de
+`<slug>` deviennent **un seul commit sur `base`**, suivi, brief, audit et plan partent en `done/`,
+la branche et ses tags sont supprimés.
 
 **`REFUS` ou `ÉCHEC` du script → s'arrêter net** et rendre la main. Une clôture à moitié faite est
 pire qu'une clôture reportée.
@@ -173,4 +173,5 @@ tous les listings suivants.
    Écrite sur `<slug>`, elle n'atteindrait jamais `base` : la branche est soit supprimée, soit
    conservée sans jamais être aplatie (point 5). C'est le même chemin d'échec silencieux qu'au
    point 2 de la clôture, et il se ferme de la même façon.
+
 5. Ne **jamais** aplatir un chantier abandonné dans `base` : il n'a pas vocation à y entrer.

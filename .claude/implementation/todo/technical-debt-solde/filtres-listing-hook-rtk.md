@@ -18,9 +18,9 @@ l'Étape 0 du tracker remonte `dette-technique.brief.md` à côté de `dette-tec
 
 **Soldé le 2026-08-15 par le chantier `contrat-pipeline`** — le filtre vit désormais dans
 `skills/implementation-tracker/scripts/impl-list.sh`, un script que le hook `rtk` ne réécrit pas, et
-que l'Étape 0 comme le Cas C appellent au lieu de recopier une commande.
-Établi par : `bash "$HOME/.claude/skills/implementation-tracker/scripts/impl-list.sh" .claude/implementation/done | grep -cE '\.(brief|audit|plan)\.md$'` → `0`,
-sur un répertoire contenant pourtant 2 `.brief.md`, 2 `.audit.md` et 2 `.plan.md`.
+que l'Étape 0 comme le Cas C appellent au lieu de recopier une commande. Établi par :
+`bash "$HOME/.claude/skills/implementation-tracker/scripts/impl-list.sh" .claude/implementation/done | grep -cE '\.(brief|audit|plan)\.md$'`
+→ `0`, sur un répertoire contenant pourtant 2 `.brief.md`, 2 `.audit.md` et 2 `.plan.md`.
 
 ## Pourquoi c'est gênant
 

@@ -13,8 +13,9 @@ l'Étape 2 d'`implementation-tracker` refuse de créer un chantier si l'arbre n'
 propre, avec une exception explicite pour les `*.brief.md` produits par `intent-brief`. Or le flux
 normal produit **aussi** un plan non suivi dans `.claude/plans/`, que la clause ne mentionne pas.
 
-**Constaté** à l'ouverture de ce chantier même : `git status` remontait le brief *et* `.claude/plans/`,
-et il a fallu décider hors procédure que le second relevait de la même logique que le premier.
+**Constaté** à l'ouverture de ce chantier même : `git status` remontait le brief *et*
+`.claude/plans/`, et il a fallu décider hors procédure que le second relevait de la même logique que
+le premier.
 
 ## Pourquoi c'est gênant
 

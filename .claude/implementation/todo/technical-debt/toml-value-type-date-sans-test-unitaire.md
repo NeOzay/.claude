@@ -9,10 +9,10 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-La suppression de `dump_value` a emporté ses tests, dont `test_dump_value_couvre_les_types_du_contrat`
-— seule assertion directe sur la sérialisation d'une `datetime.date`. Le test qui l'a remplacée,
-`test_toml_text_rend_le_membre_droit_du_egal` dans `tests/test_items.py`, couvre `str`, `bool` et
-`list`, pas `date`.
+La suppression de `dump_value` a emporté ses tests, dont
+`test_dump_value_couvre_les_types_du_contrat` — seule assertion directe sur la sérialisation d'une
+`datetime.date`. Le test qui l'a remplacée, `test_toml_text_rend_le_membre_droit_du_egal` dans
+`tests/test_items.py`, couvre `str`, `bool` et `list`, pas `date`.
 
 La branche `isinstance(value, (int, datetime.date))` de `toml_value` n'est donc plus couverte que
 par ricochet, via l'aller-retour d'un contrat dans `tests/test_store_ecriture.py`. Le cas

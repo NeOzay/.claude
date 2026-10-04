@@ -384,6 +384,7 @@ return T
 ```
 
 > **Lifecycle methods:**
+>
 > - `child.start(args)` — start the process (called once)
 > - `child.restart(args)` — stop + start (resets all state, use in `pre_case`)
 > - `child.stop()` — terminate the process
@@ -750,6 +751,7 @@ return T
 ```
 
 > **Tips:**
+>
 > - Always set `child.o.lines` and `child.o.columns` to fixed values.
 > - Delete the reference file to regenerate it on the next run.
 > - Keep test case names short — the file name is derived from them and has
@@ -808,6 +810,7 @@ return T
 
 > **Note from mini.nvim CONTRIBUTING.md:** never hardcode sleep durations as
 > raw numbers — use named constants that can be scaled per OS:
+>
 > ```lua
 > local test_times = { action = vim.fn.has("win32") == 1 and 200 or 50 }
 > sleep(test_times.action + 10)
@@ -821,6 +824,7 @@ Enable `emulate_busted = true` in `MiniTest.setup()` to use `describe`, `it`,
 `before_each`, `after_each`, `setup`, `teardown` as globals.
 
 `scripts/minimal_init.lua` change needed:
+
 ```lua
 require("mini.test").setup({ collect = { emulate_busted = true } })
 ```
@@ -945,6 +949,7 @@ MiniTest.run()
 ```
 
 Run only the test at the cursor position from within Neovim:
+
 ```lua
 -- Bind to a key in your config:
 vim.keymap.set("n", "<leader>tt", MiniTest.run_at_location)

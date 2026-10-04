@@ -38,4 +38,3 @@ garantie est donc plus étroite que ce que le solde de `chemin-skill-code-en-dur
 `check_renvois_skill` aux `.md` de `.claude/implementation/` — au minimum aux `README.md` et aux
 registres, l'archive `done/` devant rester exclue puisqu'elle relate un état passé et ne se
 réécrit pas. Vérifier par une sonde hors `skills/` qui doit devenir rouge.
-

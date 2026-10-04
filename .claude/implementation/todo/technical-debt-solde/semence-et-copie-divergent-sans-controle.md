@@ -55,9 +55,9 @@ $ ls .claude/implementation/todo/technical-debt/.list/
 backup/  semence/  templates/  contract.toml
 ```
 
-**Ce que le solde ne couvre pas** : la comparaison repose sur le numéro de version de la
-définition. Une définition modifiée **sans** que sa version soit incrémentée reste invisible — c'est
-une entrée distincte du registre, `version-de-definition-non-incrementee-apres-changement-de-contrat`
+**Ce que le solde ne couvre pas** : la comparaison repose sur le numéro de version de la définition.
+Une définition modifiée **sans** que sa version soit incrémentée reste invisible — c'est une entrée
+distincte du registre, `version-de-definition-non-incrementee-apres-changement-de-contrat`
 (2026-09-06).
 
 ## Pourquoi c'est gênant

@@ -1,8 +1,8 @@
 # Audit d'implémentation
 
 L'audit est rendu par le sous-agent `implementation-auditor` (Opus, contexte isolé, lecture seule).
-Il juge la conformité à l'intention, la qualité du code et la dette induite — et **exécute lui-même**
-les commandes de vérification plutôt que de croire le suivi.
+Il juge la conformité à l'intention, la qualité du code et la dette induite — et
+**exécute lui-même** les commandes de vérification plutôt que de croire le suivi.
 
 Il est indépendant par construction : il n'a pas écrit le code et n'a pas le droit d'y toucher.
 C'est la seule chose que la session de cadrage ne peut pas fournir, quel que soit son sérieux.

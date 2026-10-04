@@ -9,16 +9,16 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-Depuis le chantier `fichier-seme`, `listdir/types.py` déclare `ListError = GabaritError`.
-`Result`, désormais défini dans `gabarit.types` et réexporté par list-dir, lève `GabaritError` depuis
+Depuis le chantier `fichier-seme`, `listdir/types.py` déclare `ListError = GabaritError`. `Result`,
+désormais défini dans `gabarit.types` et réexporté par list-dir, lève `GabaritError` depuis
 `unwrap()`. `except ListError` rattrape toujours l'exception ; mais une trace, `__name__` et
 `__module__` affichent `gabarit.types.GabaritError` au lieu de `listdir.types.ListError`.
 
 ## Pourquoi c'est gênant
 
 Un script consommateur de la bibliothèque list-dir qui filtre ses journaux ou ses messages sur le
-nom `ListError` ne le verra plus passer. C'est le seul écart observable au « comportement identique »
-de list-dir promis par le brief de `fichier-seme`, hors élargissement `int`.
+nom `ListError` ne le verra plus passer. C'est le seul écart observable au « comportement identique
+» de list-dir promis par le brief de `fichier-seme`, hors élargissement `int`.
 
 ## Pour solder
 

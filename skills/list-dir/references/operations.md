@@ -26,7 +26,8 @@ Un `Violation` par manquement, chacun nommant fichier, sujet et cause, dans cet 
 Une liste **sans élément est conforme** : elle est légitimement vide au sortir d'`init`.
 
 `validate` avertit par ailleurs sur stderr quand la semence d'une liste a évolué, sans jamais
-changer son code de retour — [Ce que `validate` avertit](../references/provenance.md#ce-que-validate-avertit).
+changer son code de retour —
+[Ce que `validate` avertit](../references/provenance.md#ce-que-validate-avertit).
 
 ## Quand le contrat change
 

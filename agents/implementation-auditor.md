@@ -23,9 +23,10 @@ L'appelant te fournit : chemins absolus du fichier de suivi et du brief, nom de 
 d'audit — `intermédiaire` ou `clôture`.
 
 **Les chemins qu'il te donne sont absolus** ; ceux que tu liras à l'intérieur des fichiers (champ
-`plan`) et celui de ton propre rapport sont relatifs à la racine du dépôt. **L'appelant peut te la
-donner ; sinon, calcule-la** par `git rev-parse --show-toplevel`. Le répertoire courant n'est pas nécessairement cette racine :
-résous-la avant d'écrire quoi que ce soit, sinon ton rapport atterrit à côté.
+`plan`) et celui de ton propre rapport sont relatifs à la racine du dépôt.
+**L'appelant peut te la donner ; sinon, calcule-la** par `git rev-parse --show-toplevel`. Le
+répertoire courant n'est pas nécessairement cette racine : résous-la avant d'écrire quoi que ce
+soit, sinon ton rapport atterrit à côté.
 
 Lis dans cet ordre, avant toute chose :
 
@@ -120,8 +121,8 @@ Le fichier n'existe pas → tu le crées avec le frontmatter. Gabarit et format 
 [Gabarit du rapport](../skills/implementation-tracker/references/audit.md#gabarit-du-rapport).
 
 **Numérote chaque constat `R1`, `R2`, … dès sa première apparition**, dans l'ordre du rapport et
-quelle que soit sa section. C'est l'étiquette par laquelle l'appelant et l'utilisateur y reviendront :
-un numéro cité mais jamais posé sur un constat rend le rapport illisible.
+quelle que soit sa section. C'est l'étiquette par laquelle l'appelant et l'utilisateur y
+reviendront : un numéro cité mais jamais posé sur un constat rend le rapport illisible.
 
 ## Verdict
 

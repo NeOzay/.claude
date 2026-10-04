@@ -15,8 +15,8 @@ Un **gabarit** est un fichier Markdown à front matter TOML (`+++`), dont les ch
 sont déclarés par un **contrat**. Une **semence** est un répertoire qui porte ce contrat. `gabarit`
 pose le fichier, prérempli de tout ce qui est mécaniquement connu, et le vérifie ensuite.
 
-**Une list-dir est une liste de gabarits.** Le format d'un fichier, le contrat, les types admis,
-les marqueurs et le préremplissage sont déclarés ici — [`references/format.md`](references/format.md) —
+**Une list-dir est une liste de gabarits.** Le format d'un fichier, le contrat, les types admis, les
+marqueurs et le préremplissage sont déclarés ici — [`references/format.md`](references/format.md) —
 et `list-dir` les tient de ce paquet. Ce qui n'appartient qu'à une liste — l'`id` égal au nom du
 fichier, `.list/`, `from`, `[origin]`, `reseed` — reste dans list-dir.
 

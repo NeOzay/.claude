@@ -1,6 +1,7 @@
 # Recettes Neovim pour emmylua_ls
 
-Ce document contient des configurations concrètes et des patterns courants pour utiliser emmylua_ls dans Neovim.
+Ce document contient des configurations concrètes et des patterns courants pour utiliser emmylua_ls
+dans Neovim.
 
 ## Table des matières
 
@@ -81,13 +82,15 @@ settings = {
 
 ### Priorité
 
-Quand les deux sont présents, le `.emmyrc.json` a la priorité sur les settings LSP.
-Le `.emmyrc.json` est portable entre éditeurs (VSCode, Neovim, IntelliJ), les settings LSP sont spécifiques à Neovim.
+Quand les deux sont présents, le `.emmyrc.json` a la priorité sur les settings LSP. Le
+`.emmyrc.json` est portable entre éditeurs (VSCode, Neovim, IntelliJ), les settings LSP sont
+spécifiques à Neovim.
 
 ### Quand utiliser quoi
 
 - **`.emmyrc.json`** : Configuration du projet, partagée avec l'équipe (commit dans le repo).
-- **Settings LSP** : Configuration globale de votre environnement Neovim, ou options spécifiques à Neovim (comme `$VIMRUNTIME`).
+- **Settings LSP** : Configuration globale de votre environnement Neovim, ou options spécifiques à
+  Neovim (comme `$VIMRUNTIME`).
 
 ---
 
@@ -254,7 +257,8 @@ vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 
 ## Coexistence avec lua_ls (LuaLS)
 
-Il est déconseillé de faire tourner les deux simultanément sur les mêmes fichiers — les diagnostics se dédoubleraient. Voici des stratégies :
+Il est déconseillé de faire tourner les deux simultanément sur les mêmes fichiers — les diagnostics
+se dédoubleraient. Voici des stratégies :
 
 ### Option 1 : Un seul LSP (recommandé)
 
@@ -282,7 +286,8 @@ end,
 
 ## Module mapping avec moduleMap
 
-La configuration `workspace.moduleMap` permet de remapper les noms de modules dans `require`. Utile quand l'arborescence de fichiers ne correspond pas aux noms de modules.
+La configuration `workspace.moduleMap` permet de remapper les noms de modules dans `require`. Utile
+quand l'arborescence de fichiers ne correspond pas aux noms de modules.
 
 ### Exemple : remapper `lib.*` vers `script.*`
 
@@ -322,7 +327,8 @@ Avec cette config, `require("lib.utils")` est résolu vers `script/utils.lua`.
 
 ### Variables d'environnement supportées
 
-emmylua_ls supporte `$VIMRUNTIME` dans les chemins de `workspace.library`. Cette variable est résolue vers le chemin du runtime Neovim.
+emmylua_ls supporte `$VIMRUNTIME` dans les chemins de `workspace.library`. Cette variable est
+résolue vers le chemin du runtime Neovim.
 
 ### Via .emmyrc.json
 
@@ -444,17 +450,23 @@ Puis consulter le fichier de log :
 ### Problèmes courants
 
 **Le LSP ne démarre pas** :
+
 - Vérifier que `emmylua_ls` est dans le PATH : `:!which emmylua_ls`
-- Vérifier les root_markers : le fichier `.emmyrc.json` ou `.git` doit exister dans un répertoire parent.
+- Vérifier les root_markers : le fichier `.emmyrc.json` ou `.git` doit exister dans un répertoire
+  parent.
 
 **Diagnostics trop verbeux** :
+
 - Ajouter les globals manquants dans `.emmyrc.json` : `"diagnostics": { "globals": ["vim"] }`
-- Désactiver des diagnostics spécifiques : `"diagnostics": { "disable": ["unused", "undefined-global"] }`
+- Désactiver des diagnostics spécifiques :
+  `"diagnostics": { "disable": ["unused", "undefined-global"] }`
 
 **Performances lentes sur un gros workspace** :
+
 - Utiliser `ignoreDir` et `ignoreGlobs` dans workspace pour exclure les fichiers non pertinents.
 - Augmenter `diagnosticInterval` pour réduire la fréquence d'analyse.
 - Limiter les bibliothèques chargées.
 
 **Conflit avec treesitter pour le highlighting** :
+
 - Désactiver les semantic tokens du LSP (voir section Désactivation sélective).

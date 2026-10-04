@@ -4,15 +4,16 @@ Les règles **partagées** par `intent-brief`, `implementation-tracker` et les
 deux sous-agents. Chacune est définie **ici et nulle part ailleurs** ; les fichiers qui l'appliquent
 portent un renvoi ancré, jamais une copie.
 
-**Ce qui entre ici** : ce qui est **défini** à plusieurs endroits — un format, un champ, une convention que deux fichiers
-doivent respecter à l'identique.
+**Ce qui entre ici** : ce qui est **défini** à plusieurs endroits — un format, un champ, une
+convention que deux fichiers doivent respecter à l'identique.
 
 **Pas** ce qui est seulement **appliqué** à plusieurs endroits. « Hors-périmètre » et « signaux de
 dérive » apparaissent dans presque tous les fichiers du pipeline : ils y sont *utilisés*, pas
 redéfinis. Les déplacer ici viderait ces fichiers de ce qui les rend opérants.
 
-Une règle déplacée ici laisse, à son ancien emplacement, **une ligne d'appel portant sa
-conséquence** — jamais un vide. `« Interdits git : lecture seule — [Contrat des sous-agents](contrat.md#contrat-des-sous-agents) »`
+Une règle déplacée ici laisse, à son ancien emplacement,
+**une ligne d'appel portant sa conséquence** — jamais un vide.
+`« Interdits git : lecture seule — [Contrat des sous-agents](contrat.md#contrat-des-sous-agents) »`
 se lit ; l'absence, non.
 
 **Les trois agents sont hors de ce dispositif.** `agents/step-implementer.md`,
@@ -150,7 +151,8 @@ La divergence entre brief et réel est une **information** : l'effacer la détru
 Le suivi porte **l'intitulé et l'état** ; le **plan porte le contenu** de l'étape. C'est là que
 l'exécutant va le chercher, via le champ `plan`.
 
-- Une étape tient en **un seul tour d'exécution**. Elle se découpe au figeage, pas en cours de route.
+- Une étape tient en **un seul tour d'exécution**. Elle se découpe au figeage, pas en cours de
+  route.
 - Une étape **sans commande de vérification n'est pas délégable**.
 - Une étape **déjà entamée** puis interrompue se termine en direct, jamais en la re-déléguant.
 
@@ -214,4 +216,3 @@ légitimement local au dépôt.
 > ligne, ce qui empêche toute ancre `$` de matcher : un `grep -vE '\.(brief|audit)\.md$'` écrit en
 > ligne n'exclut plus rien, et les trois copies du filtre ont cassé ensemble. Un script échappe à
 > cette réécriture, qui ne s'applique qu'aux appels Bash du modèle.
-

@@ -10,8 +10,8 @@ source = "chantier `skill-convention`, étape 7 — confrontation du Python à `
 `skills/git-smart-commit/` contient `ruff.toml` et `scripts/commit_chantier.py` (16 Ko), mais pas de
 `pyrightconfig.json`. `gabarit` et `list-dir` portent les deux fichiers.
 
-`rules/claude-python-style.md` demande que `pyrightconfig.json` **et** `ruff.toml` vivent dans la skill,
-pour que sa configuration voyage avec elle.
+`rules/claude-python-style.md` demande que `pyrightconfig.json` **et** `ruff.toml` vivent dans la
+skill, pour que sa configuration voyage avec elle.
 
 ## Pourquoi c'est gênant
 

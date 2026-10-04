@@ -10,9 +10,9 @@ category = "<OPTIONNEL>"
 ## Constat
 
 Depuis le chantier `fichier-seme`, `listdir/__init__.py` localise le paquet `gabarit` (premier
-`bin/gabarit` en remontant, puis `PATH`) et échoue à l'import sans lui. `skills/list-dir/SKILL.md` et
-ses références n'en disent rien : la dépendance n'est écrite que dans `OUTILLAGE.md`, « Ce dont le
-dépôt dépend ». Le `ruff.toml` de list-dir le présente pourtant comme « destiné à être déployé
+`bin/gabarit` en remontant, puis `PATH`) et échoue à l'import sans lui. `skills/list-dir/SKILL.md`
+et ses références n'en disent rien : la dépendance n'est écrite que dans `OUTILLAGE.md`, « Ce dont
+le dépôt dépend ». Le `ruff.toml` de list-dir le présente pourtant comme « destiné à être déployé
 ailleurs ».
 
 ## Soldé le

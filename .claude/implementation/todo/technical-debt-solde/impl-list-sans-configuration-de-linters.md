@@ -10,9 +10,10 @@ source = "chantier `skill-convention`, étape 7 — confrontation du Python à `
 `skills/implementation-tracker/scripts/impl_list.py` est versionné et exposé par `bin/` sous le nom
 `impl-list`. La skill ne contient ni `ruff.toml` ni `pyrightconfig.json`.
 
-`rules/claude-python-style.md` demande les deux dans la skill. Sans `ruff.toml` local, `uvx ruff check`
-appliqué à ce fichier retombe sur les valeurs par défaut de ruff — ni `line-length = 100`, ni
-`target-version = "py312"`, ni le jeu de règles `E F I UP B SIM RUF` du dépôt.
+`rules/claude-python-style.md` demande les deux dans la skill. Sans `ruff.toml` local,
+`uvx ruff check` appliqué à ce fichier retombe sur les valeurs par défaut de ruff — ni
+`line-length = 100`, ni `target-version = "py312"`, ni le jeu de règles `E F I UP B SIM RUF` du
+dépôt.
 
 ## Pourquoi c'est gênant
 

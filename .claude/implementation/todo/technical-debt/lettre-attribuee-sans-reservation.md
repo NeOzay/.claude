@@ -28,5 +28,5 @@ n'ayant jamais été exercé, rien ne dit que la séquence du point 8 tient en p
 ## Pour solder
 
 Réserver la lettre à l'attribution (écriture dans `lettre:` suivie d'un contrôle d'unicité parmi les
-suivis actifs, ou tag posé par `lettre` lui-même), puis mener un chantier neuf de bout en bout par le
-type 2 — `lettre`, `E0`, commits d'étape, clôture — et le constater.
+suivis actifs, ou tag posé par `lettre` lui-même), puis mener un chantier neuf de bout en bout par
+le type 2 — `lettre`, `E0`, commits d'étape, clôture — et le constater.

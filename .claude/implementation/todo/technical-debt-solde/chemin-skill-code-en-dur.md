@@ -56,6 +56,7 @@ forme, ce qui empêche le compte de repartir à la hausse — c'est la condition
 posait pour son solde.
 
 Établi par :
+
 - `git grep -q '$HOME/.claude/skills' -- skills .claude/implementation/todo/README.md` → **code 1**,
   aucune occurrence (le compte passe de 8 points d'édition à 0).
 - Injection d'un appel `"$HOME/.claude/skills/list-dir/scripts/list-dir.py" list .` dans

@@ -13,9 +13,10 @@ Le paquet `gabarit` se déclare sans notion de liste (« rien ici ne connaît de
 liste », `gabarit/__init__.py`), mais le découpage du chantier `fichier-seme` y a laissé :
 
 - `Item.id` dans `gabarit/types.py`, qui rend `path.stem` — la règle d'identité d'un élément de
-  liste, alors que `references/semences.md` du skill dit qu'« aucun `id` n'est imposé » à un gabarit ;
-- des docstrings qui citent leur consommateur : celle de `Result`/`ok` (« items() rend… », « move() »,
-  `validate`), celle de `items.py` (`init_list`, `provenance.emit`).
+  liste, alors que `references/semences.md` du skill dit qu'« aucun `id` n'est imposé » à un
+  gabarit ;
+- des docstrings qui citent leur consommateur : celle de `Result`/`ok` (« items() rend… », « move()
+  », `validate`), celle de `items.py` (`init_list`, `provenance.emit`).
 
 ## Pourquoi c'est gênant
 
@@ -27,7 +28,8 @@ sous `done/<date>-<slug>.md` n'a plus le nom de son slug.
 ## Pour solder
 
 Déplacer `id` vers `listdir` (propriété calculée côté liste, ou fonction `item_id(item)`), et
-réécrire les docstrings de `gabarit/types.py` et `gabarit/items.py` sans nommer `listdir`. Vérifier :
+réécrire les docstrings de `gabarit/types.py` et `gabarit/items.py` sans nommer `listdir`.
+Vérifier :
 `grep -rnE 'items\(\)|move\(\)|init_list|provenance|\.id\b' skills/gabarit/scripts/gabarit` → aucune
 occurrence, et `.venv/bin/python -m pytest skills/list-dir/scripts/tests -q` → 447 passed.
 

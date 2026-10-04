@@ -40,7 +40,8 @@ ou l'élément est-il libre dans sa forme tant qu'il est conforme ?
 Contrainte connexe à ne pas perdre si le sujet se rouvre : `dump_value` refuse les caractères de
 contrôle (« aucune écriture TOML sur une ligne ne le porte »). Une entrée contenant un retour à la
 ligne — écrite en chaîne multiligne `"""…"""`, que la lecture accepte — lève une `SerialiseError` à
-la première réécriture. La limite « entrées courtes » est donc double : lisibilité, et sérialisation.
+la première réécriture. La limite « entrées courtes » est donc double : lisibilité, et
+sérialisation.
 
 ## Références
 

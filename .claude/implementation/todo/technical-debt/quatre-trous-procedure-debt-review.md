@@ -29,8 +29,8 @@ répertoires-listes :
   catégorie exclu » ne subsiste dans `skills/` ni dans `.list/`.
 
 Établi par : `grep -n "wc -l" skills/debt-review/SKILL.md` → l'Étape 0 ne compte pas ;
-`grep -n "ligne de tête\|Tête du registre\|marqueur déjà" skills/debt-review/SKILL.md
-skills/implementation-tracker/references/dette.md` et
+`grep -n "ligne de tête\|Tête du registre\|marqueur déjà" skills/debt-review/SKILL.md skills/implementation-tracker/references/dette.md`
+et
 `grep -rn "marqueur de catégorie exclu\|recopier l'intitulé" skills/ .claude/implementation/todo/technical-debt/.list/`
 → aucun résultat.
 

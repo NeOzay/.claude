@@ -9,11 +9,14 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-Le Chantier `shadow-skill` a rendu obligatoire le champ `skills` de la Semence `suivi`. Les quatre Suivis archivés dans `done/` et estampillés `suivi` ne le portent pas, et échouent depuis à `gabarit check --filled`.
+Le Chantier `shadow-skill` a rendu obligatoire le champ `skills` de la Semence `suivi`. Les quatre
+Suivis archivés dans `done/` et estampillés `suivi` ne le portent pas, et échouent depuis à
+`gabarit check --filled`.
 
 ## Pourquoi c'est gênant
 
-Un contrôle global de `done/` les signalerait comme fautifs, et masquerait parmi eux un vrai défaut d'archive.
+Un contrôle global de `done/` les signalerait comme fautifs, et masquerait parmi eux un vrai défaut
+d'archive.
 
 ## Pour solder
 

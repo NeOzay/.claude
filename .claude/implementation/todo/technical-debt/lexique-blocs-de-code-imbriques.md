@@ -7,9 +7,9 @@ source = "Identifié par `lexique`, R12 du rapport d'audit de clôture."
 
 ## Constat
 
-`_blocs`, dans `skills/lexique/scripts/lexique.py`, bascule l'état « dans un bloc de code » à
-chaque ligne qui commence par ```` ``` ```` ou `~~~`, sans distinguer le type ni la longueur de la
-clôture. Un bloc ```` ```` ```` qui contient un ```` ``` ````, ou un `~~~` qui contient ```` ``` ````,
+`_blocs`, dans `skills/lexique/scripts/lexique.py`, bascule l'état « dans un bloc de code » à chaque
+ligne qui commence par ```` ``` ```` ou `~~~`, sans distinguer le type ni la longueur de la clôture.
+Un bloc ```` ```` ```` qui contient un ```` ``` ````, ou un `~~~` qui contient ```` ``` ````,
 inverse l'état au milieu du bloc : le vrai tableau du lexique est alors lu comme un exemple, et la
 commande répond « aucun tableau ».
 

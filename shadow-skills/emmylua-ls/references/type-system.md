@@ -407,11 +407,14 @@ Inférence dans des types conditionnels (fonctionnalité avancée).
 
 ### Opérateurs logiques
 
-Dans les contraintes génériques, `and` et `or` remplacent respectivement `?` et `:` de TypeScript. La syntaxe est très similaire au conditionnel TypeScript mais avec cette substitution.
+Dans les contraintes génériques, `and` et `or` remplacent respectivement `?` et `:` de TypeScript.
+La syntaxe est très similaire au conditionnel TypeScript mais avec cette substitution.
 
 ### namespace\<T : string\> (type spécial)
 
-EmmyLua fournit un type générique intégré `namespace<T>` qui permet de référencer dynamiquement un namespace par son nom. C'est particulièrement utile pour modéliser des bindings vers C# (Unity, XLua) :
+EmmyLua fournit un type générique intégré `namespace<T>` qui permet de référencer dynamiquement un
+namespace par son nom. C'est particulièrement utile pour modéliser des bindings vers C# (Unity,
+XLua) :
 
 ```lua
 CS = {
@@ -426,7 +429,8 @@ local go = CS.UnityEngine.GameObject()
 local str = CS.System.String.Format("hello %s", "world")
 ```
 
-Ce mécanisme permet à EmmyLua de résoudre les types à travers des tables de liaison dynamiques, sans avoir à déclarer chaque sous-champ manuellement.
+Ce mécanisme permet à EmmyLua de résoudre les types à travers des tables de liaison dynamiques, sans
+avoir à déclarer chaque sous-champ manuellement.
 
 ---
 
@@ -589,7 +593,8 @@ local Money = {}
 - `integer` est un sous-type de `number`.
 - `never` est un sous-type de tous les types.
 - Tous les types sont un sous-type de `any`.
-- Les types littéraux (`"hello"`, `42`) sont des sous-types de leur type de base (`string`, `number`).
+- Les types littéraux (`"hello"`, `42`) sont des sous-types de leur type de base (`string`,
+  `number`).
 
 ### Covariance et contravariance
 
@@ -607,7 +612,9 @@ local Money = {}
 
 ### Types structurels vs nominaux
 
-EmmyLua utilise un système **nominal** pour les classes (deux classes différentes ne sont pas interchangeables même si elles ont les mêmes champs), mais **structurel** pour les tables littérales (une table qui a tous les champs requis est compatible).
+EmmyLua utilise un système **nominal** pour les classes (deux classes différentes ne sont pas
+interchangeables même si elles ont les mêmes champs), mais **structurel** pour les tables littérales
+(une table qui a tous les champs requis est compatible).
 
 ```lua
 ---@class A

@@ -120,8 +120,8 @@ un conflit.
 
 **Seul ce que le re-semis fait est rapporté.** Une clé gardée, une clé laissée supprimée : ce sont
 des états, identiques au prochain appel, et `validate` les dit une fois — le contrat diffère de sa
-semence — au lieu que `reseed` les rejoue indéfiniment sous le nom de « changement ». Un `reseed` qui
-n'a rien à changer n'écrit rien non plus — **pas même la sauvegarde**, sans quoi un second appel
+semence — au lieu que `reseed` les rejoue indéfiniment sous le nom de « changement ». Un `reseed`
+qui n'a rien à changer n'écrit rien non plus — **pas même la sauvegarde**, sans quoi un second appel
 remplacerait `.list/backup/` par une copie de l'état courant en répondant « déjà à jour ».
 
 L'avertissement « modifié localement » se juge sur le **contenu** du contrat, jamais sur ses

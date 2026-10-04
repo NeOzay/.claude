@@ -21,9 +21,10 @@ retenue : l'Étape 7 d'`intent-brief` est supprimée, et la confrontation est re
 présenté à l'utilisateur. L'option « rapport versionné » a été écartée : un plan pas encore accepté
 peut changer plusieurs fois, un historique de verdicts sur des versions mortes n'aiderait personne.
 Établi par : `grep -c 'Confrontation plan' skills/intent-brief/SKILL.md` → `0` et ses étapes
-s'arrêtent à `## Étape 6 — Passage au suivi` ; `grep -n 'plan-reviewer'
-skills/implementation-tracker/SKILL.md` → `126:` l'appel avant `ExitPlanMode` ; `agents/plan-reviewer.md`
-existe, `tools: Read, Grep, Glob, Bash` sans droit d'écriture.
+s'arrêtent à `## Étape 6 — Passage au suivi` ;
+`grep -n 'plan-reviewer' skills/implementation-tracker/SKILL.md` → `126:` l'appel avant
+`ExitPlanMode` ; `agents/plan-reviewer.md` existe, `tools: Read, Grep, Glob, Bash` sans droit
+d'écriture.
 
 ## Pourquoi c'est gênant
 

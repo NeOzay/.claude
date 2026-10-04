@@ -22,8 +22,8 @@ côté par arbitrage explicite (Q2 du brief), au motif que ces catégories renvo
 
 L'argument de l'arbitrage tient pour la prose qui explique les catégories, pas pour l'énumération
 elle-même : les sept identifiants, eux, sont bien une copie de la liste `values` du contrat. Une
-huitième catégorie ajoutée au contrat laisserait `gabarit-rapport.md` en décrire sept, sans qu'aucune
-commande échoue — `validate` juge les fiches contre le contrat, jamais la doc contre lui.
+huitième catégorie ajoutée au contrat laisserait `gabarit-rapport.md` en décrire sept, sans
+qu'aucune commande échoue — `validate` juge les fiches contre le contrat, jamais la doc contre lui.
 
 C'est exactement le mode de défaillance que le chantier a écrit dans `dette.md` : « une prose qui
 décrit un contrat que l'outil n'applique pas », avec la circonstance aggravante qu'on la croit,

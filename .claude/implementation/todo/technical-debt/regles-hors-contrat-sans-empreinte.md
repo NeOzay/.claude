@@ -11,18 +11,19 @@ category = "<OPTIONNEL>"
 
 Le contrôle 2 de `check_pipeline.py` (`EMPREINTES`) protège une phrase verbatim par section de
 `contrat.md`, et vérifie qu'elle apparaît exactement une fois dans `skills/`. Il ne couvre que ce
-fichier. Les règles dont l'autorité est ailleurs — `format.md` « Un élément », `operations.md`
-« Déplacer un élément », `dette.md` « Ce qu'une entrée porte », `patrons/review.md`, `debt-review/SKILL.md`
-Étape 3 — ne sont protégées par rien.
+fichier. Les règles dont l'autorité est ailleurs — `format.md` « Un élément », `operations.md` «
+Déplacer un élément », `dette.md` « Ce qu'une entrée porte », `patrons/review.md`,
+`debt-review/SKILL.md` Étape 3 — ne sont protégées par rien.
 
 Le chantier `recopies-hors-contrat` a résorbé neuf écritures de ce type, dont deux qui se
 contredisaient sur la preuve exigée d'un `doublon`.
 
-**Complété le 2026-09-15 par `git-smart-commit-trois-commits`** (R8 et R9 de son rapport d'audit)
-— la règle de staging et l'accord avant commit sont sortis de `contrat.md` vers
+**Complété le 2026-09-15 par `git-smart-commit-trois-commits`** (R8 et R9 de son rapport d'audit) —
+la règle de staging et l'accord avant commit sont sortis de `contrat.md` vers
 `skills/git-smart-commit/references/staging.md` et `confirmation.md` : ils ont perdu l'empreinte du
 contrôle 2. Les critères « chaque type lisible indépendamment » et « texte commun référencé, sans
-recopie » de ce chantier n'ont été jugés que par lecture et grep de motifs, faute de commande dédiée.
+recopie » de ce chantier n'ont été jugés que par lecture et grep de motifs, faute de commande
+dédiée.
 
 ## Pourquoi c'est gênant
 

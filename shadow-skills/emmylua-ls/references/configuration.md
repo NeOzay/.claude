@@ -1,6 +1,7 @@
 # Référence de configuration .emmyrc.json
 
-Ce document décrit toutes les options de configuration du serveur EmmyLua, telles que définies dans le schéma JSON officiel.
+Ce document décrit toutes les options de configuration du serveur EmmyLua, telles que définies dans
+le schéma JSON officiel.
 
 Le fichier `.emmyrc.json` (ou `.luarc.json`) doit être placé à la racine du workspace.
 
@@ -103,7 +104,9 @@ Quand une bibliothèque nécessite un filtrage, utiliser un objet :
 
 ### Format moduleMap
 
-Le `moduleMap` permet de remapper les noms de modules utilisés dans `require` via des expressions régulières. Chaque entrée est un objet avec `pattern` (regex de matching) et `replace` (chaîne de remplacement avec références de groupe `$1`, `$2`, etc.) :
+Le `moduleMap` permet de remapper les noms de modules utilisés dans `require` via des expressions
+régulières. Chaque entrée est un objet avec `pattern` (regex de matching) et `replace` (chaîne de
+remplacement avec références de groupe `$1`, `$2`, etc.) :
 
 ```json
 {
@@ -122,7 +125,9 @@ Le `moduleMap` permet de remapper les noms de modules utilisés dans `require` v
 }
 ```
 
-Avec cette configuration, `require("lib.utils")` est résolu vers le chemin `script/utils.lua`, et `require("myapp.core")` vers `src/core.lua`. Ce mécanisme est utile quand l'arborescence de fichiers ne correspond pas aux noms de modules conventionnels.
+Avec cette configuration, `require("lib.utils")` est résolu vers le chemin `script/utils.lua`, et
+`require("myapp.core")` vers `src/core.lua`. Ce mécanisme est utile quand l'arborescence de fichiers
+ne correspond pas aux noms de modules conventionnels.
 
 ---
 
@@ -142,7 +147,8 @@ Configuration du runtime Lua.
 
 ### Symboles non-standard supportés
 
-`//`, `/**/`, `` ` ``, `+=`, `-=`, `*=`, `/=`, `%=`, `^=`, `//=`, `|=`, `&=`, `<<=`, `>>=`, `||`, `&&`, `!`, `!=`, `continue`
+`//`, `/**/`, `` ` ``, `+=`, `-=`, `*=`, `/=`, `%=`, `^=`, `//=`, `|=`, `&=`, `<<=`, `>>=`, `||`,
+`&&`, `!`, `!=`, `continue`
 
 ### Exemples
 

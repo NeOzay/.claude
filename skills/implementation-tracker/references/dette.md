@@ -184,11 +184,13 @@ dépôt depuis son écriture, et le tri le montre sans qu'on ait à le croire su
    ```bash
    list-dir list "$T/technical-debt" --sort date
    ```
+
 4. Créer une entrée par survivant, et **remplir le fichier créé** :
 
    ```bash
    list-dir new "$T/technical-debt" <id>
    ```
+
 5. **Vérifier avant de clore**, et pas seulement la structure :
 
    ```bash
@@ -213,9 +215,9 @@ list-dir move "$T/technical-debt" <id> "$T/technical-debt-solde"
 
 Le déplacement préserve l'historique de l'entrée, jusqu'à son commit de création dans la liste de
 départ — à une condition, qui tient à ce qu'est `move`
-([Déplacer un élément](../../list-dir/references/operations.md#déplacer-un-élément)) : **déplacer et commiter
-d'abord, écrire la preuve ensuite, dans un second commit.** Mêlés, l'historique de l'entrée
-s'arrête au jour du solde.
+([Déplacer un élément](../../list-dir/references/operations.md#déplacer-un-élément)) :
+**déplacer et commiter d'abord, écrire la preuve ensuite, dans un second commit.** Mêlés,
+l'historique de l'entrée s'arrête au jour du solde.
 
 L'entrée déplacée reçoit alors la section de solde que son nouveau contrat déclare
 (`list-dir contract "$T/technical-debt-solde"`). Ce que la description du contrat ne peut pas

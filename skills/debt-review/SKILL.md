@@ -133,7 +133,6 @@ Un état, une suite, et pas deux :
   registre est en faute. Ce n'est pas une garde de présence recopiée ici : `sante_skills.py` la fait
   déjà une fois par session ([Outillage du dépôt](../../OUTILLAGE.md)).
   C'est le refus d'**attribuer au registre** un code 127 qui n'est pas le sien.
-
 - **Modifications hors de `.claude/implementation/`** → le signaler et demander. C'est ce que
   filtre le `grep -v` ci-dessus : une sortie vide suffit à continuer. Le contrôle ne porte que sur
   ce qui **fausserait** le `git status --short` de l'Étape 5 — un fichier déjà modifié sous
@@ -218,8 +217,8 @@ et il ne laisse aucune commande rejouable par entrée.
 **Les repères d'une entrée ancienne sont périmés par défaut.** Chercher le **texte** que l'entrée
 décrit, jamais la ligne qu'elle nomme : un `fichier.md:42` qui a glissé de trois lignes se lit comme
 une cible disparue, et fait classer `non-pertinent` une dette parfaitement vivante. Le registre ne
-doit plus en contenir (`../implementation-tracker/references/dette.md`, « Ce qu'une entrée porte ») ;
-ceux qui restent sont à corriger, pas à croire.
+doit plus en contenir (`../implementation-tracker/references/dette.md`, « Ce qu'une entrée porte
+») ; ceux qui restent sont à corriger, pas à croire.
 
 **Sans commande exécutée, l'entrée est `pertinent`.** Pas « probablement soldée », pas « sans doute
 obsolète » : la plausibilité ne fait sortir personne du registre.

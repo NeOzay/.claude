@@ -12,33 +12,35 @@ non-déterminisme du modèle.
 ## Un document structuré se pose depuis un gabarit
 
 Un fichier qu'on écrira plusieurs fois — un suivi, un brief, un rapport — a un contrat, et
-[gabarit](../../../skills/gabarit/SKILL.md) le pose depuis ce contrat : la commande construit la structure,
-le modèle remplit le contenu, la commande revérifie. Un modèle qui construit aussi la structure
-produit deux fichiers différents pour le même besoin, et l'écart ne se voit qu'à la lecture.
+[gabarit](../../../skills/gabarit/SKILL.md) le pose depuis ce contrat : la commande construit la
+structure, le modèle remplit le contenu, la commande revérifie. Un modèle qui construit aussi la
+structure produit deux fichiers différents pour le même besoin, et l'écart ne se voit qu'à la
+lecture.
 
 Un gabarit se nomme par sa semence, jamais par un chemin ; la semence est le seul endroit où la
 structure est écrite.
 
 **Pratiqué dans** : [gabarit](../../../skills/gabarit/SKILL.md) et ses semences `brief` et `suivi`
-([`gabarit/suivi/contract.toml`](../../../skills/gabarit/gabarit/suivi/contract.toml)), posées et vérifiées
-par [intent-brief](../../../skills/intent-brief/SKILL.md) et
+([`gabarit/suivi/contract.toml`](../../../skills/gabarit/gabarit/suivi/contract.toml)), posées et
+vérifiées par [intent-brief](../../../skills/intent-brief/SKILL.md) et
 [implementation-tracker](../../../skills/implementation-tracker/SKILL.md) ;
 [debt-review](../../../skills/debt-review/references/gabarit-rapport.md) pour son rapport de revue.
 
 ## Une mémoire se tient en registre
 
-Ce qui doit être relu, filtré, compté ou déplacé au fil du temps est une liste de fichiers tenue
-par [list-dir](../../../skills/list-dir/SKILL.md) : un répertoire est une liste, un fichier un élément, un
-contrat embarqué déclare la structure et `list-dir validate` la vérifie. Une mémoire en prose
+Ce qui doit être relu, filtré, compté ou déplacé au fil du temps est une liste de fichiers tenue par
+[list-dir](../../../skills/list-dir/SKILL.md) : un répertoire est une liste, un fichier un élément,
+un contrat embarqué déclare la structure et `list-dir validate` la vérifie. Une mémoire en prose
 libre ne se filtre pas, ne se compte pas, et se relit en entier à chaque consultation.
 
 Un état se change en déplaçant l'élément d'une liste à l'autre, jamais en éditant un champ à la
 main.
 
-**Pratiqué dans** : le [registre de dette](../../../skills/implementation-tracker/references/dette.md) et
-la [road-map](../../../skills/implementation-tracker/references/road-map.md), sous
-`.claude/implementation/todo/` ; [debt-review](../../../skills/debt-review/SKILL.md), qui dérive sa liste de
-revue du registre.
+**Pratiqué dans** : le
+[registre de dette](../../../skills/implementation-tracker/references/dette.md) et la
+[road-map](../../../skills/implementation-tracker/references/road-map.md), sous
+`.claude/implementation/todo/` ; [debt-review](../../../skills/debt-review/SKILL.md), qui dérive sa
+liste de revue du registre.
 
 ## Le frontmatter porte les données mutables
 
@@ -62,8 +64,8 @@ d'un format ou d'une règle vit dans `references/`, un fichier par sujet. Un `SK
 tout se charge en entier à chaque déclenchement, et le lecteur y cherche la seule procédure dont il
 a besoin au milieu de celles dont il n'a pas besoin.
 
-**Pratiqué dans** : [git-smart-commit](../../../skills/git-smart-commit/SKILL.md), qui tient en une table
-d'orientation ; [list-dir](../../../skills/list-dir/SKILL.md) et ses cinq références.
+**Pratiqué dans** : [git-smart-commit](../../../skills/git-smart-commit/SKILL.md), qui tient en une
+table d'orientation ; [list-dir](../../../skills/list-dir/SKILL.md) et ses cinq références.
 
 ## Lire une référence au moment d'en avoir besoin
 
@@ -73,8 +75,8 @@ lue d'avance occupe le contexte pendant toute la procédure, et une référence 
 pas dit est lue d'avance par prudence.
 
 **Pratiqué dans** : [git-smart-commit](../../../skills/git-smart-commit/SKILL.md) ;
-[implementation-tracker](../../../skills/implementation-tracker/SKILL.md), dont l'Étape 5 ne fait lire
-`references/cloture.md` qu'à la clôture.
+[implementation-tracker](../../../skills/implementation-tracker/SKILL.md), dont l'Étape 5 ne fait
+lire `references/cloture.md` qu'à la clôture.
 
 ## Une règle, un seul endroit
 
@@ -87,9 +89,10 @@ réponses contradictoires, et aucun lecteur ne sait laquelle fait foi.
 [`check_pipeline.py`](../../../scripts/check_pipeline.py) vérifie cette unicité pour les règles du
 contrat du pipeline ; les autres ne sont vérifiées par rien.
 
-**Pratiqué dans** : [le contrat du pipeline](../../../skills/implementation-tracker/references/contrat.md),
-auquel les autres skills du pipeline renvoient ;
-[git-smart-commit](../../../skills/git-smart-commit/SKILL.md), section « Ce qui vaut pour tous les types ».
+**Pratiqué dans** :
+[le contrat du pipeline](../../../skills/implementation-tracker/references/contrat.md), auquel les
+autres skills du pipeline renvoient ; [git-smart-commit](../../../skills/git-smart-commit/SKILL.md),
+section « Ce qui vaut pour tous les types ».
 
 ## Un renvoi est un lien relatif, ancre comprise
 
@@ -102,8 +105,8 @@ contrôle, et c'est ce contrôle qu'il faut relancer après un renommage.
 Ancrer un chemin sur le `HOME` est refusé, pour la raison que donne
 [l'outillage du dépôt](../../../OUTILLAGE.md).
 
-**Pratiqué dans** : [intent-brief](../../../skills/intent-brief/SKILL.md), dont chaque renvoi au contrat
-porte son ancre ; [debt-review](../../../skills/debt-review/SKILL.md).
+**Pratiqué dans** : [intent-brief](../../../skills/intent-brief/SKILL.md), dont chaque renvoi au
+contrat porte son ancre ; [debt-review](../../../skills/debt-review/SKILL.md).
 
 ## Un exécutable s'appelle par son nom
 
@@ -112,7 +115,8 @@ Règle et motif : [l'outillage du dépôt](../../../OUTILLAGE.md), qui en est l'
 son lien dans `bin/`, jamais par son chemin. Une commande propre à un projet suit
 [les commandes locales](commandes-locales.md).
 
-**Pratiqué dans** : [gabarit](../../../skills/gabarit/SKILL.md) (« `gabarit` est un lien de `bin/` ») ;
+**Pratiqué dans** : [gabarit](../../../skills/gabarit/SKILL.md) (« `gabarit` est un lien de `bin/`
+») ;
 [list-dir](../../../skills/list-dir/SKILL.md).
 
 ## La description dit quoi, quand, et ce que la skill ne fait pas
@@ -125,9 +129,10 @@ sur des demandes voisines qu'elle ne sait pas traiter.
 Une skill qui ne doit jamais partir d'elle-même porte `disable-model-invocation: true` **et** le
 dit dans sa description (« Skill exclusivement manuelle »), avec son `argument-hint`.
 
-**Pratiqué dans** : [gabarit](../../../skills/gabarit/SKILL.md), [list-dir](../../../skills/list-dir/SKILL.md) ;
-[debt-review](../../../skills/debt-review/SKILL.md) et
-[implementation-tracker](../../../skills/implementation-tracker/SKILL.md) pour les skills manuelles.
+**Pratiqué dans** : [gabarit](../../../skills/gabarit/SKILL.md),
+[list-dir](../../../skills/list-dir/SKILL.md) ; [debt-review](../../../skills/debt-review/SKILL.md)
+et [implementation-tracker](../../../skills/implementation-tracker/SKILL.md) pour les skills
+manuelles.
 
 ## Les scripts font la structure, le modèle fait le jugement
 
@@ -139,8 +144,9 @@ par rien.
 La skill énonce ce partage en toutes lettres, et sa description dit ce que la commande ne fait
 pas.
 
-**Pratiqué dans** : [list-dir](../../../skills/list-dir/SKILL.md) et [gabarit](../../../skills/gabarit/SKILL.md),
-« Partage des rôles » ; [debt-review](../../../skills/debt-review/SKILL.md).
+**Pratiqué dans** : [list-dir](../../../skills/list-dir/SKILL.md) et
+[gabarit](../../../skills/gabarit/SKILL.md), « Partage des rôles » ;
+[debt-review](../../../skills/debt-review/SKILL.md).
 
 ## Les codes de sortie sont dits
 
@@ -162,8 +168,8 @@ contourne dès qu'elle gêne, parce que rien ne dit ce qu'on risque.
 Les blocs cités `> *Mode de défaillance* —` qui subsistent dans le dépôt sont des écarts à cette
 convention.
 
-**Pratiqué dans** : [list-dir](../../../skills/list-dir/references/format.md) et ses autres références,
-réécrites sous cette forme.
+**Pratiqué dans** : [list-dir](../../../skills/list-dir/references/format.md) et ses autres
+références, réécrites sous cette forme.
 
 ## Un outil de vérification échoue fermé, un rappel échoue ouvert
 
@@ -178,7 +184,8 @@ il est.
 
 ## Une date se lit, elle ne s'écrit pas de mémoire
 
-Règle et motif : [Dates et listing](../../../skills/implementation-tracker/references/contrat.md#dates-et-listing).
+Règle et motif :
+[Dates et listing](../../../skills/implementation-tracker/references/contrat.md#dates-et-listing).
 
 **Pratiqué dans** : [intent-brief](../../../skills/intent-brief/SKILL.md), Étape 0.
 
@@ -226,4 +233,5 @@ leur forme d'origine. Les noms de fichiers, de sections et de slugs sont en fran
 accents quand ils servent d'identifiants.
 
 **Pratiqué dans** : [implementation-tracker](../../../skills/implementation-tracker/SKILL.md),
-[list-dir](../../../skills/list-dir/SKILL.md) ; slugs de `.claude/implementation/todo/technical-debt/`.
+[list-dir](../../../skills/list-dir/SKILL.md) ; slugs de
+`.claude/implementation/todo/technical-debt/`.

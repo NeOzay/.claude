@@ -52,12 +52,13 @@ Refus, tous **avant la première écriture** :
 
 Puis, dans l'ordre :
 
-1. sur `<slug>` : `statut = "terminé"`, `maj` du jour, indexation de toutes les annexes présentes, et
-   commit `<slug>: finalisation du suivi` s'il y a quelque chose à committer — une relance le trouve
-   déjà fait ;
+1. sur `<slug>` : `statut = "terminé"`, `maj` du jour, indexation de toutes les annexes présentes,
+   et commit `<slug>: finalisation du suivi` s'il y a quelque chose à committer — une relance le
+   trouve déjà fait ;
 2. `git checkout <base>` et `git merge --squash <slug>` ;
-3. `git mv` du suivi, du brief, de l'audit et du plan vers `done/<date>-<slug>[.brief|.audit|.plan].md`,
-   et réécriture des champs `plan`, `brief` et `audit` du suivi archivé ;
+3. `git mv` du suivi, du brief, de l'audit et du plan vers
+   `done/<date>-<slug>[.brief|.audit|.plan].md`, et réécriture des champs `plan`, `brief` et `audit`
+   du suivi archivé ;
 4. `git commit -F <fichier>`, `git branch -D <slug>`, `git tag -d` des tags de sa lettre.
 
 Pourquoi chacun de ces gestes :
@@ -74,8 +75,8 @@ Pourquoi chacun de ces gestes :
 
 ## Abandon
 
-Pas d'aplatissement ici ([`branche-chantier.md`](branche-chantier.md)). Les commits sont nommés, chacun
-présenté et accordé ([`confirmation.md`](confirmation.md)), stagés par chemins
+Pas d'aplatissement ici ([`branche-chantier.md`](branche-chantier.md)). Les commits sont nommés,
+chacun présenté et accordé ([`confirmation.md`](confirmation.md)), stagés par chemins
 ([`staging.md`](staging.md)). La décision — raison, dette, sort de la branche — appartient à
 l'appelant ; seuls les gestes sont ici.
 

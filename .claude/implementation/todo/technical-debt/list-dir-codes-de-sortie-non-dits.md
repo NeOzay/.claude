@@ -21,10 +21,10 @@ pourtant les mêmes codes que `gabarit`, dont le paquet porte la CLI.
 
 ## Pourquoi c'est gênant
 
-Un appelant qui ne connaît pas les codes lit la sortie pour décider, et une sortie vide sous un
-code 0 se lit comme un succès. `list-dir` est le skill le plus appelé depuis d'autres skills — le
-registre de dette, la road-map, la revue —, et c'est précisément là que la distinction entre « refus »
-(1) et « erreur d'appel » (2) change la conduite à tenir : la première se corrige dans le contenu,
+Un appelant qui ne connaît pas les codes lit la sortie pour décider, et une sortie vide sous un code
+0 se lit comme un succès. `list-dir` est le skill le plus appelé depuis d'autres skills — le
+registre de dette, la road-map, la revue —, et c'est précisément là que la distinction entre « refus
+» (1) et « erreur d'appel » (2) change la conduite à tenir : la première se corrige dans le contenu,
 la seconde dans la commande.
 
 ## Pour solder

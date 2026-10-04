@@ -11,8 +11,8 @@ argument-hint: "[sujet du chantier]"
 
 # Intent Brief
 
-Le mode plan produit un bon plan **pour la demande telle qu'il l'a comprise**. Le désalignement
-naît en amont — intention floue ou reformulée de travers, contraintes que seul l'utilisateur connaît,
+Le mode plan produit un bon plan **pour la demande telle qu'il l'a comprise**. Le désalignement naît
+en amont — intention floue ou reformulée de travers, contraintes que seul l'utilisateur connaît,
 périmètre jamais borné — et se constate en aval, quand le plan ne défend plus rien.
 
 Ce skill cadre l'amont, et rien d'autre. Il ne planifie pas et ne relit pas le plan : le plan se
@@ -94,7 +94,8 @@ ls .claude/implementation/*.brief.md 2>/dev/null
 Utiliser la date renvoyée par `date`, jamais l'inventer :
 [Dates et listing](../implementation-tracker/references/contrat.md#dates-et-listing).
 
-- `NON_GIT` → demander si l'utilisateur veut quand même un brief (non versionné). Attendre la réponse.
+- `NON_GIT` → demander si l'utilisateur veut quand même un brief (non versionné). Attendre la
+  réponse.
 - `.claude/implementation/` absent → demander confirmation avant de créer l'arborescence.
 - **Brief existant sur un sujet proche** → le lire, proposer de le reprendre ou d'en créer un
   nouveau. Ne jamais écraser sans accord.

@@ -37,7 +37,8 @@ compter comme un élément, et le contrôle de conservation d'une agglomération
 faux sans broncher.
 
 `semence/` et `backup/` n'existent que sur une liste semée depuis une définition, et n'ont de sens
-que pour `reseed` : [Provenance et péremption](../references/provenance.md#provenance-et-péremption).
+que pour `reseed` :
+[Provenance et péremption](../references/provenance.md#provenance-et-péremption).
 
 Une liste **sans aucun élément est valide** pour `init` et `validate` : une liste fraîchement créée
 est légitimement vide. Elle est en revanche une **erreur** pour `merge` et `derive` — agglomérer ou

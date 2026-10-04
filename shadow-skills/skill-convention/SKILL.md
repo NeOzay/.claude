@@ -16,19 +16,19 @@ configurations locales à un projet.
 **Principe directeur : réduire au maximum le non-déterminisme du modèle.** Toutes les conventions
 qui suivent y servent ; trois le portent directement.
 
-- **Un document se pose depuis un gabarit** — [gabarit](../../skills/gabarit/SKILL.md) construit le fichier
-  depuis un contrat, le modèle le remplit. Un modèle qui invente aussi la structure produit deux
-  fichiers différents pour le même besoin.
-- **Une mémoire se tient en registre** — [list-dir](../../skills/list-dir/SKILL.md) : un répertoire est une
-  liste, un fichier un élément, un contrat déclare la structure et `validate` la vérifie. Une
-  mémoire en prose libre ne se filtre pas, ne se compte pas, et se relit à chaque consultation.
+- **Un document se pose depuis un gabarit** — [gabarit](../../skills/gabarit/SKILL.md) construit le
+  fichier depuis un contrat, le modèle le remplit. Un modèle qui invente aussi la structure produit
+  deux fichiers différents pour le même besoin.
+- **Une mémoire se tient en registre** — [list-dir](../../skills/list-dir/SKILL.md) : un répertoire
+  est une liste, un fichier un élément, un contrat déclare la structure et `validate` la vérifie.
+  Une mémoire en prose libre ne se filtre pas, ne se compte pas, et se relit à chaque consultation.
 - **Le frontmatter porte les données mutables**, séparées de la prose. Ce qui change au fil d'un
   chantier — statut, session, branche, dates — se lit et s'écrit là, sans relire le texte ni
   risquer de le réécrire.
 
-**Ce skill décrit, il ne corrige pas.** Un écart constaté dans une skill existante va au registre
-de dette ([Registre de dette](../../skills/implementation-tracker/references/dette.md)) : réaligner une skill
-est un chantier à part entière, avec son brief.
+**Ce skill décrit, il ne corrige pas.** Un écart constaté dans une skill existante va au registre de
+dette ([Registre de dette](../../skills/implementation-tracker/references/dette.md)) : réaligner une
+skill est un chantier à part entière, avec son brief.
 
 **Il renvoie plutôt qu'il ne recopie.** Une règle qui a déjà son autorité ailleurs y reste, et ce
 skill y mène.
@@ -52,4 +52,5 @@ les charge seul, d'après leur champ `paths`.
 ## Références
 
 - [`references/prose.md`](references/prose.md) : on écrit ou relit un `SKILL.md` ou une référence.
-- [`references/commandes-locales.md`](references/commandes-locales.md) : une skill ou un projet doit fournir une commande.
+- [`references/commandes-locales.md`](references/commandes-locales.md) : une skill ou un projet doit
+  fournir une commande.

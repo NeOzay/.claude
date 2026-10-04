@@ -21,9 +21,10 @@ fichiers qu'ils n'atteignaient pas :
 - sept entrées vivantes de `.claude/implementation/todo/technical-debt/` — hors du répertoire
   retenu — citant des chemins `templates/` morts.
 
-Établi par : `grep -rn 'templates' skills/implementation-tracker/list-dir .claude/implementation/todo`
-le 2026-09-20 → dix occurrences, dont aucune n'était visible par les critères du brief, tous verts
-au même instant.
+Établi par :
+`grep -rn 'templates' skills/implementation-tracker/list-dir .claude/implementation/todo` le
+2026-09-20 → dix occurrences, dont aucune n'était visible par les critères du brief, tous verts au
+même instant.
 
 ## Pourquoi c'est gênant
 

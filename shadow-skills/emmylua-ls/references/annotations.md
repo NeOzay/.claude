@@ -1,6 +1,7 @@
 # Référence des annotations EmmyLua
 
-EmmyLua utilise des commentaires spéciaux préfixés par `---` (trois tirets) pour enrichir l'analyse statique et le système de types. Ces annotations sont compatibles avec le format EmmyLua et LuaCATS.
+EmmyLua utilise des commentaires spéciaux préfixés par `---` (trois tirets) pour enrichir l'analyse
+statique et le système de types. Ces annotations sont compatibles avec le format EmmyLua et LuaCATS.
 
 ## Table des matières
 
@@ -324,7 +325,8 @@ setColor(4)          -- Warning: enum-value-mismatch
 
 ### Attribut key (spécifique à emmylua_ls)
 
-L'attribut `(key)` permet de contrôler le préfixe de complétion. Quand il est utilisé, la complétion propose les chemins internes de l'enum au lieu du nom complet :
+L'attribut `(key)` permet de contrôler le préfixe de complétion. Quand il est utilisé, la complétion
+propose les chemins internes de l'enum au lieu du nom complet :
 
 ```lua
 ---@enum (key) Bindings
@@ -341,7 +343,8 @@ local Bindings = {
 -- Avec (key) : la complétion propose CS.Unity.GameObject
 ```
 
-Cette fonctionnalité est particulièrement utile pour les bindings C# (Unity/XLua) où le nom du conteneur Lua n'est pas pertinent pour l'utilisateur.
+Cette fonctionnalité est particulièrement utile pour les bindings C# (Unity/XLua) où le nom du
+conteneur Lua n'est pas pertinent pour l'utilisateur.
 
 ### Enum comme clé de table
 
@@ -473,7 +476,8 @@ Marque une fonction comme asynchrone.
 function fetchUrl(url) end
 ```
 
-Si une fonction `@async` est appelée dans une fonction non-async, le diagnostic `await-in-sync` sera émis.
+Si une fonction `@async` est appelée dans une fonction non-async, le diagnostic `await-in-sync` sera
+émis.
 
 ---
 
@@ -694,7 +698,8 @@ function move() end
 
 ## @namespace
 
-Déclare un namespace pour organiser les classes et alias. Annotation spécifique à emmylua_ls (absente de lua_ls/LuaLS).
+Déclare un namespace pour organiser les classes et alias. Annotation spécifique à emmylua_ls
+(absente de lua_ls/LuaLS).
 
 ### Syntaxe
 
@@ -748,7 +753,8 @@ local btn = createButton()
 
 ### namespace\<T\> (type spécial)
 
-EmmyLua fournit un type générique spécial `namespace<T : string>` qui référence un namespace dynamiquement. C'est particulièrement utile pour modéliser des bindings vers des langages comme C# :
+EmmyLua fournit un type générique spécial `namespace<T : string>` qui référence un namespace
+dynamiquement. C'est particulièrement utile pour modéliser des bindings vers des langages comme C# :
 
 ```lua
 CS = {
@@ -767,7 +773,8 @@ local obj = CS.UnityEngine.GameObject()
 
 ## @using
 
-Importe un namespace, permettant d'utiliser ses types sans le préfixe qualifié. Annotation spécifique à emmylua_ls.
+Importe un namespace, permettant d'utiliser ses types sans le préfixe qualifié. Annotation
+spécifique à emmylua_ls.
 
 ### Syntaxe
 
@@ -789,8 +796,10 @@ function updateLabel(lbl) end
 
 ### Différence avec @namespace
 
-- `---@namespace UI` : Déclare que les types définis ensuite appartiennent au namespace `UI`, ou rouvre le namespace pour y accéder sans préfixe.
-- `---@using UI` : Importe le namespace `UI` pour que ses types soient accessibles sans préfixe, sans y ajouter de nouveaux types.
+- `---@namespace UI` : Déclare que les types définis ensuite appartiennent au namespace `UI`, ou
+  rouvre le namespace pour y accéder sans préfixe.
+- `---@using UI` : Importe le namespace `UI` pour que ses types soient accessibles sans préfixe,
+  sans y ajouter de nouveaux types.
 
 ---
 
@@ -857,7 +866,8 @@ Marque un fichier comme fichier de métadonnées (définitions uniquement, pas d
 ---@meta
 ```
 
-Placé en début de fichier. Les fichiers meta sont utilisés pour fournir des définitions de types sans code runtime (bibliothèques, stubs, etc.).
+Placé en début de fichier. Les fichiers meta sont utilisés pour fournir des définitions de types
+sans code runtime (bibliothèques, stubs, etc.).
 
 ---
 
