@@ -102,15 +102,18 @@
   "outputStyle": "Concise",
   "language": "Francais",
   "effortLevel": "medium",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "plansDirectory": ".claude/plans",
   "tui": "fullscreen",
   "editorMode": "normal",
   "verbose": false,
   "autoCompactEnabled": true,
   "voiceEnabled": true,
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "effortLevel": "high"
-    }
+  "env": {
+    "CLAUDE_CODE_SCROLL_SPEED": "4"
   }
 }
