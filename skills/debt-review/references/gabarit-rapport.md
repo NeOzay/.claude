@@ -133,7 +133,7 @@ ne voudrait plus rien dire.
 fichiers **présents dans la liste de revue**.
 
 La complétude se contrôle donc **contre le registre**, avant d'agglomérer
-([Étape 3](../SKILL.md#étape-3--agglomérer-et-restituer), qui porte le mode de défaillance mesuré).
+([Phase 3](../SKILL.md#phase-3--agglomérer-et-restituer), qui porte le mode de défaillance mesuré).
 C'est le seul contrôle de la revue qui ne tienne pas dans une commande : la liste générique ne
 connaît pas le registre dont elle dérive, et c'est précisément ce qui la garde générique.
 

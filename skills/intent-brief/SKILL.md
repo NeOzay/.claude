@@ -29,7 +29,7 @@ Argument éventuel = sujet du chantier : il amorce le slug et oriente la reconna
 **Ne jamais poser une question dont le dépôt contient la réponse.**
 
 D'où l'ordre non négociable : **explorer → restituer → questionner les trous**. Explorer d'abord
-est ce qui rend les questions spécifiques ; sauter l'Étape 1 ramène au questionnaire générique,
+est ce qui rend les questions spécifiques ; sauter la Phase 1 ramène au questionnaire générique,
 qui fatigue l'utilisateur et ne produit rien.
 
 ## Quand ne pas cadrer
@@ -41,16 +41,16 @@ Le cadrage a un coût. Il ne se justifie pas pour :
 - une tâche que l'utilisateur a déjà décrite avec ses critères.
 
 Dans ces cas : le dire en une ligne et renvoyer directement à `/implementation-tracker`, qui sait
-ouvrir un chantier sans brief. **Sortie anticipée** également si, après l'Étape 2, l'utilisateur
+ouvrir un chantier sans brief. **Sortie anticipée** également si, après la Phase 2, l'utilisateur
 valide la restitution sans correction et qu'aucune ambiguïté n'est ouverte : proposer un brief
 minimal — intention et hors-périmètre, les autres sections à `— non abordé` — et passer à
-l'Étape 5.
+la Phase 5.
 
 ## Règle du sourçage
 
 **Toute affirmation du brief est sourcée : dite par l'utilisateur, ou vérifiée dans le dépôt.**
 
-Supposer n'est pas interdit — l'Étape 2 est une supposition assumée, et c'est la meilleure du
+Supposer n'est pas interdit — la Phase 2 est une supposition assumée, et c'est la meilleure du
 dispositif. La ligne de partage est **exposée / silencieuse** : une supposition affichée appelle
 la réfutation, une supposition non marquée devient une vérité de référence que plus rien ne
 remettra en cause.
@@ -82,7 +82,7 @@ Marqueurs de détection : `references/grille-questions.md`, section « Détecter
 
 ---
 
-## Étape 0 — Prérequis
+## Phase 0 — Prérequis
 
 ```bash
 date +%F
@@ -100,7 +100,7 @@ Utiliser la date renvoyée par `date`, jamais l'inventer :
 - **Brief existant sur un sujet proche** → le lire, proposer de le reprendre ou d'en créer un
   nouveau. Ne jamais écraser sans accord.
 
-## Étape 1 — Reconnaissance silencieuse
+## Phase 1 — Reconnaissance silencieuse
 
 Objectif : savoir ce que le code répond déjà, pour ne demander que le reste. Aucune question ici,
 et pas de narration fichier par fichier.
@@ -120,9 +120,9 @@ et pas de narration fichier par fichier.
 **Plafond** : pour une demande ciblée, une passe de recherche et cinq fichiers lus. Au-delà, c'est
 du plan, pas du cadrage.
 
-## Étape 2 — Restitution de la compréhension
+## Phase 2 — Restitution de la compréhension
 
-L'étape la plus rentable : un malentendu se corrige ici en une phrase, au lieu d'être découvert
+La phase la plus rentable : un malentendu se corrige ici en une phrase, au lieu d'être découvert
 dans l'implémentation.
 
 ```
@@ -137,7 +137,7 @@ Puis : **« Qu'est-ce qui est faux là-dedans ? »** Demander ce qui est faux, p
 une question fermée récolte un « oui » poli, une ouverte récolte la correction.
 
 **Contrainte de vérification** : la restitution doit citer au moins un fait concret du dépôt — un
-commit, un fichier, un test, une fonction. Sans citation, l'Étape 1 n'a pas eu lieu : la refaire.
+commit, un fichier, un test, une fonction. Sans citation, la Phase 1 n'a pas eu lieu : la refaire.
 
 Puis **arrêter le slug**, tiré de l'argument ou du sujet. Il nomme le fichier et ne change plus :
 **le brief fait autorité**, le fichier de suivi le reprendra tel quel. Forme et conséquence :
@@ -153,10 +153,10 @@ gabarit contract brief
 Le contrat dit ce que chaque champ et chaque section attend : le lire avant de remplir, puis y
 écrire ce qui est déjà établi. Le brief sert de registre à partir d'ici.
 
-## Étape 3 — Questions ouvertes, une par tour
+## Phase 3 — Questions ouvertes, une par tour
 
 Puiser dans `references/grille-questions.md`. **Réservoir, pas checklist** : n'en tirer que les
-axes que l'Étape 1 n'a pas couverts.
+axes que la Phase 1 n'a pas couverts.
 
 - **Une seule question par tour.** Une salve récolte des réponses bâclées.
 - Ancrer dans le concret observé : « j'ai vu `TokenStore` réécrit deux fois — qu'est-ce qui a
@@ -168,15 +168,15 @@ axes que l'Étape 1 n'a pas couverts.
 
 **Axes prioritaires si le temps manque** : intention réelle, hors-périmètre, signaux de dérive.
 
-## Étape 4 — Arbitrages fermés
+## Phase 4 — Arbitrages fermés
 
-Sur les seules ambiguïtés relevées aux Étapes 2-3, utiliser `AskUserQuestion`. Grouper plusieurs
+Sur les seules ambiguïtés relevées aux Phases 2-3, utiliser `AskUserQuestion`. Grouper plusieurs
 questions dans un même appel est ici **permis** : ce sont des arbitrages à choix fermés, pas de
-l'exploration — la règle « une question par tour » ne s'applique qu'à l'Étape 3.
+l'exploration — la règle « une question par tour » ne s'applique qu'à la Phase 3.
 
-Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à trancher, sauter l'étape.
+Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à trancher, sauter la phase.
 
-## Étape 5 — Finalisation
+## Phase 5 — Finalisation
 
 **Contrôles avant de figer :**
 
@@ -203,7 +203,7 @@ Puis :
 
 Le brief tient en une page. S'il déborde, c'est un plan déguisé.
 
-## Étape 6 — Passage au suivi
+## Phase 6 — Passage au suivi
 
 Le brief est figé : il lui faut maintenant un fichier de suivi, sinon tout ce travail vit dans une
 conversation qui se fermera. **Le proposer explicitement** — `implementation-tracker` ne s'invoque

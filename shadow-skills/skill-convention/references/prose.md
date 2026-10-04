@@ -187,7 +187,7 @@ il est.
 Règle et motif :
 [Dates et listing](../../../skills/implementation-tracker/references/contrat.md#dates-et-listing).
 
-**Pratiqué dans** : [intent-brief](../../../skills/intent-brief/SKILL.md), Étape 0.
+**Pratiqué dans** : [intent-brief](../../../skills/intent-brief/SKILL.md), Phase 0.
 
 ## Un sous-agent recopie ses règles
 

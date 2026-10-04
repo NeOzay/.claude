@@ -60,7 +60,7 @@ une commande de `list-dir` ; le modèle n'écrit que **dans** des fiches déjà 
 
 ---
 
-## Étape 0 — Prérequis
+## Phase 0 — Prérequis
 
 ```bash
 date +%F
@@ -110,7 +110,7 @@ Utiliser la date renvoyée par `date`, jamais l'inventer :
 Un état, une suite, et pas deux :
 
 - **`ABSENT` sur les trois** → les registres n'existent pas encore dans ce projet. Les amorcer,
-  puis reprendre l'étape : [Registre de dette](../implementation-tracker/references/dette.md) en
+  puis reprendre la phase : [Registre de dette](../implementation-tracker/references/dette.md) en
   porte la procédure. Ne pas la recopier ici, et ne créer aucun répertoire à la main — l'amorçage
   est une commande.
 - **`ABSENT` sur un ou deux** → le dire et s'arrêter. Ce n'est pas un projet neuf mais un registre
@@ -119,23 +119,23 @@ Un état, une suite, et pas deux :
   registre non conforme instruit des entrées dont la structure ment déjà — mais **la remise en
   conformité n'est pas le travail d'une revue**, et `migrate` réécrit des fichiers que
   l'utilisateur n'a pas demandé à voir changer sous prétexte qu'il demandait une relecture.
-- **`VIDE` sur `technical-debt`** → le dire et s'arrêter : il n'y a rien à instruire, et l'Étape 1
+- **`VIDE` sur `technical-debt`** → le dire et s'arrêter : il n'y a rien à instruire, et la Phase 1
   échouerait de toute façon — `derive` refuse une liste sans élément. Ce n'est pas une anomalie :
   un registre soldé jusqu'à la dernière entrée est un bon registre.
 - **`VIDE` sur `technical-debt-solde` ou `-ecarte`** → **continuer, c'est l'état normal.** Ces deux
-  registres sont des **destinations**, pas des sources : ils ne se remplissent qu'à l'Étape 5, quand
-  un `move` y dépose une entrée sortie du registre actif. Un projet qui n'a jamais rien soldé les a
-  légitimement vides, et l'Étape 5 le redit en toutes lettres — « `technical-debt-ecarte` reste vide
-  tant qu'aucune revue n'a écarté d'entrée ».
+  registres sont des **destinations**, pas des sources : ils ne se remplissent qu'à la Phase 5,
+  quand un `move` y dépose une entrée sortie du registre actif. Un projet qui n'a jamais rien soldé
+  les a légitimement vides, et la Phase 5 le redit en toutes lettres — « `technical-debt-ecarte`
+  reste vide tant qu'aucune revue n'a écarté d'entrée ».
 - **`OK` sur `technical-debt`** → continuer. C'est le seul registre dont l'état décide qu'il y a une
-  revue à faire ; les deux autres n'ont qu'à exister et être conformes, puisque l'Étape 5 y écrit.
+  revue à faire ; les deux autres n'ont qu'à exister et être conformes, puisque la Phase 5 y écrit.
 - **`OUTIL ABSENT`** → s'arrêter, et dire que `list-dir` est introuvable dans le `PATH` — pas qu'un
   registre est en faute. Ce n'est pas une garde de présence recopiée ici : `sante_skills.py` la fait
   déjà une fois par session ([Outillage du dépôt](../../OUTILLAGE.md)).
   C'est le refus d'**attribuer au registre** un code 127 qui n'est pas le sien.
 - **Modifications hors de `.claude/implementation/`** → le signaler et demander. C'est ce que
   filtre le `grep -v` ci-dessus : une sortie vide suffit à continuer. Le contrôle ne porte que sur
-  ce qui **fausserait** le `git status --short` de l'Étape 5 — un fichier déjà modifié sous
+  ce qui **fausserait** le `git status --short` de la Phase 5 — un fichier déjà modifié sous
   `.claude/implementation/` y serait de toute façon accepté, donc l'exiger propre rejetterait des
   arbres parfaitement sains.
 - **Une revue existe déjà à la date du jour** parmi les répertoires listés → la lire et proposer de
@@ -145,12 +145,12 @@ Un état, une suite, et pas deux :
 > *Mode de défaillance* — ces règles ont été fautives trois fois de suite, toujours de la même
 > façon : chaque correctif relisait la ligne qu'il visait, jamais son voisinage. Deux pièges s'y
 > cachent. D'abord, **les trois registres ne sont pas symétriques** — `technical-debt` est la
-> source dont l'Étape 1 dérive, `-solde` et `-ecarte` sont les destinations où l'Étape 5 écrit ;
+> source dont la Phase 1 dérive, `-solde` et `-ecarte` sont les destinations où la Phase 5 écrit ;
 > une règle qui les traite uniformément se trompe forcément sur deux d'entre eux, et l'une d'elles
 > arrêtait la revue d'un projet amorcé dès sa première dette. Ensuite, **le bloc et les puces
 > vieillissent séparément** : un état que le bloc cesse d'imprimer laisse une puce sans déclencheur,
 > et l'inverse laisse une sortie sans consigne. Une règle ajoutée ici se relit donc contre les trois
-> autres puces **et** contre les Étapes 1 et 5.
+> autres puces **et** contre les Phases 1 et 5.
 
 > *Mode de défaillance* — `! list-dir validate` était vrai pour **n'importe quel** code non nul, y
 > compris le 127 d'une commande introuvable : un registre parfaitement sain s'affichait alors
@@ -164,7 +164,7 @@ personne n'a arbitré, c'est-à-dire précisément ce que la troisième règle i
 
 Un argument `@chemin` désigne un autre registre que celui par défaut.
 
-## Étape 1 — Dériver la liste de revue
+## Phase 1 — Dériver la liste de revue
 
 ```bash
 R=".claude/implementation/done/revues/$(date +%F)"
@@ -186,13 +186,13 @@ test "$(list-dir list "$R" | wc -l)" -eq "$(list-dir list "$T/technical-debt" | 
   || echo "ÉCHEC : autant de fiches que d'entrées attendu"
 ```
 
-À rejouer **avant `merge`**, à l'Étape 3. C'est le seul contrôle de la revue qui ne soit pas dans
+À rejouer **avant `merge`**, à la Phase 3. C'est le seul contrôle de la revue qui ne soit pas dans
 une commande, précisément parce que la liste générique ne connaît pas le registre dont elle dérive.
 
 La fiche **ne porte rien de la prose de l'entrée**, et c'est délibéré : une fiche qui recopierait le
 *Constat* en serait un doublon éditable, et le registre cesserait d'être la source unique.
 
-## Étape 2 — Instruire, fiche par fiche
+## Phase 2 — Instruire, fiche par fiche
 
 Traiter les fiches **une à une**, dans l'ordre du registre :
 
@@ -208,7 +208,7 @@ Pour chacune :
    au contrat de la liste de revue, section `Vérifié par`.
 3. Classer, selon `references/categories.md`.
 4. Écrire la fiche `$R/<id>.md` : les champs `category` et `reviewed`, puis les sections **Vérifié
-   par**, **Verdict** et **Action**. La section `Arbitrage` reste au marqueur jusqu'à l'Étape 4.
+   par**, **Verdict** et **Action**. La section `Arbitrage` reste au marqueur jusqu'à la Phase 4.
 
 **Ne pas grouper les vérifications.** Une passe de `grep` qui répond à six entrées d'un coup produit
 six classements adossés à la même lecture — c'est le raccourci qui fait rater les cas particuliers,
@@ -247,7 +247,7 @@ list-dir validate "$R" --filled
 Ce contrôle dit que chaque fiche **présente** est remplie ; il ne dit rien de celles qui auraient
 disparu — c'est le rôle du comptage contre le registre, ci-dessous.
 
-## Étape 3 — Agglomérer et restituer
+## Phase 3 — Agglomérer et restituer
 
 ```bash
 test "$(list-dir list "$R" | wc -l)" -eq "$(list-dir list "$T/technical-debt" | wc -l)" \
@@ -296,7 +296,7 @@ et c'est le commentaire du contrat qui dit pourquoi cet ordre-là. Une catégori
 dans la boucle sans que rien ne soit à retoucher ici. Il ne s'obtient pas par `--sort category`,
 qui ordonne les valeurs alphabétiquement ; `--sort date` ordonne l'intérieur d'une pile.
 
-## Étape 4 — Arbitrer
+## Phase 4 — Arbitrer
 
 Faire trancher, pile par pile. Une décision peut être :
 
@@ -336,13 +336,13 @@ Où elle s'écrit, selon ce qu'elle régit :
 
 **La règle s'écrit avant les corrections qu'elle autorise**, jamais après : c'est elle qui les rend
 rejouables. Et elle est **la seule raison** pour laquelle une passe de revue écrit hors de
-`.claude/implementation/` — l'Étape 6 en tient compte.
+`.claude/implementation/` — la Phase 6 en tient compte.
 
 > *Mode de défaillance* — sans ce chemin, la seule issue est de corriger les entrées sans écrire la
 > règle. Les corrections passent alors pour des retouches d'humeur, et le prochain relecteur, qui
 > lit un dispositif muet sur le sujet, les défait de bonne foi.
 
-## Étape 5 — Écrire les registres
+## Phase 5 — Écrire les registres
 
 Seulement sur les entrées arbitrées, et **jamais à la main** : une entrée qui sort du registre
 change de liste par `move`.
@@ -386,17 +386,17 @@ La somme après la revue égale la somme avant. Une liste vide compte 0 et ne fa
 contrôle — `technical-debt-ecarte` reste vide tant qu'aucune revue n'a écarté d'entrée.
 
 **Rester à la racine du dépôt**, ici comme partout dans ce skill : pas de `cd` vers `todo/`. Les
-chemins que `git status --short` rend sont relatifs au répertoire courant, et l'Étape 6 a besoin de
+chemins que `git status --short` rend sont relatifs au répertoire courant, et la Phase 6 a besoin de
 les lire préfixés.
 
-## Étape 6 — Rendre la main
+## Phase 6 — Rendre la main
 
 ```bash
 git status --short
 ```
 
 **Il ne doit lister que des chemins sous `.claude/implementation/`** — plus, si et seulement si un
-arbitrage a produit une règle, le ou les fichiers de règle que l'Étape 4 nomme. Tout autre chemin
+arbitrage a produit une règle, le ou les fichiers de règle que la Phase 4 nomme. Tout autre chemin
 est un fichier de code, et l'avoir modifié est la violation de la première règle : le dire, et
 proposer de l'annuler.
 

@@ -2,7 +2,7 @@
 
 Ce que le modèle écrit dans une fiche, une fois `derive` passé : les deux champs et les trois
 sections requises, sur chacun des verdicts possibles. Une dernière fiche montre une section
-`Arbitrage` remplie — le seul ajout de l'Étape 4.
+`Arbitrage` remplie — le seul ajout de la Phase 4.
 
 Ce qui est reproduit ici est le **corps** d'une fiche, tel qu'il apparaîtrait dans
 `done/revues/<AAAA-MM-DD>/<id>.md`. Le front matter est écrit par `derive` : `id`, `title` et `date`
@@ -139,7 +139,7 @@ Rien à déplacer ; `category = "inverifiable"` et `reviewed` à la date du jour
 
 ## Une fiche arbitrée
 
-La section `Arbitrage` est écrite à l'Étape 4, après que l'utilisateur a tranché — et par elle
+La section `Arbitrage` est écrite à la Phase 4, après que l'utilisateur a tranché — et par elle
 seule. Ici, un verdict **renversé** : `category` et le **Verdict** ont été corrigés en même temps,
 pour que la fiche ne dise pas le contraire de ce qu'elle porte.
 

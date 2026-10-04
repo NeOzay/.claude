@@ -1,6 +1,6 @@
 # Grille de questions — cadrage d'intention
 
-Réservoir d'axes, pas checklist. N'utiliser que ce que la reconnaissance (Étape 1) n'a pas
+Réservoir d'axes, pas checklist. N'utiliser que ce que la reconnaissance (Phase 1) n'a pas
 couvert. Une question par tour, toujours ancrée dans ce qui a été observé dans le dépôt.
 
 ---
