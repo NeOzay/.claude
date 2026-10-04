@@ -30,6 +30,37 @@ sans être vue.
 rien ne le réclame. Le chantier `semences-de-listes` avait inscrit `uvx ruff format --check` à son
 contrôle final, puis l'a retiré en constatant qu'il échouait.
 
+## Soldé le
+
+**2026-10-04, hors chantier** — la question de fond est tranchée par **oui** : le formatage fait
+partie du contrat. Un `ruff.toml` à la racine couvre `scripts/` et `statusline-command.py` à 100
+colonnes, comme les skills. Chaque `ruff.toml`, celui de la racine comme ceux des six skills, porte
+`[format] exclude = ["*.md"]`. `uvx ruff format .` a reformaté 21 fichiers Python, en un commit
+qui ne touche à rien d'autre (`style: appliquer ruff format au Python du dépôt`).
+
+La déclaration du contrôle va dans `OUTILLAGE.md` et non dans `contrat.md`, comme **Pour solder**
+le demandait : la section Dépendances de `contrat.md` y a été transportée entre-temps.
+`OUTILLAGE.md` porte la commande dans son tableau de dépendances, et une règle dans « Vérifier le
+code Python » : « Le formatage fait partie du contrat ». Le rappel de session
+(`hooks/outillage-rappel.sh`) la répète.
+
+`references/extension.md`, compté parmi les huit fichiers du constat, n'est pas reformaté mais
+exclu : ruff 0.16 formate les blocs de code des `.md`, dont les commentaires sont alignés à la main.
+
+Établi par, depuis la racine et depuis le paquet seul :
+
+```
+$ uvx ruff format --check .
+95 files already formatted                                   code 0
+
+$ cd skills/list-dir && uvx ruff format --check .
+41 files already formatted                                   code 0
+```
+
+Sans régression : `uvx ruff check .` passe de 6 à 5 erreurs (un `E501` de `test_contract.py`
+résorbé par le reformatage, aucune nouvelle), `uvx --with pytest basedpyright` rend 6580 erreurs
+avant comme après, et les sept suites de tests rendent 783 tests verts avant comme après.
+
 ## Pourquoi c'est gênant
 
 Le paquet est destiné à être déployé ailleurs, et sa configuration voyage avec lui : `ruff.toml`
