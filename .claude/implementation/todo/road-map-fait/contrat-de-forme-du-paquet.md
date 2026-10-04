@@ -26,6 +26,25 @@ Le point à ne pas manquer : `ruff check .` — la commande que `contrat.md` doc
 nulle sur un dépôt sain. Tant que c'est vrai, on apprend à ignorer son verdict, ce qui rend le
 contrôle menteur bien au-delà des lignes qu'il signale.
 
+## Fait le
+
+**2026-10-04, hors chantier** — aucun Chantier n'a porté l'entrée, il n'y a donc pas d'archive
+dans `done/`. La question reçoit la réponse **oui** sur ses deux volets, et chacun est outillé :
+
+- **le formatage** : `ruff format`, configuré par un `ruff.toml` à la racine et un par skill,
+  appliqué au dépôt et déclaré dans `OUTILLAGE.md` (`uvx ruff format --check .`). La dette
+  `ruff-format-jamais-applique` est soldée ;
+- **l'enroulement à 100 colonnes** : `rumdl fmt` réenroule la prose Markdown
+  (`.rumdl.toml`, section `[MD013]`), déclaré dans `OUTILLAGE.md` (`uvx rumdl fmt --check .`). La
+  dette `prose-lignes-allongees-par-la-migration` est soldée.
+
+**Ce qui reste ouvert** : le point à ne pas manquer. `uvx ruff check .` sort toujours non nul, sur
+5 erreurs (2 `E501` dans `test_fusion.py`, 3 dans `statusline-command.py`). Les dettes
+`ruff-echoue-sur-les-tests-de-list-dir` et `statusline-hors-des-linters` les suivent. Il en va de
+même de `trois-lignes-au-dela-de-100-colonnes`, que la convention désormais outillée rend soldable,
+mais qui n'a pas encore été soldée. Ruff format est aussi absent des consignes des agents : la
+dette `ruff-format-absent-des-agents` le suit.
+
 ## Références
 
 - dette : `ruff-format-jamais-applique` — « Le formatage ruff n'a jamais été appliqué au paquet
