@@ -17,6 +17,19 @@ projeter » — et une liste fraîchement amorcée est vide par construction.
 Le critère que cette vérification servait est pourtant atteint : les gabarits suivent bien
 l'amorçage, ce qui a été établi autrement, en créant une entrée avant de projeter.
 
+## Écartée le
+
+**2026-10-04 — pas une dette** — pour la solder, il fallait corriger le plan archivé de
+`semences-de-listes`. Sur décision de l'utilisateur, une archive de `done/` relate le Chantier tel
+qu'il a été clos et ne se réécrit jamais : la commande fausse qu'elle porte fait partie de cet
+historique. La leçon générale — écrire une vérification après l'avoir exécutée — n'est pas un
+constat sur le dépôt. Établi par :
+
+```
+$ grep -n "pas une dette" skills/implementation-tracker/references/contrat.md
+59:Qu'une archive ne passe plus un contrat qui a évolué depuis n'est pas une dette. Le pipeline
+```
+
 ## Pourquoi c'est gênant
 
 Une commande de vérification qui échoue là où le critère est atteint est pire qu'une absence de
