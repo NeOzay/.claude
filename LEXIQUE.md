@@ -24,3 +24,4 @@ Termes réservés dans tous les projets. Règles d'emploi :
 | Base | Branche principale d'où part un Chantier, et sur laquelle il est aplati à la Clôture. | [Frontmatter](skills/implementation-tracker/references/contrat.md#frontmatter) |
 | Clôture | Fin d'un Chantier livré : audit, archivage en `done/`, aplatissement sur la Base. | [implementation-tracker](skills/implementation-tracker/SKILL.md) |
 | Abandon | Fin d'un Chantier non livré : archivé avec sa raison, jamais aplati sur la Base. | [implementation-tracker](skills/implementation-tracker/SKILL.md) |
+| Shadow-skill | Skill rangé hors du contexte, dans `shadow-skills/` ou `.claude/shadow-skills/`, que l'agent cherche et charge par la commande `shadow-skill`. | [shadow-skill](skills/shadow-skill/SKILL.md) |

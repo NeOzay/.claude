@@ -43,6 +43,7 @@ telemetry/
 plugins/marketplaces/
 plugins/known_marketplaces.json
 plugins/store/
+plugins/plugin-directory-cache-v2.json
 tasks/
 state/
 

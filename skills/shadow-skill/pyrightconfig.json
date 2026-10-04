@@ -1,0 +1,20 @@
+{
+  "typeCheckingMode": "all",
+  "venvPath": "../..",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
+  "include": [
+    "scripts"
+  ],
+  "exclude": [
+    "**/__pycache__"
+  ],
+  "extraPaths": [
+    "scripts",
+    "scripts/tests",
+    "../gabarit/scripts"
+  ],
+  "reportImplicitStringConcatenation": false,
+  "reportUnusedCallResult": false,
+  "reportImportCycles": false
+}

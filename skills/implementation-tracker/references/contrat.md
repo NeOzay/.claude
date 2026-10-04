@@ -118,6 +118,9 @@ garantir :
   lui qui dit à la clôture quoi déplacer vers `road-map-fait/`
   ([Road-map](road-map.md#le-champ-road-map)).
 - `maj` est actualisé à chaque écriture dans le suivi, en même temps que le contenu.
+- `skills` nomme les Shadow-skills du Chantier, `[]` si aucun ; `shadow-skill depuis-suivi` le lit
+  à la reprise. Les archives de `done/` antérieures au champ ne le portent pas, ne passent plus
+  `gabarit check --filled`, et ne sont pas réécrites pour autant.
 
 ## Autorité et divergence
 

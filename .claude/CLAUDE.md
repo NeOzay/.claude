@@ -9,9 +9,10 @@ ce dépôt. Une règle qui ne vaut que pour travailler sur ce dépôt s'écrit i
 
 ## Conventions
 
-Le skill [`skill-convention`](../skills/skill-convention/SKILL.md) énonce les conventions de ce
-dépôt : prose d'une skill, code Python, documents posés depuis une Semence, registres, commandes
-fournies à un agent. Le charger avant d'écrire ou de relire un fichier de skill.
+Le Shadow-skill [`skill-convention`](../shadow-skills/skill-convention/SKILL.md) énonce les
+conventions de ce dépôt : prose d'une skill, code Python, documents posés depuis une Semence,
+registres, commandes fournies à un agent. Le charger par `shadow-skill charge skill-convention`
+avant d'écrire ou de relire un fichier de skill.
 
 ## Outillage
 

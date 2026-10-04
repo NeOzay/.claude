@@ -1,29 +1,27 @@
----
-name: nvim-mini-test
-description: >
-  Write and manage unit tests for Neovim plugins using mini.test (from mini.nvim).
-  Use this skill whenever the user works on a Neovim plugin and mentions tests, testing,
-  unit tests, TDD, test coverage, or asks to add/fix/refactor tests. Also trigger when
-  the user asks to set up a test infrastructure for a Neovim plugin, create a CI pipeline
-  for plugin tests, or bootstrap a new plugin project that needs tests. This skill covers
-  mini.test specifically — not plenary.busted, busted, or neotest. If the user explicitly
-  asks for plenary or busted, do NOT use this skill.
----
++++
+gabarit = "shadow-skill"
+name = "nvim-mini-test"
+description = "Write and manage unit tests for Neovim plugins using mini.test (from mini.nvim). This skill covers mini.test specifically — not plenary.busted, busted, or neotest."
+when-to-load = "Use this skill whenever the user works on a Neovim plugin and mentions tests, testing, unit tests, TDD, test coverage, or asks to add/fix/refactor tests. Also trigger when the user asks to set up a test infrastructure for a Neovim plugin, create a CI pipeline for plugin tests, or bootstrap a new plugin project that needs tests. If the user explicitly asks for plenary or busted, do NOT use this skill."
+tags = ["neovim", "lua", "tests"]
++++
 
 # Neovim Plugin Testing with mini.test
+
+## Instructions
 
 This skill teaches how to write, organize, and run unit tests for Neovim plugins using
 mini.test from the mini.nvim ecosystem. mini.test is a modern, zero-dependency test
 framework that runs inside a real Neovim instance.
 
-## When to use mini.test
+### When to use mini.test
 
 - New Neovim plugin projects that need a test setup
 - Adding tests to existing plugins
 - Migrating from plenary.busted to mini.test
 - Setting up CI for Neovim plugin tests
 
-## Project structure
+### Project structure
 
 A well-tested Neovim plugin follows this layout:
 
@@ -48,9 +46,9 @@ my-plugin/
 
 Test files should mirror the source structure with a `test_` prefix.
 
-## Setting up mini.test
+### Setting up mini.test
 
-### minimal_init.lua
+#### minimal_init.lua
 
 Every test suite needs a bootstrap file. Create `tests/minimal_init.lua`:
 
@@ -93,7 +91,7 @@ running tests. Clone them the same way mini.test is cloned above.
 > /deps/
 > ```
 
-### Makefile
+#### Makefile
 
 ```makefile
 .PHONY: test test-file
@@ -105,12 +103,12 @@ test-file:
 	nvim --headless -u tests/minimal_init.lua -c "lua MiniTest.run_file('$(FILE)')"
 ```
 
-## Writing tests
+### Writing tests
 
 Read `references/mini-test-api.md` for the complete API reference. Here is a summary
 of the core patterns.
 
-### Basic test file
+#### Basic test file
 
 Every test file returns a test set:
 
@@ -140,7 +138,7 @@ Key rules:
 - Use `MiniTest.expect` for assertions, not raw `assert()`
 - Each test function receives no arguments
 
-### Hooks for setup and teardown
+#### Hooks for setup and teardown
 
 ```lua
 local T = new_set({
@@ -163,7 +161,7 @@ local T = new_set({
 })
 ```
 
-### Nested sets (grouping tests)
+#### Nested sets (grouping tests)
 
 ```lua
 local T = new_set()
@@ -191,7 +189,7 @@ return T
 
 Each nested set can have its own hooks — they compose with parent hooks.
 
-### Parametric tests
+#### Parametric tests
 
 Since sets are plain Lua tables, generate test cases programmatically:
 
@@ -213,7 +211,7 @@ end
 return T
 ```
 
-### Testing buffer operations
+#### Testing buffer operations
 
 Many Neovim plugins manipulate buffers. Here is the pattern:
 
@@ -246,7 +244,7 @@ end
 return T
 ```
 
-### Testing async operations
+#### Testing async operations
 
 For plugins with async behavior, use `vim.wait()`:
 
@@ -263,7 +261,7 @@ T["async operation completes"] = function()
 end
 ```
 
-### Child process testing (advanced isolation)
+#### Child process testing (advanced isolation)
 
 For tests that need full isolation (different configs, testing UI), mini.test provides
 `MiniTest.new_child_neovim()`. See `references/mini-test-api.md` for details.
@@ -288,7 +286,7 @@ end
 return T
 ```
 
-## Assertions reference (quick)
+### Assertions reference (quick)
 
 | Method | Description |
 |--------|-------------|
@@ -305,7 +303,7 @@ For exhaustive code examples covering every test type (parametrize, child
 process, screenshots, async, busted-style, skip/finally, n_retry, data,
 custom collection…), read `references/examples.md`.
 
-## CI with GitHub Actions
+### CI with GitHub Actions
 
 ```yaml
 name: Tests
@@ -326,7 +324,7 @@ jobs:
         run: make test
 ```
 
-## Common pitfalls
+### Common pitfalls
 
 - Forgetting `return T` at the end of a test file — tests silently won't run
 - Not cleaning up buffers/state between tests — use `pre_case`/`post_case` hooks
@@ -335,3 +333,8 @@ jobs:
   so if your module has mutable state, clear it in `pre_case`:
   `package.loaded["my-plugin"] = nil`
 - Running tests without `--headless` — omitting this flag opens a visible Neovim window
+
+## Références
+
+- [`references/mini-test-api.md`](references/mini-test-api.md) : the full API, including screenshot testing and child process methods.
+- [`references/examples.md`](references/examples.md) : exhaustive code examples covering every test type (parametrize, child process, screenshots, async, busted-style, skip/finally, n_retry, data, custom collection…).

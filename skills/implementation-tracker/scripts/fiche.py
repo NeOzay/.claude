@@ -10,6 +10,10 @@ tronquée. Le YAML plat entre `---` n'est lu qu'en repli, pour les archives fig�
 Le format lu est rendu à l'appelant : c'est lui qui refuse un YAML là où seule une fiche
 vivante est attendue.
 
+UNE LISTE DE CHAÎNES EST LA SEULE VALEUR COMPOSÉE ADMISE, rendue à part des champs : le Suivi
+porte `skills`, la liste des Shadow-skills du Chantier. Une table, ou une liste d'autre chose,
+reste refusée.
+
 BIBLIOTHÈQUE STANDARD SEULE : le garde-fou tourne sous le `python3` du PATH, qui n'a pas
 `tomlkit`. Écrire une fiche n'est pas le rôle de ce module, mais celui de `gabarit`.
 """
@@ -19,8 +23,8 @@ from __future__ import annotations
 import datetime
 import re
 import tomllib
-from dataclasses import dataclass
-from typing import Literal
+from dataclasses import dataclass, field
+from typing import Literal, cast
 
 type Format = Literal["toml", "yaml"]
 
@@ -38,10 +42,15 @@ class FrontMatterError(ValueError):
 
 @dataclass(frozen=True)
 class Front:
-    """Les champs d'un front matter, et le format dans lequel ils ont été lus."""
+    """Les champs d'un front matter, et le format dans lequel ils ont été lus.
+
+    `champs` porte les valeurs scalaires, `listes` les listes de chaînes : un appelant qui attend
+    un chemin ou un statut ne reçoit jamais une liste à sa place.
+    """
 
     format: Format
     champs: dict[str, str]
+    listes: dict[str, tuple[str, ...]] = field(default_factory=dict[str, tuple[str, ...]])
 
 
 def lire_front(texte: str) -> Front:
@@ -52,7 +61,8 @@ def lire_front(texte: str) -> Front:
 
     Raises:
         FrontMatterError: pas de délimiteur en première ligne, aucun délimiteur fermant, TOML
-            invalide (clé en double comprise), valeur non scalaire, clé YAML en double.
+            invalide (clé en double comprise), table ou liste d'autre chose que des chaînes,
+            clé YAML en double.
     """
     lignes = texte.splitlines()
     ouvrant = lignes[0].strip() if lignes else ""
@@ -70,20 +80,35 @@ def lire_front(texte: str) -> Front:
             f"front matter non fermé : aucune ligne « {ouvrant} » ne le termine"
         ) from None
     corps = lignes[1:fin]
-    return Front(fmt, _lire_toml(corps) if fmt == "toml" else _lire_yaml(corps))
+    return _lire_toml(corps) if fmt == "toml" else Front(fmt, _lire_yaml(corps))
 
 
-def _lire_toml(corps: list[str]) -> dict[str, str]:
+def _lire_toml(corps: list[str]) -> Front:
     try:
         brut: dict[str, object] = tomllib.loads("\n".join(corps))
     except tomllib.TOMLDecodeError as exc:
         raise FrontMatterError(f"front matter TOML invalide — {exc}") from None
-    return {cle: _texte(cle, valeur) for cle, valeur in brut.items()}
+    # `isinstance(…, list)` ne dit rien du type des éléments : le cast l'élargit à `object`,
+    # et `_chaines` vérifie chacun.
+    listes = {
+        cle: _chaines(cle, cast("list[object]", valeur))
+        for cle, valeur in brut.items()
+        if isinstance(valeur, list)
+    }
+    champs = {cle: _texte(cle, valeur) for cle, valeur in brut.items() if cle not in listes}
+    return Front("toml", champs, listes)
+
+
+def _chaines(cle: str, valeur: list[object]) -> tuple[str, ...]:
+    if not all(isinstance(v, str) for v in valeur):
+        raise FrontMatterError(f"champ « {cle} » : une liste de chaînes est attendue")
+    # Chaque élément vient d'être vérifié : `all(isinstance…)` ne rétrécit pas le type.
+    return tuple(cast("list[str]", valeur))
 
 
 def _texte(cle: str, valeur: object) -> str:
-    # Une fiche est plate : un tableau ou une table y est une erreur de saisie, pas une valeur
-    # qu'un appelant saurait employer comme chemin ou comme statut.
+    # Hors des listes de chaînes, rendues à part, une fiche est plate : une table y est une
+    # erreur de saisie, pas une valeur qu'un appelant saurait employer comme chemin ou statut.
     if isinstance(valeur, bool):
         return "true" if valeur else "false"
     if isinstance(valeur, str | int | float):

@@ -109,6 +109,9 @@ et pas de narration fichier par fichier.
   ira dans le `road-map` du futur suivi, et c'est lui qui fera sortir l'entrée à la clôture
   ([Road-map](../implementation-tracker/references/road-map.md#le-champ-road-map))
 - `CLAUDE.md` du projet, `README`, conventions locales
+- **les Shadow-skills du sujet** : `shadow-skill tags`, puis `shadow-skill cherche <mots du
+  sujet>`. Charger par `shadow-skill charge <nom>` ceux dont le `when-to-load` décrit la demande :
+  ils disent ce que le domaine attend, et donc ce qui reste à demander
 - fichiers concernés par la demande
 - `git log --oneline -20` sur la zone visée — les commits racontent les tentatives passées
 - tests existants : ils encodent le comportement attendu

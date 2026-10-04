@@ -1,0 +1,49 @@
+# Semence du fichier principal d'un Shadow-skill.
+#
+# Un Shadow-skill vit hors de `skills/`, dans `shadow-skills/<nom>/SKILL.md` (global) ou
+# `.claude/shadow-skills/<nom>/SKILL.md` (local à un projet) : Claude Code ne le charge pas, la
+# commande `shadow-skill` le liste, le recherche et le charge. Chaque description dit ce que le
+# champ ou la section attend : la skill n'en décrit pas la structure, elle renvoie ici.
+
+name = "shadow-skill"
+description = "Fichier principal d'un Shadow-skill : ce qu'il couvre, quand le charger, ses tags, ses instructions."
+
+[fields.name]
+type = "slug"
+required = true
+description = "Le nom du Shadow-skill : exactement le nom de son répertoire, par lequel `shadow-skill charge` le résout."
+
+[fields.description]
+type = "text"
+required = true
+description = "Ce que le skill couvre, en une à trois phrases. `liste` et `cherche` la rendent."
+
+[fields.when-to-load]
+type = "text"
+required = true
+description = """
+Dans quelle situation charger ce skill, en une ou deux phrases : les gestes, les fichiers ou
+les mots qui le rendent utile. `cherche` y lit, et `depuis-suivi` la rend à la reprise d'un
+Chantier."""
+
+[fields.tags]
+type = "list"
+required = true
+description = """
+Les tags du skill, chacun déclaré dans le `tags.toml` de son niveau ou du global : un tag
+absent du registre est un constat de `shadow-skill verifie`. Consulter `shadow-skill tags`
+avant d'en créer un."""
+
+[sections.Instructions]
+required = true
+description = """
+Le contenu du skill, tel qu'un `SKILL.md` ordinaire le porterait. Ses subdivisions s'écrivent
+en `###` et au-delà : un `## ` ouvrirait une section non déclarée. Les liens relatifs se
+résolvent depuis le répertoire du skill."""
+
+[sections."Références"]
+description = """
+Une puce par fichier de référence du skill — un lien relatif, puis quand le lire :
+  - [`references/<fichier>.md`](references/<fichier>.md) : <quand le lire>
+
+Absente quand le skill n'a pas de référence."""

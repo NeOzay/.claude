@@ -12,7 +12,7 @@ l'outillage d'un dépôt n'a rien à y faire.
 
 ## Ce dont le dépôt dépend
 
-Le dépôt dépend de trois commandes, d'un interpréteur, de git et de deux linters — et de rien
+Le dépôt dépend de quatre commandes, d'un interpréteur, de git et de deux linters — et de rien
 d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
@@ -20,7 +20,8 @@ d'autre :
 | `list-dir` | les six registres de `todo/`, `debt-review` | `command -v list-dir` |
 | `impl-list` | l'Étape 0 du tracker, le listing des suivis | `command -v impl-list` |
 | `gabarit` | le paquet que `list-dir` importe, la semence `suivi` | `command -v gabarit` |
-| Python ≥ 3.12 | `list-dir` et `gabarit` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
+| `shadow-skill` | la recherche des Shadow-skills au brief, au plan et à la reprise d'un Chantier | `command -v shadow-skill` |
+| Python ≥ 3.12 | `list-dir`, `gabarit` et `shadow-skill` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx --with pytest basedpyright` |
 

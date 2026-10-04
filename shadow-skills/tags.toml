@@ -1,0 +1,9 @@
+# Registre des tags des Shadow-skills globaux : une ligne par tag, `tag = "description"`.
+# Consulter `shadow-skill tags` avant d'en créer un : un doublon sous un autre nom coupe la
+# recherche en deux.
+
+neovim = "Neovim : plugins, configuration, API."
+lua = "Le langage Lua : code, annotations, outillage."
+tests = "Écrire, organiser ou lancer des tests."
+lsp = "Serveurs de langage (LSP) : configuration, diagnostics."
+conventions = "Conventions de maintien de la configuration Claude Code : skills, Python, documents, registres."

@@ -72,6 +72,13 @@ description = "Le chemin du rapport d'audit, posé au premier audit du chantier.
 type = "slug"
 description = "L'id de l'entrée de road-map dont le chantier part, s'il en part une."
 
+[fields.skills]
+type = "list"
+required = true
+description = """
+Les noms des Shadow-skills utiles au Chantier, retenus pendant le plan par `shadow-skill cherche` ;
+`[]` si aucun. À la reprise, `shadow-skill depuis-suivi <slug>` les remet au contexte."""
+
 [fields."créé"]
 type = "date"
 required = true

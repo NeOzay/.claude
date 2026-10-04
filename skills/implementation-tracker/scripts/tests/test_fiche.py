@@ -25,9 +25,20 @@ def test_toml_cle_en_double_refusee() -> None:
         lire_front('+++\nplan = "a.md"\nplan = "b.md"\n+++\n')
 
 
-def test_toml_valeur_non_scalaire_refusee() -> None:
+def test_toml_liste_de_chaines_rendue_a_part() -> None:
+    front = lire_front('+++\nslug = "x"\nskills = ["a", "b"]\nvide = []\n+++\n')
+    assert front.champs == {"slug": "x"}
+    assert front.listes == {"skills": ("a", "b"), "vide": ()}
+
+
+def test_toml_table_refusee() -> None:
     with pytest.raises(FrontMatterError, match="non scalaire"):
-        lire_front('+++\nplan = ["a.md"]\n+++\n')
+        lire_front("+++\n[plan]\na = 1\n+++\n")
+
+
+def test_toml_liste_d_autre_chose_que_des_chaines_refusee() -> None:
+    with pytest.raises(FrontMatterError, match="liste de chaînes"):
+        lire_front("+++\nskills = [1, 2]\n+++\n")
 
 
 def test_yaml_en_repli_retire_le_commentaire() -> None:

@@ -46,6 +46,7 @@ session = 2
 lettre = "A"
 plan = "{PLAN}"
 brief = "{BRIEF}"
+skills = ["un-skill"]
 "créé" = 2026-01-01
 maj = 2026-01-02
 +++
@@ -179,6 +180,7 @@ def test_cloture_aplatit_archive_et_nettoie(depot: Path) -> None:
     assert f'plan = "{DONE}/{DATE}-{SLUG}.plan.md"\n' in texte
     assert f'brief = "{DONE}/{DATE}-{SLUG}.brief.md"\n' in texte
     assert 'base = "principale"               # branche principale\n' in texte
+    assert 'skills = ["un-skill"]\n' in texte
 
     assert SLUG not in git(depot, "branch", "--list")
     assert git(depot, "tag", "--list") == ""

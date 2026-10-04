@@ -1,6 +1,7 @@
 @RTK.md
 @skills/lexique/instructions.md
 @LEXIQUE.md
+@skills/shadow-skill/instructions.md
 
 # Règle absolue — commits git
 

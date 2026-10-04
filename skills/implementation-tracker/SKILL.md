@@ -119,6 +119,11 @@ committer ou les mettre de côté) avant de relancer.
    lever. Explorer le code et construire le plan normalement — c'est le flux natif qui fait
    le travail.
 
+   **Chercher les Shadow-skills du Chantier** avant de construire le plan : `shadow-skill tags`,
+   puis `shadow-skill cherche <mots>` sur les domaines que le plan touche, et
+   `shadow-skill charge <nom>` pour ceux dont le `when-to-load` décrit le travail. Retenir leurs
+   noms : ils iront dans le champ `skills` du Suivi (point 7).
+
    **C'est ici que le plan se construit, et nulle part ailleurs.** `intent-brief` s'arrête au
    brief validé : il ne planifie pas et ne confronte pas.
 3. **Faire relire le plan avant de le présenter.** Le harness assigne un fichier de plan dès
@@ -202,6 +207,9 @@ committer ou les mettre de côté) avant de relancer.
    la clôture ; omis, elle y restera indéfiniment
    ([Road-map](references/road-map.md#le-champ-road-map)).
 
+   **Le champ `skills`** reçoit les noms des Shadow-skills retenus au point 2, `[]` si aucun ne
+   sert : un tableau vide dit qu'on a cherché, un champ absent ne dirait rien.
+
    Le **symptôme** est ce qui permet, trois sessions plus tard, de voir qu'on a construit la
    bonne solution au mauvais problème. Les **signaux de dérive** deviennent un déclencheur
    d'arrêt pendant l'implémentation (Étape 4). C'est ce point de jonction qui attache le chantier à
@@ -238,6 +246,10 @@ corriger le fichier d'office (l'utilisateur peut avoir volontairement changé de
 
 Incrémenter `session` de 1 dans le frontmatter — c'est ce compteur qui sert aux messages de commit
 de session (voir Étape 4).
+
+Remettre au contexte les Shadow-skills du Chantier : `shadow-skill depuis-suivi <slug>`, puis
+`shadow-skill charge <nom>` pour ceux dont l'étape en cours a besoin. Un champ `skills` vide n'a
+rien à rendre ; une erreur sur un nom se signale, sans bloquer la reprise.
 
 **Modifications non commitées détectées** (`git status --short` non vide, Étape 0) → le signaler en
 tout début de conversation et **proposer** un commit de session avant de continuer, par
