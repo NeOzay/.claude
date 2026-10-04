@@ -54,8 +54,11 @@ un schéma se survole.
 ```
 
 `done/` porte des **archives figées** ; `todo/` des registres **vivants**, relus et élagués, jamais
-archivés. Le pipeline alimente `todo/` à la clôture et ne l'ouvre à aucun autre moment ; seul
-`debt-review`, invoqué à la main, le relit et le met à jour.
+archivés. Une archive relate le Chantier tel qu'il a été clos : elle n'a pas à passer
+`gabarit check --filled` contre la Semence courante, et ne se réécrit jamais pour s'y conformer.
+Qu'une archive ne passe plus un contrat qui a évolué depuis n'est pas une dette. Le pipeline
+alimente `todo/` à la clôture et ne l'ouvre à aucun autre moment ; seul `debt-review`, invoqué à la
+main, le relit et le met à jour.
 
 Les six registres sont des **répertoires-listes** : un répertoire = une liste, un fichier = une
 entrée, un `.list/contract.toml` qui déclare la structure. Ils ne s'éditent jamais à la main — les
@@ -120,8 +123,7 @@ garantir :
   ([Road-map](road-map.md#le-champ-road-map)).
 - `maj` est actualisé à chaque écriture dans le suivi, en même temps que le contenu.
 - `skills` nomme les Shadow-skills du Chantier, `[]` si aucun ; `shadow-skill depuis-suivi` le lit
-  à la reprise. Les archives de `done/` antérieures au champ ne le portent pas, ne passent plus
-  `gabarit check --filled`, et ne sont pas réécrites pour autant.
+  à la reprise. Les archives de `done/` antérieures au champ ne le portent pas.
 
 ## Autorité et divergence
 
