@@ -42,6 +42,7 @@ telemetry/
 .last-update-result.json
 plugins/marketplaces/
 plugins/known_marketplaces.json
+plugins/store/
 tasks/
 state/
 
