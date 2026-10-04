@@ -24,9 +24,7 @@ from listdir.store import ListStore
 
 def git(depot: Path, *argv: str) -> str:
     """git dans le dépôt-jouet, en échec bruyant. Ce n'est pas le git du paquet."""
-    proc = subprocess.run(
-        ["git", *argv], cwd=depot, capture_output=True, text=True, check=True
-    )
+    proc = subprocess.run(["git", *argv], cwd=depot, capture_output=True, text=True, check=True)
     return proc.stdout
 
 
@@ -167,6 +165,4 @@ def test_check_item_rappelle_sans_refuser(depot: Path) -> None:
 
     cible = ouvrir(depot / "cible")
     manquements = cible.check_item(cible.get("entree").unwrap())
-    assert [f"{v.subject} — {v.reason}" for v in manquements] == [
-        "champ « verdict » — manquant"
-    ]
+    assert [f"{v.subject} — {v.reason}" for v in manquements] == ["champ « verdict » — manquant"]

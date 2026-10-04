@@ -99,9 +99,7 @@ def main() -> None:
             time_str = f"{remaining // 60}min"
         parts.append(color("0;36", f"[{round(five_pct)}% | {time_str}]"))
 
-    caveman_flag = os.path.join(
-        os.environ.get("HOME", ""), ".claude", ".caveman-active"
-    )
+    caveman_flag = os.path.join(os.environ.get("HOME", ""), ".claude", ".caveman-active")
     if os.path.isfile(caveman_flag):
         mode: str
         try:

@@ -50,7 +50,9 @@ def test_arbre_sain(contrat: Path) -> None:
 
 
 def test_motif_disparu(contrat: Path) -> None:
-    _ = ecrire(contrat, CONTRAT_REL, "# C\n\n## Une regle\n\nVidé.\n\n## Une autre\n\npropre formule\n")
+    _ = ecrire(
+        contrat, CONTRAT_REL, "# C\n\n## Une regle\n\nVidé.\n\n## Une autre\n\npropre formule\n"
+    )
     assert any("introuvable" in m for m in rouges(contrat))
 
 

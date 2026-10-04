@@ -73,9 +73,9 @@ class Control:
 CONTROLS: list[Control] = []
 
 
-def control(number: int, title: str) -> Callable[
-    [Callable[[Path], list[Finding]]], Callable[[Path], list[Finding]]
-]:
+def control(
+    number: int, title: str
+) -> Callable[[Callable[[Path], list[Finding]]], Callable[[Path], list[Finding]]]:
     """Enregistre une fonction de contrôle. L'ordre d'exécution est celui des numéros."""
 
     def register(fn: Callable[[Path], list[Finding]]) -> Callable[[Path], list[Finding]]:
@@ -111,8 +111,18 @@ def fichiers_versionnables(root: Path) -> list[Path] | None:
     auteur ne peut pas le corriger, et le rouge serait sans cause.
     """
     out = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others",
-         "--exclude-standard", "--", "*.md"],
+        [
+            "git",
+            "-C",
+            str(root),
+            "ls-files",
+            "-z",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "*.md",
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -245,15 +255,11 @@ def check_renvois(root: Path) -> list[Finding]:
                 citees.add(ancre)
 
     if total == 0:
-        findings.append(
-            Finding(False, "aucun renvoi trouvé — le contrat n'est cité nulle part")
-        )
+        findings.append(Finding(False, "aucun renvoi trouvé — le contrat n'est cité nulle part"))
     elif not any(not f.ok for f in findings):
         findings.append(Finding(True, f"{total} renvois, tous résolvent"))
 
-    findings.extend(
-        Finding(False, f"section jamais citée : #{a}") for a in sorted(ancres - citees)
-    )
+    findings.extend(Finding(False, f"section jamais citée : #{a}") for a in sorted(ancres - citees))
     return findings
 
 
@@ -391,9 +397,7 @@ def check_agents(root: Path) -> list[Finding]:
     if not fichiers:
         return [Finding(False, "aucun agent examiné — contrôle sans objet")]
 
-    couples = [
-        f for f in fichiers if "contrat.md" in f.read_text(encoding="utf-8")
-    ]
+    couples = [f for f in fichiers if "contrat.md" in f.read_text(encoding="utf-8")]
     if couples:
         return [
             Finding(
@@ -431,9 +435,7 @@ def check_archives(root: Path) -> list[Finding]:
         for champ in ("plan", "brief", "audit"):
             cible = champs.get(champ, "").strip()
             if cible and not (root / cible).is_file():
-                findings.append(
-                    Finding(False, f"{nom} → {champ}: pointe dans le vide ({cible})")
-                )
+                findings.append(Finding(False, f"{nom} → {champ}: pointe dans le vide ({cible})"))
     if not findings:
         findings.append(
             Finding(True, f"{len(archives)} archives, tous les champs plan/brief/audit résolvent")

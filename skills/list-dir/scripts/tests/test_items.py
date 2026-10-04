@@ -125,7 +125,7 @@ def test_une_fence_ouverte_avale_les_sections_suivantes() -> None:
 
 
 # ------------------------------------------------- règle 1 : l'aller-retour octet
-BRUT = '''+++
+BRUT = """+++
 # un commentaire que tomllib ignore
 title = "des \\"guillemets\\" et une apostrophe"
 id = "z"
@@ -139,7 +139,7 @@ Le corps.
 ## Assumé
 
 <OPTIONNEL>
-'''
+"""
 
 
 def test_aller_retour_octet_pour_octet(tmp_path: Path) -> None:

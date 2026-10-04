@@ -366,9 +366,7 @@ def gestes(c: Cloture) -> list[tuple[str, Callable[[], object]]]:
         (f"git branch -D {c.slug}", lambda: git_ecriture("branch", "-D", c.slug)),
     ]
     if c.tags:
-        liste.append(
-            (f"git tag -d {' '.join(c.tags)}", lambda: git_ecriture("tag", "-d", *c.tags))
-        )
+        liste.append((f"git tag -d {' '.join(c.tags)}", lambda: git_ecriture("tag", "-d", *c.tags)))
     return liste
 
 

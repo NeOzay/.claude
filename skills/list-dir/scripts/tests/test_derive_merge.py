@@ -126,8 +126,7 @@ def test_un_champ_sans_from_portant_command_recoit_la_sortie(liste: Path, tmp_pa
 def test_une_command_qui_echoue_en_derive_n_ecrit_rien(liste: Path, tmp_path: Path) -> None:
     contrat = PATRON_TOML.replace(
         '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n',
-        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\n'
-        'command = "false"\n',
+        '[fields.verdict]\ntype = "text"\nrequired = true\ndescription = ""\ncommand = "false"\n',
     )
     cible = tmp_path / "revues"
 

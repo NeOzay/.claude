@@ -25,7 +25,11 @@ def test_ancrage_sur_le_home_refuse(tmp_path: Path, ecriture: str) -> None:
     Le fichier visé EXISTE : ce n'est pas son absence qu'on reproche, c'est la forme.
     """
     _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", f'```bash\n"{ecriture}/.claude/skills/x/scripts/outil.py" list\n```\n')
+    _ = ecrire(
+        tmp_path,
+        "skills/x/SKILL.md",
+        f'```bash\n"{ecriture}/.claude/skills/x/scripts/outil.py" list\n```\n',
+    )
     assert any("ancré sur le HOME" in m for m in rouges(tmp_path))
 
 

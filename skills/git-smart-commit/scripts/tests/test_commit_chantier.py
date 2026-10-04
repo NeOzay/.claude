@@ -420,11 +420,19 @@ def test_refus_si_une_bibliotheque_manque(depot: Path, tmp_path: Path) -> None:
 def test_refus_nomme_une_dependance_absente(depot: Path, tmp_path: Path) -> None:
     """Hors du venv, `tomlkit` manque : le refus le nomme, lui et l'interpréteur."""
     python = shutil.which("python3", path="/usr/bin:/bin")
-    if python is None or subprocess.run(
-        [python, "-c", "import sys\nif sys.version_info < (3, 12): sys.exit(2)\nimport tomlkit"],
-        capture_output=True,
-        check=False,
-    ).returncode != 1:
+    if (
+        python is None
+        or subprocess.run(
+            [
+                python,
+                "-c",
+                "import sys\nif sys.version_info < (3, 12): sys.exit(2)\nimport tomlkit",
+            ],
+            capture_output=True,
+            check=False,
+        ).returncode
+        != 1
+    ):
         pytest.skip("aucun python3 >= 3.12 sans tomlkit sous /usr/bin")
     # Le script, copié hors du dépôt : aucun .venv parmi ses ancêtres, pas de réexécution.
     script = tmp_path / "seul" / "commit_chantier.py"

@@ -263,7 +263,10 @@ def test_une_cle_terminale_exotique_traverse_l_aller_retour() -> None:
     `parse_contract` tolère l'inconnu. Écrite brute, `ma cle = "x"` n'était plus du
     TOML — et `note.libre` était pire : le contrat réémis portait une table
     `[fields.id.note]` que personne n'avait écrite, et `validate` la trouvait bonne."""
-    contrat = CONTRAT + '\n[fields.exotique]\ntype = "text"\ndescription = ""\n"ma cle" = "x"\n"note.libre" = "y"\n'
+    contrat = (
+        CONTRAT
+        + '\n[fields.exotique]\ntype = "text"\ndescription = ""\n"ma cle" = "x"\n"note.libre" = "y"\n'
+    )
 
     texte = emit(plat(contrat)).unwrap()
 

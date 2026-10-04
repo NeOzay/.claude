@@ -11,7 +11,7 @@ from pathlib import Path
 from check_pipeline import LISTER, check_listing
 from depot_jouet import ecrire
 
-LISTER_FIDELE = '''
+LISTER_FIDELE = """
 from pathlib import Path
 
 ANNEXES = (".brief.md", ".audit.md", ".plan.md")
@@ -24,15 +24,15 @@ def suivis(dir: Path) -> list[str]:
         p.name for p in dir.iterdir()
         if p.is_file() and p.name.endswith(".md") and not p.name.endswith(ANNEXES)
     )
-'''
+"""
 
-LISTER_SANS_FILTRE = '''
+LISTER_SANS_FILTRE = """
 from pathlib import Path
 
 
 def suivis(dir: Path) -> list[str]:
     return sorted(p.name for p in dir.iterdir()) if dir.is_dir() else []
-'''
+"""
 
 
 def peupler(root: Path) -> None:

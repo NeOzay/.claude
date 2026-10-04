@@ -35,16 +35,16 @@ def command(args, utils):
     return utils.ok("faite")
 '''
 
-ANNOTEE = '''
+ANNOTEE = """
 DESCRIPTION: str = "déclarée avec une annotation"
 REQUIRES: list[str] = ["git"]
 
 
 def command(args, utils):
     return utils.ok(None)
-'''
+"""
 
-EFFET_DE_BORD = '''
+EFFET_DE_BORD = """
 from pathlib import Path
 
 Path(__file__).parent.joinpath("importee.temoin").write_text("le module a été exécuté")
@@ -55,7 +55,7 @@ REQUIRES: list[str] = []
 
 def command(args, utils):
     return utils.ok(None)
-'''
+"""
 
 
 def poser(liste: Path, nom: str, source: str = COMMANDE) -> Path:

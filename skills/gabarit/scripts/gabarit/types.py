@@ -27,6 +27,7 @@ from typing import Literal, Never, cast, get_args, override
 PLACEHOLDER = "<À REMPLIR>"  # requis — tant qu'il est là, l'élément n'est pas instruit
 OPTIONAL = "<OPTIONNEL>"  # facultatif — sa présence n'empêche rien
 
+
 class GabaritError(Exception):
     """Levée par Result.unwrap() sur un résultat en échec."""
 

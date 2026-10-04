@@ -25,7 +25,11 @@ def test_arbre_sain(depot: Path) -> None:
 
 
 def test_ancre_morte(depot: Path) -> None:
-    _ = ecrire(depot, "skills/x/SKILL.md", "[X](../implementation-tracker/references/contrat.md#nexiste-pas)\n")
+    _ = ecrire(
+        depot,
+        "skills/x/SKILL.md",
+        "[X](../implementation-tracker/references/contrat.md#nexiste-pas)\n",
+    )
     assert any("ancre morte : #nexiste-pas" in m for m in rouges(depot))
 
 
@@ -49,7 +53,11 @@ def test_aucun_renvoi(tmp_path: Path) -> None:
 
 
 def test_section_jamais_citee(depot: Path) -> None:
-    _ = ecrire(depot, CONTRAT_REL, "# C\n\n## Arborescence et nommage\n\n## Dates et listing\n\n## Orpheline\n")
+    _ = ecrire(
+        depot,
+        CONTRAT_REL,
+        "# C\n\n## Arborescence et nommage\n\n## Dates et listing\n\n## Orpheline\n",
+    )
     assert any("section jamais citée : #orpheline" in m for m in rouges(depot))
 
 

@@ -51,17 +51,22 @@ def test_contrat_minimal_se_charge() -> None:
 
 def test_sections_dans_l_ordre_du_toml() -> None:
     """L'ordre du TOML ordonne les sections — c'est lui que `new` reproduit."""
-    texte = MINIMAL + """
+    texte = (
+        MINIMAL
+        + """
 [sections."Assumé"]
 required = false
 description = ""
 """
+    )
     c = parse_contract(texte, FICHIER).unwrap()
     assert list(c.sections) == ["Constat", "Assumé"]
 
 
 def test_champ_porte_sa_declaration() -> None:
-    texte = MINIMAL + """
+    texte = (
+        MINIMAL
+        + """
 [fields.category]
 type = "enum"
 values = ["a", "b"]
@@ -69,6 +74,7 @@ required = true
 description = "la catégorie"
 from = "source"
 """
+    )
     f = parse_contract(texte, FICHIER).unwrap().fields["category"]
     assert (f.type, f.required, f.values, f.description, f.source) == (
         "enum",
@@ -105,7 +111,9 @@ def test_section_declare_command() -> None:
 
 
 def test_text_et_command_ensemble_sur_un_champ_est_refuse() -> None:
-    texte = MINIMAL + '\n[fields.date]\ntype = "date"\ndescription = ""\ntext = "x"\ncommand = "y"\n'
+    texte = (
+        MINIMAL + '\n[fields.date]\ntype = "date"\ndescription = ""\ntext = "x"\ncommand = "y"\n'
+    )
     message = echec(texte)
     assert "champ « date »" in message
     assert "ne peuvent être déclarés ensemble" in message
@@ -153,9 +161,7 @@ def test_fields_n_est_pas_une_table() -> None:
 
 
 def test_champ_declare_par_autre_chose_qu_une_table() -> None:
-    assert "champ « id »" in echec(
-        'name = "n"\ndescription = ""\n\n[fields]\nid = "slug"\n'
-    )
+    assert "champ « id »" in echec('name = "n"\ndescription = ""\n\n[fields]\nid = "slug"\n')
 
 
 def test_type_inconnu_est_nomme_avec_les_types_admis() -> None:
@@ -197,9 +203,7 @@ def test_values_refuse_une_valeur_vide() -> None:
 
 
 def test_enum_sans_values() -> None:
-    message = echec(
-        'name = "n"\ndescription = ""\n\n[fields.c]\ntype = "enum"\ndescription = ""\n'
-    )
+    message = echec('name = "n"\ndescription = ""\n\n[fields.c]\ntype = "enum"\ndescription = ""\n')
     assert "n'admet rien" in message
 
 
@@ -218,8 +222,7 @@ def test_description_de_champ_non_textuelle() -> None:
 
 def test_from_qui_ne_nomme_pas_un_champ() -> None:
     message = echec(
-        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\n'
-        'description = ""\nfrom = 3\n'
+        'name = "n"\ndescription = ""\n\n[fields.id]\ntype = "slug"\ndescription = ""\nfrom = 3\n'
     )
     assert "« from »" in message
     assert "int" in message
@@ -298,9 +301,7 @@ def test_ancien_format_de_sections_est_refuse() -> None:
 
 def test_ancien_format_avec_une_seule_des_deux_listes_est_refuse() -> None:
     """`optional` seule à l'ancien format suffit à être détectée, sans `required`."""
-    message = echec(
-        'name = "n"\ndescription = ""\n\n[sections]\noptional = ["Assumé"]\n'
-    )
+    message = echec('name = "n"\ndescription = ""\n\n[sections]\noptional = ["Assumé"]\n')
     assert "ancien format" in message
 
 

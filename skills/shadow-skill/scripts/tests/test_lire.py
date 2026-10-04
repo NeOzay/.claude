@@ -80,7 +80,6 @@ def test_chercher_exige_chaque_mot_sans_casse(poser: Poser, tmp_path: Path) -> N
     assert chercher(skills, ["absent"]) == []
 
 
-
 def test_chercher_ignore_les_accents(poser: Poser, tmp_path: Path) -> None:
     poser("g", "alpha", description="Écrire le déploiement.", tags=["lua"])
     poser("g", "beta", description="Serveur de langage.", tags=["lua"])
@@ -88,6 +87,7 @@ def test_chercher_ignore_les_accents(poser: Poser, tmp_path: Path) -> None:
     assert [s.nom for s in chercher(skills, ["deploiement"])] == ["alpha"]
     assert [s.nom for s in chercher(skills, ["ECRIRE"])] == ["alpha"]
     assert [s.nom for s in chercher(skills, ["sérveur"])] == ["beta"]
+
 
 def test_trouver_un_nom_inconnu_liste_les_connus(poser: Poser, tmp_path: Path) -> None:
     poser("g", "alpha")

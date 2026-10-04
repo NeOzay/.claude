@@ -32,7 +32,7 @@ Le second corps, avec sa propre formule.
 
 TABLE = {"une-regle": ("formulation distinctive",), "une-autre": ("propre formule",)}
 
-LISTER_FIDELE = '''
+LISTER_FIDELE = """
 from pathlib import Path
 
 ANNEXES = (".brief.md", ".audit.md", ".plan.md")
@@ -45,7 +45,7 @@ def suivis(dir: Path) -> list[str]:
         p.name for p in dir.iterdir()
         if p.is_file() and p.name.endswith(".md") and not p.name.endswith(ANNEXES)
     )
-'''
+"""
 
 
 @pytest.fixture
@@ -103,7 +103,11 @@ def test_depot_sain(depot_sain: Path, capsys: pytest.CaptureFixture[str]) -> Non
 INJECTIONS: list[tuple[int, str, str]] = [
     (1, "skills/x/SKILL.md", "[X](../implementation-tracker/references/contrat.md#morte)\n"),
     (2, "skills/x/SKILL.md", "la formulation distinctive recopiée\n"),
-    (3, LISTER, "from pathlib import Path\n\n\ndef suivis(dir):\n    return sorted(p.name for p in dir.iterdir())\n"),
+    (
+        3,
+        LISTER,
+        "from pathlib import Path\n\n\ndef suivis(dir):\n    return sorted(p.name for p in dir.iterdir())\n",
+    ),
     (4, "agents/auditeur.md", "Voir references/contrat.md.\n"),
     (5, ".claude/implementation/done/chantier.md", "---\nplan: .claude/plans/disparu.md\n---\n"),
     (6, "skills/x/SKILL.md", "```bash\nbash scripts/x.sh\n```\n"),

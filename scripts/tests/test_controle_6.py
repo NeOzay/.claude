@@ -53,24 +53,38 @@ def test_garde_qui_commande_lappel(tmp_path: Path) -> None:
 
 def test_garde_en_commentaire_apres_lappel(tmp_path: Path) -> None:
     """Le faux vert : le garde ne commandait rien, il suivait l'appel."""
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\nbash scripts/x.sh  # [ -f scripts/x.sh ]\n```\n")
+    _ = ecrire(
+        tmp_path, "skills/x/SKILL.md", "```bash\nbash scripts/x.sh  # [ -f scripts/x.sh ]\n```\n"
+    )
     assert any("appel relatif non gardé" in m for m in rouges(tmp_path))
 
 
 def test_garde_sur_un_autre_fichier(tmp_path: Path) -> None:
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\nif [ -f autre.sh ]; then bash scripts/x.sh; fi\n```\n")
+    _ = ecrire(
+        tmp_path,
+        "skills/x/SKILL.md",
+        "```bash\nif [ -f autre.sh ]; then bash scripts/x.sh; fi\n```\n",
+    )
     assert any("appel relatif non gardé" in m for m in rouges(tmp_path))
 
 
 def test_point_nest_pas_un_metacaractere(tmp_path: Path) -> None:
     """`re.escape` : sans lui, un garde sur `x-sh` validait un appel de `x.sh`."""
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\nif [ -f scriptsXx.sh ]; then bash scripts/x.sh; fi\n```\n")
+    _ = ecrire(
+        tmp_path,
+        "skills/x/SKILL.md",
+        "```bash\nif [ -f scriptsXx.sh ]; then bash scripts/x.sh; fi\n```\n",
+    )
     assert any("appel relatif non gardé" in m for m in rouges(tmp_path))
 
 
 def test_variable_non_concernee(tmp_path: Path) -> None:
     """`python3 "$L"` ne porte aucun chemin en clair : c'est sa définition qui compte."""
-    _ = ecrire(tmp_path, "skills/x/SKILL.md", '```bash\npython3 "$L" validate .\npython3 -c "print(1)"\n```\n')
+    _ = ecrire(
+        tmp_path,
+        "skills/x/SKILL.md",
+        '```bash\npython3 "$L" validate .\npython3 -c "print(1)"\n```\n',
+    )
     assert rouges(tmp_path) == []
 
 
@@ -86,8 +100,8 @@ def test_skills_vide(tmp_path: Path) -> None:
 
 DIRECTS_FAUTIFS = [
     "scripts/x.py validate .",
-    './scripts/x.sh --dry-run',
-    'cd /tmp && scripts/x.py list',
+    "./scripts/x.sh --dry-run",
+    "cd /tmp && scripts/x.py list",
 ]
 
 DIRECTS_ABSOLUS = [

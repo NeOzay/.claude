@@ -158,7 +158,7 @@ def test_dependance_declaree_mais_absente_est_nommee(racine: Path) -> None:
     _ = poser_venv(racine, "pytest")
     (mal,) = sante_skills._dependances(racine)
 
-    assert "tomlkit déclaré" in mal   # nommée seule : pytest est là, il ne doit pas figurer
+    assert "tomlkit déclaré" in mal  # nommée seule : pytest est là, il ne doit pas figurer
 
 
 def test_venv_complet_ne_dit_rien(racine: Path) -> None:

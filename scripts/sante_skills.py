@@ -153,7 +153,9 @@ def anomalies() -> list[str]:
         # machine-spécifique que `bin/` existe pour supprimer.
         cible = os.readlink(lien)
         if Path(cible).is_absolute():
-            maux.append(f"bin/{lien.name} pointe en absolu ({cible}) — attendu : un chemin relatif.")
+            maux.append(
+                f"bin/{lien.name} pointe en absolu ({cible}) — attendu : un chemin relatif."
+            )
         if not lien.exists():
             maux.append(f"bin/{lien.name} pointe dans le vide ({cible}).")
             continue
