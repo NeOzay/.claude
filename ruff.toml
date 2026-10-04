@@ -1,0 +1,18 @@
+# Configuration ruff de la racine du dépôt.
+#
+# Elle couvre le Python qui n'appartient à aucune skill : `scripts/` et
+# `statusline-command.py`. Chaque skill garde son propre `ruff.toml`, qui voyage avec
+# elle ; ruff applique à chaque fichier la configuration la plus proche, et celle-ci
+# ne s'étend donc pas aux skills.
+#
+# line-length = 100 : la largeur des skills. Sans elle, ruff format enroulerait la
+# racine à 88 colonnes et les skills à 100.
+
+line-length = 100
+target-version = "py312"
+
+[format]
+# ruff formate aussi les blocs de code des `.md`. Ceux du dépôt alignent leurs
+# commentaires à la main pour se lire comme un tableau, et `.claude/implementation/done/`
+# porte des archives figées : le formateur ne touche qu'au Python.
+exclude = ["*.md"]

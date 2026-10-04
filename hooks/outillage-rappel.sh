@@ -33,6 +33,7 @@ esac
 
 cat <<EOF
 Outillage de ce dépôt ($racine/OUTILLAGE.md) :
+  · formatage : \`uvx ruff format <chemins>\` avant de commiter du Python.
   · linters : \`uvx ruff check <chemins>\` et \`uvx --with pytest basedpyright\` — jamais
     \`pyright\`, qui rejette le typeCheckingMode "all" du dépôt et vérifie en mode par
     défaut en rendant un décompte d'apparence normale.

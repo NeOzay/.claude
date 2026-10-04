@@ -23,7 +23,7 @@ d'autre :
 | `shadow-skill` | la recherche des Shadow-skills au brief, au plan et à la reprise d'un Chantier | `command -v shadow-skill` |
 | Python ≥ 3.12 | `list-dir`, `gabarit` et `shadow-skill` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
-| `ruff`, `basedpyright` | la vérification du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .` et `uvx --with pytest basedpyright` |
+| `ruff`, `basedpyright` | la vérification et le formatage du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` |
 
 **Ces commandes sont des liens de `bin/`, résolus par le `PATH`.** Rien ne les cite par leur
 chemin : un chemin de plus serait un point d'édition de plus, que le prochain déplacement
@@ -106,6 +106,16 @@ sur le même arbre : 4 erreurs sous `pyright`, 13 sous `basedpyright`.
 > typage ». Une comparaison ultérieure sous `basedpyright` en a montré **trois**, induites par ce
 > chantier. Un garde-fou qui répond toujours oui coûte plus cher que pas de garde-fou : on cesse de
 > vérifier ce qu'on croit vérifié.
+
+**Le formatage fait partie du contrat : `uvx ruff format .` avant de commiter du Python.** Le
+`ruff.toml` de la racine couvre `scripts/` et `statusline-command.py`, celui de chaque skill son
+propre code ; tous enroulent à 100 colonnes. Tous excluent aussi les `.md` : ruff formate leurs
+blocs de code, dont les commentaires sont alignés à la main.
+
+> *Mode de défaillance* — tant que rien ne lançait `ruff format --check`, des chantiers ont ajouté
+> des fichiers hors format sans le voir : 5 fichiers de `list-dir` le 2026-08-30, 8 le 2026-09-06,
+> 21 sur tout le dépôt au premier formatage. Un formatage qu'aucune commande ne vérifie ne tient
+> pas.
 
 **Comparer à la base se fait sur un arbre extrait, jamais par `git stash`.** Un fichier déjà
 commité sur la branche de chantier n'est pas annulé par un `stash` : la comparaison est faussée
