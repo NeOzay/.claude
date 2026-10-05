@@ -23,6 +23,14 @@ Le premier à s'en apercevoir est l'agent qui suit le lien en cours de tâche.
 
 Étendre le contrôle 8 à `shadow-skills/`, ou corriger l'affirmation de `prose.md`.
 
+## Soldé le
+
+**2026-10-05, correctif `fix(pipeline)` (c1688a0)** — le contrôle 8 parcourt désormais
+`shadow-skills/` en plus de `skills/`. Établi par :
+`python3 scripts/check_pipeline.py | sed -n '/^8\./,/^9\./p'` → « 114 renvois entre skills, tous
+résolvent » (61 avant l'extension) ; les tests `test_ancre_morte_depuis_un_shadow_skill` et
+`test_renvoi_valide_depuis_un_shadow_skill` passent.
+
 ## Assumé
 
 <OPTIONNEL>
