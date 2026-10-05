@@ -92,7 +92,7 @@ def test_zones_exclues(depot: Path) -> None:
 
 def test_slugify_ponctuation() -> None:
     """L'ancienne version ne retirait que les apostrophes."""
-    assert slugify("Format d'étape et délégabilité") == "format-détape-et-délégabilité"
+    assert slugify("Modèle d'implémentation") == "modèle-dimplémentation"
     assert slugify("Branche, commits (et staging)") == "branche-commits-et-staging"
     assert slugify("Autorité et divergence") == "autorité-et-divergence"
 

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Les opérations git et fichiers d'un chantier, sans aucun jugement.
 
-DEUX SOUS-COMMANDES :
+TROIS SOUS-COMMANDES :
 
 - `lettre` : la première lettre de A à Z qu'aucun tag d'étape `<L>E<n>` n'occupe. Elle nomme
   les tags d'un chantier (`AE0`, `AE1`…) et se note dans le frontmatter de son suivi.
+- `retouche <L> <n>` : le tag de la prochaine retouche de l'étape `n`, `<L>E<n>.<k>`. Refuse si
+  l'étape `n` n'est pas livrée (`<L>E<n>` absent), ou si l'étape `n+1` l'est déjà : ce qui
+  suit n'est plus une retouche de `n`.
 - `cloture <slug> --message <fichier> [--dry-run]` : finalise le suivi, aplatit la
   branche `<slug>` en un commit unique sur `base`, archive les fichiers du chantier en
   `done/`, puis supprime la branche et ses tags.
@@ -27,7 +30,8 @@ LE FRONT MATTER DU SUIVI EST DU TOML, lu par `fiche.lire_front` — le lecteur q
 garde-fou — et réécrit par `gabarit`, dont la reprojection ne touche que les champs changés.
 Un suivi encore en YAML `---` est refusé : seules les archives de `done/` le sont, et elles
 ne se ferment plus. Les deux bibliothèques se localisent par les commandes de `bin/` qui les
-exposent, `impl-list` et `gabarit`, et seule la clôture les charge : `lettre` tourne partout.
+exposent, `impl-list` et `gabarit`, et seule la clôture les charge : `lettre` et `retouche`
+tournent partout.
 
 LE VENV DU DÉPÔT PORTE `tomlkit`, dont l'écrivain de `gabarit` a besoin : le script s'y
 réexécute, comme `gabarit-cli.py`.
@@ -67,7 +71,7 @@ from typing import cast
 IMPLEMENTATION = Path(".claude/implementation")
 TODO = IMPLEMENTATION / "todo"
 DONE = IMPLEMENTATION / "done"
-TAG_ETAPE = re.compile(r"^(?P<lettre>[A-Z])E\d+$")
+TAG_ETAPE = re.compile(r"^(?P<lettre>[A-Z])E(?P<etape>\d+)(?:\.(?P<retouche>\d+))?$")
 TITRE_MAX = 50
 
 
@@ -94,7 +98,7 @@ def git_ecriture(*argv: str) -> str:
 
 # ------------------------------------------------------------------------- lettre
 def tags_etape() -> dict[str, list[str]]:
-    """Les tags d'étape du dépôt, regroupés par lettre."""
+    """Les tags d'étape et de retouche du dépôt, regroupés par lettre."""
     proc = git("tag", "--list")
     if proc.returncode != 0:
         raise Refus(f"git tag --list : {proc.stderr.strip()}")
@@ -115,6 +119,33 @@ def lettre_libre() -> str:
         "les 26 lettres sont occupées par des tags d'étape : clore ou abandonner un chantier"
         " libère la sienne"
     )
+
+
+# ----------------------------------------------------------------------- retouche
+def rang(tag: str) -> tuple[int, int]:
+    """`(n, k)` d'un tag `<L>E<n>.<k>` ; `k = 0` pour le tag d'étape `<L>E<n>`.
+
+    TRI NUMÉRIQUE, PAS ALPHABÉTIQUE : `AE1.10` vient après `AE1.2`, et `AE10` après `AE2`.
+    """
+    m = TAG_ETAPE.match(tag)
+    if m is None:
+        raise ValueError(f"pas un tag d'étape : {tag}")
+    return int(m.group("etape")), int(m.group("retouche") or 0)
+
+
+def prochaine_retouche(lettre: str, etape: int) -> str:
+    if not re.fullmatch(r"[A-Z]", lettre):
+        raise Refus(f"« {lettre} » n'est pas une lettre de A à Z")
+    rangs = {rang(tag) for tag in tags_etape().get(lettre, [])}
+    if (etape, 0) not in rangs:
+        raise Refus(f"tag {lettre}E{etape} absent : l'étape {etape} n'est pas livrée")
+    if (etape + 1, 0) in rangs:
+        raise Refus(
+            f"tag {lettre}E{etape + 1} présent : l'étape {etape + 1} est livrée, ce n'est plus"
+            f" une retouche de l'étape {etape}"
+        )
+    k = max(r for n, r in rangs if n == etape) + 1
+    return f"{lettre}E{etape}.{k}"
 
 
 # ------------------------------------------------------------------------ clôture
@@ -299,7 +330,7 @@ def preparer(slug: str, message: Path) -> Cloture:
         date=date,
         deplacements=deplacements,
         champs=champs_cibles,
-        tags=sorted(tags_etape().get(lettre, []), key=lambda t: int(t[2:])),
+        tags=sorted(tags_etape().get(lettre, []), key=rang),
         plage=git("log", "--oneline", f"{base}..{slug}").stdout.rstrip(),
     )
 
@@ -403,6 +434,9 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog="commit-chantier")
     sous = parser.add_subparsers(dest="commande", required=True)
     _ = sous.add_parser("lettre", help="première lettre libre pour les tags d'étape")
+    p_retouche = sous.add_parser("retouche", help="tag de la prochaine retouche d'une étape")
+    _ = p_retouche.add_argument("lettre")
+    _ = p_retouche.add_argument("etape", type=int)
     p_cloture = sous.add_parser("cloture", help="aplatir et archiver un chantier")
     _ = p_cloture.add_argument("slug")
     _ = p_cloture.add_argument("--message", required=True, type=Path)
@@ -413,6 +447,9 @@ def main(argv: list[str]) -> int:
     try:
         if commande == "lettre":
             print(lettre_libre())
+            return 0
+        if commande == "retouche":
+            print(prochaine_retouche(cast("str", args.lettre), cast("int", args.etape)))
             return 0
         bibliotheques()
         cloture = preparer(cast("str", args.slug), cast("Path", args.message))

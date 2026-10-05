@@ -127,6 +127,10 @@ le voir : une session qui continue après sa Passation garde le même numéro.
 Comparer le champ `branche` du front matter à la branche git courante. **Divergence → le signaler**,
 ne pas corriger le fichier d'office (l'utilisateur peut avoir volontairement changé de branche).
 
+Comparer le modèle de la session, que le harness donne, au champ `modèle` du front matter.
+**Écart → le signaler**, sans bloquer ni rien changer : seul l'utilisateur fait `/model`. Un suivi
+qui ne porte pas le champ n'a rien à comparer.
+
 Incrémenter `session` de 1 dans le frontmatter — c'est ce compteur qui sert aux messages de commit
 de session (voir Phase 4).
 
@@ -135,8 +139,9 @@ Remettre au contexte les Shadow-skills du Chantier : `shadow-skill depuis-suivi 
 rien à rendre ; une erreur sur un nom se signale, sans bloquer la reprise.
 
 **Modifications non commitées détectées** (`git status --short` non vide, Phase 0) → le signaler en
-tout début de conversation et **proposer** un commit de session avant de continuer, par
-`git-smart-commit`, type 2 : [Commit rapide de chantier](../git-smart-commit/references/etape.md).
+tout début de conversation et **proposer** un commit avant de continuer, par `git-smart-commit`,
+type 2 : [Commit rapide de chantier](../git-smart-commit/references/etape.md). Un commit de
+session si une Étape est `[>]` ; sinon, un commit de Retouche de la dernière Étape livrée.
 
 La reprise faite, passer à la Phase 4 : sa référence porte la mesure du contexte et la
 Passation.

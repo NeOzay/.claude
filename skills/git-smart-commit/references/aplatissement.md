@@ -97,6 +97,7 @@ l'appelant ; seuls les gestes sont ici.
      git commit -m "<slug>: abandon — archivage"
      git branch -D <slug>
      git tag --list '<L>E[0-9]*'                             # puis git tag -d sur chacun
+     # le motif couvre aussi les tags de Retouche : `*` prend le point de `AE1.1`
      ```
 
    - *garder la branche* — archiver le seul suivi, sans rien supprimer ; les tags restent, et la

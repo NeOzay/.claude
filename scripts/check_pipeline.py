@@ -15,8 +15,8 @@ structurelle : un contrôle rend un Finding(ok=False) explicite quand sa populat
 d'entrée est vide, et jamais une liste de constats vide — que `main` compterait
 comme un succès.
 
-LES AGENTS SONT HORS PÉRIMÈTRE des contrôles 1 et 2. agents/step-implementer.md et
-agents/implementation-auditor.md dupliquent volontairement les règles qui les
+LES AGENTS SONT HORS PÉRIMÈTRE des contrôles 1 et 2. agents/implementation-auditor.md et
+agents/plan-reviewer.md dupliquent volontairement les règles qui les
 concernent : ils se chargent dans leur propre fenêtre, et un agent en isolation qui
 ne suivrait pas un renvoi perdrait le garde-fou. Le contrôle 4 vérifie justement
 qu'ils n'ont pas été rendus dépendants du noyau.
@@ -278,9 +278,10 @@ EMPREINTES: dict[str, tuple[str, ...]] = {
         "refonte-complete-du-systeme-dauth",  # contre-exemple de slug
         "réattribue ces noms",  # nommage du plan archivé
     ),
-    "frontmatter": ("Une valeur absente vaut",),
+    "frontmatter": ("pendant l'archivage",),  # réécriture des chemins vers done/
     "autorité-et-divergence": ("le suivi fait foi",),
-    "format-détape-et-délégabilité": ("un seul tour",),  # granularité
+    "format-détape": ("un seul tour",),  # granularité
+    "modèle-dimplémentation": ("Au moindre doute, Opus",),  # choix par défaut
     "contrat-des-sous-agents": ("rev-parse --show-toplevel",),  # racine du dépôt
     "dates-et-listing": ("jamais devinée",),
 }

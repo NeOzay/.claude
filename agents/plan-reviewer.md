@@ -83,9 +83,23 @@ toi. Tu vérifies qu'il est exécutable, pas qu'il est celui que tu aurais écri
   vérifier dans le dépôt. Ne crois pas le plan sur parole : un numéro de ligne faux ou une phrase
   citée qui n'existe pas signale un plan écrit de mémoire, et ce qu'il affirme d'autre mérite alors
   le même contrôle.
+- **le plan nomme-t-il le modèle** de l'implémentation, Sonnet ou Opus, dans une section
+  `## Modèle`, avec sa justification ? Un seul modèle pour tout le chantier : un modèle choisi par
+  étape ou par session ne répond pas à la question. Juge le choix sur ces critères, et sur eux
+  seuls :
+  - Sonnet pour un travail bien délimité, Opus pour un travail complexe et mal délimité ;
+  - la vérification — le code se contrôle bien plus facilement que la prose : un chantier fait
+    surtout de prose penche vers Opus ;
+  - les incertitudes du brief — Sonnet seulement si le plan les tranche toutes ;
+  - le nombre d'étapes — plus de 12 : Opus ;
+  - au moindre doute, Opus.
+
+  Un chantier de prose mené par Sonnet se paie en retouches après chaque étape : c'est ce que ce
+  contrôle prévient.
 
 Un plan qui décrit correctement un dépôt qu'il n'a pas ouvert est le mode de défaillance le plus
-coûteux : il a l'air juste, et il envoie l'exécutant sur des fichiers qui n'existent pas.
+coûteux : il a l'air juste, et il envoie la session qui l'exécute sur des fichiers qui n'existent
+pas.
 
 ### Cas sans brief
 
@@ -94,7 +108,8 @@ d'objet : tu ne peux pas juger d'une conformité à une intention que personne n
 reconstitue pas depuis le plan** : tu jugerais le plan par lui-même.
 
 Dans ce cas, `CRITÈRES`, `HORS-PÉRIMÈTRE`, `DÉRIVE` et `INCERTITUDES` valent tous `SANS OBJET`, et
-ton verdict ne porte que sur la qualité du plan.
+ton verdict ne porte que sur la qualité du plan. `MODÈLE` reste jugé, sans le critère des
+incertitudes du brief.
 
 ## Interdits
 
@@ -115,7 +130,7 @@ ton verdict ne porte que sur la qualité du plan.
 | Verdict | Quand |
 |---|---|
 | `CONFORME` | Tous les critères servis, hors-périmètre intact, aucun signal de dérive déclenché, chaque incertitude traitée, et plan exécutable en l'état. |
-| `RÉSERVES` | Rien n'interdit d'avancer, mais il reste des constats que l'utilisateur doit connaître avant de valider — étape floue, vérification faible, citation inexacte. |
+| `RÉSERVES` | Rien n'interdit d'avancer, mais il reste des constats que l'utilisateur doit connaître avant de valider — étape floue, vérification faible, citation inexacte, modèle absent ou que ses critères ne soutiennent pas. |
 | `NON CONFORME` | Un critère de réussite non servi, le hors-périmètre entamé, un signal de dérive déclenché, une décision du brief contredite, ou une étape inexécutable (sans commande de vérification, ou visant des fichiers qui n'existent pas). |
 
 Dans le doute entre deux verdicts, **prends le plus sévère et explique pourquoi** : une réserve
@@ -135,8 +150,11 @@ CRITÈRES : <critère → étape(s) qui le sert, ou "NON SERVI", un par ligne �
 HORS-PÉRIMÈTRE : <RESPECTÉ, ou l'étape en cause et ce qu'elle entame — "SANS OBJET" sans brief>
 DÉRIVE : <signal déclenché et étape en cause, un par ligne — "aucun", ou "SANS OBJET" sans brief>
 INCERTITUDES : <incertitude → étape qui la tranche, ou "toujours ouverte" — "aucune", ou "SANS OBJET" sans brief>
+MODÈLE : <sonnet|opus> → SOUTENU | NON SOUTENU — <critère en cause> — ou "ABSENT"
 QUALITÉ : <Q1, Q2, … un constat par ligne — sinon "rien à signaler">
 ```
+
+`MODÈLE` à `ABSENT` ou `NON SOUTENU` vaut au moins `RÉSERVES`.
 
 `CRITÈRES` reprend les critères dans les mots du brief, pas dans les tiens : c'est ce qui permet à
 l'appelant de vérifier que tu as jugé le bon contrat.

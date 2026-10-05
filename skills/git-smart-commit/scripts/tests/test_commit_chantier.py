@@ -1,4 +1,4 @@
-"""commit_chantier.py — la lettre des tags d'étape, et la clôture d'un chantier.
+"""commit_chantier.py — la lettre des tags d'étape, le tag d'une retouche, et la clôture.
 
 Le script est lancé en SOUS-PROCESSUS, comme l'agent le lance : c'est la ligne de
 commande qui est le contrat, codes de sortie compris. Chaque test monte son dépôt sur
@@ -147,6 +147,43 @@ def test_lettre_refusee_quand_les_26_sont_prises(depot: Path) -> None:
     assert "26 lettres" in proc.stderr
 
 
+# ----------------------------------------------------------------------- retouche
+def test_retouche_rend_les_tags_l_un_apres_l_autre(depot: Path) -> None:
+    premier = lancer(depot, "retouche", "A", "1")
+    assert (premier.returncode, premier.stdout) == (0, "AE1.1\n")
+    _ = git(depot, "tag", "AE1.1")
+    second = lancer(depot, "retouche", "A", "1")
+    assert (second.returncode, second.stdout) == (0, "AE1.2\n")
+
+
+def test_retouche_suit_le_rang_numerique(depot: Path) -> None:
+    for k in range(1, 11):
+        _ = git(depot, "tag", f"AE1.{k}")
+    proc = lancer(depot, "retouche", "A", "1")
+    assert (proc.returncode, proc.stdout) == (0, "AE1.11\n")
+
+
+def test_retouche_refusee_sur_une_etape_non_livree(depot: Path) -> None:
+    proc = lancer(depot, "retouche", "A", "2")
+    assert (proc.returncode, proc.stdout) == (1, "")
+    assert "AE2 absent" in proc.stderr
+
+
+def test_retouche_refusee_quand_l_etape_suivante_est_livree(depot: Path) -> None:
+    _ = git(depot, "tag", "AE2")
+    proc = lancer(depot, "retouche", "A", "1")
+    assert (proc.returncode, proc.stdout) == (1, "")
+    assert "AE2 présent" in proc.stderr
+
+
+def test_retouche_ignore_les_tags_d_une_autre_lettre(depot: Path) -> None:
+    _ = git(depot, "tag", "BE1")
+    _ = git(depot, "tag", "BE1.4")
+    _ = git(depot, "tag", "BE2")
+    proc = lancer(depot, "retouche", "A", "1")
+    assert (proc.returncode, proc.stdout) == (0, "AE1.1\n")
+
+
 # ------------------------------------------------------------------------ dry-run
 def test_dry_run_ne_modifie_rien(depot: Path) -> None:
     avant = instantane(depot)
@@ -199,9 +236,19 @@ def test_cloture_accepte_un_audit_non_suivi(depot: Path) -> None:
 
 def test_cloture_ne_supprime_que_les_tags_de_sa_lettre(depot: Path) -> None:
     _ = git(depot, "tag", "BE0", BASE)
+    _ = git(depot, "tag", "BE0.1", BASE)
     proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
     assert proc.returncode == 0, proc.stderr
-    assert git(depot, "tag", "--list").split() == ["BE0"]
+    assert git(depot, "tag", "--list").split() == ["BE0", "BE0.1"]
+
+
+def test_cloture_supprime_les_tags_de_retouche(depot: Path) -> None:
+    for tag in ("AE1.1", "AE1.2", "AE1.10"):
+        _ = git(depot, "tag", tag)
+    proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
+    assert proc.returncode == 0, proc.stderr
+    assert "Tags supprimés : AE0 AE1 AE1.1 AE1.2 AE1.10" in proc.stdout
+    assert git(depot, "tag", "--list") == ""
 
 
 # -------------------------------------------------------------------------- refus

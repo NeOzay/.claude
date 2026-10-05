@@ -13,6 +13,13 @@ Le Suivi d'un Chantier porte dans son champ `skills` les Shadow-skills retenus a
 `agents/step-implementer.md` n'en dit rien, et implementation-tracker ne les lui transmet pas à la
 délégation d'une Étape.
 
+## Écartée le
+
+> **2026-10-05 — non pertinent** — `step-implementer` et la délégation d'Étape ont été retirés du
+> pipeline par le Chantier `retouches-et-modele-du-chantier` : plus aucun agent n'exécute une Étape
+> hors de la session, qui charge elle-même les Shadow-skills du Suivi à la reprise.
+> Établi par : `test -e agents/step-implementer.md; echo $?` → `1`, l'agent n'existe plus.
+
 ## Pourquoi c'est gênant
 
 Une Étape déléguée s'exécute sans les conventions que le Chantier a jugées nécessaires : l'exécutant

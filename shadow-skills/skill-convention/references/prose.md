@@ -196,8 +196,8 @@ fenêtre, sans suivre les renvois, et sans recevoir les hooks de la session. Les
 concernent y sont donc écrites en dur. C'est la seule recopie admise, et elle est bornée aux
 règles dont l'agent a besoin.
 
-**Pratiqué dans** : [`step-implementer.md`](../../../agents/step-implementer.md) ; l'exception est
-déclarée en tête de [`check_pipeline.py`](../../../scripts/check_pipeline.py).
+**Pratiqué dans** : [`implementation-auditor.md`](../../../agents/implementation-auditor.md) ;
+l'exception est déclarée en tête de [`check_pipeline.py`](../../../scripts/check_pipeline.py).
 
 ## Une phrase déclare, elle ne raconte pas
 

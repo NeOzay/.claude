@@ -16,8 +16,8 @@ Une règle déplacée ici laisse, à son ancien emplacement,
 `« Interdits git : lecture seule — [Contrat des sous-agents](contrat.md#contrat-des-sous-agents) »`
 se lit ; l'absence, non.
 
-**Les trois agents sont hors de ce dispositif.** `agents/step-implementer.md`,
-`agents/implementation-auditor.md` et `agents/plan-reviewer.md` dupliquent volontairement les règles
+**Les deux agents sont hors de ce dispositif.** `agents/implementation-auditor.md` et
+`agents/plan-reviewer.md` dupliquent volontairement les règles
 qui les concernent : ils se chargent dans leur propre fenêtre, où cette redondance ne coûte rien, et
 un agent en isolation qui ne suivrait pas un renvoi perdrait le garde-fou. Cette section 5 est leur
 **référence de contrôle**, pas une cible de renvoi.
@@ -109,10 +109,8 @@ garantir :
   sur deux sessions.
 - `lettre` est attribuée à la création, et le script de clôture refuse un suivi qui n'en porte
   pas : [Tags d'étape](../../git-smart-commit/references/tags-etape.md).
-- `execution` est repris **tel quel** du brief. **Une valeur absente vaut `direct`** : la lire
-  comme « délégable » enverrait un exécutant en contexte isolé sur un chantier dont personne n'a
-  jugé la délégabilité, sans hors-périmètre ni signaux de dérive écrits, donc sans rien qui
-  l'arrête ni personne à qui demander.
+- `modèle` est repris du Plan, pour tout le Chantier :
+  [Modèle d'implémentation](#modèle-dimplémentation).
 - `audit` n'apparaît qu'au premier audit du chantier.
 - `plan`, `brief` et `audit` sont réécrits vers leurs chemins `done/` **pendant l'archivage**.
   Sans cela ils pointeraient vers des fichiers qui n'existent plus, ou pire, vers le plan d'un
@@ -137,12 +135,11 @@ Un périmètre qui change réellement s'amende **dans le suivi**, daté, avec un
 décisions.
 
 > *Mode de défaillance* — sans cette écriture, un chantier qui évolue n'a plus de périmètre écrit
-> nulle part : l'exécutant refuse en `ÉCART` un travail pourtant validé, et l'auditeur le compte
-> comme un hors-périmètre entamé.
+> nulle part : l'auditeur compte comme un hors-périmètre entamé un travail pourtant validé.
 
 La divergence entre brief et réel est une **information** : l'effacer la détruit.
 
-## Format d'étape et délégabilité
+## Format d'étape
 
 ```
 - [état] N. Intitulé — <fichier(s)> — vérif: <commande>
@@ -150,21 +147,42 @@ La divergence entre brief et réel est une **information** : l'effacer la détru
 
 `[ ]` à faire · `[>]` en cours · `[x]` fait · `[!]` bloqué
 
-Le suivi porte **l'intitulé et l'état** ; le **plan porte le contenu** de l'étape. C'est là que
-l'exécutant va le chercher, via le champ `plan`.
+`[>]` se pose quand le travail de l'étape commence, pas au commit de la précédente : entre les deux,
+une modification est une Retouche de l'étape livrée
+([Commit rapide de chantier](../../git-smart-commit/references/etape.md)).
 
-- Une étape tient en **un seul tour d'exécution**. Elle se découpe au figeage, pas en cours de
-  route.
-- Une étape **sans commande de vérification n'est pas délégable**.
-- Une étape **déjà entamée** puis interrompue se termine en direct, jamais en la re-déléguant.
+Le suivi porte **l'intitulé et l'état** ; le **plan porte le contenu** de l'étape. C'est là que la
+session qui l'exécute va le chercher, via le champ `plan`.
 
-> *Mode de défaillance* — un appel de sous-agent est atomique et ne se reprend pas : un agent froid
-> lancé sur un travail à moitié fait le rapportera en `ÉCART`. Si le cas se répète, les étapes sont
-> trop grosses.
+Une étape tient en **un seul tour d'exécution**. Elle se découpe au figeage, pas en cours de route.
+
+> *Mode de défaillance* — une étape trop grosse ne tient pas dans une session : interrompue, elle
+> se reprend à froid sur un travail à moitié fait, que son commit d'étape réunit sans que personne
+> l'ait vu d'un bloc.
+
+## Modèle d'implémentation
+
+Un Chantier est conduit par **un seul modèle**, Sonnet ou Opus, choisi au Plan pour toute
+l'implémentation. La session qui suit la Passation de la création démarre à vide : l'utilisateur y
+fait `/model <modèle>`. Rien ne change le modèle à sa place, ni par Étape, ni par session.
+
+**Sonnet** pour un travail bien délimité, **Opus** pour un travail complexe et mal délimité. Trois
+critères le disent :
+
+- **la vérification** — le code se contrôle bien plus facilement que la prose : un Chantier fait
+  surtout de prose penche vers Opus ;
+- **les incertitudes du brief** — Sonnet seulement si le Plan les tranche toutes ;
+- **le nombre d'Étapes** — plus de 12 : Opus.
+
+**Au moindre doute, Opus.**
+
+> *Mode de défaillance* — un Chantier de prose mené par Sonnet se paie en Retouches : le texte a
+> l'air juste, la vérification n'y voit pas d'écart, et la relecture le découvre après le commit
+> d'étape.
 
 ## Contrat des sous-agents
 
-Vaut pour `step-implementer`, `implementation-auditor` et `plan-reviewer`.
+Vaut pour `implementation-auditor` et `plan-reviewer`.
 
 **Entrée** — l'appelant transmet des **chemins absolus**. Les chemins lus *à l'intérieur* des
 fichiers (champ `plan`, fichiers d'une étape) sont relatifs à la **racine du dépôt** : l'appelant
@@ -184,10 +202,6 @@ fichier de suivi**.
 **Sortie** — chaque agent termine par son bloc normalisé, et rien après. L'appelant reste
 responsable au retour : relire le fichier de suivi avant d'y écrire, il a pu vieillir pendant
 l'exécution.
-
-> *Mode de défaillance* — un travail partiel laissé dans l'arbre par un agent arrêté en `ÉCART` est
-> voulu (il n'a pas les commandes pour revenir en arrière). Son sort se tranche **avant** toute
-> autre action, sinon le prochain commit le ramasse en silence.
 
 ## Dates et listing
 

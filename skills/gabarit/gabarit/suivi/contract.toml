@@ -46,14 +46,11 @@ type = "text"
 required = true
 description = "La lettre des tags d'étape (<L>E0, <L>E1…), rendue par `commit-chantier lettre` à la création."
 
-[fields.execution]
+[fields."modèle"]
 type = "enum"
 required = true
-description = """
-Repris tel quel du brief :
-- `délégué` : les étapes substantielles partent à step-implementer ;
-- `direct` : elles se font dans la session."""
-values = ["délégué", "direct"]
+description = "Le modèle qui conduit toute l'implémentation, repris de la section `## Modèle` du Plan."
+values = ["sonnet", "opus"]
 
 [fields.plan]
 type = "text"
@@ -135,8 +132,8 @@ vit dans son rapport, pas ici."""
 description = """
 Ce que la session qui s'arrête transmet à la suivante à la Passation, et qu'aucun autre fichier
 ne dit, en trois blocs :
-- `**Écrite** :` `session <N>, après <L>E<n>` — la session qui l'écrit et le dernier tag d'Étape
-  posé ;
+- `**Écrite** :` `session <N>, après <tag>` — la session qui l'écrit et le dernier tag posé,
+  d'Étape ou de Retouche ;
 - `**En cours** :` le travail entamé, dans son état exact, ou « rien » ;
 - `**À savoir** :` ce que la session a appris, absent du Suivi, du Plan et du code.
 

@@ -16,9 +16,7 @@ committer ou les mettre de côté) avant de relancer.
    Un brief validé existe déjà pour ce chantier → le lire et passer directement au point 2.
 
    **Pas de brief** (cadrage jugé inutile, cf. « Quand ne pas cadrer » d'`intent-brief`) →
-   `brief` omis et **`execution = "direct"` imposé** : sans hors-périmètre ni signaux de dérive
-   écrits, un exécutant isolé n'a aucune borne. Remplir `## Objectif et périmètre` avec
-   l'utilisateur, en une passe.
+   `brief` omis. Remplir `## Objectif et périmètre` avec l'utilisateur, en une passe.
 2. **Entrer en plan mode** (`EnterPlanMode`), avec le brief comme cadre : rappeler
    explicitement au plan les critères de réussite, le hors-périmètre et les incertitudes à
    lever. Explorer le code et construire le plan normalement — c'est le flux natif qui fait
@@ -28,6 +26,10 @@ committer ou les mettre de côté) avant de relancer.
    puis `shadow-skill cherche <mots>` sur les domaines que le plan touche, et
    `shadow-skill charge <nom>` pour ceux dont le `when-to-load` décrit le travail. Retenir leurs
    noms : ils iront dans le champ `skills` du Suivi (point 7).
+
+   **Choisir le modèle de l'implémentation** : le plan porte une section `## Modèle`, le choix —
+   Sonnet ou Opus — et sa justification en une phrase. Critères :
+   [Modèle d'implémentation](contrat.md#modèle-dimplémentation).
 
    **C'est ici que le plan se construit, et nulle part ailleurs.** `intent-brief` s'arrête au
    brief validé : il ne planifie pas et ne confronte pas.
@@ -64,15 +66,15 @@ committer ou les mettre de côté) avant de relancer.
    second plan existe, la date de modification désigne le mauvais fichier.
 
    **Le plan doit être versionné.** C'est lui qui porte le contenu des étapes — le suivi n'en a que
-   les intitulés, et `step-implementer` va y lire la description de son étape. Vérifier qu'il n'est
-   pas ignoré :
+   les intitulés, et la session qui exécute une étape y lit sa description. Vérifier qu'il n'est pas
+   ignoré :
 
    ```bash
    git check-ignore -q .claude/plans/<fichier>.md && echo "IGNORÉ — le signaler"
    ```
 
-   S'il est ignoré, le dire à l'utilisateur : sans lui, la reprise en session 3 et toute délégation
-   perdent la description des étapes. Sinon, il entre dans le commit de l'état initial (point 9).
+   S'il est ignoré, le dire à l'utilisateur : sans lui, toute reprise après une Passation perd la
+   description des étapes. Sinon, il entre dans le commit de l'état initial (point 9).
 4. **Créer la branche d'implémentation** nommée exactement `<slug>`, à partir de la branche
    courante — la **branche principale**, qui ira dans le champ `base` du suivi — et obtenir la
    lettre des tags d'étape, qui ira dans le champ `lettre` :
@@ -93,8 +95,8 @@ committer ou les mettre de côté) avant de relancer.
    ```
 
    **Figer le plan** dans le suivi : ses étapes deviennent la section `Étapes`, et son chemin va
-   dans le champ `plan`. Format d'une étape, granularité, conditions de délégabilité :
-   [Format d'étape et délégabilité](contrat.md#format-détape-et-délégabilité).
+   dans le champ `plan`. Format d'une étape et granularité :
+   [Format d'étape](contrat.md#format-détape).
 
    **C'est ici que les étapes trop grosses se découpent**, pas en cours de route — le renvoi
    ci-dessus dit pourquoi.
@@ -102,7 +104,7 @@ committer ou les mettre de côté) avant de relancer.
    [Arborescence et nommage](contrat.md#arborescence-et-nommage).
 7. **Reprendre l'objectif et le périmètre du brief**, ne pas les réinventer : la semence déclare
    les blocs de cette section, et leur contenu vient du brief tel qu'il a été validé.
-   Les champs `brief` et `execution` en viennent aussi, ce dernier tel quel.
+   Le champ `brief` en vient aussi ; le champ `modèle` vient de la section `## Modèle` du plan.
    Règles des champs : [Frontmatter](contrat.md#frontmatter).
 
    **Chantier parti d'une entrée de `road-map/`** → renseigner le champ `road-map` avec son `id`,
@@ -136,3 +138,7 @@ committer ou les mettre de côté) avant de relancer.
     [Passation](execution.md#passation). Le cadrage, l'exploration et la relecture du plan pèsent
     sur chaque tour suivant sans plus servir à l'implémentation, et la session de création est
     celle qui en sait le plus sans l'avoir écrit.
+
+    La Passation acceptée, dire à l'utilisateur de faire `/model <modèle>` dans la session vierge,
+    avant `/implementation-tracker @<suivi>` : c'est là que l'implémentation commence, et rien ne
+    change le modèle à sa place.

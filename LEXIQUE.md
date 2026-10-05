@@ -16,7 +16,8 @@ Termes réservés dans tous les projets. Règles d'emploi :
 | Chantier | Implémentation conduite par implementation-tracker, du Brief à la Clôture, sur la branche `<slug>`. | [implementation-tracker](skills/implementation-tracker/SKILL.md) |
 | Brief | Fiche d'intention d'un Chantier (intention, critères, bornes), figée à sa validation. | [intent-brief](skills/intent-brief/SKILL.md) |
 | Suivi | Fichier d'un Chantier qui porte son objectif, ses Étapes, son état et ses décisions, tenu à jour en continu. | [implementation-tracker](skills/implementation-tracker/SKILL.md) |
-| Étape | Unité de travail d'un Chantier telle que le Suivi la tient, avec ses fichiers et sa commande de vérification ; elle peut s'écarter du Plan initial. | [Format d'étape](skills/implementation-tracker/references/contrat.md#format-détape-et-délégabilité) |
+| Étape | Unité de travail d'un Chantier telle que le Suivi la tient, avec ses fichiers et sa commande de vérification ; elle peut s'écarter du Plan initial. | [Format d'étape](skills/implementation-tracker/references/contrat.md#format-détape) |
+| Retouche | Modification d'une Étape livrée, faite avant que l'Étape suivante ne commence, commitée et taguée `<L>E<N>.<k>`. | [Commit rapide de chantier](skills/git-smart-commit/references/etape.md) |
 | Signal de dérive | Indice, lisible dans le diff, qu'un Chantier s'écarte de son Brief, et qui arrête l'implémentation. | [implementation-tracker](skills/implementation-tracker/SKILL.md) |
 | Registre | List-dir tenue par le pipeline : dette technique ou road-map. | [Registre de dette](skills/implementation-tracker/references/dette.md) |
 | Plan | Document qui décrit les Étapes initiales d'un Chantier, relu par plan-reviewer ; le Suivi reprend ces Étapes et les tient à jour. | [implementation-tracker](skills/implementation-tracker/SKILL.md) |

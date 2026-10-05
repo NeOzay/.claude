@@ -30,18 +30,6 @@ description = """
 values = ["brouillon", "validé"]
 text = "brouillon"
 
-[fields.execution]
-type = "enum"
-required = true
-description = """
-- `délégué` : les étapes prévisibles se borneront à des fichiers nommés, avec une commande de
-  vérification chacune ;
-- `direct` : sinon, et dès qu'une incertitude est reportée ou que les signaux de dérive sont
-  vides — un exécutant isolé n'aurait ni personne à qui demander, ni rien qui l'arrête.
-
-Repris tel quel par le suivi."""
-values = ["délégué", "direct"]
-
 [fields."créé"]
 type = "date"
 required = true

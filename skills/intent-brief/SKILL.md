@@ -185,11 +185,7 @@ Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à tran
 
 Puis :
 
-1. **Trancher la délégabilité** et l'écrire dans le champ `execution` du brief, selon ce que sa
-   description dit de chaque valeur (`gabarit contract brief`). Une incertitude reportée ou des
-   signaux de dérive vides imposent `direct` : un exécutant en sous-agent n'a personne à qui poser
-   la question, il tranchera seul, et sans signaux il n'a rien qui l'arrête.
-2. **Vérifier le brief** contre sa semence :
+1. **Vérifier le brief** contre sa semence :
 
    ```bash
    gabarit check .claude/implementation/<slug>.brief.md --filled
@@ -197,9 +193,9 @@ Puis :
 
    Un échec nomme ce qui reste à remplir : le brief ne se présente pas à la validation tant qu'il
    n'est pas conforme. Un axe resté vide s'écrit `— non abordé`, jamais une supposition.
-3. Restituer les trois sections décisives — intention, hors-périmètre, incertitudes — et pointer
+2. Restituer les trois sections décisives — intention, hors-périmètre, incertitudes — et pointer
    le fichier pour le reste. Ne pas recopier le brief entier.
-4. Sur validation : `statut` passe à `validé`. Le brief est figé.
+3. Sur validation : `statut` passe à `validé`. Le brief est figé.
 
 Le brief tient en une page. S'il déborde, c'est un plan déguisé.
 
