@@ -666,9 +666,20 @@ RENVOI_INTER_SKILL = re.compile(r"\]\((\.\./[^)#\s]+)(#[^)\s]+)?(?:\s+\"[^\"]*\"
 
 @control(8, "Renvois documentaires entre skills")
 def check_renvois_skill(root: Path) -> list[Finding]:
-    fichiers = list(markdown_files(root, only="skills"))
+    # Les Shadow-skills renvoient vers `skills/` comme les skills entre eux : un
+    # intitulé renommé là-bas casse leurs ancres sans que rien ne le dise, et le premier
+    # à s'en apercevoir est l'agent qui suit le lien en cours de tâche.
+    fichiers = [
+        *markdown_files(root, only="skills"),
+        *markdown_files(root, only="shadow-skills"),
+    ]
     if not fichiers:
-        return [Finding(False, "aucun fichier examiné dans skills/ — contrôle sans objet")]
+        return [
+            Finding(
+                False,
+                "aucun fichier examiné dans skills/ ni shadow-skills/ — contrôle sans objet",
+            )
+        ]
 
     cites = 0
     findings: list[Finding] = []

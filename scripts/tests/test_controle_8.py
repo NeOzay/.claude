@@ -153,3 +153,27 @@ def test_titre_dans_une_fence_nest_pas_une_ancre(tmp_path: Path) -> None:
         "Voir [X](../cible/references/contrat.md#faux-titre).\n",
     )
     assert any("ancre morte" in m for m in rouges(tmp_path))
+
+
+# --- Les Shadow-skills tombent sous le même contrôle -------------------------
+
+
+def test_ancre_morte_depuis_un_shadow_skill(tmp_path: Path) -> None:
+    """Un Shadow-skill renvoie vers `skills/` : son ancre périmée doit crier aussi."""
+    _ = ecrire(tmp_path, "skills/cible/references/contrat.md", "# Contrat\n\n## Champs\n\nx\n")
+    _ = ecrire(
+        tmp_path,
+        "shadow-skills/source/references/note.md",
+        "Voir [X](../../../skills/cible/references/contrat.md#section-renommee).\n",
+    )
+    assert any("ancre morte" in m for m in rouges(tmp_path))
+
+
+def test_renvoi_valide_depuis_un_shadow_skill(tmp_path: Path) -> None:
+    _ = ecrire(tmp_path, "skills/cible/references/contrat.md", "# Contrat\n\n## Champs\n\nx\n")
+    _ = ecrire(
+        tmp_path,
+        "shadow-skills/source/references/note.md",
+        "Voir [X](../../../skills/cible/references/contrat.md#champs).\n",
+    )
+    assert rouges(tmp_path) == []
