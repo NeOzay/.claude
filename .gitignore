@@ -56,3 +56,6 @@ __pycache__/
 # du dépôt, qui ne relèvent pas du garde-fou.
 skills/synced/
 plugins/synced/
+
+# Mods en cours de développement : le dossier de rechargement à chaud de la session
+dev-mods/

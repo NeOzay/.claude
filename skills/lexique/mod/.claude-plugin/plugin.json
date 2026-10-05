@@ -1,0 +1,5 @@
+{
+  "name": "lexique-sous-agent",
+  "version": "0.1.0",
+  "description": "Verse le lexique à un sous-agent au démarrage, sans le plafond de 10 000 caractères d'un hook."
+}

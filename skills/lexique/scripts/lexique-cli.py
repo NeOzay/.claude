@@ -7,12 +7,15 @@ le résultat en code de sortie.
 LE NOM PORTE UN TIRET, comme `gabarit-cli.py` : il n'est pas importable, et ne dispute pas son
 nom au module `lexique` rangé à côté. La commande s'appelle `lexique` par son lien de `bin/`.
 
-DEUX RÉGIMES D'ÉCHEC POUR SEPT COMMANDES :
+DEUX RÉGIMES D'ÉCHEC POUR HUIT COMMANDES :
 - `init` échoue fermé — 0 lexique posé, son chemin sur stdout ; 1 fichier déjà présent ;
 - `liste` échoue fermé — 0 conforme, 1 constat ou lexique malformé, 2 erreur d'appel ; un
   lexique vide ou absent se dit sur stderr, sans toucher au code ;
 - `session` échoue OUVERT — sortie 0 quoi qu'il arrive : c'est un hook `SessionStart`, et un
   rappel n'a jamais de raison d'empêcher une session de démarrer. Ses alertes vont au contexte.
+- `sous-agent` échoue OUVERT de même : le mod `lexique-sous-agent` l'appelle au lancement d'un
+  sous-agent ; il lit sur stdin un JSON, en prend `agent_type`, et rend sur stdout ce que l'agent
+  reçoit, en `hookSpecificOutput` — le format d'un hook `SubagentStart` —, d'après son fichier.
 - `chemin`, `termes`, `definition` et `definitions` échouent fermé et alimentent `:Lexique`,
   dans la configuration Neovim (`~/.config/nvim/lua/lexique.lua`) : aucune autre commande ne
   lit, ne parse ou ne localise un `LEXIQUE.md` pour Neovim.
@@ -24,15 +27,16 @@ pour horizon, et le hook doit rester rapide.
 import sys
 
 # `noqa: UP036` : ruff juge ce bloc mort parce que target-version vaut py312. Il n'existe que
-# pour le Python plus ancien qui exécuterait ce fichier — et `session` y reste silencieux.
+# pour le Python plus ancien qui exécuterait ce fichier — et les hooks y restent silencieux.
 if sys.version_info < (3, 12):  # noqa: UP036
-    if sys.argv[1:2] == ["session"]:  # pyright: ignore[reportUnreachable]
+    if sys.argv[1:2] in (["session"], ["sous-agent"]):  # pyright: ignore[reportUnreachable]
         raise SystemExit(0)
     v = ".".join(str(n) for n in sys.version_info[:3])
     sys.stderr.write(f"lexique exige Python >= 3.12, trouvé {v} ({sys.executable}).\n")
     raise SystemExit(2)
 
 import argparse
+import json
 import os
 from pathlib import Path
 from typing import cast
@@ -44,11 +48,13 @@ from lexique import (
     LOCAL,
     amorcer,
     annonce_session,
+    annonce_sous_agent,
     chemin_global,
     chemin_local,
     definir,
     lister,
     localiser,
+    racine_globale,
     racine_projet,
     servir,
 )
@@ -136,6 +142,27 @@ def _session() -> int:
     return 0
 
 
+def _sous_agent() -> int:
+    # ÉCHEC OUVERT, comme `_session` : un rappel n'empêche pas un sous-agent de démarrer.
+    try:
+        entree = cast("object", json.load(sys.stdin))
+        # `cast` : une table JSON a des clés `str`, ce que `isinstance` ne dit pas au typeur.
+        champs = cast("dict[str, object]", entree) if isinstance(entree, dict) else {}
+        agent_type = champs.get("agent_type")
+        if not isinstance(agent_type, str):
+            raise ValueError("`agent_type` absent de l'entrée du hook.")
+        projet = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path.cwd())
+        texte = annonce_sous_agent(agent_type, projet, racine_globale())
+        if texte:
+            sortie = {
+                "hookSpecificOutput": {"hookEventName": "SubagentStart", "additionalContext": texte}
+            }
+            sys.stdout.write(json.dumps(sortie, ensure_ascii=False) + "\n")
+    except Exception as e:
+        sys.stderr.write(f"lexique sous-agent : {e}\n")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="lexique", description="Lexiques global et local.")
     sous = parser.add_subparsers(dest="commande", required=True)
@@ -144,6 +171,7 @@ def main() -> int:
     init = sous.add_parser("init", help="pose le lexique local d'un projet, en-tête seul")
     init.add_argument("--projet", type=Path, help="défaut : la racine git d'ici, ou ici")
     sous.add_parser("session", help="le lexique local, pour le hook SessionStart")
+    sous.add_parser("sous-agent", help="le lexique d'un sous-agent, pour le mod lexique-sous-agent")
     chemin = sous.add_parser("chemin", help="le chemin d'un lexique à ouvrir, pour Neovim")
     chemin.add_argument("--projet", type=Path, help="défaut : la racine git d'ici, ou ici")
     chemin.add_argument("--global", dest="au_global", action="store_true", help="le global")
@@ -161,6 +189,8 @@ def main() -> int:
     commande = cast("str", args.commande)
     if commande == "session":
         return _session()
+    if commande == "sous-agent":
+        return _sous_agent()
     projet = cast("Path | None", args.projet) or racine_projet(Path.cwd())
     if commande == "init":
         return _init(projet)

@@ -6,7 +6,7 @@ Un terme défini dans un lexique n'a qu'un sens : sa définition. Deux lexiques 
 - **global** — `LEXIQUE.md` à la racine de la configuration : les concepts des skills globales,
   faites pour servir dans n'importe quel projet ;
 - **local** — `.claude/LEXIQUE.md` à la racine du projet, versé au contexte au démarrage de la
-  session.
+  session et d'un sous-agent.
 
 ## Règles
 

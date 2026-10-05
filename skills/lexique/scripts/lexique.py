@@ -19,6 +19,10 @@ LA STRUCTURE EST POSÉE PAR LA COMMANDE : `amorcer` écrit l'en-tête d'un lexiq
 que le modèle n'ait à écrire que des lignes — un en-tête recopié à la main est un en-tête que
 `lire` refuse.
 
+LE FRONTMATTER D'UN AGENT EST DU YAML, lu ici au plus juste : les lignes `cle: valeur` en colonne 0,
+commentaire de fin de ligne ôté, `True` lu comme `true`. Il ne sert qu'à trois scalaires — `name`,
+`omitClaudeMd`, `injectLexique` ; rien de plus n'y est lu.
+
 COLLECTE ET JUGEMENT SÉPARÉS : `lire` collecte, `controler` juge. Aucune fonction n'imprime ni
 n'appelle `exit` : c'est la CLI qui traduit.
 """
@@ -41,6 +45,10 @@ _SEPARATEUR = re.compile(r":?-+:?")
 _COUPURE = re.compile(r"(?<!\\)\|")
 # Une clôture de bloc de code : ce qu'elle entoure est un exemple, jamais le lexique.
 _CLOTURE = re.compile(r"^\s*(```|~~~)")
+# Une ligne `cle: valeur` en colonne 0 du frontmatter d'un agent : tout ce qu'on en lit.
+_CHAMP = re.compile(r"^([A-Za-z_][\w-]*):[ \t]*(.*?)[ \t]*$")
+# Un commentaire YAML de fin de ligne : un `#` précédé d'une espace, hors guillemets.
+_COMMENTAIRE = re.compile(r"[ \t]+#.*$")
 
 
 @dataclass(frozen=True)
@@ -346,6 +354,83 @@ def annonce_session(fichier_global: Path, fichier_local: Path, projet: Path) -> 
             *(f"  · {a}" for a in alertes),
         ]
     return "\n".join(parties) + "\n"
+
+
+def _valeur(brut: str) -> str:
+    """Un scalaire du frontmatter, lu comme Claude Code le lit après analyse YAML.
+
+    Entre guillemets, la valeur telle quelle. Sinon, commentaire de fin de ligne ôté, et un booléen
+    `True` ou `TRUE` vaut `true` : `omitClaudeMd: True` isole l'agent pour Claude Code, et il
+    doit l'isoler ici aussi.
+    """
+    if len(brut) >= 2 and brut[0] in "'\"" and brut[-1] == brut[0]:
+        return brut[1:-1]
+    valeur = _COMMENTAIRE.sub("", brut).strip()
+    return "true" if valeur.lower() == "true" else valeur
+
+
+def entete_agent(fichier: Path) -> dict[str, str]:
+    """Les champs scalaires du frontmatter d'un agent, guillemets ôtés. Illisible ou sans : vide."""
+    try:
+        lignes = fichier.read_text(encoding="utf-8").splitlines()
+    except (UnicodeDecodeError, OSError):
+        return {}
+    if not lignes or lignes[0].strip() != "---":
+        return {}
+    champs: dict[str, str] = {}
+    for ligne in lignes[1:]:
+        if ligne.strip() == "---":
+            break
+        if (m := _CHAMP.match(ligne)) is not None:
+            champs[m[1]] = _valeur(m[2])
+    return champs
+
+
+def fichier_agent(agent_type: str, projet: Path, racine: Path) -> Path | None:
+    """Le fichier de l'agent `agent_type` : celui du projet masque celui de l'utilisateur.
+
+    Un agent intégré ou de plugin n'a pas de fichier ici : `None`.
+    """
+    for dossier in (projet / ".claude" / "agents", racine / "agents"):
+        for fichier in sorted(dossier.rglob("*.md")):
+            if entete_agent(fichier).get("name") == agent_type:
+                return fichier
+    return None
+
+
+def _bloc(titre: str, chemin: Path) -> str:
+    """Un fichier versé tel quel sous une ligne qui le nomme ; sa faute se dit dans son bloc."""
+    try:
+        texte = chemin.read_text(encoding="utf-8").rstrip()
+    except (UnicodeDecodeError, OSError):
+        texte = "(illisible ou absent)"
+    return f"{titre} ({chemin}) :\n\n{texte}\n"
+
+
+def annonce_sous_agent(agent_type: str, projet: Path, racine: Path) -> str:
+    """Ce que le démarrage d'un sous-agent verse au contexte, d'après le fichier de l'agent.
+
+    `racine` est la racine de la configuration globale. Sans `omitClaudeMd`, l'agent reçoit déjà
+    `CLAUDE.md`, donc le global et ses instructions : il ne manque que le local. Avec
+    `omitClaudeMd: true`, rien — sauf `injectLexique: true`, qui verse les trois. Chaîne vide
+    pour un agent sans fichier, comme pour `annonce_session` sans lexique local.
+    """
+    fichier = fichier_agent(agent_type, projet, racine)
+    if fichier is None:
+        return ""
+    champs = entete_agent(fichier)
+    fichier_global = racine / FICHIER
+    local = annonce_session(fichier_global, chemin_local(projet), projet)
+    if champs.get("omitClaudeMd") != "true":
+        return local
+    if champs.get("injectLexique") != "true":
+        return ""
+    blocs = [
+        _bloc("Instructions du lexique", racine / "skills" / "lexique" / "instructions.md"),
+        _bloc("Lexique global", fichier_global),
+        local,
+    ]
+    return "\n".join(b for b in blocs if b)
 
 
 def localiser(fichier_global: Path, fichier_local: Path, niveau: str) -> Result[Path]:

@@ -3,8 +3,8 @@ name: lexique
 description: >
   Tient les lexiques qui fixent le sens des mots : le global (`LEXIQUE.md` à la racine de la
   configuration) et le local d'un projet (`.claude/LEXIQUE.md`), deux tableaux
-  `Terme | Définition | Lien`. Fournit la commande `lexique` (init, liste, session, chemin, termes,
-  definition, definitions). Se déclenche dès qu'il s'agit de proposer, ajouter, modifier ou retirer un terme,
+  `Terme | Définition | Lien`. Fournit la commande `lexique` (init, liste, session, sous-agent, chemin,
+  termes, definition, definitions). Se déclenche dès qu'il s'agit de proposer, ajouter, modifier ou retirer un terme,
   d'amorcer le lexique local d'un projet, ou de savoir si un terme est déjà réservé. N'écrit aucun
   terme sans l'accord de l'utilisateur.
 ---
@@ -46,6 +46,7 @@ besoin ; un tableau dans un bloc de code est un exemple, et ne compte pas :
 lexique init [--projet DIR]                # pose .claude/LEXIQUE.md, en-tête seul
 lexique liste [--projet DIR]               # termes global puis local : niveau, terme, lien
 lexique session                            # le lexique local du projet, pour le hook SessionStart
+lexique sous-agent                         # le lexique d'un sous-agent, pour le mod lexique-sous-agent
 lexique chemin [--global] [--projet DIR]   # le chemin du lexique à ouvrir, pour Neovim
 lexique termes [--projet DIR]              # un terme par ligne, global puis local, pour Neovim
 lexique definition TERME [--projet DIR]    # la définition d'un terme, pour Neovim
@@ -68,6 +69,10 @@ lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`
   de démarrer. Ses alertes vont dans sa sortie, donc dans le contexte. Le projet est
   `$CLAUDE_PROJECT_DIR` tel quel — le sous-projet ouvert, dans un monodépôt —, ou le répertoire
   courant.
+- `sous-agent` échoue ouvert, comme `session` : **0** quoi qu'il arrive, une entrée illisible se dit
+  sur stderr. Il lit sur stdin un JSON, en prend `agent_type`, et rend sur stdout un
+  `hookSpecificOutput` (le format d'un hook `SubagentStart`) — ou rien. Le projet se résout comme
+  pour `session`.
 - `chemin` échoue fermé : **0** le fichier existe, son chemin sur stdout ; **1** aucun global à
   cet endroit, ou local absent, ou local égal au global — pourquoi, sur stderr.
 - `termes` échoue fermé : **0** un terme par ligne, global puis local, même sur un lexique non
@@ -89,8 +94,34 @@ lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`
    ligne présentée, pas pour la suivante.
 4. Écrire la ligne dans le tableau, puis relancer `lexique liste` : **0** attendu.
 
+## Ce que reçoit un sous-agent
+
+Un sous-agent ne reçoit pas le hook `SessionStart`. Le mod
+[`lexique-sous-agent`](mod/hooks/register.ts) lance `lexique sous-agent` à son
+lancement et préfixe le `prompt` du sous-agent de ce qu'il rend. La commande lit le **fichier de
+l'agent** — d'abord dans `.claude/agents/` du projet, puis dans `agents/` de la configuration
+globale — et décide d'après son frontmatter :
+
+| Frontmatter de l'agent | Ce qu'il reçoit par le mod |
+|---|---|
+| ni `omitClaudeMd` ni `injectLexique` | le lexique local ; le global et les instructions arrivent déjà par `CLAUDE.md` |
+| `omitClaudeMd: true` | rien : l'isolation est voulue |
+| `omitClaudeMd: true` et `injectLexique: true` | les instructions, le lexique global et le lexique local |
+
+`injectLexique` se lit comme `omitClaudeMd`, comme Claude Code lit le YAML : `true`, `True`, `TRUE`
+ou `"true"` vaut oui, et un commentaire de fin de ligne est ignoré. L'auteur de l'agent pose ce
+champ à la main ; ni le mod ni ses scripts n'écrivent dans un fichier d'agent. Un agent sans fichier
+(`Explore`, `Plan`, general-purpose, agent de plugin) ne reçoit rien.
+
+**Charger le mod** : un mod n'est pas un hook de `settings.json`. `CLAUDE_CODE_PLUGIN_DIRS`, dans
+le bloc `env` de `settings.json`, nomme son dossier, `skills/lexique/mod` sous la racine de la
+configuration : chaque session le charge. Pour une seule session : `claude --plugin-dir` sur ce
+même dossier. Il passe par le `prompt` et non par un hook `SubagentStart` : un hook plafonne son
+contexte à 10 000 caractères, au-delà desquels il en garde un aperçu de 2 Ko.
+
 ## Amorcer le lexique local d'un projet
 
 `lexique init` pose `.claude/LEXIQUE.md` à la racine du projet, en-tête compris : le modèle n'écrit
 que des lignes, par la procédure ci-dessus. Le hook `SessionStart` verse le lexique au contexte
-dès la session suivante ; aucun import n'est à ajouter au projet.
+dès la session suivante, et le mod à chaque sous-agent concerné ; aucun import n'est à ajouter au
+projet.

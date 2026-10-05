@@ -26,3 +26,11 @@ reçoivent `CLAUDE.md` (general-purpose, agents de `agents/`) et lesquels non (`
 - `shadow-skills/skill-convention/references/commandes-locales.md`, « Portée du mécanisme » : les
   sous-agents trouvent les commandes du `PATH`, donc `lexique liste`
 - chantier `lexique` (suivi, journal du 2026-09-23)
+
+## Fait le
+
+2026-10-05, par le chantier `lexique-des-sous-agents`. Un mod, `skills/lexique/mod/`, verse le lexique
+local — et, pour un agent à `injectLexique: true`, les instructions et le lexique global — au `prompt`
+d'un sous-agent à son lancement, d'après le frontmatter de son fichier ; `lexique sous-agent` porte la
+règle. Le plafond de 10 000 caractères d'un hook `SubagentStart` l'a écarté. Archive du chantier :
+`.claude/implementation/done/2026-10-05-lexique-des-sous-agents.md`.
