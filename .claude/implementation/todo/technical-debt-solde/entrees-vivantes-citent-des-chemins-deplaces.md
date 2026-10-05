@@ -26,6 +26,14 @@ soldée ou sans objet.
 Remplacer dans ces entrées les chemins sous `skills/nvim-mini-test/`, `skills/emmylua-ls/` et
 `skills/skill-convention/references/` par leurs équivalents sous `shadow-skills/`.
 
+## Soldé le
+
+**2026-10-05, correctif `fix(dette)` (8273fd0)** — les sept entrées citent désormais
+`shadow-skills/`. Établi par :
+`grep -rnE "(^|[^-/[:alnum:]_])skills/(nvim-mini-test|emmylua-ls)|(^|[^-/[:alnum:]_])skills/skill-convention/(references|modeles)" .claude/implementation/todo/technical-debt .claude/implementation/todo/road-map | grep -v entrees-vivantes`
+→ aucune ligne ; `python3 scripts/check_pipeline.py | sed -n '/^8\./,/^9\./p'` → « 114 renvois entre
+skills, tous résolvent ».
+
 ## Assumé
 
 Le pipeline ne réécrit pas un Registre de lui-même (Journal du Chantier `shadow-skill`).
