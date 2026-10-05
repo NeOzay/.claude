@@ -40,10 +40,11 @@ sans que rien ne le dise.
 
 ## Pour solder
 
-Poser la règle, dans `intent-brief` ou dans `skill-convention/references/prose.md` : **un critère de
-réussite en forme de grep ne porte ni `--include` ni répertoire plus étroit que le périmètre du
-chantier**, ou dit explicitement ce qu'il laisse dehors et pourquoi. Un chantier de renommage
-recherche en outre sans distinction de casse — `GABARIT` avait déjà échappé au premier passage.
+Poser la règle, dans `intent-brief` ou dans `shadow-skills/skill-convention/references/prose.md` :
+**un critère de réussite en forme de grep ne porte ni `--include` ni répertoire plus étroit que le
+périmètre du chantier**, ou dit explicitement ce qu'il laisse dehors et pourquoi. Un chantier de
+renommage recherche en outre sans distinction de casse — `GABARIT` avait déjà échappé au premier
+passage.
 
 Vérifier : rejouer le cas de ce chantier sur un dépôt d'essai — un mot renommé dans un `.toml` de
 définition doit faire échouer le critère tant qu'il subsiste.

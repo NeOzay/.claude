@@ -8,7 +8,7 @@ source = "chantier `skill-convention`, audit de clôture R1 (`cea0665`)"
 ## Constat
 
 La convention « La description dit quoi, quand, et ce que la skill ne fait pas »
-(`skills/skill-convention/references/prose.md`) demande une limite en une phrase négative. La
+(`shadow-skills/skill-convention/references/prose.md`) demande une limite en une phrase négative. La
 `description` de `skills/intent-brief/SKILL.md` se termine sur « Alimente implementation-tracker. »
 et ne porte aucune limite, alors qu'`intent-brief` s'arrête explicitement au brief validé : il ne
 planifie pas et ne confronte pas.

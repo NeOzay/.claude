@@ -22,7 +22,7 @@ reçoivent `CLAUDE.md` (general-purpose, agents de `agents/`) et lesquels non (`
   (`session`)
 - `settings.json`, hooks `SessionStart`
 - `hooks/outillage-rappel.sh`, en-tête : les sous-agents ne reçoivent pas `SessionStart`
-- `skills/skill-convention/references/prose.md`, section « Un sous-agent recopie ses règles »
-- `skills/skill-convention/references/commandes-locales.md`, « Portée du mécanisme » : les
+- `shadow-skills/skill-convention/references/prose.md`, section « Un sous-agent recopie ses règles »
+- `shadow-skills/skill-convention/references/commandes-locales.md`, « Portée du mécanisme » : les
   sous-agents trouvent les commandes du `PATH`, donc `lexique liste`
 - chantier `lexique` (suivi, journal du 2026-09-23)

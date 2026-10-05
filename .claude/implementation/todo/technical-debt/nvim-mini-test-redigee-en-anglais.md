@@ -9,9 +9,9 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-`skills/skill-convention/references/prose.md`, section « La prose est en français », énonce que la
-prose d'une skill est en français. `skills/nvim-mini-test/` est intégralement en anglais : le
-`SKILL.md` (337 lignes, intitulés « When to use mini.test », « Common pitfalls »…), sa
+`shadow-skills/skill-convention/references/prose.md`, section « La prose est en français », énonce
+que la prose d'une skill est en français. `shadow-skills/nvim-mini-test/` est intégralement en
+anglais : le `SKILL.md` (337 lignes, intitulés « When to use mini.test », « Common pitfalls »…), sa
 `description` de frontmatter, et ses deux références `examples.md` et `mini-test-api.md`.
 
 Relevé le 2026-09-17 : aucun autre skill du dépôt n'est dans ce cas — `emmylua-ls`, qui traite
@@ -29,8 +29,9 @@ français.
 
 ## Pour solder
 
-Traduire `skills/nvim-mini-test/SKILL.md`, sa `description` et ses deux références, en laissant
-dans leur forme d'origine les identifiants, les noms d'API `mini.test` et les extraits de code.
+Traduire `shadow-skills/nvim-mini-test/SKILL.md`, sa `description` et ses deux références, en
+laissant dans leur forme d'origine les identifiants, les noms d'API `mini.test` et les extraits de
+code.
 
 ## Assumé
 

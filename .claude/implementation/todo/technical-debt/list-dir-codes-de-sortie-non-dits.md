@@ -9,9 +9,9 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-`skills/skill-convention/references/prose.md`, section « Les codes de sortie sont dits », énonce
-qu'une commande documente ses codes : 0 succès, 1 refus ou échec, 2 erreur d'appel, avertissement
-sur stderr sans changement de code.
+`shadow-skills/skill-convention/references/prose.md`, section « Les codes de sortie sont dits »,
+énonce qu'une commande documente ses codes : 0 succès, 1 refus ou échec, 2 erreur d'appel,
+avertissement sur stderr sans changement de code.
 
 `skills/gabarit/SKILL.md` les donne en une ligne. `skills/list-dir/SKILL.md` ne les donne nulle
 part : il énonce « Échec fermé : sortie non nulle et message nommant la cause » (ligne 115) et

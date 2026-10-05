@@ -9,15 +9,15 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-`skills/skill-convention/references/prose.md`, section « La description dit quoi, quand, et ce que
-la skill ne fait pas », exige trois choses de la `description` du frontmatter : ce que fait la
-skill, quand elle se déclenche, et sa limite en une phrase négative.
+`shadow-skills/skill-convention/references/prose.md`, section « La description dit quoi, quand, et
+ce que la skill ne fait pas », exige trois choses de la `description` du frontmatter : ce que fait
+la skill, quand elle se déclenche, et sa limite en une phrase négative.
 
-Celle de `skills/emmylua-ls/SKILL.md` porte les deux premières (« Référence du LSP emmylua_ls… »,
-« Déclencher dès que l'utilisateur mentionne… ») et **aucune limite négative**. Les autres skills
-du dépôt en portent une : « Ne juge aucun contenu » (`gabarit`, `list-dir`), « Ne corrige aucun
-code » (`debt-review`), « This skill covers mini.test specifically — not plenary.busted »
-(`nvim-mini-test`).
+Celle de `shadow-skills/emmylua-ls/SKILL.md` porte les deux premières (« Référence du LSP
+emmylua_ls… », « Déclencher dès que l'utilisateur mentionne… ») et **aucune limite négative**. Les
+autres skills du dépôt en portent une : « Ne juge aucun contenu » (`gabarit`, `list-dir`), « Ne
+corrige aucun code » (`debt-review`), « This skill covers mini.test specifically — not
+plenary.busted » (`nvim-mini-test`).
 
 ## Pourquoi c'est gênant
 
@@ -29,8 +29,8 @@ sur la mauvaise référence.
 
 ## Pour solder
 
-Ajouter une phrase négative à la `description` d'`skills/emmylua-ls/SKILL.md`, qui écarte au moins
-le style de code et les tests.
+Ajouter une phrase négative à la `description` de `shadow-skills/emmylua-ls/SKILL.md`, qui écarte au
+moins le style de code et les tests.
 
 ## Assumé
 
