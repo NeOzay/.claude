@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_SCROLL_SPEED": "4"
+  },
   "permissions": {
     "allow": [
       "WebSearch",
@@ -105,6 +108,9 @@
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "high"
+    },
+    "claude-sonnet-5-5": {
+      "effortLevel": "high"
     }
   },
   "plansDirectory": ".claude/plans",
@@ -112,8 +118,5 @@
   "editorMode": "normal",
   "verbose": false,
   "autoCompactEnabled": true,
-  "voiceEnabled": true,
-  "env": {
-    "CLAUDE_CODE_SCROLL_SPEED": "4"
-  }
+  "voiceEnabled": true
 }
