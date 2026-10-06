@@ -28,6 +28,13 @@ sont ancrés de même.
 Établi par : `grep -n '\$HOME/.claude' settings.json` → quatre lignes : deux hooks `SessionStart`
 (`sante_skills.py`, `lexique-cli.py session`), le hook `intent-brief-gate.sh`, la `statusLine`.
 
+**Corrigé le 2026-10-06** : le second hook `SessionStart` n'existe plus, le lexique local passant
+par le mod `lexique-sous-agent`. Il ne reste que trois constantes ancrées sur le `HOME`, dont un
+seul hook `SessionStart`.
+
+Établi par : `grep -n '\$HOME/.claude' settings.json` → trois lignes : le hook `SessionStart`
+(`sante_skills.py`), le hook `intent-brief-gate.sh`, la `statusLine`.
+
 ## Pourquoi c'est gênant
 
 Une exception non écrite ne se distingue pas d'un oubli. Le prochain lecteur qui appliquera la
