@@ -12,6 +12,23 @@ Constats tirés de la pratique, un par ligne de vérification : chacun a été �
 pas en lisant les types. Ce qui n'a pas été essayé est dit comme tel, en fin de fichier. Les
 versions de Claude Code sont celles de la session ; un constat peut changer avec elles.
 
+### Entretenir ce fichier
+
+Ce fichier n'est pas figé : il se tient à jour à chaque découverte sur les mods, par celui qui
+travaille sur un mod, dans la session même.
+
+- **Ce qui s'y ajoute** : un comportement établi en exécutant (ce qui marche, une limite, une
+  recette de test), rangé sous la section qui lui correspond. Une découverte qui n'a que la lecture
+  des types pour preuve va sous « Non essayé ».
+- **Ce qui s'y corrige** : un constat que Claude Code a rendu faux (nouvelle version, comportement
+  qui change) se remplace, avec la version qui l'a montré. Un constat démenti ne reste pas à côté
+  de son remplaçant.
+- **Ce qui en sort** : un constat devenu sans objet, ou un « Non essayé » qu'on a essayé : il passe
+  dans la section de son résultat.
+- **Quand** : au moment où la découverte est faite, avant de poursuivre le travail sur le mod ;
+  pas à la clôture, où elle s'oublie. Aucun commit sans l'accord de l'utilisateur, ici comme
+  ailleurs.
+
 ### Charger et vérifier un mod
 
 - `CLAUDE_CODE_PLUGIN_DIRS`, dans le bloc `env` de `settings.json`, nomme le dossier du mod : chaque
