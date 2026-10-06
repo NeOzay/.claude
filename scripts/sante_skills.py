@@ -17,11 +17,13 @@ SILENCIEUX QUAND TOUT VA BIEN : un hook qui parle à chaque session finit par ne
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
 import sys
 from pathlib import Path
+from typing import cast
 
 MIN_PYTHON = (3, 12)
 
@@ -133,6 +135,95 @@ def _dependances(root: Path) -> list[str]:
     return []
 
 
+def _objet_json(chemin: Path) -> dict[str, object] | str:
+    """L'objet JSON que porte `chemin`, ou le motif qui l'en empêche."""
+    try:
+        # `json.loads` rend Any : le lire comme `object` oblige à vérifier sa forme.
+        valeur = cast("object", json.loads(chemin.read_text(encoding="utf-8")))
+    except (OSError, ValueError) as e:
+        return f"illisible ({e})"
+    if not isinstance(valeur, dict):
+        return "n'est pas un objet JSON"
+    # Les clés d'un objet JSON sont TOUJOURS des chaînes : le type ne le sait pas.
+    return cast("dict[str, object]", valeur)
+
+
+def _liste(valeur: object) -> list[object]:
+    """Une valeur JSON lue comme liste : une valeur seule en est une d'un élément."""
+    return cast("list[object]", valeur) if isinstance(valeur, list) else [valeur]
+
+
+def mods_en_defaut(root: Path) -> list[str]:
+    """Chaque mod posé à la racine d'un skill peut-il se charger ?
+
+    UN MOD QUI NE SE CHARGE PAS NE DIT RIEN : le moteur le saute, et la session tourne
+    sans le contexte qu'il devait verser. Ce contrôle voit ce qui se lit sans lancer
+    le moteur — manifeste, modules nommés, dépendances. Un module présent qui échoue
+    au chargement lui échappe : seul le journal de `claude --debug` le montre.
+
+    UN MOD EST UN DOSSIER DE SKILL qui porte `.claude-plugin/` ou `hooks/hooks.json`,
+    sous `skills/` et sous le `.claude/skills/` du dépôt. L'un sans l'autre est déjà
+    un mod incomplet.
+    """
+    maux: list[str] = []
+    dossiers = sorted(
+        d
+        for parent in (root / "skills", root / ".claude" / "skills")
+        if parent.is_dir()
+        for d in parent.iterdir()
+        if (d / ".claude-plugin").is_dir() or (d / "hooks" / "hooks.json").is_file()
+    )
+    noms: set[object] = set()
+    dependances: dict[Path, list[object]] = {}
+
+    for mod in dossiers:
+        ici = mod.relative_to(root)
+        plugin = _objet_json(mod / ".claude-plugin" / "plugin.json")
+        if isinstance(plugin, str):
+            maux.append(f"mod {ici} : .claude-plugin/plugin.json {plugin}.")
+        else:
+            nom = plugin.get("name")
+            if isinstance(nom, str) and nom:
+                noms.add(nom)
+            else:
+                maux.append(f"mod {ici} : .claude-plugin/plugin.json ne porte pas de « name ».")
+            dependances[mod] = _liste(plugin.get("dependencies", []))
+
+        # Les modules se résolvent depuis `hooks/`, où `hooks.json` les nomme.
+        crochets = _objet_json(mod / "hooks" / "hooks.json")
+        if isinstance(crochets, str):
+            maux.append(f"mod {ici} : hooks/hooks.json {crochets}.")
+            continue
+        for module in _liste(crochets.get("modules", [])):
+            if not isinstance(module, str) or not (mod / "hooks" / module).is_file():
+                maux.append(f"mod {ici} : le module {module!r} de hooks/hooks.json est absent.")
+
+    for mod, deps in dependances.items():
+        maux.extend(
+            f"mod {mod.relative_to(root)} : la dépendance {dep!r} ne nomme aucun mod présent."
+            for dep in deps
+            if dep not in noms
+        )
+    return maux
+
+
+def plugin_dirs_restant(root: Path) -> list[str]:
+    """`CLAUDE_CODE_PLUGIN_DIRS` resté dans `settings.json` ?
+
+    Les mods de ce dépôt se chargent depuis la racine de leur skill. Un dossier encore
+    nommé là se chargerait deux fois, ou désignerait un dossier qui n'existe plus.
+    """
+    reglages = root / "settings.json"
+    if reglages.is_file() and "CLAUDE_CODE_PLUGIN_DIRS" in reglages.read_text(encoding="utf-8"):
+        return [
+            (
+                "settings.json nomme encore CLAUDE_CODE_PLUGIN_DIRS — un mod se charge depuis"
+                " la racine de son skill ; retirer la variable."
+            )
+        ]
+    return []
+
+
 def anomalies() -> list[str]:
     maux: list[str] = []
     root = racine()
@@ -175,6 +266,8 @@ def anomalies() -> list[str]:
             maux.append(f"« {lien.name} » résout vers {trouve}, pas vers bin/{lien.name}.")
 
     maux.extend(_dependances(root))
+    maux.extend(mods_en_defaut(root))
+    maux.extend(plugin_dirs_restant(root))
 
     if sys.version_info < MIN_PYTHON:
         v = ".".join(str(n) for n in sys.version_info[:3])

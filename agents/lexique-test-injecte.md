@@ -1,6 +1,6 @@
 ---
 name: lexique-test-injecte
-description: Témoin du lexique à `omitClaudeMd: true` et `injectLexique: true` : doit recevoir par le mod lexique-sous-agent les règles, le global et le local. Agent de test, lancé à la main : jamais pour une tâche.
+description: Témoin du lexique à `omitClaudeMd: true` et `injectLexique: true` : doit recevoir par le mod lexique les règles, le global et le local. Agent de test, lancé à la main : jamais pour une tâche.
 omitClaudeMd: true
 injectLexique: true
 tools: Read

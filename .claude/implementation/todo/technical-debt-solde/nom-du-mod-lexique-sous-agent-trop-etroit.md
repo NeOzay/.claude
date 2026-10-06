@@ -25,3 +25,17 @@ plus tard coûte davantage à chaque ajout.
 Renommer le mod (par exemple `lexique`) dans `plugin.json`, les messages d'état, l'`id` de la
 section et les dix fichiers qui le citent ; relancer `claude plugin test` et les trois agents
 témoins.
+
+## Soldé le
+
+**2026-10-06, chantier `mods-a-la-racine-des-skills`** — le mod s'appelle `lexique`, sa section
+`lexique:local`, et les fichiers qui le citaient sont renommés.
+
+Établi par :
+
+- `grep -n '"name"' skills/lexique/.claude-plugin/plugin.json` → `"name": "lexique",`.
+- `grep -rln lexique-sous-agent`, hors `done/`, rapports d'audit et dettes soldées → le suivi, le
+  brief et le plan du Chantier seuls, que la Clôture archive en `done/`.
+- `claude plugin test skills/lexique` → 8 pass, 0 fail, code 0.
+- les trois agents témoins, dans `claude-translator`, rendent le relevé d'avant le renommage
+  (Journal du Chantier, Étape 6 ; audit de clôture).

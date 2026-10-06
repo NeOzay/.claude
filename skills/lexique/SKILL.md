@@ -45,8 +45,8 @@ besoin ; un tableau dans un bloc de code est un exemple, et ne compte pas :
 ```bash
 lexique init [--projet DIR]                # pose .claude/LEXIQUE.md, en-tête seul
 lexique liste [--projet DIR]               # termes global puis local : niveau, terme, lien
-lexique session                            # le lexique local du projet, pour le mod lexique-sous-agent
-lexique sous-agent TYPE                    # le lexique d'un sous-agent, pour le mod lexique-sous-agent
+lexique session                            # le lexique local du projet, pour le mod lexique
+lexique sous-agent TYPE                    # le lexique d'un sous-agent, pour le mod lexique
 lexique chemin [--global] [--projet DIR]   # le chemin du lexique à ouvrir, pour Neovim
 lexique termes [--projet DIR]              # un terme par ligne, global puis local, pour Neovim
 lexique definition TERME [--projet DIR]    # la définition d'un terme, pour Neovim
@@ -97,7 +97,7 @@ lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`
 ## Ce que reçoit la session
 
 La session principale reçoit le lexique local par le mod
-[`lexique-sous-agent`](mod/hooks/register.ts) : il lance `lexique session` une fois, et ajoute la
+[`lexique`](hooks/register.ts) : il lance `lexique session` une fois, et ajoute la
 sortie au prompt système, en section de session, à chaque composition. Un hook `SessionStart`
 plafonne son contexte à 10 000 caractères et n'en garde qu'un aperçu de 2 Ko ; une section du
 prompt système n'a pas ce plafond. Sans le mod chargé, la session ne reçoit aucun lexique local, et
@@ -113,7 +113,7 @@ Deux autres voies ne conviennent pas :
 ## Ce que reçoit un sous-agent
 
 Un sous-agent ne reçoit pas la section que le mod ajoute au prompt système de la session. Le
-mod [`lexique-sous-agent`](mod/hooks/register.ts) lance `lexique sous-agent` à son lancement et
+mod [`lexique`](hooks/register.ts) lance `lexique sous-agent` à son lancement et
 préfixe le `prompt` du sous-agent de ce qu'il rend. La commande lit le **fichier de l'agent** —
 d'abord dans `.claude/agents/` du projet, puis dans `agents/` de la configuration globale — et
 décide d'après son frontmatter :
@@ -129,11 +129,12 @@ ou `"true"` vaut oui, et un commentaire de fin de ligne est ignoré. L'auteur de
 champ à la main ; ni le mod ni ses scripts n'écrivent dans un fichier d'agent. Un agent sans fichier
 (`Explore`, `Plan`, general-purpose, agent de plugin) ne reçoit rien.
 
-**Charger le mod** : un mod n'est pas un hook de `settings.json`. `CLAUDE_CODE_PLUGIN_DIRS`, dans
-le bloc `env` de `settings.json`, nomme son dossier, `skills/lexique/mod` sous la racine de la
-configuration : chaque session le charge. Pour une seule session : `claude --plugin-dir` sur ce
-même dossier. Il passe par le `prompt` et non par un hook `SubagentStart` : un hook plafonne son
-contexte à 10 000 caractères, au-delà desquels il en garde un aperçu de 2 Ko.
+**Charger le mod** : un mod n'est pas un hook de `settings.json`. Il vit à la racine de ce skill,
+dans `.claude-plugin/` et `hooks/`, et chaque session le charge seule : aucun réglage ne le nomme.
+Il lance `lexique session` et `lexique sous-agent` par `$.commande`, que le mod
+[mod-commun](../mod-commun/SKILL.md) ajoute au moteur, et dont il dépend.
+Il passe par le `prompt` et non par un hook `SubagentStart` : un hook plafonne son contexte à
+10 000 caractères, au-delà desquels il en garde un aperçu de 2 Ko.
 
 ## Amorcer le lexique local d'un projet
 

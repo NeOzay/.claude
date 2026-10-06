@@ -1,0 +1,6 @@
+{
+  "name": "mod-commun",
+  "version": "0.1.0",
+  "description": "Ajoute $.commande au moteur : le lancement d'une commande, partagé entre les mods, qui rend sa sortie et dit un échec sur la ligne d'état.",
+  "types": "./types/index.d.ts"
+}

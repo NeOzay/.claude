@@ -1,0 +1,6 @@
+{
+  "name": "lexique",
+  "version": "0.2.0",
+  "description": "Verse le lexique local à la session et à un sous-agent à son lancement, sans le plafond de 10 000 caractères d'un hook.",
+  "dependencies": ["mod-commun"]
+}

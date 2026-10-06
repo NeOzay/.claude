@@ -7,7 +7,7 @@ source = "audit hors chantier de `lexique-local-tronque-par-le-hook-session`, tr
 
 ## Constat
 
-Le mod `lexique-sous-agent` verse le lexique local en section de `prompt.compose`. Lancé avec
+Le mod `lexique` verse le lexique local en section de `prompt.compose`. Lancé avec
 `--system-prompt`, qui remplace le prompt système, `claude -p` dans `claude-translator` ne porte
 plus la section : le prompt enregistré compte 2 blocs et le modèle répond que le lexique est absent.
 Avec `--append-system-prompt`, la section est présente, une fois. Constaté le 2026-10-06 ; l'ancien

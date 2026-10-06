@@ -49,6 +49,21 @@ Puis relancer le garde-fou, qui contrôle le contenu des agents : `scripts/check
 rendre « Pipeline conforme. ». Solde établi par `grep -c 'ruff format' agents/*.md` → au moins `1`
 pour chacun des deux fichiers.
 
-## Assumé
+## Soldé le
 
-<OPTIONNEL>
+**2026-10-06, chantier `mods-a-la-racine-des-skills`** — soldée à l'inverse du « Pour solder »,
+comme le Brief le décide : les agents ne portent plus aucune règle d'outillage, et le mod
+`outillage` verse à chaque sous-agent lancé sur ce dépôt un rappel qui porte `ruff format`.
+
+Établi par :
+
+- `grep -c 'ruff format' .claude/skills/outillage/scripts/rappel.sh` → `1`.
+- transcription du sous-agent de l'audit de clôture,
+  `projects/-home-debian--claude/f070f2ee-801b-4077-b292-6ac880d212b8/subagents/agent-acd0ea04bce624ddc.jsonl`
+  → premier message ouvert sur « Outillage de ce dépôt (/home/debian/.claude/OUTILLAGE.md) : », et
+  la ligne « `uvx ruff format <chemins>` avant de commiter du Python ».
+
+Non repris : le rappel est une consigne d'auteur, et rien ne fait compter à l'auditeur un fichier
+hors format comme un écart ; il n'arrive pas non plus depuis un sous-dossier du dépôt. Restent au
+registre : `ruff-format-non-juge-par-l-auditeur`,
+`rappel-d-outillage-absent-depuis-un-sous-dossier`.

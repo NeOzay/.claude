@@ -1,6 +1,6 @@
 ---
 name: lexique-test-claude-md
-description: Témoin du lexique, sans `omitClaudeMd` : doit recevoir le local par le mod lexique-sous-agent, le global et les règles par CLAUDE.md. Agent de test, lancé à la main : jamais pour une tâche.
+description: Témoin du lexique, sans `omitClaudeMd` : doit recevoir le local par le mod lexique, le global et les règles par CLAUDE.md. Agent de test, lancé à la main : jamais pour une tâche.
 tools: Read
 ---
 

@@ -11,10 +11,10 @@ DEUX RÉGIMES D'ÉCHEC POUR HUIT COMMANDES :
 - `init` échoue fermé — 0 lexique posé, son chemin sur stdout ; 1 fichier déjà présent ;
 - `liste` échoue fermé — 0 conforme, 1 constat ou lexique malformé, 2 erreur d'appel ; un
   lexique vide ou absent se dit sur stderr, sans toucher au code ;
-- `session` échoue OUVERT — sortie 0 quoi qu'il arrive : le mod `lexique-sous-agent` l'appelle à la
+- `session` échoue OUVERT — sortie 0 quoi qu'il arrive : le mod `lexique` l'appelle à la
   première composition du prompt système, et un rappel n'a jamais de raison d'empêcher une session
   de démarrer. Ses alertes vont au contexte.
-- `sous-agent` échoue OUVERT de même : le mod `lexique-sous-agent` l'appelle au lancement d'un
+- `sous-agent` échoue OUVERT de même : le mod `lexique` l'appelle au lancement d'un
   sous-agent ; il prend le type de l'agent en argument, et rend sur stdout ce que l'agent reçoit,
   en texte brut comme `session`, d'après son fichier. Sans cet argument : 2, erreur d'appel.
 - `chemin`, `termes`, `definition` et `definitions` échouent fermé et alimentent `:Lexique`,
@@ -161,9 +161,9 @@ def main() -> int:
     liste.add_argument("--projet", type=Path, help="défaut : la racine git d'ici, ou ici")
     init = sous.add_parser("init", help="pose le lexique local d'un projet, en-tête seul")
     init.add_argument("--projet", type=Path, help="défaut : la racine git d'ici, ou ici")
-    sous.add_parser("session", help="le lexique local, pour le mod lexique-sous-agent")
+    sous.add_parser("session", help="le lexique local, pour le mod lexique")
     sous_agent = sous.add_parser(
-        "sous-agent", help="le lexique d'un sous-agent, pour le mod lexique-sous-agent"
+        "sous-agent", help="le lexique d'un sous-agent, pour le mod lexique"
     )
     sous_agent.add_argument("agent_type", help="le type de l'agent, son nom de fichier")
     chemin = sous.add_parser("chemin", help="le chemin d'un lexique à ouvrir, pour Neovim")

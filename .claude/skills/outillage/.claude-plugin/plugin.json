@@ -1,0 +1,6 @@
+{
+  "name": "outillage",
+  "version": "0.1.0",
+  "description": "Rappelle l'outillage de ce dépôt à chaque sous-agent, en tête de son prompt.",
+  "dependencies": ["mod-commun"]
+}

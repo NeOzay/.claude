@@ -751,7 +751,16 @@ def check_pyright(root: Path) -> list[Finding]:
     répond toujours oui, et il ne se voit pas : d'où ce contrôle, qui refuse la mention
     plutôt que d'attendre l'appel.
     """
-    fichiers = [*markdown_files(root), *root.glob("hooks/*.sh"), *root.glob("agents/*.md")]
+    # Les scripts des skills comptent : le rappel d'outillage vit dans
+    # `.claude/skills/outillage/scripts/`, et une consigne qu'il verse à un sous-agent y
+    # produirait l'appel aussi sûrement qu'un `.md`.
+    fichiers = [
+        *markdown_files(root),
+        *root.glob("hooks/*.sh"),
+        *root.glob("agents/*.md"),
+        *root.glob("skills/*/scripts/*.sh"),
+        *root.glob(".claude/skills/*/scripts/*.sh"),
+    ]
     findings: list[Finding] = []
     vus = 0
     for fichier in sorted(set(fichiers)):

@@ -180,7 +180,7 @@ jamais de raison d'empêcher le démarrage d'une session. L'en-tête du script d
 il est.
 
 **Pratiqué dans** : [`check_pipeline.py`](../../../scripts/check_pipeline.py) (fermé) ;
-[`outillage-rappel.sh`](../../../hooks/outillage-rappel.sh) (ouvert).
+[`rappel.sh`](../../../.claude/skills/outillage/scripts/rappel.sh) du mod outillage (ouvert).
 
 ## Une date se lit, elle ne s'écrit pas de mémoire
 
@@ -193,11 +193,16 @@ Règle et motif :
 
 Exception à « une règle, un seul endroit » : un agent de `agents/` se charge dans sa propre
 fenêtre, sans suivre les renvois, et sans recevoir les hooks de la session. Les règles qui le
-concernent y sont donc écrites en dur. C'est la seule recopie admise, et elle est bornée aux
-règles dont l'agent a besoin.
+concernent y sont donc écrites en dur. C'est la seule recopie admise, et elle est bornée aux règles
+du contrat du pipeline et aux méthodes d'audit valables dans tout projet.
 
-**Pratiqué dans** : [`implementation-auditor.md`](../../../agents/implementation-auditor.md) ;
-l'exception est déclarée en tête de [`check_pipeline.py`](../../../scripts/check_pipeline.py).
+L'outillage d'un dépôt n'en est pas : un agent de `agents/` est global, et les lanceurs d'un dépôt
+sont faux dans un autre. Il arrive au sous-agent par un mod du dépôt, qui préfixe son prompt au
+lancement.
+
+**Pratiqué dans** : [`implementation-auditor.md`](../../../agents/implementation-auditor.md),
+« Comparer à la base » ; le mod outillage, `.claude/skills/outillage/` ; l'exception est déclarée en
+tête de [`check_pipeline.py`](../../../scripts/check_pipeline.py).
 
 ## Une phrase déclare, elle ne raconte pas
 

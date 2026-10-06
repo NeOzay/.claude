@@ -1,5 +1,0 @@
-{
-  "name": "lexique-sous-agent",
-  "version": "0.1.0",
-  "description": "Verse le lexique local à la session et à un sous-agent à son lancement, sans le plafond de 10 000 caractères d'un hook."
-}

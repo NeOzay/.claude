@@ -12,7 +12,7 @@ UN TERME N'EST DÉFINI QU'UNE FOIS, tous niveaux confondus. Un terme du global e
 local ne le redéfinit pas. La comparaison se fait après `casefold` et normalisation des espaces —
 un terme peut compter plusieurs mots, et « Signal de dérive » est « signal  de dérive ».
 
-STDLIB SEULE : le mod `lexique-sous-agent` lance ce module sous le `python3` du PATH, où le venv du
+STDLIB SEULE : le mod `lexique` lance ce module sous le `python3` du PATH, où le venv du
 dépôt n'est pas actif. Rien ici ne doit exiger ce qu'il porte.
 
 LA STRUCTURE EST POSÉE PAR LA COMMANDE : `amorcer` écrit l'en-tête d'un lexique local neuf, pour

@@ -59,3 +59,8 @@ plugins/synced/
 
 # Mods en cours de développement : le dossier de rechargement à chaud de la session
 dev-mods/
+
+# Le tsconfig.json d'un mod étend celui que le moteur pose dans .claude-plugin/types/,
+# lui-même ignoré : versionné, il ne vaudrait rien là où le mod ne s'est jamais chargé.
+skills/*/tsconfig.json
+.claude/skills/*/tsconfig.json

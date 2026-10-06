@@ -24,3 +24,24 @@ modèle employant mal un terme le laisse deviner.
 Faire vérifier par `sante_skills.py` que `CLAUDE_CODE_PLUGIN_DIRS` nomme un dossier de mod existant
 qui porte un `hooks/hooks.json`, et qu'il dise l'anomalie dans son stdout, comme pour les autres
 dépendances.
+
+## Soldé le
+
+**2026-10-06, chantier `mods-a-la-racine-des-skills`** — `CLAUDE_CODE_PLUGIN_DIRS` n'existe plus :
+chaque mod se charge depuis la racine de son skill. Le « Pour solder » est donc transposé :
+`scripts/sante_skills.py` contrôle, à chaque démarrage, les mods à la racine d'un skill
+(`plugin.json` lisible avec un `name`, modules de `hooks.json` présents, `dependencies` présentes),
+et signale la variable si elle revient dans `settings.json`.
+
+Établi par :
+
+- `grep -c CLAUDE_CODE_PLUGIN_DIRS settings.json` → `0` ; `python3 scripts/sante_skills.py` →
+  code 0, aucune sortie.
+- copie de `HEAD` par `git archive`, `skills/mod-commun/hooks/register.ts` supprimé, puis
+  `python3 scripts/sante_skills.py` → code 1, « ✗ mod skills/mod-commun : le module
+  './register.ts' de hooks/hooks.json est absent. ».
+- `pytest scripts/tests/test_sante_skills.py` → 34 passés.
+
+Limite : un module présent qui échoue au chargement échappe au contrôle ; seul le journal de
+`claude --debug` le montre (docstring de `mods_en_defaut`, `claude-code-mods`). Reste au registre :
+`sante-skills-plante-sur-une-dependance-objet`.

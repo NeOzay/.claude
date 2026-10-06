@@ -12,8 +12,8 @@ l'outillage d'un dépôt n'a rien à y faire.
 
 ## Ce dont le dépôt dépend
 
-Le dépôt dépend de sept commandes, d'un interpréteur, de git, de deux linters et d'un formateur
-Markdown — et de rien d'autre :
+Le dépôt dépend de sept commandes, d'un interpréteur, de git, de deux linters, d'un formateur
+Markdown et de l'outillage TypeScript des mods — et de rien d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
 |---|---|---|
@@ -28,6 +28,7 @@ Markdown — et de rien d'autre :
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification et le formatage du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` |
 | `rumdl` | le formatage du Markdown versionné | **absent du `PATH`** : se lance par `uvx rumdl fmt .`, et `uvx rumdl fmt --check .` pour vérifier |
+| Biome, `tsc` | le formatage et le typage du TypeScript des mods | **absents du `PATH`** : se lancent par `npx`, voir [Le TypeScript des mods](#le-typescript-des-mods) |
 
 **Ces commandes sont des liens de `bin/`, résolus par le `PATH`.** Rien ne les cite par leur
 chemin : un chemin de plus serait un point d'édition de plus, que le prochain déplacement
@@ -132,9 +133,12 @@ TMP=$(mktemp -d); git archive <base> | tar -x -C "$TMP"
 > *Mode de défaillance* — deux relevés du même chantier ont été publiés faux pour cette raison :
 > « ruff, 5 erreurs toutes préexistantes » (deux étaient induites) et « 551 tests avant » (545).
 
-**Les sous-agents portent ces règles en dur**, recopiées dans `agents/*.md` plutôt que renvoyées
-ici : le garde-fou leur interdit tout renvoi au contrat du pipeline, pour qu'ils restent lisibles
-seuls. C'est la seule duplication voulue de ce fichier.
+**Les sous-agents reçoivent ces règles par le mod outillage.** Un sous-agent ne lit ni
+`.claude/CLAUDE.md` ni ce fichier : dans une session ouverte sur ce dépôt, le mod
+`.claude/skills/outillage/` préfixe son prompt du rappel que rend
+`.claude/skills/outillage/scripts/rappel.sh`. Les agents de `agents/` sont globaux et ne recopient
+donc pas l'outillage d'ici, faux dans un autre projet. Seule la comparaison à la base reste écrite
+dans `implementation-auditor.md` : c'est une méthode d'audit, valable dans tout projet.
 
 ## Formater le Markdown
 
@@ -154,6 +158,40 @@ pas — ancres HTML, fichiers sans titre de tête — et sort non nul sur un dé
 > plus) ; Prettier réalignait chaque tableau, si bien qu'une ligne modifiée réécrivait le tableau
 > entier. Avant d'élargir la configuration, vérifier sur une copie que `list-dir validate`,
 > `gabarit check` et les tests rendent le même résultat qu'avant.
+
+## Le TypeScript des mods
+
+Un mod se vérifie par quatre commandes, lancées depuis la racine du dépôt, `<mod>` étant son
+dossier (`skills/<nom>` ou `.claude/skills/<nom>`). Ce qu'elles vérifient et pourquoi :
+`rules/claude-typescript-style.md` ; ce que les mods permettent : le Shadow-skill
+`claude-code-mods`.
+
+**Le format : Biome, `npx --yes @biomejs/biome@2 format --write <mod>` avant de commiter, et sans
+`--write` pour vérifier.** `biome.json`, à la racine, limite Biome au TypeScript des mods
+(`files.includes`) et lui fait suivre le `.gitignore` : sans ces deux bornes, il formaterait le JSON
+du dépôt, `settings.json` compris, et le venv. Le linter est désactivé : seul le format fait partie
+du contrat. Biome traite aussi `biome.json` lui-même, quoi qu'en dise `files.includes`.
+
+**Le typage : `tsc`, par un `tsconfig.json` temporaire hors du mod.** Celui du mod n'est pas
+versionné, et `claude -p` ne pose pas les types : le `tsconfig.json` temporaire étend celui qu'un
+mod déjà chargé porte dans `.claude-plugin/types/`, et nomme les `hooks/` du mod à vérifier.
+
+```bash
+R=$(git rev-parse --show-toplevel); T=$(mktemp -d)
+TY="$R/<dossier .claude-plugin/types d'un mod déjà chargé>"   # chemins absolus : le
+M="$R/<mod>"                                                  # tsconfig vit dans $T
+printf '{"extends":"%s/tsconfig.json","compilerOptions":{"typeRoots":["%s"]},"include":["%s/hooks","%s/skills/mod-commun/types"]}' \
+  "$TY" "$TY" "$M" "$R" > "$T/tsconfig.json"
+npx --yes -p typescript@5 tsc -p "$T/tsconfig.json" --noEmit
+```
+
+**Le manifeste et les tests : `claude plugin validate <mod>`, puis `claude plugin test <mod>`.** Le
+premier lit le manifeste et charge le module ; le second lance les `*.test.ts`. Un test qui passe
+se lit jusqu'à la ligne « the engine reported », où un hook ignoré ne fait rien échouer.
+
+> *Mode de défaillance* — le banc ne charge que le mod testé et ne dit pas ce que reçoit une vraie
+> session. Les quatre commandes passent sur un mod que la session ignore : la preuve qu'il agit se
+> lit dans le journal d'un `claude -p --debug`, par la recette de `claude-code-mods`.
 
 ## Les tests
 

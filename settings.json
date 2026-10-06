@@ -1,7 +1,6 @@
 {
   "env": {
-    "CLAUDE_CODE_SCROLL_SPEED": "4",
-    "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/skills/lexique/mod"
+    "CLAUDE_CODE_SCROLL_SPEED": "4"
   },
   "permissions": {
     "allow": [

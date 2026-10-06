@@ -39,6 +39,7 @@ skill y mène.
 |---|---|---|
 | Prose d'une skill | [`references/prose.md`](references/prose.md), vers lequel `rules/skill-prose.md` renvoie au contact d'un fichier de skill | on écrit ou relit un `SKILL.md` ou une référence |
 | Code Python | `rules/claude-python-style.md`, chargé au contact d'un `*.py` — par chemin relatif sur ce dépôt-ci, par `**/.claude/**` ailleurs | on écrit du Python |
+| Code TypeScript d'un mod | `rules/claude-typescript-style.md`, chargé au contact d'un `*.ts` de mod ; le Shadow-skill [claude-code-mods](../claude-code-mods/SKILL.md) pour ce que les mods permettent, leurs limites et leurs tests | on écrit, teste ou relit un mod |
 | Poser un document depuis un contrat | [gabarit](../../skills/gabarit/SKILL.md) | on crée un fichier structuré à remplir |
 | Tenir un registre | [list-dir](../../skills/list-dir/SKILL.md) | on crée, valide, filtre ou migre une liste de fichiers |
 | Commandes à la disposition d'un agent | [`references/commandes-locales.md`](references/commandes-locales.md) | une skill ou un projet doit fournir une commande |

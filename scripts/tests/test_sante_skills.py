@@ -246,3 +246,115 @@ def test_une_epingle_a_marqueur_exige_quand_meme_la_presence(racine: Path) -> No
     (mal,) = sante_skills._dependances(racine)
 
     assert "tomlkit" in mal
+
+
+# ------------------------------------------------- les mods à la racine des skills
+def poser_mod(
+    racine: Path,
+    dossier: str,
+    plugin: str | None = '{"name": "m"}',
+    modules: str | None = '{"modules": ["./register.ts"]}',
+    *,
+    module: bool = True,
+) -> Path:
+    """Un mod jouet : son manifeste, son `hooks.json` et `hooks/register.ts`.
+
+    `None` omet le fichier, `module=False` omet le module.
+    """
+    mod = racine / dossier
+    (mod / ".claude-plugin").mkdir(parents=True)
+    (mod / "hooks").mkdir()
+    if plugin is not None:
+        _ = (mod / ".claude-plugin" / "plugin.json").write_text(plugin, encoding="utf-8")
+    if modules is not None:
+        _ = (mod / "hooks" / "hooks.json").write_text(modules, encoding="utf-8")
+    if module:
+        _ = (mod / "hooks" / "register.ts").write_text("", encoding="utf-8")
+    return mod
+
+
+def test_mods_sains_ne_disent_rien(racine: Path) -> None:
+    """Un fournisseur sous `skills/`, son client sous `.claude/skills/` : la dépendance
+    se résout d'un dossier à l'autre, comme `outillage` vers `mod-commun`."""
+    _ = poser_mod(racine, "skills/commun", '{"name": "commun"}')
+    _ = poser_mod(racine, ".claude/skills/client", '{"name": "client", "dependencies": ["commun"]}')
+
+    assert sante_skills.mods_en_defaut(racine) == []
+
+
+def test_un_skill_sans_mod_n_est_pas_controle(racine: Path) -> None:
+    """La fixture pose `skills/x/` sans `.claude-plugin/` ni `hooks/` : rien à dire."""
+    assert sante_skills.mods_en_defaut(racine) == []
+
+
+def test_manifeste_absent_est_nomme(racine: Path) -> None:
+    _ = poser_mod(racine, "skills/m", plugin=None)
+    (mal,) = sante_skills.mods_en_defaut(racine)
+
+    assert "skills/m" in mal and "plugin.json illisible" in mal
+
+
+def test_manifeste_qui_n_est_pas_du_json_est_nomme(racine: Path) -> None:
+    _ = poser_mod(racine, "skills/m", plugin='{"name": "m",}')
+    (mal,) = sante_skills.mods_en_defaut(racine)
+
+    assert "plugin.json illisible" in mal
+
+
+def test_manifeste_sans_nom_est_nomme(racine: Path) -> None:
+    """Le moteur range un mod sous son `name` : sans lui, rien ne le désigne."""
+    _ = poser_mod(racine, "skills/m", plugin='{"version": "0.1.0"}')
+    (mal,) = sante_skills.mods_en_defaut(racine)
+
+    assert "ne porte pas de « name »" in mal
+
+
+def test_hooks_json_absent_est_nomme(racine: Path) -> None:
+    _ = poser_mod(racine, "skills/m", modules=None)
+    (mal,) = sante_skills.mods_en_defaut(racine)
+
+    assert "hooks.json illisible" in mal
+
+
+def test_module_absent_est_nomme(racine: Path) -> None:
+    _ = poser_mod(racine, "skills/m", module=False)
+    (mal,) = sante_skills.mods_en_defaut(racine)
+
+    assert "'./register.ts'" in mal and "absent" in mal
+
+
+def test_dependance_absente_est_nommee(racine: Path) -> None:
+    """Un client dont le fournisseur manque appelle un nom de `$` que rien ne pose."""
+    _ = poser_mod(racine, "skills/m", '{"name": "m", "dependencies": ["mod-commun"]}')
+    (mal,) = sante_skills.mods_en_defaut(racine)
+
+    assert "'mod-commun'" in mal and "aucun mod présent" in mal
+
+
+def test_plugin_dirs_dans_settings_est_nomme(racine: Path) -> None:
+    _ = (racine / "settings.json").write_text(
+        '{"env": {"CLAUDE_CODE_PLUGIN_DIRS": "skills/lexique/mod"}}', encoding="utf-8"
+    )
+    (mal,) = sante_skills.plugin_dirs_restant(racine)
+
+    assert "CLAUDE_CODE_PLUGIN_DIRS" in mal
+
+
+def test_settings_sans_plugin_dirs_ne_dit_rien(racine: Path) -> None:
+    _ = (racine / "settings.json").write_text('{"env": {}}', encoding="utf-8")
+
+    assert sante_skills.plugin_dirs_restant(racine) == []
+
+
+def test_les_mods_remontent_dans_anomalies(racine: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Le contrôle est branché : le hook de démarrage le voit, pas seulement les tests."""
+    lier(racine, "y", "../skills/x/scripts/y.py")
+    monkeypatch.setenv("PATH", str(racine / "bin") + os.pathsep + os.environ["PATH"])
+    _ = poser_mod(racine, "skills/m", plugin=None)
+    _ = (racine / "settings.json").write_text(
+        '{"env": {"CLAUDE_CODE_PLUGIN_DIRS": "x"}}', encoding="utf-8"
+    )
+
+    maux = sante_skills.anomalies()
+    assert any("plugin.json illisible" in m for m in maux)
+    assert any("CLAUDE_CODE_PLUGIN_DIRS" in m for m in maux)
