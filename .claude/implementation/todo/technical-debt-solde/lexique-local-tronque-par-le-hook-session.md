@@ -21,3 +21,28 @@ session.
 
 Verser le lexique local à la session par une voie sans plafond (un mod, comme pour les sous-agents), ou
 le garder sous 10 000 caractères, et faire dire à `lexique liste` qu'il dépasse.
+
+## Soldé le
+
+**2026-10-06, hors chantier** (correction de la dette, trois audits dans
+`.claude/implementation/lexique-local-tronque.audit.md`) — le mod `lexique-sous-agent` verse le
+lexique local à la session par une section de `prompt.compose`, sans le plafond d'un hook ; le
+hook `SessionStart` du lexique est retiré de `settings.json`.
+
+Établi par :
+
+- `wc -c < .claude/LEXIQUE.md` (dans `claude-translator`) → `13338` ; `lexique session` rend
+  `13459` caractères : plus que les 10 000 du plafond.
+- une session `claude -p --model haiku "Réponds OK." < /dev/null` dans `claude-translator`, puis
+  le décompte de la ligne « Passe typographique » dans sa transcription → 1 occurrence dans
+  chacun des 2 `prompt_snapshot`, 2 au total, aucune ailleurs : le lexique local figure entier
+  dans le prompt système, jusqu'à sa dernière ligne.
+- troisième audit : **RÉSERVES**, aucun bloquant ; le lexique figure une fois dans le prompt
+  système en session neuve, après `/clear` et `/compact`, à `--resume` et `--continue` ;
+  `lexique-test-isole` ne reçoit rien, `lexique-test-claude-md` et `lexique-test-injecte` le
+  reçoivent une fois.
+
+Limites restées au registre : `lexique-local-absent-sous-system-prompt`,
+`conversation-reprise-sans-lexique-local-jusqua-compaction`,
+`aucun-signal-quand-le-mod-lexique-ne-se-charge-pas`,
+`nom-du-mod-lexique-sous-agent-trop-etroit`.
