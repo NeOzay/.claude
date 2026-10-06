@@ -6,6 +6,8 @@ when-to-load = "À charger avant d'écrire, de déboguer ou de tester un mod, un
 tags = ["mods", "tests"]
 +++
 
+# claude-code-mods — ce que les mods permettent et leurs limites
+
 ## Instructions
 
 Constats tirés de la pratique, un par ligne de vérification : chacun a été établi en exécutant,
@@ -41,8 +43,8 @@ travaille sur un mod, dans la session même.
   les `*.test.ts`. Un avertissement « no author information » est sans effet.
 - `tsc` n'est pas installé : `npx --yes -p typescript@5 tsc -p tsconfig.json --noEmit` depuis le
   dossier du mod, qui étend le `tsconfig.json` posé par le moteur.
-- Le `$` d'un hook se type par `Parameters<Hook<'agent.spawn'>>[0]` : le moteur n'exporte pas de
-  type nommé pour lui.
+- Le `$` d'un hook se type par `EngineInterface`, exporté par `claude-code` : c'est le `$` de tout
+  événement sauf `engine.create`.
 
 ### Ce qui marche
 
@@ -53,9 +55,10 @@ travaille sur un mod, dans la session même.
   **session principale seulement**. Elle survit à `/clear`, à `/compact` et à `--continue`, sans se
   dupliquer. Elle n'a pas de plafond de taille (13 000 caractères versés entiers). Un sous-agent ne
   la reçoit pas. L'`id` d'un plugin s'écrit `<plugin>:<nom>`.
-- **Mémoriser entre deux appels** : une variable du module tient jusqu'au rechargement du mod ;
-  `prompt.compose` se déclenche à chaque requête, donc un calcul coûteux se mémorise
-  (`local ??= await ...`).
+- **Mémoriser entre deux appels** : une variable du module tient jusqu'au rechargement du mod,
+  donc un calcul coûteux se mémorise (`local ??= await ...`). `prompt.compose` n'est pas rappelé à
+  chaque requête (une fois observé pour quatre requêtes) : ne pas compter sur lui pour recalculer.
+  `??=` relance le calcul tant qu'il rend une valeur vide.
 - **Une commande qui fournit le texte** : le mod ne décide de rien, il lance une commande
   (`lexique session`, `lexique sous-agent <type>`) et verse sa sortie en texte brut. Un JSON de
   format de hook n'apporte rien au mod et alourdit la commande.
@@ -78,10 +81,13 @@ travaille sur un mod, dans la session même.
   nouvelle session n'a pas la ligne ; après `/compact` le résumé ne la garde pas et rien ne la
   rajoute ; chaque `--resume` ou `--continue` en ajoute une copie. Un hook `SessionStart` de
   `settings.json` se redéclenche, lui, avec `source=clear` et `source=compact`.
-- **`$.session.append` à `agent.spawn` ou `SubagentStart`** : refusé, « no running loop » ; la
-  boucle du sous-agent n'existe pas encore.
-- **`agent.spawn` ne voit que son `prompt`** : c'est la seule voie pour verser du contexte à un
-  sous-agent, et elle ne dit rien d'un sous-agent `fork`.
+- **`$.session.append` avant `next` dans `agent.spawn`, ou à `SubagentStart`** : il n'y a pas encore
+  d'`agentId` à nommer, la boucle du sous-agent n'existe pas (« no running loop »). Appelé **après**
+  `next(e)`, avec l'`agentId` rendu, il est accepté, en avant-plan comme en arrière-plan : la ligne
+  arrive dans la conversation du sous-agent avant sa première requête.
+- **Verser du contexte à un sous-agent** : deux voies, le `prompt` réécrit avant `next` (celle du
+  mod `lexique-sous-agent`) ou `$.session.append` après `next`. Ni l'une ni l'autre n'est essayée
+  sur un sous-agent `fork`, refusé dans cette configuration.
 
 ### Tester
 
@@ -117,8 +123,17 @@ printf '%s\n' '{"type":"user","message":{"role":"user","content":"/clear"}}' \
 - Un hook `SessionStart` passé par `--settings` sert de témoin : il montre ce que la base verse
   dans les mêmes cas.
 
+### Autres modes, essayés au troisième audit
+
+- Autre style de sortie et `--append-system-prompt` : la section de `prompt.compose` est présente,
+  une seule fois.
+- `--system-prompt` : la section disparaît, et la session n'a plus de lexique local.
+- `--bare` : le moteur refuse de charger le mod, même avec `--plugin-dir` ; les hooks de
+  `settings.json` sont aussi sautés. Session non ouverte faute de clé d'API.
+- Une conversation reprise réutilise le prompt système qu'elle a enregistré, jusqu'à sa prochaine
+  compaction : une conversation commencée sans la section n'en reçoit pas à la reprise.
+
 ### Non essayé
 
 La session interactive, la compaction automatique, le rechargement à chaud d'un mod en cours de
-session, un sous-agent `fork`, et ce que devient une section de `prompt.compose` avec un autre
-style de sortie ou `--bare`.
+session et un coéquipier d'équipe d'agents.
