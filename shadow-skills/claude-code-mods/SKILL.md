@@ -33,6 +33,10 @@ travaille sur un mod, dans la session même.
 
 ### Charger et vérifier un mod
 
+- Un mod posé à la racine d'un dossier de skill, `.claude/skills/<nom>/` du projet ou
+  `~/.claude/skills/<nom>/`, se charge seul, `claude -p` compris, sans `SKILL.md` ni réglage : le
+  journal de `--debug` le nomme `<nom>@skills-dir`. Celui du projet ne se charge que dans une
+  session ouverte sur ce projet.
 - `CLAUDE_CODE_PLUGIN_DIRS`, dans le bloc `env` de `settings.json`, nomme le dossier du mod : chaque
   session le charge, `claude -p` compris. `claude --plugin-dir <dossier>` le charge pour une
   session.
@@ -43,6 +47,12 @@ travaille sur un mod, dans la session même.
   les `*.test.ts`. Un avertissement « no author information » est sans effet.
 - `tsc` n'est pas installé : `npx --yes -p typescript@5 tsc -p tsconfig.json --noEmit` depuis le
   dossier du mod, qui étend le `tsconfig.json` posé par le moteur.
+- `claude --debug` écrit dans `debug/<session>.txt` l'ordre de chargement des modules, l'échec d'un
+  module avec sa raison, et chaque appel d'un mod (`$.process.run (<mod>)`). C'est la preuve
+  qu'un mod est chargé.
+- `claude -p` ne pose pas les types dans le dossier du mod. Pour vérifier un mod qui n'en a pas
+  encore, un `tsconfig.json` hors du mod étend celui d'un autre mod, avec son `typeRoots` en chemin
+  absolu, et nomme les `hooks/` du mod à vérifier dans son `include`.
 - Le `$` d'un hook se type par `EngineInterface`, exporté par `claude-code` : c'est le `$` de tout
   événement sauf `engine.create`.
 
@@ -59,6 +69,13 @@ travaille sur un mod, dans la session même.
   donc un calcul coûteux se mémorise (`local ??= await ...`). `prompt.compose` n'est pas rappelé à
   chaque requête (une fois observé pour quatre requêtes) : ne pas compter sur lui pour recalculer.
   `??=` relance le calcul tant qu'il rend une valeur vide.
+- **Partager du code entre mods** : un plugin ajoute un nom à `$` dans `engine.create`
+  (`const built = await next(e)`, puis `return { ...built, commande: { lancer } }`) ; la méthode
+  appelle le moteur par `built` (`built.process.run`). Tout autre mod l'appelle par
+  `$.commande.lancer(...)`, avec ou sans `dependencies` dans son `plugin.json` : le contrat de types
+  (`"types"` du fournisseur) ne sert qu'à typer l'appel. Le journal attribue l'appel au fournisseur
+  (`$.process.run (essai-commun)`). Établi par un essai jetable, fournisseur dans
+  `~/.claude/skills/`, client dans `.claude/skills/`.
 - **Une commande qui fournit le texte** : le mod ne décide de rien, il lance une commande
   (`lexique session`, `lexique sous-agent <type>`) et verse sa sortie en texte brut. Un JSON de
   format de hook n'apporte rien au mod et alourdit la commande.
@@ -67,6 +84,10 @@ travaille sur un mod, dans la session même.
 
 ### Limites constatées
 
+- **Un import ne sort pas du dossier du plugin** : `import '../../autre/lib.ts'` est refusé par
+  `claude plugin validate` et au chargement (« outside the plugin's folder »), et un lien
+  symbolique posé dans le dossier aussi (« resolves outside the plugin's folder ») : le module
+  entier ne se charge pas. Du code partagé passe par un nom ajouté à `$`.
 - **Plafond des hooks de `settings.json`** : un `additionalContext` de plus de 10 000 caractères
   (`SessionStart`, `SubagentStart`) est remplacé par un aperçu de 2 Ko ; le reste va dans un
   fichier. Constaté dans le binaire 2.1.289 (`HXo = 1e4`), non configurable. C'est la raison d'être
@@ -137,3 +158,13 @@ printf '%s\n' '{"type":"user","message":{"role":"user","content":"/clear"}}' \
 
 La session interactive, la compaction automatique, le rechargement à chaud d'un mod en cours de
 session et un coéquipier d'équipe d'agents.
+
+D'après la référence de `plugin-authoring` (2.1.291), non vérifié :
+
+- `CLAUDE_CODE_PLUGIN_DIRS` n'est jamais lu dans les réglages d'un projet ;
+- un module importe un autre fichier de son plugin par un `import` statique ; un `import()`
+  empêche le chargement ;
+- `dependencies` pose le contrat du fournisseur dans `.claude-plugin/types/<plugin>/` du client,
+  pour `tsc` : non observé, `claude -p` ne posant pas les types ;
+- l'ordre d'appel de deux mods qui ajoutent chacun un nom, ou d'un client qui l'appelle depuis
+  `engine.create`.
