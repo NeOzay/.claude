@@ -2,9 +2,7 @@ import type { On } from 'claude-code'
 import { expect, test } from 'claude-code/testing'
 
 const TEXTE = 'Lexique local de /p'
-const SORTIE = JSON.stringify({
-  hookSpecificOutput: { hookEventName: 'SubagentStart', additionalContext: TEXTE },
-})
+const SORTIE = `${TEXTE}\n`
 
 const execution = (stdout: string, exitCode = 0) => ({
   value: { exitCode, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false },
@@ -30,10 +28,10 @@ const fond = (on: On) => {
 }
 
 test('préfixe le prompt du sous-agent du texte rendu par la commande', async ($, on) => {
-  const appels: { argv: readonly string[]; stdin?: string; projet?: string }[] = []
+  const appels: { argv: readonly string[]; projet?: string }[] = []
   on('env.get', (_$, e) => ({ value: e.name === 'HOME' ? '/h' : '/projet' }))
   on('process.run', (_$, e) => {
-    appels.push({ argv: e.argv, stdin: e.init?.stdin, projet: e.init?.env?.CLAUDE_PROJECT_DIR })
+    appels.push({ argv: e.argv, projet: e.init?.env?.CLAUDE_PROJECT_DIR })
     return execution(SORTIE)
   })
   const vus = fond(on)
@@ -41,8 +39,12 @@ test('préfixe le prompt du sous-agent du texte rendu par la commande', async ($
   await $['agent'].spawn(SPAWN)
 
   expect(appels.length).toBe(1)
-  expect(appels[0]?.argv).toEqual(['python3', '/h/.claude/skills/lexique/scripts/lexique-cli.py', 'sous-agent'])
-  expect(appels[0]?.stdin).toBe(JSON.stringify({ agent_type: 'analyste' }))
+  expect(appels[0]?.argv).toEqual([
+    'python3',
+    '/h/.claude/skills/lexique/scripts/lexique-cli.py',
+    'sous-agent',
+    'analyste',
+  ])
   expect(appels[0]?.projet).toBe('/projet')
   expect(vus[0]?.prompt).toContain(TEXTE)
   expect(vus[0]?.prompt.endsWith('Fais ceci.')).toBe(true)
@@ -51,17 +53,6 @@ test('préfixe le prompt du sous-agent du texte rendu par la commande', async ($
 test('laisse le prompt intact quand la commande ne rend rien', async ($, on) => {
   on('env.get', () => ({ value: '/h' }))
   on('process.run', () => execution(''))
-  const vus = fond(on)
-
-  await $['agent'].spawn(SPAWN)
-
-  expect(vus[0]?.prompt).toBe('Fais ceci.')
-})
-
-test('échoue ouvert quand la sortie est illisible', async ($, on) => {
-  on('env.get', () => ({ value: '/h' }))
-  on('process.run', () => execution('pas du json'))
-  on('ui.status', () => ({ value: undefined }) as never)
   const vus = fond(on)
 
   await $['agent'].spawn(SPAWN)
@@ -86,4 +77,69 @@ test('dit sur la ligne d\'état que la commande échoue', async ($, on) => {
   expect(vus[0]?.prompt).toBe('Fais ceci.')
   expect(dits.length).toBe(1)
   expect(dits[0]).toContain('cli introuvable')
+})
+
+const COMPOSE = {
+  model: 'm',
+  promptModel: 'm',
+  surfaces: ['terminal'],
+  tools: [],
+  outputStyle: null,
+  traits: [],
+} as never
+
+// Ce que la session reçoit : les sections que le fond de `prompt.compose` rend, le mod ajouté.
+const fondCompose = (on: On) => on('prompt.compose', () => ({ sections: [{ id: 'intro', text: 'Intro.', scope: 'shared' }] }))
+
+test('ajoute le lexique local en section de session, après celles du moteur', async ($, on) => {
+  const appels: { argv: readonly string[]; projet?: string }[] = []
+  on('env.get', (_$, e) => ({ value: e.name === 'HOME' ? '/h' : '/projet' }))
+  on('process.run', (_$, e) => {
+    appels.push({ argv: e.argv, projet: e.init?.env?.CLAUDE_PROJECT_DIR })
+    return execution(`${TEXTE}\n`)
+  })
+  fondCompose(on)
+
+  const { sections } = await $['prompt'].compose(COMPOSE)
+
+  expect(appels[0]?.argv).toEqual(['python3', '/h/.claude/skills/lexique/scripts/lexique-cli.py', 'session'])
+  expect(appels[0]?.projet).toBe('/projet')
+  expect(sections.map(s => s.id)).toEqual(['intro', 'lexique-sous-agent:local'])
+  expect(sections[1]).toEqual({ id: 'lexique-sous-agent:local', text: TEXTE, scope: 'session' })
+})
+
+test('ne lance la commande qu\'une fois, pour toutes les compositions', async ($, on) => {
+  let lancements = 0
+  on('env.get', () => ({ value: '/h' }))
+  on('process.run', () => {
+    lancements++
+    return execution(`${TEXTE}\n`)
+  })
+  fondCompose(on)
+
+  await $['prompt'].compose(COMPOSE)
+  await $['prompt'].compose(COMPOSE)
+
+  expect(lancements).toBe(1)
+})
+
+test('laisse les sections du moteur quand la commande ne rend rien', async ($, on) => {
+  on('env.get', () => ({ value: '/h' }))
+  on('process.run', () => execution(''))
+  fondCompose(on)
+
+  const { sections } = await $['prompt'].compose(COMPOSE)
+
+  expect(sections.map(s => s.id)).toEqual(['intro'])
+})
+
+test('laisse les sections du moteur quand la commande échoue', async ($, on) => {
+  on('env.get', () => ({ value: '/h' }))
+  on('process.run', () => execution('', 2))
+  on('ui.status', () => ({ value: undefined }) as never)
+  fondCompose(on)
+
+  const { sections } = await $['prompt'].compose(COMPOSE)
+
+  expect(sections.map(s => s.id)).toEqual(['intro'])
 })

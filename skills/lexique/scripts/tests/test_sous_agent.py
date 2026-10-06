@@ -1,12 +1,10 @@
 """Lexiques d'un sous-agent : ce que son fichier décide qu'il reçoit."""
 
-import json
 import os
 import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import cast
 
 from lexique import annonce_sous_agent, entete_agent, fichier_agent
 
@@ -169,11 +167,10 @@ def test_agent_dans_un_sous_repertoire(ecrire: Ecrire, tmp_path: Path) -> None:
 CLI = Path(__file__).resolve().parents[1] / "lexique-cli.py"
 
 
-def _hook(projet: Path, entree: str) -> subprocess.CompletedProcess[str]:
+def _hook(projet: Path, *args: str) -> subprocess.CompletedProcess[str]:
     env = {**os.environ, "CLAUDE_PROJECT_DIR": str(projet)}
     return subprocess.run(
-        [sys.executable, str(CLI), "sous-agent"],
-        input=entree,
+        [sys.executable, str(CLI), "sous-agent", *args],
         capture_output=True,
         text=True,
         env=env,
@@ -181,31 +178,27 @@ def _hook(projet: Path, entree: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_cli_verse_le_local_en_json(ecrire: Ecrire, tmp_path: Path) -> None:
+def test_cli_verse_le_local_en_texte_brut(ecrire: Ecrire, tmp_path: Path) -> None:
     projet, _ = _decor(ecrire, tmp_path)
     _agent(projet / ".claude", "a")
-    r = _hook(projet, json.dumps({"agent_type": "a"}))
+    r = _hook(projet, "a")
     assert r.returncode == 0
-    sortie = cast("dict[str, dict[str, str]]", json.loads(r.stdout))["hookSpecificOutput"]
-    assert sortie["hookEventName"] == "SubagentStart"
-    assert "Zorglubage" in sortie["additionalContext"]
+    assert "Zorglubage" in r.stdout
 
 
 def test_cli_silencieuse_pour_un_agent_isole(ecrire: Ecrire, tmp_path: Path) -> None:
     projet, _ = _decor(ecrire, tmp_path)
     _agent(projet / ".claude", "a", "omitClaudeMd: true\n")
-    r = _hook(projet, json.dumps({"agent_type": "a"}))
+    r = _hook(projet, "a")
     assert (r.returncode, r.stdout) == (0, "")
 
 
 def test_cli_silencieuse_pour_un_agent_inconnu(ecrire: Ecrire, tmp_path: Path) -> None:
     projet, _ = _decor(ecrire, tmp_path)
-    r = _hook(projet, json.dumps({"agent_type": "Explore"}))
+    r = _hook(projet, "Explore")
     assert (r.returncode, r.stdout) == (0, "")
 
 
-def test_cli_en_zero_sur_une_entree_illisible(tmp_path: Path) -> None:
-    for entree in ("pas du json", "[]", "{}", '{"agent_type": 3}'):
-        r = _hook(tmp_path, entree)
-        assert (r.returncode, r.stdout) == (0, "")
-        assert "lexique sous-agent" in r.stderr
+def test_cli_en_deux_sans_type_d_agent(tmp_path: Path) -> None:
+    r = _hook(tmp_path)
+    assert (r.returncode, r.stdout) == (2, "")
