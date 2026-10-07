@@ -187,6 +187,31 @@ def test_filled_ne_reclame_jamais_un_facultatif(liste_vide: Path) -> None:
     assert sujets(ouvrir(liste_vide), filled=True) == []
 
 
+def test_marqueurs_types_legitimes_et_jamais_reclames_au_facultatif(liste_vide: Path) -> None:
+    """Un élément posé par `create` est conforme ; `--filled` ne lui réclame que ses requis."""
+    store = ouvrir(liste_vide)
+    _ = store.write(store.create("neuf").unwrap()).unwrap()
+
+    assert sujets(ouvrir(liste_vide)) == []
+    trouves = sujets(ouvrir(liste_vide), filled=True)
+    assert "champ « title » — à remplir" in trouves
+    assert not any("date" in t or "tags" in t for t in trouves)
+
+
+def test_marqueur_d_un_autre_type_est_signale(liste_vide: Path) -> None:
+    _ = element(liste_vide, "neuf", 'id = "neuf"\ntitle = "t"\ndate = "<OPTIONNEL int>"\n')
+
+    trouves = sujets(ouvrir(liste_vide))
+
+    assert any(t.startswith("champ « date »") and "autre type" in t for t in trouves)
+
+
+def test_ancien_marqueur_generique_reste_accepte_sur_un_champ_type(liste_vide: Path) -> None:
+    _ = element(liste_vide, "neuf", f'id = "neuf"\ntitle = "t"\ndate = "{OPTIONAL}"\n')
+
+    assert sujets(ouvrir(liste_vide)) == []
+
+
 def test_champ_non_declare_est_signale(liste_vide: Path) -> None:
     _ = element(liste_vide, "a", 'id = "a"\ntitle = "T"\nbizarre = "x"\n')
     assert "champ « bizarre » — non déclaré au contrat" in sujets(ouvrir(liste_vide))

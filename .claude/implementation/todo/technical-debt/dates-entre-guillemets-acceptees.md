@@ -33,6 +33,12 @@ $ list-dir validate .claude/implementation/todo/technical-debt
 
 rumdl ne voit pas cet écart non plus : il ne lit pas le front matter.
 
+**Complété le 2026-10-07** (chantier `socle-contrat-evolutif`, audit de clôture `d5be681`, R1) —
+`list-dir new` et `gabarit new` posent désormais `<À REMPLIR date>` et `<OPTIONNEL date>` : le
+Marqueur dit le type et la règle des guillemets s'affiche sur stderr de `contract`. La cause du
+constat est réduite, pas fermée : `check_value` accepte toujours `reviewed = "2026-10-07"`, et
+ni `gabarit check` ni `list-dir validate` ne le signalent. Le Solde est inchangé.
+
 ## Pourquoi c'est gênant
 
 C'est le mode de défaillance que le commentaire de `prefill.py` décrit : une même liste porte deux

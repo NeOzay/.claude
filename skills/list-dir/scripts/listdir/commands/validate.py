@@ -11,7 +11,9 @@ jamais réclamer ce qu'il dit facultatif.
 LES AVERTISSEMENTS DE PROVENANCE SORTENT DANS LES DEUX CAS, et ne changent ni l'un
 ni l'autre. Une liste dont la semence a évolué n'a aucun élément fautif : la taire
 sur un succès laisserait la péremption invisible là où on la cherche justement, et
-la compter comme un manquement déclarerait invalide une liste en règle.
+la compter comme un manquement déclarerait invalide une liste en règle. Les notes des
+éléments — un ancien marqueur générique sur un champ typé, un champ ou une section `deprecated`
+encore porté — suivent la même voie.
 """
 
 from __future__ import annotations
@@ -45,7 +47,7 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
     # dernier : un élément illisible fait sortir `validate` sans jamais parcourir la
     # suite, et la péremption disparaissait alors du seul appel où l'on regarde la
     # liste de plus près.
-    note = "\n".join(warnings(lst.path, lst.contract))
+    note = "\n".join([*warnings(lst.path, lst.contract), *lst.notes()])
 
     filled = cast("bool", args.filled)
     r = lst.validate(filled=filled)

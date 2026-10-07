@@ -24,7 +24,7 @@ le reste au marqueur. Il ne reste qu'à écrire.
 id = "cache-sessions-sans-ttl"
 title = "Le cache de sessions n'expire jamais"
 date = 2025-03-04
-reviewed = "<À REMPLIR>"
+reviewed = "<À REMPLIR date>"
 category = "<À REMPLIR>"
 +++
 

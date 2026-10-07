@@ -37,15 +37,18 @@ gabarit defs                           # les semences disponibles, leur rang et 
 `gabarit` est un lien de `bin/` vers `scripts/gabarit-cli.py`, résolu par le `PATH`.
 
 Codes de sortie : **0** succès, la valeur seule sur stdout ; **1** refus ou échec, message sur
-stderr ; **2** erreur d'appel. Un avertissement sort sur stderr sans toucher au code.
+stderr ; **2** erreur d'appel. Un avertissement sort sur stderr sans toucher au code : ancien
+marqueur générique sur un champ typé, champ ou section `deprecated` encore porté.
 
 **Un fichier posé ne dit pas ce qu'il attend.** Avant de le remplir, lire
 `gabarit contract <nom>` : chaque champ et chaque section y porte sa description. Un marqueur dit
-qu'il faut écrire, jamais quoi écrire.
+qu'il faut écrire, jamais quoi écrire, et celui d'un champ `int`, `date`, `bool` ou `list` dit son
+type (`<OPTIONNEL date>`) : seuls `slug`, `text` et `enum` gardent leurs guillemets, les autres
+s'écrivent sans — [Les marqueurs](references/format.md#les-marqueurs).
 
 **Deux verdicts.** Sans `--filled`, la structure seule : les marqueurs sont légitimes. Avec, plus
-aucun `<À REMPLIR>` là où le contrat exige quelque chose — les facultatifs restés `<OPTIONNEL>` ne
-sont jamais réclamés. `list-dir validate` rend les mêmes, en les tenant d'ici :
+aucun `<À REMPLIR>`, typé ou non, là où le contrat exige quelque chose — les facultatifs restés
+`<OPTIONNEL>` ne sont jamais réclamés. `list-dir validate` rend les mêmes, en les tenant d'ici :
 [Les deux verdicts](references/format.md#les-deux-verdicts).
 
 **Rien n'est écrasé ni écrit à moitié** : `new` refuse un fichier existant, et une commande de
@@ -62,7 +65,7 @@ Deux références, une par sujet — à lire au moment d'en avoir besoin, pas d'
 
 | Fichier | Ce qu'il porte | Lire quand |
 |---|---|---|
-| [`references/format.md`](references/format.md) | le fichier et son front matter, le contrat, les six types, le préremplissage, les marqueurs, les deux verdicts | on écrit une semence, ou on juge un fichier posé |
+| [`references/format.md`](references/format.md) | le fichier et son front matter, le contrat, les sept types, `deprecated`, le préremplissage, les marqueurs, les deux verdicts | on écrit une semence, ou on juge un fichier posé |
 | [`references/semences.md`](references/semences.md) | forme d'une semence, les quatre rangs, l'estampille, l'environnement du préremplissage | on range une semence, ou on cherche pourquoi un nom se résout ailleurs |
 
 ## Les semences livrées

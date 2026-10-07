@@ -22,7 +22,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-from jouet import CONTRAT, ELEMENT, PATRON_TOML, ecrire, monter_liste, monter_patron
+from jouet import (
+    CONTRAT,
+    ELEMENT,
+    PATRON_TOML,
+    ecrire,
+    element,
+    monter_liste,
+    monter_patron,
+)
 
 CLI = Path(__file__).resolve().parent.parent / "list-dir.py"
 
@@ -741,3 +749,178 @@ def test_un_element_illisible_n_efface_pas_l_avertissement_de_provenance(
 
     assert r.code == 1
     assert "aucune provenance déclarée" in r.err
+
+
+# ------------------------------------------------------------ list et le type bool
+CONTRAT_BOOL = CONTRAT.replace(
+    "[sections.",
+    '[fields.pin]\ntype = "bool"\ndescription = ""\n\n[sections.',
+    1,
+)
+
+
+def liste_avec_pins(racine: Path) -> Path:
+    """Deux éléments : `a` épinglé, `b` non."""
+    liste = monter_liste(racine / "jouet", CONTRAT_BOOL)
+    for ident, pin in (("a", "true"), ("b", "false")):
+        _ = element(liste, ident, f'id = "{ident}"\ntitle = "T"\npin = {pin}\n')
+    return liste
+
+
+def test_list_where_compare_un_booleen_a_sa_forme_toml(tmp_path: Path) -> None:
+    liste = liste_avec_pins(tmp_path)
+
+    vrai = lancer("list", str(liste), "--where", "pin=true")
+    faux = lancer("list", str(liste), "--where", "pin=false")
+
+    assert (vrai.code, vrai.out.strip()) == (0, "a")
+    assert (faux.code, faux.out.strip()) == (0, "b")
+
+
+def test_list_affiche_un_booleen_en_minuscules(tmp_path: Path) -> None:
+    liste = liste_avec_pins(tmp_path)
+
+    r = lancer("list", str(liste), "--sort", "pin")
+
+    assert r.out.splitlines() == ["b false", "a true"]
+
+
+# ----------------------------------------------------------- l'ancien marqueur
+def test_validate_avertit_d_un_ancien_marqueur_sans_changer_le_code(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path, avec_element=False)
+    _ = element(
+        liste,
+        "vieux",
+        'id = "vieux"\ntitle = "T"\ndate = "<OPTIONNEL>"\ntags = "<OPTIONNEL>"\n',
+    )
+
+    r = lancer("validate", str(liste))
+
+    assert r.code == 0
+    assert "champ « date » — ancien marqueur « <OPTIONNEL> »" in r.err
+    assert "la forme typée est « <OPTIONNEL date> »" in r.err
+    assert "champ « tags » — ancien marqueur" in r.err
+    assert "category" not in r.err
+
+
+def test_validate_se_tait_sur_un_element_a_jour(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path)
+
+    r = lancer("validate", str(liste))
+
+    assert r.code == 0
+    assert r.err == ""
+
+
+def test_validate_avertit_aussi_quand_il_echoue(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path, avec_element=False)
+    _ = element(liste, "vieux", 'id = "vieux"\ntitle = "T"\ndate = "<OPTIONNEL>"\nintrus = 1\n')
+
+    r = lancer("validate", str(liste))
+
+    assert r.code == 1
+    assert "non déclaré" in r.err
+    assert "ancien marqueur" in r.err
+
+
+# ------------------------------------------------------------- list --sort typé
+CONTRAT_TRI = CONTRAT.replace(
+    "[sections.",
+    '[fields.rang]\ntype = "int"\ndescription = ""\n\n'
+    '[fields.niveau]\ntype = "enum"\nvalues = ["note", "majeur", "critique"]\n'
+    'description = ""\n\n[sections.',
+    1,
+)
+
+
+def liste_a_trier(racine: Path) -> Path:
+    liste = monter_liste(racine / "jouet", CONTRAT_TRI)
+    fronts = {
+        "a": 'rang = 10\nniveau = "note"',
+        "b": 'rang = 9\nniveau = "critique"',
+        "c": 'rang = 2\nniveau = "majeur"',
+        "d": 'niveau = "<OPTIONNEL>"',  # rang absent, niveau au marqueur
+        "e": 'rang = "12"\nniveau = "inconnu"',  # valeurs non conformes au type
+        "f": 'rang = 9\nniveau = "note"',
+    }
+    for ident, corps in fronts.items():
+        _ = element(liste, ident, f'id = "{ident}"\ntitle = "T"\n{corps}\n')
+    return liste
+
+
+def ordre(liste: Path, tri: str) -> list[str]:
+    r = lancer("list", str(liste), f"--sort={tri}")
+    assert r.code == 0, r.err
+    return [ligne.split()[0] for ligne in r.out.splitlines()]
+
+
+def test_tri_d_un_int_se_fait_en_nombre(tmp_path: Path) -> None:
+    """9 avant 10 : en texte, « 10 » précéderait « 9 »."""
+    assert ordre(liste_a_trier(tmp_path), "rang") == ["c", "b", "f", "a", "e", "d"]
+
+
+def test_tri_decroissant_garde_non_conformes_et_absents_en_fin(tmp_path: Path) -> None:
+    assert ordre(liste_a_trier(tmp_path), "-rang") == ["a", "b", "f", "c", "e", "d"]
+
+
+def test_tri_d_un_enum_suit_l_ordre_des_values(tmp_path: Path) -> None:
+    liste = liste_a_trier(tmp_path)
+    # note < majeur < critique, et non l'alphabet (critique, majeur, note).
+    assert ordre(liste, "niveau") == ["a", "f", "c", "b", "e", "d"]
+    assert ordre(liste, "-niveau") == ["b", "c", "a", "f", "e", "d"]
+
+
+def test_tri_multi_colonnes_chacune_a_son_sens(tmp_path: Path) -> None:
+    liste = liste_a_trier(tmp_path)
+    # b et f partagent rang 9 ; le niveau décroissant place critique (b) avant note (f).
+    assert ordre(liste, "rang,-niveau")[:4] == ["c", "b", "f", "a"]
+    assert ordre(liste, "rang,niveau")[:4] == ["c", "f", "b", "a"]
+
+
+def test_tri_d_un_bool_met_faux_avant_vrai(tmp_path: Path) -> None:
+    liste = liste_avec_pins(tmp_path)
+    assert ordre(liste, "pin") == ["b", "a"]
+    assert ordre(liste, "-pin") == ["a", "b"]
+
+
+def test_tri_affiche_les_champs_sans_le_signe_moins(tmp_path: Path) -> None:
+    r = lancer("list", str(liste_a_trier(tmp_path)), "--sort=-rang")
+    assert r.out.splitlines()[0] == "a 10"
+
+
+def test_tri_refuse_un_moins_seul_et_un_champ_inconnu(tmp_path: Path) -> None:
+    liste = liste_a_trier(tmp_path)
+
+    seul = lancer("list", str(liste), "--sort=-")
+    inconnu = lancer("list", str(liste), "--sort=-nimporte")
+
+    assert seul.code == 1
+    assert "« - » doit précéder le nom d'un champ" in seul.err
+    assert inconnu.code == 1
+    assert "champ « nimporte » non déclaré" in inconnu.err
+
+
+def test_tri_decroissant_s_ecrit_avec_un_signe_egal(tmp_path: Path) -> None:
+    """`--sort -rang` serait pris par argparse pour une option : la forme `--sort=-rang`
+    est celle qui passe, et l'aide la dit."""
+    liste = liste_a_trier(tmp_path)
+
+    sans_egal = lancer("list", str(liste), "--sort", "-rang")
+    aide = lancer("list", "--help")
+
+    assert sans_egal.code == 2
+    assert "--sort=-CHAMP" in aide.out + aide.err
+
+
+# ------------------------------------------------- contract : règle des guillemets
+def test_contract_dit_la_regle_des_guillemets_sur_stderr_seulement(tmp_path: Path) -> None:
+    liste = liste_sur_disque(tmp_path)
+
+    complet = lancer("contract", str(liste))
+    valeurs = lancer("contract", str(liste), "--values", "category")
+
+    assert complet.out.rstrip("\n") == CONTRAT.rstrip("\n")  # stdout reste verbatim
+    assert "Règle des guillemets" in complet.err
+    assert "Règle des guillemets" not in complet.out
+    assert valeurs.out.splitlines() == ["rouge", "vert"]
+    assert valeurs.err == ""

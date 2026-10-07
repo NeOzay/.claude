@@ -23,6 +23,13 @@ Le second défaut est hérité tel quel des `Field`, où la même expression est
 y existe aussi. Le chantier `sections-en-forme-longue` ne les a pas créés — il a calqué la boucle
 des sections sur celle des champs, y compris sur ce point.
 
+**Complété le 2026-10-07** (chantier `socle-contrat-evolutif`, audit de clôture `d5be681`, R3) — la
+première clé optionnelle réelle vient d'arriver : `deprecated`, sur les champs et les sections.
+C'est l'échéance que l'Assumé annonçait. Sa valeur est contrôlée (chaîne non vide, refusée avec
+`required`, `text` ou `command`), mais sa clé ne l'est pas : `deprecaed = "…"` est accepté sans un
+mot, code 0, le champ n'est alors pas déprécié et le contrat continue de le poser et de le
+réclamer.
+
 ## Pourquoi c'est gênant
 
 Le format des sections a été introduit « ouvert à d'autres clés plus tard ». C'est précisément ce

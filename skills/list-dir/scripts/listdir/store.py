@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import final, override
 
 from gabarit.check import check_item as check_file
+from gabarit.check import notes as notes_file
 from gabarit.prefill import compose
 
 from .contract import (
@@ -42,7 +43,20 @@ from .items import (
 from .prefill import PrefillContext, for_item, initial_field, initial_section, preview
 from .prefill import context as prefill_context
 from .provenance import read_seed
-from .types import OPTIONAL, Change, Contract, FieldValue, Item, Result, Violation, fail, ok
+from .types import (
+    OPTIONAL,
+    PLACEHOLDER,
+    TYPED_MARKER_TYPES,
+    Change,
+    Contract,
+    FieldValue,
+    Item,
+    Result,
+    Violation,
+    fail,
+    marker,
+    ok,
+)
 
 
 @final
@@ -137,6 +151,22 @@ class ListStore:
             out.extend(self.check_item(item, filled))
         return ok(out)
 
+    def notes(self) -> list[str]:
+        """Ce que les éléments portent de périmé sans être fautif — un ancien marqueur
+        générique sur un champ typé, un champ ou une section `deprecated` —, une note par
+        champ ou section. Jamais un manquement.
+
+        UN ÉLÉMENT ILLISIBLE N'EST PAS DE SON RESSORT : `validate` le dit déjà, et
+        une liste partiellement lisible ne doit pas faire taire les notes qu'on peut
+        encore rendre. D'où des notes, et non un `Result`.
+        """
+        out: list[str] = []
+        for p in self.paths():
+            r = read_item(p)
+            if r:
+                out.extend(notes_file(self.contract, r.unwrap()))
+        return out
+
     def check_item(self, item: Item, filled: bool = False) -> list[Violation]:
         """Un élément confronté à CE contrat, qu'il vienne ou non de cette liste.
 
@@ -196,6 +226,9 @@ class ListStore:
         change sont réécrits. Tableaux mis en forme, guillemets et commentaires
         survivent à une migration qui ne portait pas sur eux — et le diff ne montre
         alors que la migration.
+
+        UNE VALEUR ÉCRITE N'EST JAMAIS TOUCHÉE. Seul un marqueur générique sur un champ
+        `int`, `date`, `bool` ou `list` est converti en sa forme typée, à statut égal.
 
         Un champ RETIRÉ emporte le commentaire qui le précédait : c'était sa légende,
         et la laisser derrière lui décrirait un champ qui n'existe plus.
@@ -266,7 +299,25 @@ class ListStore:
         for name, f in self.contract.fields.items():
             subject = f"champ « {name} »"
             if name in item.fields:
-                fields[name] = item.fields[name]
+                valeur_lue = item.fields[name]
+                # UN ANCIEN MARQUEUR GÉNÉRIQUE SUR UN CHAMP TYPÉ devient sa forme typée, À
+                # STATUT ÉGAL : `<À REMPLIR>` reste requis. C'est la seule valeur écrite que
+                # `migrate` touche — celle-ci n'en est pas une, c'est un marqueur.
+                if f.type in TYPED_MARKER_TYPES and valeur_lue in (PLACEHOLDER, OPTIONAL):
+                    typee = marker(valeur_lue == PLACEHOLDER, f.type)
+                    fields[name] = typee
+                    changes.append(
+                        Change(
+                            item.path,
+                            subject,
+                            f"marqueur « {valeur_lue} » remplacé par « {typee} »",
+                        )
+                    )
+                else:
+                    fields[name] = valeur_lue
+            elif f.deprecated is not None:
+                # JAMAIS AJOUTÉ : un champ qu'on ne pose plus ne manque à personne.
+                continue
             elif name == "id":
                 # L'identifiant ne prend jamais de marqueur : il vaut le nom du
                 # fichier, seul lien entre l'élément et son support.
@@ -285,7 +336,7 @@ class ListStore:
                         return Result(posee.status, None, posee.message)
                     valeur = posee.unwrap()
                 fields[name] = valeur
-                changes.append(Change(item.path, subject, f"ajouté, {valeur}"))
+                changes.append(Change(item.path, subject, f"ajouté, {forme_texte(valeur)}"))
 
         for name, value in item.fields.items():
             if name in self.contract.fields:
@@ -311,6 +362,8 @@ class ListStore:
             subject = f"section « {title} »"
             if title in item.sections:
                 sections[title] = item.sections[title]
+            elif s.deprecated is not None:
+                continue
             else:
                 if dry_run and s.command is not None:
                     corps = preview(s)
@@ -499,6 +552,8 @@ class ListStore:
     ) -> Result[Item]:
         fields: dict[str, object] = {}
         for name, f in derived.contract.fields.items():
+            if f.deprecated is not None:
+                continue
             if name == "id":
                 # Reporté d'office : c'est le seul lien entre une fiche et l'élément
                 # qu'elle instruit.
@@ -515,7 +570,14 @@ class ListStore:
                 )
             else:
                 fields[name] = source.fields.get(f.source, f.marker)
-        return ok(Item(derived.path / f"{source.id}.md", fields, dict(sections)))
+        # LE MOULE PEUT PORTER UNE SECTION QUE LE CONTRAT DÉPRÉCIE : la fiche est un fichier
+        # neuf, elle ne la reçoit pas.
+        posees = {
+            t: b
+            for t, b in sections.items()
+            if (decl := derived.contract.sections.get(t)) is None or decl.deprecated is None
+        }
+        return ok(Item(derived.path / f"{source.id}.md", fields, posees))
 
     def merge_text(self) -> Result[str]:
         """L'aggloméré, en mémoire. La conservation est vérifiée avant de rendre.
@@ -620,8 +682,20 @@ def _correspond(valeur: object, critere: FieldValue) -> bool:
     C'est ce qui autorise à réserver le critère vide à l'absence, sans ambiguïté.
     """
     if valeur is None:
-        return str(critere) == ""
-    return str(valeur) == str(critere)
+        return forme_texte(critere) == ""
+    return forme_texte(valeur) == forme_texte(critere)
+
+
+def forme_texte(valeur: object) -> str:
+    """La valeur telle qu'on la dit : `true`/`false` pour un booléen, `str()` sinon.
+
+    UNE SEULE FORME POUR LE FILTRE ET L'AFFICHAGE : `str(True)` rend « True », que le
+    TOML écrit `true`. Sans ce détour, `--where pin=true` ne trouverait rien et `list`
+    montrerait une graphie que personne n'a écrite.
+    """
+    if isinstance(valeur, bool):
+        return "true" if valeur else "false"
+    return str(valeur)
 
 
 def _reordering(

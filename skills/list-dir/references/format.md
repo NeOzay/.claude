@@ -3,7 +3,7 @@
 Ce qu'est un répertoire-liste, et ce qu'une liste ajoute à un gabarit. Tout ce qui suit est
 mécaniquement vérifiable par `validate`.
 
-**Une liste est une liste de gabarits.** Le format d'un fichier, le contrat, les six types admis,
+**Une liste est une liste de gabarits.** Le format d'un fichier, le contrat, les sept types admis,
 le préremplissage et les marqueurs sont déclarés par `gabarit`, dont ce paquet dépend :
 [Le format d'un gabarit](../../gabarit/references/format.md). Ce fichier-ci ne porte que ce qu'une
 liste y ajoute — l'`id` égal au nom du fichier, `.list/`, `from`, `[origin]`.
@@ -80,7 +80,7 @@ refs = ["R4"]
 
 `.list/contract.toml`, dans la liste elle-même. Il déclare ce qu'un élément doit contenir, et a la
 forme de celui d'une semence de gabarit — `name`, `description`, `[fields.*]`, `[sections.*]`, les
-six types, `text`/`command`, `description` exigée partout :
+sept types, `text`/`command`, `deprecated`, `description` exigée partout :
 [Le contrat](../../gabarit/references/format.md#le-contrat).
 
 Quatre ajouts lui sont propres.
@@ -147,10 +147,11 @@ Trois limites propres à une liste :
 
 ## Les marqueurs
 
-Les deux marqueurs, ce qu'ils disent, et ce que `--filled` réclame ou ignore sont ceux d'un
-gabarit : [Les marqueurs](../../gabarit/references/format.md#les-marqueurs). Un élément créé par
-`new`, ou une fiche créée par `derive`, porte **tout** le contrat — chaque champ et chaque section,
-même facultatif. Ce qu'on ne voit pas n'est jamais rempli.
+Les marqueurs — génériques, ou typés comme `<OPTIONNEL date>` pour un champ `int`, `date`, `bool` ou
+`list` —, ce qu'ils disent, la règle des guillemets, et ce que `--filled` réclame ou ignore sont
+ceux d'un gabarit : [Les marqueurs](../../gabarit/references/format.md#les-marqueurs). Un élément
+créé par `new`, ou une fiche créée par `derive`, porte **tout** le contrat — chaque champ et chaque
+section, même facultatif. Ce qu'on ne voit pas n'est jamais rempli.
 
 **Seul `id` échappe aux deux** : il est renseigné à la création, puisqu'il est le nom du fichier.
 

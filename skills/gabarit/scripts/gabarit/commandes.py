@@ -23,8 +23,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from .check import check_item
-from .contract import CONTRACT, check_value, field_values, parse_contract
+from .check import check_item, notes
+from .contract import CONTRACT, REGLE_GUILLEMETS, check_value, field_values, parse_contract
 from .definitions import DEFS, Root, config_root, definitions, project_root, resolve, roots
 from .items import read_item, write_item
 from .prefill import Contexte, Environnement, compose, premier_existant, racine_git
@@ -191,6 +191,9 @@ def check(
         item.sections,
         raw_front=item.raw_front,
     )
+    # LES NOTES SUIVENT LE VERDICT, quel qu'il soit : un ancien marqueur se signale aussi
+    # sur un fichier qui échoue pour une autre raison.
+    note = "\n".join([n for n in (note, *notes(semence.contrat, sans_estampille)) if n])
     violations = check_item(semence.contrat, sans_estampille, filled)
     if violations:
         detail = "\n".join(str(v) for v in violations)
@@ -206,7 +209,8 @@ def contract(semence: Semence, champ: str = "") -> Result[str]:
     """Le contrat d'une semence, TEL QU'IL EST ÉCRIT — ou les `values` d'un de ses champs.
 
     LE TEXTE EST RENDU TEL QUEL, commentaires compris : ils portent souvent le pourquoi
-    d'un champ, et c'est ce qu'on vient chercher avant de remplir un fichier posé. Il
+    d'un champ, et c'est ce qu'on vient chercher avant de remplir un fichier posé. La règle
+    des guillemets l'accompagne sur stderr, jamais sur stdout. Il
     a été JUGÉ avant d'être rendu, par `lire_semence` : un contrat cassé ne sort pas
     sous un code de succès.
 
@@ -215,7 +219,8 @@ def contract(semence: Semence, champ: str = "") -> Result[str]:
     jamais une sortie vide sous un code 0.
     """
     if not champ:
-        return ok(semence.texte.rstrip("\n"))
+        # LA RÈGLE SORT SUR STDERR : stdout reste le contrat verbatim, que l'on pipe.
+        return ok(semence.texte.rstrip("\n"), REGLE_GUILLEMETS)
     valeurs = field_values(semence.contrat, champ, semence.chemin / CONTRACT)
     if not valeurs:
         return Result(valeurs.status, None, valeurs.message)

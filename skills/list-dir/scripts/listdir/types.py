@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Never, Protocol, override
 from gabarit.types import FIELD_TYPES as FIELD_TYPES
 from gabarit.types import OPTIONAL as OPTIONAL
 from gabarit.types import PLACEHOLDER as PLACEHOLDER
+from gabarit.types import TYPED_MARKER_TYPES as TYPED_MARKER_TYPES
 from gabarit.types import Contract as BaseContract
 from gabarit.types import Field as BaseField
 from gabarit.types import FieldType as FieldType
@@ -32,6 +33,7 @@ from gabarit.types import Result as Result
 from gabarit.types import Section as Section
 from gabarit.types import Violation as Violation
 from gabarit.types import fail as fail
+from gabarit.types import marker as marker
 from gabarit.types import ok as ok
 
 if TYPE_CHECKING:  # pragma: no cover

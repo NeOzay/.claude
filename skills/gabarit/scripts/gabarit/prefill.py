@@ -148,6 +148,17 @@ def initial_field(f: Field, ctx: Contexte) -> Result[FieldValue]:
             )
         value = int(value)
 
+    # UN `bool` SE POSE EN BOOLÉEN, et non en chaîne : `text = "false"` écrit `false`, que
+    # TOML lit comme un booléen. Seules ces deux formes sont admises — ni « True », ni « 0 »,
+    # ni « oui » : une sortie ambiguë est refusée en la nommant plutôt que devinée.
+    if f.type == "bool":
+        if value not in ("true", "false"):
+            return fail(
+                f"{ctx.lieu}: champ « {f.name} » — valeur issue de {origine} refusée : "
+                f"« {value} » n'est ni « true » ni « false »"
+            )
+        value = value == "true"
+
     reason = check_value(f, value)
     if reason:
         return fail(
@@ -183,8 +194,10 @@ def compose(
     chacun à sa valeur initiale. Rien n'est écrit.
 
     Poser aussi le facultatif n'est pas de la générosité : ce qu'on ne voit pas n'est
-    jamais rempli. `fixed` donne les valeurs que l'appelant impose, qui ne passent ni
-    par un marqueur ni par le préremplissage.
+    jamais rempli. UN CHAMP OU UNE SECTION `deprecated` N'EST PAS POSÉ : on ne crée plus ce
+    qu'on est en train de retirer (un `fixed` explicite de l'appelant, lui, l'emporte).
+    `fixed` donne les valeurs que l'appelant impose, qui ne passent ni par un marqueur ni
+    par le préremplissage.
 
     LA PREMIÈRE COMMANDE QUI ÉCHOUE ARRÊTE TOUT, dans l'ordre du contrat : un fichier à
     moitié posé ne se rend pas.
@@ -194,6 +207,8 @@ def compose(
         if name in fixed:
             fields[name] = fixed[name]
             continue
+        if f.deprecated is not None:
+            continue
         initial = initial_field(f, ctx)
         if not initial:
             return Result(initial.status, None, initial.message)
@@ -201,6 +216,8 @@ def compose(
 
     sections: dict[str, str] = {}
     for title, s in contract.sections.items():
+        if s.deprecated is not None:
+            continue
         posee = initial_section(s, ctx)
         if not posee:
             return Result(posee.status, None, posee.message)

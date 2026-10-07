@@ -54,6 +54,17 @@ def test_create_pose_le_marqueur_de_chaque_statut(liste_vide: Path) -> None:
     assert item.sections["Assumé"] == OPTIONAL
 
 
+def test_create_pose_le_marqueur_du_type_du_champ(liste_vide: Path) -> None:
+    """Un `date` ou un `list` facultatif reçoit son marqueur typé ; `text` et `enum`, le
+    générique — c'est la règle des guillemets."""
+    item = ouvrir(liste_vide).create("neuf").unwrap()
+
+    assert item.fields["date"] == "<OPTIONNEL date>"
+    assert item.fields["tags"] == "<OPTIONNEL list>"
+    assert item.fields["title"] == PLACEHOLDER
+    assert item.fields["category"] == OPTIONAL
+
+
 def test_create_pose_id_au_nom_du_fichier(liste_vide: Path) -> None:
     """`id` n'a jamais de marqueur : c'est le seul lien entre l'élément et son support."""
     item = ouvrir(liste_vide).create("neuf").unwrap()
@@ -214,6 +225,99 @@ def test_migrate_ne_touche_pas_un_champ_deja_rempli_meme_preremplissable(tmp_pat
     _ = ouvrir(liste).migrate().unwrap()
 
     assert ouvrir(liste).get("a").unwrap().fields["date"] == datetime.date(2020, 1, 1)
+
+
+CORPS_COMPLET = "## Constat\n\nx\n\n## Assumé\n\n<OPTIONNEL>\n"
+
+
+def liste_a_date_requise(racine: Path) -> Path:
+    contrat = CONTRAT.replace(
+        '[fields.date]\ntype = "date"\n', '[fields.date]\ntype = "date"\nrequired = true\n'
+    )
+    return monter_liste(racine / "jouet", contrat)
+
+
+def test_migrate_convertit_l_ancien_marqueur_en_gardant_son_statut(tmp_path: Path) -> None:
+    liste = liste_a_date_requise(tmp_path)
+    _ = element(
+        liste,
+        "a",
+        'id = "a"\ntitle = "T"\ndate = "<À REMPLIR>"\ncategory = "<OPTIONNEL>"\n'
+        'tags = "<OPTIONNEL>"\n',
+        CORPS_COMPLET,
+    )
+
+    changes = ouvrir(liste).migrate().unwrap()
+
+    lu = ouvrir(liste).get("a").unwrap()
+    assert lu.fields["date"] == "<À REMPLIR date>"  # requis reste requis
+    assert lu.fields["tags"] == "<OPTIONNEL list>"
+    assert lu.fields["category"] == OPTIONAL  # un enum garde son marqueur générique
+    assert "a.md: champ « date » — marqueur « <À REMPLIR> » remplacé par « <À REMPLIR date> »" in (
+        actes(changes)
+    )
+    assert len(changes) == 2
+
+
+def test_migrate_ne_touche_aucune_valeur_ecrite(tmp_path: Path) -> None:
+    liste = liste_a_date_requise(tmp_path)
+    front = (
+        'id = "a"\ntitle = "<OPTIONNEL>"\ndate = 2020-01-01\ncategory = "rouge"\n'
+        'tags = ["x",\n        "y"]\n'
+    )
+    _ = element(liste, "a", front, CORPS_COMPLET)
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    changes = ouvrir(liste).migrate().unwrap()
+
+    assert changes == []  # le `text` « <OPTIONNEL> » est un marqueur générique légitime
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant
+
+
+def test_migrate_conversion_en_dry_run_n_ecrit_rien(tmp_path: Path) -> None:
+    liste = liste_a_date_requise(tmp_path)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\ndate = "<À REMPLIR>"\n', CORPS_COMPLET)
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    changes = ouvrir(liste).migrate(dry_run=True).unwrap()
+
+    assert any("remplacé par « <À REMPLIR date> »" in a for a in actes(changes))
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant
+
+
+def test_migrate_conversion_rejouable_et_mise_en_forme_preservee(tmp_path: Path) -> None:
+    liste = liste_a_date_requise(tmp_path)
+    _ = element(
+        liste,
+        "a",
+        'id = "a"\n# la légende du titre\ntitle = \'T\'\ndate = "<À REMPLIR>"\n'
+        'category = "rouge"\ntags = ["x",\n        "y"]\n',
+    )
+
+    _ = ouvrir(liste).migrate().unwrap()
+    apres = (liste / "a.md").read_text(encoding="utf-8")
+
+    assert "# la légende du titre\ntitle = 'T'\n" in apres
+    assert 'tags = ["x",\n        "y"]\n' in apres
+    assert 'date = "<À REMPLIR date>"\n' in apres
+    assert ouvrir(liste).migrate().unwrap() == []
+    assert (liste / "a.md").read_text(encoding="utf-8") == apres
+
+
+def test_migrate_dit_un_booleen_ajoute_a_sa_forme_toml(tmp_path: Path) -> None:
+    """`False` n'est pas ce qu'on écrit dans le fichier : le message dit `false`."""
+    contrat = CONTRAT.replace(
+        "[sections.",
+        '[fields.pin]\ntype = "bool"\ndescription = ""\ntext = "false"\n\n[sections.',
+        1,
+    )
+    liste = monter_liste(tmp_path / "jouet", contrat)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\n', CORPS_COMPLET)
+
+    changes = ouvrir(liste).migrate().unwrap()
+
+    assert "a.md: champ « pin » — ajouté, false" in actes(changes)
+    assert "pin = false\n" in (liste / "a.md").read_text(encoding="utf-8")
 
 
 def test_migrate_echoue_sur_une_command_ratee_et_n_ecrit_rien(tmp_path: Path) -> None:

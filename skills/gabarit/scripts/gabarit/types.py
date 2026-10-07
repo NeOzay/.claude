@@ -78,7 +78,7 @@ def fail(message: str, code: int = 1) -> Result[Never]:
 
 
 # --------------------------------------------------------------------- contrat
-type FieldType = Literal["slug", "text", "date", "enum", "list", "int"]
+type FieldType = Literal["slug", "text", "date", "enum", "list", "int", "bool"]
 """Les types qu'un contrat peut déclarer. La liste est fermée : un contrat n'est
 pas un langage, et un type inconnu est une faute que load_contract nomme."""
 
@@ -90,6 +90,44 @@ FIELD_TYPES: tuple[FieldType, ...] = cast(
 )
 """Les mêmes, énumérables. Dérivés de l'alias, jamais recopiés : deux listes qui
 se ressemblent finissent toujours par diverger."""
+
+TYPED_MARKER_TYPES: frozenset[FieldType] = frozenset({"int", "date", "bool", "list"})
+"""Les types dont la valeur TOML ne s'écrit pas entre guillemets : leur marqueur dit le
+type (`<OPTIONNEL date>`), pour que le modèle n'écrive pas `reviewed = "<OPTIONNEL>"` et
+n'y laisse pas les guillemets d'une chaîne. `text`, `enum` et `slug` n'y sont pas : leur
+valeur finale est aussi une chaîne, le marqueur générique y est exact."""
+
+
+def marker(required: bool, type: FieldType | None = None) -> str:
+    """Le marqueur d'un champ ou d'une section : requis ou facultatif, typé ou non.
+
+    LA SEULE CONSTRUCTION D'UN MARQUEUR TYPÉ. Elle part des deux constantes ci-dessus et
+    n'en recopie aucune : `<À REMPLIR>` devient `<À REMPLIR int>`, rien d'autre ne change.
+    Une section, ou un type hors de `TYPED_MARKER_TYPES`, reçoit le marqueur générique.
+
+    Args:
+        required: vrai pour `<À REMPLIR…>`, faux pour `<OPTIONNEL…>`.
+        type: le type du champ ; None pour une section.
+    """
+    base = PLACEHOLDER if required else OPTIONAL
+    if type is None or type not in TYPED_MARKER_TYPES:
+        return base
+    return f"{base[:-1]} {type}>"
+
+
+ALL_MARKERS: frozenset[str] = frozenset(
+    marker(required, type_)
+    for required in (True, False)
+    for type_ in (None, *sorted(TYPED_MARKER_TYPES))
+)
+"""Toutes les formes qu'un marqueur peut prendre. Dérivées de `marker`, jamais recopiées."""
+
+
+def accepted_markers(type: FieldType) -> frozenset[str]:
+    """Les marqueurs qu'un champ de ce type accepte : les deux génériques — l'ancienne
+    forme, tolérée — et les deux de son propre type, jamais ceux d'un autre."""
+    return frozenset(marker(required, t) for required in (True, False) for t in (None, type))
+
 
 type FieldValue = str | bool | int | datetime.date | list[str]
 """Ce qu'un champ peut valoir. Exactement ce que le sérialiseur de items.py sait
@@ -111,15 +149,18 @@ class Field:
     values: list[str] = field(default_factory=list)  # enum seulement
     text: str | None = None  # texte littéral posé à la place du marqueur
     command: str | None = None  # commande dont la sortie est posée à la place du marqueur
+    deprecated: str | None = None  # la consigne : ce champ n'est plus posé, et que faire de lui
 
     @property
     def marker(self) -> str:
         """Le marqueur que ce champ reçoit à la création.
 
         Un champ facultatif se marque comme une section facultative : sinon
-        --filled réclamerait de remplir ce que le contrat dit optionnel.
+        --filled réclamerait de remplir ce que le contrat dit optionnel. Un champ
+        d'un type dont la valeur ne s'écrit pas en chaîne porte le marqueur de son
+        type : voir `marker`.
         """
-        return PLACEHOLDER if self.required else OPTIONAL
+        return marker(self.required, self.type)
 
 
 @dataclass(frozen=True)
@@ -131,11 +172,12 @@ class Section:
     description: str = ""
     text: str | None = None  # texte littéral posé à la place du marqueur
     command: str | None = None  # commande dont la sortie est posée à la place du marqueur
+    deprecated: str | None = None  # la consigne : cette section n'est plus posée
 
     @property
     def marker(self) -> str:
         """Le marqueur que cette section reçoit à la création. Voir Field.marker."""
-        return PLACEHOLDER if self.required else OPTIONAL
+        return marker(self.required)
 
 
 @dataclass(frozen=True)

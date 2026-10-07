@@ -15,7 +15,7 @@ import pytest
 from gabarit.contract import check_value, parse_contract
 from gabarit.items import read_item, write_item
 from gabarit.prefill import Contexte, initial_field
-from gabarit.types import OPTIONAL, PLACEHOLDER, Field, Item
+from gabarit.types import PLACEHOLDER, Field, Item, marker
 
 
 def entier(*, required: bool = True, text: str | None = None, command: str | None = None) -> Field:
@@ -85,8 +85,10 @@ def test_une_sortie_qui_n_est_pas_un_entier_est_refusee_en_la_nommant(
 
 
 def test_un_int_sans_preremplissage_pose_son_marqueur(tmp_path: Path) -> None:
-    assert initial_field(entier(required=True), contexte(tmp_path)).unwrap() == PLACEHOLDER
-    assert initial_field(entier(required=False), contexte(tmp_path)).unwrap() == OPTIONAL
+    assert initial_field(entier(required=True), contexte(tmp_path)).unwrap() == marker(True, "int")
+    assert initial_field(entier(required=False), contexte(tmp_path)).unwrap() == marker(
+        False, "int"
+    )
 
 
 # ------------------------------------------------------------------ aller-retour

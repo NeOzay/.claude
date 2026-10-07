@@ -38,6 +38,10 @@ contrat — rien n'imprimait le contrat lui-même. Une prose qui recopie les cha
 d'un contrat est une copie de plus à tenir à jour ; un renvoi vers cette commande
 n'en est pas une.
 
+LA RÈGLE DES GUILLEMETS ACCOMPAGNE LE CONTRAT sur stderr — jamais sur stdout, ni avec
+`--values` : seuls `text`, `enum` et `slug` gardent leurs guillemets, et c'est ce qu'on
+vient relire avant de remplir un fichier.
+
 LE TEXTE EST RENDU TEL QUEL, commentaires compris : ils portent souvent le pourquoi
 d'un champ, et un contrat reformaté par un aller-retour de parseur perdrait
 justement ce que le lecteur venait chercher.
@@ -58,7 +62,7 @@ import argparse
 from pathlib import Path
 from typing import cast
 
-from listdir.contract import field_values, list_base, load_source
+from listdir.contract import REGLE_GUILLEMETS, field_values, list_base, load_source
 from listdir.definitions import resolve, roots
 from listdir.types import Result, Utils, fail, ok
 
@@ -119,7 +123,8 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
 
     champ = cast("str", args.values)
     if not champ:
-        return utils.ok(texte.rstrip("\n"))
+        # LA RÈGLE SORT SUR STDERR : stdout reste le contrat verbatim, que l'on pipe.
+        return utils.ok(texte.rstrip("\n"), REGLE_GUILLEMETS)
 
     valeurs = field_values(contrat, champ, chemin)
     if not valeurs:

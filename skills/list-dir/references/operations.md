@@ -17,7 +17,8 @@ Un `Violation` par manquement, chacun nommant fichier, sujet et cause, dans cet 
 | champ requis absent | manquement | idem |
 | `id` ≠ nom du fichier | manquement | idem |
 | valeur mal typée, hors enum, date non ISO | manquement | idem |
-| champ portant un marqueur | légitime — le type n'est pas contrôlé | manquement si le champ est **requis** |
+| champ portant un marqueur de son type, ou le marqueur générique | légitime — le type n'est pas contrôlé | manquement si le champ est **requis** |
+| champ portant le marqueur **d'un autre type** (`<OPTIONNEL int>` sur un `date`) | manquement | idem |
 | section non déclarée au contrat | manquement | idem |
 | section requise absente ou vide | manquement | idem |
 | section requise au marqueur | légitime | manquement |
@@ -25,9 +26,16 @@ Un `Violation` par manquement, chacun nommant fichier, sujet et cause, dans cet 
 
 Une liste **sans élément est conforme** : elle est légitimement vide au sortir d'`init`.
 
-`validate` avertit par ailleurs sur stderr quand la semence d'une liste a évolué, sans jamais
-changer son code de retour —
-[Ce que `validate` avertit](../references/provenance.md#ce-que-validate-avertit).
+`validate` avertit par ailleurs sur stderr, sans jamais changer son code de retour :
+
+- quand la semence d'une liste a évolué —
+  [Ce que `validate` avertit](../references/provenance.md#ce-que-validate-avertit) ;
+- pour chaque élément qui porte un marqueur générique sur un champ `int`, `date`, `bool` ou
+  `list` : la note nomme la forme typée, et `migrate` la pose ;
+- pour chaque élément qui porte un champ ou une section `deprecated`, avec la consigne du contrat.
+
+Un champ ou une section `deprecated` n'est jamais réclamé, jamais signalé comme non déclaré, et son
+type reste contrôlé quand un élément le porte.
 
 ## Quand le contrat change
 
@@ -42,9 +50,12 @@ exactement ce que ce format existe pour supprimer.
 | champ déclaré, absent de l'élément | posé au marqueur de son statut |
 | section déclarée, absente | ajoutée au marqueur de son statut |
 | `id` absent | posé au nom du fichier — jamais un marqueur |
+| marqueur générique sur un champ `int`, `date`, `bool` ou `list` | converti en sa forme typée, **à statut égal** : `<À REMPLIR>` devient `<À REMPLIR date>` |
+| champ ou section `deprecated`, absent | **non ajouté** |
+| champ ou section `deprecated`, présent | gardé en place ; `--drop` ne le retire pas |
 | ordre des champs ou des sections différent | repris de l'ordre du contrat |
 | champ ou section que le contrat ne déclare plus | **conservé** et signalé ; `--drop` le retire |
-| valeur déjà écrite | jamais touchée |
+| valeur déjà écrite | jamais touchée — un marqueur n'est pas une valeur écrite |
 
 **Elle ne juge pas.** Elle ne renomme rien et ne reporte aucune valeur : décider qu'un champ
 `severite` disparu est devenu `gravite` demande un contexte qu'aucun script n'a. C'est le partage
@@ -91,6 +102,14 @@ chemin d'arrivée, pour qu'un script puisse le lire sans le démêler d'un comme
 au `cut`. `--where` est répétable et les critères se cumulent ; il porte sur les champs déclarés,
 jamais sur le texte. Un filtre qui ne rend rien produit **zéro octet et le code 0** : c'est une
 réponse, pas une erreur — contrairement à `merge`, qui perdrait un élément.
+
+**`--sort a,-b` ordonne selon le type déclaré**, un `-` en tête de champ inversant son sens. Le `-`
+se colle à l'option, `--sort=-b` : `argparse` prend `--sort -b` pour une option. Un `int` se trie en
+nombre (9 avant 10), un `enum` dans l'ordre de ses `values`, un `bool` faux avant vrai, une `date`
+et un texte en chaîne. Trois groupes se rangent dans cet ordre : les valeurs conformes au type, puis
+les valeurs non conformes (en texte), puis les champs absents ou restés au marqueur — ces deux
+derniers groupes en fin quel que soit le sens, et sans jamais faire lever le tri. `--where` compare
+un `bool` à `true` ou `false`, et `list` les écrit de même.
 
 ## Listes dérivées
 

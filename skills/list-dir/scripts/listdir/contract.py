@@ -20,6 +20,7 @@ import tomllib
 from pathlib import Path
 
 from gabarit.contract import CONTRACT as CONTRACT
+from gabarit.contract import REGLE_GUILLEMETS as REGLE_GUILLEMETS
 from gabarit.contract import Extra, declared_fields, declared_sections, entete
 from gabarit.contract import check_value as check_value
 from gabarit.contract import field_values as field_values

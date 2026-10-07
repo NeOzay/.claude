@@ -40,7 +40,7 @@ un fichier quand il corrige une section. `validate` repasse après.
 version est inférieure.
 
 **Le paquet [`gabarit`](../gabarit/SKILL.md)**, et rien d'autre hors de la stdlib. Une liste est
-une liste de gabarits : le format d'un fichier, le contrat, les six types, le préremplissage et les
+une liste de gabarits : le format d'un fichier, le contrat, les sept types, le préremplissage et les
 marqueurs viennent de lui, et `listdir` les réexporte plutôt que de les redéfinir
 ([Le format d'un gabarit](../gabarit/references/format.md)). Il est localisé au premier
 `bin/gabarit` trouvé en remontant, puis dans le `PATH` ; absent, l'import échoue en le nommant,
@@ -56,7 +56,7 @@ list-dir init <répertoire>                   # crée une liste et son contrat s
 list-dir init <répertoire> --def <nom>       # ... ou celui d'une définition, résolue par son nom
 list-dir init <répertoire> --from <chemin>   # ... ou d'un répertoire de définition, tel quel
 list-dir new <liste> <id>                    # crée un élément prérempli du contrat
-list-dir list <liste> [--where c=v] [--sort c]
+list-dir list <liste> [--where c=v] [--sort=c,-c2]   # `-` en tête : décroissant, collé à --sort=
 list-dir show <liste> <id>
 list-dir contract <liste>                    # le contrat EN VIGUEUR de cette liste
 list-dir contract --def <nom>                # ... ou celui d'une définition, résolue par son nom
@@ -117,11 +117,13 @@ de ne pas pouvoir annoncer celle qui échouera. Les deux clés et leurs refus so
 ce qu'une liste y ajoute — les `LISTDIR_*`, le répertoire d'exécution — est dans
 `references/format.md`.
 
-**Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un
-coup tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au
-marqueur, l'ordre est repris du contrat, aucune valeur déjà écrite n'est touchée. Elle ne renomme
-et ne reporte rien : un champ que le contrat ne déclare plus est conservé et signalé, `--drop` le
-retire sur ordre. Le renommage reste au modèle, qui seul sait que `severite` est devenu `gravite`.
+**Le contrat change, la liste suit.** Ajouter un champ ou une section au contrat invalide d'un coup
+tous les éléments écrits avant : `migrate` les remet en ligne — ce qui manque est posé au marqueur,
+l'ordre est repris du contrat, aucune valeur déjà écrite n'est touchée. Seul un marqueur générique
+sur un champ `int`, `date`, `bool` ou `list` est converti en sa forme typée, à statut égal.
+`migrate` ne renomme et ne reporte rien : un champ que le contrat ne déclare plus est conservé et
+signalé, `--drop` le retire sur ordre. Le renommage reste au modèle, qui seul sait que `severite`
+est devenu `gravite`. Un champ ou une section `deprecated` n'est jamais ajouté, et jamais retiré.
 
 **Échec fermé** : sortie non nulle et message nommant la cause — contrat introuvable, champ inconnu,
 élément non conforme, outil déclaré manquant, agglomération qui perd un élément. Jamais de succès

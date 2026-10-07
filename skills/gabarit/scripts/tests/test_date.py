@@ -20,7 +20,7 @@ import pytest
 from gabarit.contract import check_value
 from gabarit.items import read_item, toml_text, write_item
 from gabarit.prefill import Contexte, initial_field
-from gabarit.types import OPTIONAL, PLACEHOLDER, Field, Item
+from gabarit.types import Field, Item, marker
 
 
 def jour(*, required: bool = True, text: str | None = None, command: str | None = None) -> Field:
@@ -58,8 +58,8 @@ def test_une_sortie_qui_n_est_pas_une_date_est_refusee_en_la_nommant(
 
 
 def test_une_date_sans_preremplissage_pose_son_marqueur(tmp_path: Path) -> None:
-    assert initial_field(jour(required=True), contexte(tmp_path)).unwrap() == PLACEHOLDER
-    assert initial_field(jour(required=False), contexte(tmp_path)).unwrap() == OPTIONAL
+    assert initial_field(jour(required=True), contexte(tmp_path)).unwrap() == marker(True, "date")
+    assert initial_field(jour(required=False), contexte(tmp_path)).unwrap() == marker(False, "date")
 
 
 # ------------------------------------------------------------------ graphie écrite

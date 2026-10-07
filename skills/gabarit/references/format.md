@@ -76,15 +76,16 @@ description = ""
 text = "Rien d'assumé à ce jour."   # ce texte, à la place du marqueur
 ```
 
-### Les six types
+### Les sept types
 
 `slug`, `text`, `date`, `enum` (avec `values`), `list` (de chaînes), `int` (un entier ; un booléen
-n'en est pas un). **La liste est fermée** : un contrat n'est pas un langage, et tout autre type est
+n'en est pas un), `bool` (`true` ou `false`, sans guillemets ; l'entier `0` ou `1` n'en est pas un).
+**La liste est fermée** : un contrat n'est pas un langage, et tout autre type est
 une erreur qui nomme le type.
 
 **L'autorité est `FieldType`, dans `scripts/gabarit/types.py`** : le code y dérive `FIELD_TYPES` de
 l'alias plutôt que d'en tenir une seconde liste, et un type ajouté là est admis sans qu'aucune
-énumération suive. Les six noms ci-dessus sont une transcription pour le lecteur, la seule du
+énumération suive. Les sept noms ci-dessus sont une transcription pour le lecteur, la seule du
 dépôt : un type ajouté ou retiré se reporte ici, et nulle part ailleurs. Une transcription qu'on
 oublie de suivre annonce un type qui n'existe pas, ou tait celui qui vient d'apparaître.
 
@@ -100,6 +101,22 @@ n'échoue ; une valeur vide, elle, disparaîtrait sans laisser de trace.
 la clé, `required` dit si elle est obligatoire (défaut `false`), `description` dit ce qu'il faut y
 écrire. C'est l'ordre du TOML qui ordonne les sections dans un fichier créé — pas un tri par
 `required`.
+
+### `deprecated` retire un champ ou une section sans le supprimer
+
+`deprecated = "<consigne>"` marque un champ ou une section qu'on ne pose plus, et dit à qui le porte
+encore ce qu'il en fait. La consigne est une chaîne non vide.
+
+- Un fichier neuf ne le porte pas : ni `new`, ni `derive`, ni `migrate` ne le posent, et `migrate`
+  ne le retire pas d'un fichier qui le porte (`--drop` non plus : il est déclaré).
+- `check` ne le réclame jamais, ne le signale jamais comme non déclaré, et contrôle encore le type
+  d'un champ déprécié qu'un fichier porte.
+- Tant qu'un fichier le porte, `check` avertit sur stderr, avec la consigne, sans changer son code
+  de retour : `<fichier>: champ « source » — déprécié : <consigne>`. Une absence ne dit rien.
+
+Le contrat est refusé si `deprecated` est vide, ou s'il est déclaré avec `required = true`, `text`
+ou `command` : ce qu'on ne pose plus ne se préremplit pas et ne se réclame pas. Le message nomme la
+contradiction ; le contrat n'est pas corrigé en silence.
 
 ### `description` est exigée partout
 
@@ -130,7 +147,9 @@ l'objet de ces deux clés — ce qui est mécaniquement connu n'a pas à être r
 Le contrat est refusé si `text` et `command` sont déclarés **ensemble**, si l'un des deux est
 **vide**, ou s'il porte sur un champ de type **`list`** : la valeur produite est toujours du texte.
 Sur un champ de type `int`, ce texte est converti en entier à la pose — `text = "1"` pose `1` — et
-refusé en le nommant s'il n'est pas un entier en base 10. Une date préremplie est posée en date
+refusé en le nommant s'il n'est pas un entier en base 10. Sur un champ `bool`, `text = "false"`
+pose le booléen `false`, pas la chaîne ; seuls `true` et `false` sont admis, tout autre texte est
+refusé en le nommant. Une date préremplie est posée en date
 nue, comme une date saisie : deux graphies valides du même champ ne cohabitent pas selon l'origine
 de la valeur.
 
@@ -153,14 +172,29 @@ facultatif. Ce qu'on ne voit pas n'est jamais rempli.
 reportée dans le fichier : `<À REMPLIR>` sous `## Constat` ne rappelle pas que la section veut un
 constat factuel sans remède. C'est `gabarit contract <nom>` qui la sert — à lire avant de remplir.
 
-Deux constantes, définies une seule fois dans `scripts/gabarit/types.py` :
+Deux constantes, définies une seule fois dans `scripts/gabarit/types.py`, et la fonction `marker`
+qui en tire la forme typée :
 
 | Déclaré au contrat | Marqueur posé | `check --filled` |
 |---|---|---|
-| champ `required = true` | `<À REMPLIR>` | le réclame |
-| champ `required = false` | `<OPTIONNEL>` | l'ignore |
+| champ `required = true` | `<À REMPLIR>`, ou `<À REMPLIR int>` | le réclame |
+| champ `required = false` | `<OPTIONNEL>`, ou `<OPTIONNEL date>` | l'ignore |
 | section `required = true` | `<À REMPLIR>` | la réclame |
 | section `required = false` | `<OPTIONNEL>` | l'ignore |
+
+**Le marqueur d'un champ `int`, `date`, `bool` ou `list` dit son type** : `<OPTIONNEL date>`.
+`text`, `enum`, `slug` et les sections portent le marqueur générique.
+
+**La règle des guillemets** : seuls les champs `slug`, `text` et `enum` gardent leurs guillemets.
+Un champ `int`, `date`, `bool` ou `list` s'écrit sans guillemets, et le marqueur qui le tient se
+remplace guillemets compris — `reviewed = "<OPTIONNEL date>"` devient `reviewed = 2026-10-07`, pas
+`reviewed = "2026-10-07"`. Le marqueur typé le rappelle, là où le marqueur générique laissait
+écrire une chaîne. `gabarit contract` rappelle la règle sur stderr.
+
+**Le marqueur d'un autre type est un manquement** : `<OPTIONNEL int>` sur un champ `date` ne dit
+pas quoi écrire. Le marqueur générique sur un champ typé reste accepté ; `check` avertit sur
+stderr, sans changer son code de retour, et nomme la forme typée qui le remplace. Sur une liste,
+`list-dir migrate` fait la conversion.
 
 Un champ ou une section portant `text` ou `command` y échappe : il reçoit sa valeur, pas un
 marqueur, et `check --filled` ne le réclame donc jamais.
@@ -168,8 +202,9 @@ marqueur, et `check --filled` ne le réclame donc jamais.
 Rien d'autre ne marque un vide — ni chaîne vide, ni champ omis, ni tiret. Un champ **absent** et un
 champ **à remplir** sont deux états différents.
 
-Sur un champ portant `<À REMPLIR>`, le contrôle de type est **suspendu** : `date = "<À REMPLIR>"`
-est signalé comme *à remplir*, jamais comme *type invalide* — le message doit dire quoi faire.
+Sur un champ portant un marqueur de son type, ou le marqueur générique, le contrôle de type est
+**suspendu** : `date = "<À REMPLIR date>"` est signalé comme *à remplir*, jamais comme *type
+invalide* — le message doit dire quoi faire.
 
 ---
 
@@ -179,8 +214,12 @@ est signalé comme *à remplir*, jamais comme *type invalide* — le message doi
 
 - **sans `--filled`** — la structure seule : les champs et les sections déclarés sont présents, les
   types tiennent, et les marqueurs sont légitimes ;
-- **avec `--filled`** — plus aucun `<À REMPLIR>` là où le contrat exige quelque chose. Les
-  facultatifs restés `<OPTIONNEL>` ne sont jamais réclamés.
+- **avec `--filled`** — plus aucun `<À REMPLIR>`, typé ou non, là où le contrat exige quelque
+  chose. Les facultatifs restés `<OPTIONNEL>` ne sont jamais réclamés.
 
 Un champ ou une section que le contrat ne déclare pas est signalé ; l'estampille `gabarit` ne l'est
 jamais.
+
+**Les avertissements ne sont pas des manquements.** Un ancien marqueur générique sur un champ typé
+et un champ ou une section `deprecated` encore portés sortent sur stderr, avec la consigne ; le
+code de retour ne change pas.

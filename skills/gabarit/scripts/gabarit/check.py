@@ -5,6 +5,11 @@ marqueurs sont légitimes, puisqu'un fichier fraîchement créé n'est pas encor
 Avec `filled`, plus aucun marqueur n'est toléré là où le contrat exige quelque chose —
 mais les facultatifs restés à leur marqueur ne sont JAMAIS réclamés.
 
+LES NOTES NE SONT PAS DES MANQUEMENTS. `notes` dit ce qui est périmé sans être faux — un
+ancien marqueur générique sur un champ typé, un champ ou une section `deprecated` que le
+fichier porte encore — et sort sur le canal des avertissements : le verdict, lui, ne change
+pas.
+
 `fixed` PORTE LES RÈGLES QU'UN APPELANT SUBSTITUE AU CONTRÔLE DE TYPE d'un champ
 déclaré. `listdir` y met la sienne — `id` vaut le nom du fichier —, qu'un gabarit seul
 n'a aucune raison d'imposer : un suivi archivé sous `done/<date>-<slug>.md` ne porte
@@ -17,7 +22,7 @@ from collections.abc import Callable, Mapping
 
 from .contract import check_value, is_marker
 from .items import fence_ouverte
-from .types import Contract, Item, Violation
+from .types import OPTIONAL, PLACEHOLDER, TYPED_MARKER_TYPES, Contract, Item, Violation, marker
 
 type Rule = Callable[[Item, object], str]
 """La raison du manquement d'une valeur, ou une chaîne vide si elle convient."""
@@ -34,6 +39,33 @@ def check_item(
         *check_fields(contract, item, filled, fixed or {}),
         *check_sections(contract, item, filled),
     ]
+
+
+def notes(contract: Contract, item: Item) -> list[str]:
+    """Ce qu'il y a à dire d'un fichier conforme ou non, sans que ce soit un manquement.
+
+    Une note par champ ou section `deprecated` que le fichier porte encore, avec la consigne
+    du contrat : c'est ce qui dit à qui le tient quoi en faire. Une absence ne dit rien.
+
+    Une note par champ typé resté à l'ancien marqueur générique : `<OPTIONNEL>` sur un
+    `date` est accepté, mais ne dit pas qu'une date nue est attendue. Elle nomme la forme
+    typée qui le remplace, À STATUT ÉGAL : c'est celui de l'ancien marqueur qui compte, pas
+    celui du contrat — la conversion de `migrate` fait de même.
+    """
+    out: list[str] = []
+    for name, f in contract.fields.items():
+        value = item.fields.get(name)
+        if f.deprecated is not None and name in item.fields:
+            out.append(f"{item.path}: champ « {name} » — déprécié : {f.deprecated}")
+        if f.type in TYPED_MARKER_TYPES and value in (PLACEHOLDER, OPTIONAL):
+            out.append(
+                f"{item.path}: champ « {name} » — ancien marqueur « {value} » sur un champ "
+                f"« {f.type} » ; la forme typée est « {marker(value == PLACEHOLDER, f.type)} »"
+            )
+    for title, s in contract.sections.items():
+        if s.deprecated is not None and title in item.sections:
+            out.append(f"{item.path}: section « {title} » — dépréciée : {s.deprecated}")
+    return out
 
 
 def check_fields(

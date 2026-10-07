@@ -28,10 +28,34 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import cast
 
-from .types import FIELD_TYPES, OPTIONAL, PLACEHOLDER, Contract, Field, Result, Section, fail, ok
+from .types import (
+    ALL_MARKERS,
+    FIELD_TYPES,
+    TYPED_MARKER_TYPES,
+    Contract,
+    Field,
+    Result,
+    Section,
+    accepted_markers,
+    fail,
+    ok,
+)
 
 CONTRACT = "contract.toml"
 """Le nom du fichier de contrat dans une semence."""
+
+_SANS_GUILLEMETS = ", ".join(t for t in FIELD_TYPES if t in TYPED_MARKER_TYPES)
+_AVEC_GUILLEMETS = ", ".join(t for t in FIELD_TYPES if t not in TYPED_MARKER_TYPES)
+
+REGLE_GUILLEMETS = (
+    f"Règle des guillemets : seuls les champs {_AVEC_GUILLEMETS} gardent les leurs. "
+    f"Un champ {_SANS_GUILLEMETS} s'écrit sans guillemets : en le remplissant, "
+    'retirer ceux de son marqueur (reviewed = "<OPTIONNEL date>" devient '
+    "reviewed = 2026-10-07)."
+)
+"""Ce que `contract` dit sur stderr : où poser des guillemets. DÉRIVÉE de
+`TYPED_MARKER_TYPES`, jamais recopiée — c'est la règle qui décide quels types ont un
+marqueur typé, et la dire autrement ailleurs la ferait diverger."""
 
 type Extra = Callable[[str, dict[str, object]], Result[dict[str, object]]]
 """Un contrôle propre à l'appelant sur la table d'un champ : rend les arguments en plus
@@ -116,6 +140,49 @@ def _prefill(
     return ok((text_val, command_val))
 
 
+def _deprecated(
+    body: dict[str, object],
+    path: Path,
+    subject: str,
+    *,
+    required: bool,
+    text: str | None,
+    command: str | None,
+) -> Result[str | None]:
+    """La consigne de `deprecated`, ou None si la clé est absente.
+
+    UNE CHAÎNE NON VIDE : la consigne est ce que `validate` redira à qui porte encore le
+    champ, et une valeur vide ne dirait rien. Refusée avec `required`, `text` ou `command` :
+    un champ qu'on ne pose plus ne se préremplit pas et ne se réclame pas. Le contrat
+    contradictoire est NOMMÉ, jamais corrigé en silence.
+    """
+    valeur = body.get("deprecated")
+    if valeur is None:
+        return ok(None)
+    if not isinstance(valeur, str):
+        return fail(
+            f"{path}: {subject}, « deprecated » — une chaîne est attendue, "
+            f"trouvé {type(valeur).__name__}"
+        )
+    if not valeur.strip():
+        return fail(f"{path}: {subject}, « deprecated » — la consigne ne peut être vide")
+    contradictoires = [
+        nom
+        for nom, present in (
+            ("required", required),
+            ("text", text is not None),
+            ("command", command is not None),
+        )
+        if present
+    ]
+    if contradictoires:
+        return fail(
+            f"{path}: {subject} — « deprecated » contredit « {contradictoires[0]} » : "
+            "ce qu'on ne pose plus ne se préremplit pas et ne se réclame pas"
+        )
+    return ok(valeur)
+
+
 # ------------------------------------------------------------------ morceaux
 def entete(raw: dict[str, object], path: Path, anonyme: str) -> Result[tuple[str, str]]:
     """Le `name` et la `description` d'un contrat. `anonyme` dit pourquoi un nom est dû.
@@ -193,15 +260,23 @@ def parse_field[F: Field](
         return fail(prefill.message)
     text_val, command_val = prefill.unwrap()
 
+    required = bool(body.get("required", False))
+    deprecated = _deprecated(
+        body, path, f"champ « {name} »", required=required, text=text_val, command=command_val
+    )
+    if not deprecated:
+        return fail(deprecated.message)
+
     return ok(
         make(
             name=name,
             type=ftype,
-            required=bool(body.get("required", False)),
+            required=required,
             description=description.unwrap(),
             values=values.unwrap(),
             text=text_val,
             command=command_val,
+            deprecated=deprecated.unwrap(),
             **extras,
         )
     )
@@ -241,13 +316,21 @@ def parse_section(title: str, value: object, path: Path) -> Result[Section]:
         return fail(prefill.message)
     text_val, command_val = prefill.unwrap()
 
+    required = bool(body.get("required", False))
+    deprecated = _deprecated(
+        body, path, f"section « {title} »", required=required, text=text_val, command=command_val
+    )
+    if not deprecated:
+        return fail(deprecated.message)
+
     return ok(
         Section(
             name=title,
-            required=bool(body.get("required", False)),
+            required=required,
             description=description.unwrap(),
             text=text_val,
             command=command_val,
+            deprecated=deprecated.unwrap(),
         )
     )
 
@@ -324,13 +407,14 @@ def field_values(contrat: Contract, champ: str, chemin: Path) -> Result[list[str
 
 # ------------------------------------------------- confrontation d'une valeur au contrat
 def is_marker(value: object) -> bool:
-    """Vrai si la valeur est l'un des deux marqueurs, et rien d'autre.
+    """Vrai si la valeur est un marqueur — générique ou typé —, et rien d'autre.
 
     Ni la chaîne vide, ni un tiret, ni None : un champ ABSENT et un champ À REMPLIR
     sont deux états différents, et les confondre ferait passer un oubli pour une
-    intention.
+    intention. Le `isinstance` précède le test d'appartenance : une valeur non hachable
+    (une liste lue d'un front matter) le ferait lever.
     """
-    return value in (PLACEHOLDER, OPTIONAL)
+    return isinstance(value, str) and value in ALL_MARKERS
 
 
 def check_value(field: Field, value: object) -> str:
@@ -339,9 +423,15 @@ def check_value(field: Field, value: object) -> str:
     LE CONTRÔLE DE TYPE EST SUSPENDU SUR UN MARQUEUR : `date = "<À REMPLIR>"` doit
     être signalé comme *à remplir*, jamais comme *type invalide*. Un message qui
     parle de type devant un marqueur dit au lecteur de corriger ce qui va bien.
+
+    SEUL LE MARQUEUR D'UN AUTRE TYPE EST UN MANQUEMENT : `<OPTIONNEL int>` sur un champ
+    `date` ne dit pas quelle valeur écrire, et le laisser passer cacherait un contrat
+    ou un fichier mal posé. Le marqueur générique reste accepté : c'est l'ancienne forme.
     """
     if is_marker(value):
-        return ""
+        if value in accepted_markers(field.type):
+            return ""
+        return f"« {value} » est le marqueur d'un autre type que « {field.type} »"
 
     match field.type:
         case "slug":
@@ -371,6 +461,9 @@ def check_value(field: Field, value: object) -> str:
             # pour l'entier 1.
             if isinstance(value, bool) or not isinstance(value, int):
                 return f"un entier est attendu, trouvé {type(value).__name__}"
+        case "bool":
+            if not isinstance(value, bool):
+                return f"un booléen est attendu, trouvé {type(value).__name__}"
         case "list":
             if not isinstance(value, list):
                 return f"une liste est attendue, trouvé {type(value).__name__}"
