@@ -22,7 +22,7 @@
       "~/projects/nvim-plugins"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PostToolUse": [
       {
