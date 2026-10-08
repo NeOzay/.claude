@@ -2,8 +2,12 @@
 id = "basedpyright-treize-erreurs-non-tenues"
 title = "`basedpyright` rend treize erreurs là où le dépôt en attend zéro"
 date = 2026-09-05
+severite = "inconnue"
+chantier = "provenance-listes-derivees"
+reference = "R1"
+pin = false
 source = "chantier provenance-listes-derivees, journal du suivi et audit R1"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

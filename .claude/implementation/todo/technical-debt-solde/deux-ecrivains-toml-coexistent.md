@@ -2,8 +2,12 @@
 id = "deux-ecrivains-toml-coexistent"
 title = "Deux écrivains TOML cohabitent dans listdir : dump_value est déprécié"
 date = 2026-09-09
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier tableaux-toml-aplatis-a-l-ecriture, journal du 2026-09-09 — « dump_value est gardé intact »"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -30,6 +34,17 @@ dépendent donc d'une même table, dans deux modules.
 Établi par : `grep -rn "dump_value\|ESCAPES" skills/list-dir/scripts/listdir/` → appels en
 `store.py:807-808` et `provenance.py:431`, import en `provenance.py:45`, définition et usage
 d'`ESCAPES` en `items.py:172,186` et `provenance.py:328`.
+
+## Soldé le
+
+**2026-09-10, chantier `supprimer-dump-value`** — `store.init_list` et `provenance.emit` passent
+par tomlkit via `toml_text` ; `dump_value` et `ESCAPES` sont supprimés, la table d'échappements de
+noms de table vit désormais dans `provenance.py` sous `ECHAPPEMENTS_DE_NOM`, unique définition du
+dépôt. La règle d'écriture des chaînes est portée par le seul écrivain restant.
+
+Établi par : `git grep -n "dump_value\|ESCAPES" -- skills/list-dir/scripts/` → aucune sortie
+(sortie 1), et `~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/` → 447 passés,
+0 échec.
 
 ## Pourquoi c'est gênant
 
@@ -76,14 +91,3 @@ Le report est délibéré. Ce chantier a explicitement écarté la refonte de `d
 posait « si le diff touche l'écriture des contrats ou `provenance.py`, s'arrêter » comme signal de
 dérive, et les contrats n'ont rien à préserver puisqu'ils sont recopiés à l'octet — le bénéfice
 immédiat était donc nul.
-
-## Soldé le
-
-**2026-09-10, chantier `supprimer-dump-value`** — `store.init_list` et `provenance.emit` passent
-par tomlkit via `toml_text` ; `dump_value` et `ESCAPES` sont supprimés, la table d'échappements de
-noms de table vit désormais dans `provenance.py` sous `ECHAPPEMENTS_DE_NOM`, unique définition du
-dépôt. La règle d'écriture des chaînes est portée par le seul écrivain restant.
-
-Établi par : `git grep -n "dump_value\|ESCAPES" -- skills/list-dir/scripts/` → aucune sortie
-(sortie 1), et `~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/` → 447 passés,
-0 échec.

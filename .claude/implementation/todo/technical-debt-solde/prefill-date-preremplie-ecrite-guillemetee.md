@@ -2,6 +2,10 @@
 id = "prefill-date-preremplie-ecrite-guillemetee"
 title = "Un champ date prérempli est écrit entre guillemets, contre la forme nue des dates saisies"
 date = 2026-08-31
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier 2026-08-31-champs-preremplis, audit de clôture R5"
 reviewed = 2026-09-06
 category = "pertinent"

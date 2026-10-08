@@ -2,8 +2,12 @@
 id = "suivis-archives-sans-champ-skills"
 title = "Les Suivis archivés ne passent plus `gabarit check --filled`"
 date = "2026-10-04"
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `shadow-skill`, audit de clôture, constat R9"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

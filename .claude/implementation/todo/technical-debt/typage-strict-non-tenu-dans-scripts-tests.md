@@ -2,7 +2,13 @@
 id = "typage-strict-non-tenu-dans-scripts-tests"
 title = "Les tests de `scripts/` ne tiennent pas le typage strict du dépôt"
 date = 2026-09-18
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "Étape 7"
+pin = false
 source = "chantier `skill-convention`, étape 7 — confrontation du Python à `rules/claude-python-style.md`"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -29,3 +35,7 @@ Deux voies, à trancher : exposer ce dont le test a besoin sous un nom public, o
 accès d'un `# pyright: ignore[reportPrivateUsage]` avec le motif, comme la convention l'exige.
 Renoncer au typage strict sur `scripts/tests/` serait une troisième voie, qui demande alors de
 l'écrire dans `rules/claude-python-style.md`.
+
+## Assumé
+
+<OPTIONNEL>

@@ -136,34 +136,47 @@ def initial_field(f: Field, ctx: Contexte) -> Result[FieldValue]:
         return ok(f.marker)
 
     origine = f"commande « {f.command} »" if f.command is not None else "« text »"
+    return typed_value(f, value, ctx.lieu, origine)
+
+
+def typed_value(f: Field, text: str, lieu: str, origine: str) -> Result[FieldValue]:
+    """`text` converti au type du champ, puis confronté au contrat.
+
+    LA SEULE CONVERSION D'UNE CHAÎNE EN VALEUR DE CHAMP. `text`, `command` et la valeur
+    qu'un appelant passe en argument (`list-dir fill`) n'écrivent que des chaînes ; deux
+    conversions finiraient par accepter des formes différentes pour un même type.
+
+    Args:
+        lieu: ce que le message d'échec nomme en tête — la liste, ou le fichier.
+        origine: d'où vient `text`, tel que le message d'échec le cite.
+    """
+    value: FieldValue = text
     # UN `int` SE POSE EN ENTIER, pas en texte : `text` et `command` ne produisent que
     # des chaînes, et « 1 » écrit tel quel serait refusé à la vérification suivante.
     # La conversion est stricte — une sortie qui n'est pas un entier est refusée ici,
     # en la nommant, plutôt que tronquée ou arrondie.
     if f.type == "int":
-        if ENTIER.fullmatch(value) is None:
+        if ENTIER.fullmatch(text) is None:
             return fail(
-                f"{ctx.lieu}: champ « {f.name} » — valeur issue de {origine} refusée : "
-                f"« {value} » n'est pas un entier en base 10"
+                f"{lieu}: champ « {f.name} » — valeur issue de {origine} refusée : "
+                f"« {text} » n'est pas un entier en base 10"
             )
-        value = int(value)
+        value = int(text)
 
     # UN `bool` SE POSE EN BOOLÉEN, et non en chaîne : `text = "false"` écrit `false`, que
     # TOML lit comme un booléen. Seules ces deux formes sont admises — ni « True », ni « 0 »,
     # ni « oui » : une sortie ambiguë est refusée en la nommant plutôt que devinée.
     if f.type == "bool":
-        if value not in ("true", "false"):
+        if text not in ("true", "false"):
             return fail(
-                f"{ctx.lieu}: champ « {f.name} » — valeur issue de {origine} refusée : "
-                f"« {value} » n'est ni « true » ni « false »"
+                f"{lieu}: champ « {f.name} » — valeur issue de {origine} refusée : "
+                f"« {text} » n'est ni « true » ni « false »"
             )
-        value = value == "true"
+        value = text == "true"
 
     reason = check_value(f, value)
     if reason:
-        return fail(
-            f"{ctx.lieu}: champ « {f.name} » — valeur issue de {origine} refusée : {reason}"
-        )
+        return fail(f"{lieu}: champ « {f.name} » — valeur issue de {origine} refusée : {reason}")
 
     # UNE DATE SE POSE NUE, comme celles qui sont saisies : `text` et `command` ne rendent
     # que des chaînes, et l'écrivain rendrait `jour = "2026-08-31"` là où il écrit

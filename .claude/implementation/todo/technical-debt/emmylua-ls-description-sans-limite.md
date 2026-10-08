@@ -2,8 +2,12 @@
 id = "emmylua-ls-description-sans-limite"
 title = "La description d'emmylua-ls ne dit pas ce que la skill ne fait pas"
 date = "2026-09-17"
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "Non précisée"
+pin = false
 source = "chantier `skill-convention`, confrontation des skills à `references/prose.md`"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "origin-def-renomme-en-silence"
 title = "un reseed sans option accepte une semence qui se renomme"
 date = 2026-09-04
+severite = "inconnue"
+chantier = "peremption-contrat"
+reference = "R5"
+pin = false
 source = "chantier peremption-contrat, audit de clôture ddebb2b, R5"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

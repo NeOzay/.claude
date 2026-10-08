@@ -2,6 +2,10 @@
 id = "prefill-oserror-message-et-branche-non-couverte"
 title = "La branche OSError de prefill._run n'est jamais couverte, et son message ment sur la cause"
 date = 2026-08-31
+severite = "inconnue"
+chantier = "champs-preremplis"
+reference = "R2"
+pin = false
 source = "chantier 2026-08-31-champs-preremplis, audit de clôture R2"
 reviewed = 2026-09-06
 category = "pertinent"

@@ -2,7 +2,13 @@
 id = "contrat-employe-en-deux-sens"
 title = "« Contrat » est réservé au sens gabarit/list-dir, mais implementation-tracker l'emploie dans un autre sens"
 date = 2026-09-23
+severite = "inconnue"
+chantier = "lexique"
+reference = "R3"
+pin = false
 source = "Identifié par `lexique`, R3 du rapport d'audit de clôture."
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -28,3 +34,7 @@ Choisir un autre mot pour les deux sens du tracker (par exemple « règles du pi
 des sous-agents »), avec l'accord de l'utilisateur, et l'appliquer à `implementation-tracker`,
 `intent-brief`, `git-smart-commit` et `check_pipeline.py` (constante `CONTRAT`, ancres citées) —
 puis relancer `check_pipeline.py`, dont les renvois ancrés vers `contrat.md` casseront.
+
+## Assumé
+
+<OPTIONNEL>

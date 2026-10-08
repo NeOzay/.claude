@@ -2,8 +2,12 @@
 id = "correctif-passation-e11-non-audite"
 title = "La règle de fraîcheur de la section `## Passation` est livrée sans audit"
 date = "2026-10-04"
+severite = "inconnue"
+chantier = "contexte-tracker"
+reference = "Clôture"
+pin = false
 source = "chantier `contexte-tracker`, clôture du 2026-10-04, arbitrage de l'utilisateur"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "nvim-mini-test-redigee-en-anglais"
 title = "La skill nvim-mini-test est rédigée en anglais"
 date = "2026-09-17"
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "Non précisée"
+pin = false
 source = "chantier `skill-convention`, confrontation des skills à `references/prose.md`"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

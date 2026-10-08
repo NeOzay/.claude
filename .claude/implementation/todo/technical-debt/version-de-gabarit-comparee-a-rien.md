@@ -2,8 +2,12 @@
 id = "version-de-gabarit-comparee-a-rien"
 title = "La version d'un gabarit n'est comparée à rien, faute de liste qui la suive"
 date = 2026-09-05
+severite = "inconnue"
+chantier = "provenance-listes-derivees"
+reference = "R5"
+pin = false
 source = "chantier provenance-listes-derivees, audit R5 — hors-périmètre assumé au brief"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

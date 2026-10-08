@@ -2,8 +2,12 @@
 id = "step-implementer-sans-shadow-skills"
 title = "`step-implementer` ne reçoit pas les Shadow-skills du Suivi"
 date = "2026-10-04"
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `shadow-skill`, audit de clôture, constat R7"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

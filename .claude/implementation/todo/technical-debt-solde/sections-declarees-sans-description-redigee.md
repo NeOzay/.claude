@@ -2,8 +2,12 @@
 id = "sections-declarees-sans-description-redigee"
 title = "Toutes les descriptions de section du dépôt sont vides"
 date = 2026-08-31
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier sections-en-forme-longue, hors-périmètre assumé au brief"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

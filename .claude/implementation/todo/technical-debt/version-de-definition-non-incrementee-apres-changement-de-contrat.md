@@ -2,8 +2,12 @@
 id = "version-de-definition-non-incrementee-apres-changement-de-contrat"
 title = "Le contrat des trois définitions a changé sans que [origin].version bouge"
 date = 2026-09-06
+severite = "inconnue"
+chantier = "description-obligatoire-partout"
+reference = "R4"
+pin = false
 source = "chantier description-obligatoire-partout, audit de clôture e441337, R4 — dette induite"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

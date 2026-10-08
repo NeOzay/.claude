@@ -2,8 +2,12 @@
 id = "retouche-sans-garde-sur-l-etape-commencee"
 title = "`commit-chantier retouche` ne voit pas qu'une Étape suivante a commencé"
 date = 2026-10-05
+severite = "inconnue"
+chantier = "retouches-et-modele-du-chantier"
+reference = "R7"
+pin = false
 source = "chantier `retouches-et-modele-du-chantier`, audit de clôture, constat R7"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

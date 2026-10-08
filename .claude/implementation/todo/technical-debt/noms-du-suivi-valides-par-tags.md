@@ -2,8 +2,12 @@
 id = "noms-du-suivi-valides-par-tags"
 title = "Les noms du champ `skills` d'un Suivi sont validés par une fonction nommée `_tags`"
 date = "2026-10-04"
+severite = "note"
+chantier = "shadow-skill"
+reference = "R3"
+pin = true
 source = "chantier `shadow-skill`, audit de clôture, constat R3"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "where-compare-textuellement"
 title = "`where` compare les valeurs sous forme textuelle, y compris l'absence"
 date = 2026-08-23
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `format-registres`, R10 des audits de clôture"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

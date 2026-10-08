@@ -2,6 +2,10 @@
 id = "fence-non-fermee-diagnostic-trompeur"
 title = "Une fence non refermée avale les sections suivantes, et les deux messages qui en découlent sont faux"
 date = 2026-08-23
+severite = "inconnue"
+chantier = "format-registres"
+reference = "R22, R25"
+pin = false
 source = "chantier `format-registres`, R22 et R25 des audits de clôture"
 reviewed = 2026-09-06
 category = "pertinent"

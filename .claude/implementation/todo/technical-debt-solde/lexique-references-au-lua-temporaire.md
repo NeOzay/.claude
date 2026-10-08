@@ -2,7 +2,13 @@
 id = "lexique-references-au-lua-temporaire"
 title = "`SKILL.md` et la CLI de `lexique` citent `nvim/lexique.lua`, un fichier déclaré temporaire"
 date = 2026-09-27
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `lexique-nvim`, R6 du rapport d'audit de clôture."
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

@@ -2,8 +2,12 @@
 id = "correctifs-r11-r13-non-audites"
 title = "Les correctifs R11 et R13 de `revue-dette` n'ont jamais été audités"
 date = 2026-08-17
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `revue-dette`, décision de clôture ; soldé le jour même, R18 du troisième audit."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

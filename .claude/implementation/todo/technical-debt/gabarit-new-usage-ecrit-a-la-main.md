@@ -2,8 +2,12 @@
 id = "gabarit-new-usage-ecrit-a-la-main"
 title = "L'usage de `gabarit new` est une chaîne écrite à la main, que rien ne confronte à ses arguments"
 date = 2026-09-15
+severite = "inconnue"
+chantier = "fichier-seme"
+reference = "R7"
+pin = false
 source = "chantier fichier-seme, audit de clôture R7 (`5123a3d`) — clos avec"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

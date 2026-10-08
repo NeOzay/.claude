@@ -2,8 +2,12 @@
 id = "registres-derives-du-contrat-sans-que-validate-le-dise"
 title = "Trois registres ont dérivé de leur contrat sans que `validate` en dise un mot"
 date = 2026-09-20
+severite = "inconnue"
+chantier = "deux-sens-de-gabarit"
+reference = "Étape 5"
+pin = false
 source = "chantier `deux-sens-de-gabarit`, constaté à l'étape 5 en cherchant à poser une section « Soldé le »"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

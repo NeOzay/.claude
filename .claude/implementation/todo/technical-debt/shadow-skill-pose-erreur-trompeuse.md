@@ -2,8 +2,12 @@
 id = "shadow-skill-pose-erreur-trompeuse"
 title = "Un Shadow-skill tout juste posé échoue sur un message de type au lieu d'un Marqueur"
 date = "2026-10-04"
+severite = "inconnue"
+chantier = "shadow-skill"
+reference = "session 2"
+pin = false
 source = "chantier `shadow-skill`, essai des sous-commandes en session 2"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

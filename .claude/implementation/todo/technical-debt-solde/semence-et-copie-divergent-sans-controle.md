@@ -2,6 +2,10 @@
 id = "semence-et-copie-divergent-sans-controle"
 title = "Rien ne confronte une liste amorcée à la définition qui l'a semée"
 date = 2026-08-30
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier renvoi-contrat-des-categories, audit R6 ; revu par sections-en-forme-longue, audit R7"
 reviewed = 2026-09-06
 category = "a-solder"

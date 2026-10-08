@@ -2,6 +2,10 @@
 id = "source-verbatim-perd-italiques"
 title = "Le champ `source` est déclaré « verbatim » et perd les délimiteurs d'italique"
 date = 2026-08-23
+severite = "inconnue"
+chantier = "format-registres"
+reference = "R8"
+pin = false
 source = "chantier `format-registres`, R8 des audits de clôture"
 reviewed = 2026-09-06
 category = "pertinent"

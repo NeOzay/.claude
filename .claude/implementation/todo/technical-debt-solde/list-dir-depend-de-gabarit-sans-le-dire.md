@@ -2,8 +2,12 @@
 id = "list-dir-depend-de-gabarit-sans-le-dire"
 title = "list-dir dépend désormais de gabarit, et sa documentation ne le dit pas"
 date = 2026-09-15
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier fichier-seme, audit de clôture R5 (`fadddf1`), reconduit par R6 (`5123a3d`) — hors-périmètre assumé au brief"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

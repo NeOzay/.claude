@@ -2,7 +2,13 @@
 id = "intent-brief-description-sans-limite"
 title = "La `description` d'`intent-brief` ne dit pas ce que la skill ne fait pas"
 date = 2026-09-18
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "R1"
+pin = false
 source = "chantier `skill-convention`, audit de clôture R1 (`cea0665`)"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -25,3 +31,7 @@ travail repart du mauvais endroit.
 
 Ajouter une phrase de limite à la `description` d'`intent-brief` — « Ne planifie pas. » —, dans un
 chantier qui a le droit d'éditer les skills existantes.
+
+## Assumé
+
+<OPTIONNEL>

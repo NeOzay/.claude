@@ -3,7 +3,7 @@ description = "Dette technique constatée et non résolue"
 
 [origin]
 def = "technical-debt"
-version = 2
+version = 3
 
 [fields.id]
 type = "slug"
@@ -19,9 +19,37 @@ type = "date"
 required = true
 description = "date du constat, jamais modifiée"
 
+[fields.severite]
+type = "enum"
+required = true
+description = "gravité, selon l'échelle du registre ; « inconnue » tant que personne ne l'a jugée"
+# L'ORDRE DE CETTE LISTE EST CELUI DE LA GRAVITÉ, de la moindre à la pire :
+# `list --sort=-severite` range ainsi le plus grave en tête. `inconnue` vient en premier
+# pour finir en dernier : jamais jugée, elle ne passe devant aucune dette jugée.
+values = ["inconnue", "note", "avertissement", "majeur", "critique"]
+
+[fields.chantier]
+type = "text"
+required = true
+description = "slug du Chantier qui l'a identifiée, sans préfixe daté, ou « Hors chantier »"
+
+[fields.reference]
+type = "text"
+required = true
+description = "où le Chantier l'a écrite : le R<n> du rapport, ou le lieu cité ; « Non précisée » à défaut"
+
+# FAUX PAR DÉFAUT : une dette neuve n'est pas épinglée. Épingler sert à la retrouver
+# (`list --where pin=true`), et à rien d'autre — `debt-review` l'ignore.
+[fields.pin]
+type = "bool"
+required = true
+text = "false"
+description = "épinglée pour être retrouvée sans effort ; sans autre effet"
+
 [fields.source]
 type = "text"
 required = false
+deprecated = "Remplacé par chantier et reference ; ne plus l'écrire."
 description = "le chantier qui l'a identifiée et où il l'a écrit, verbatim"
 
 [fields.reviewed]
@@ -33,8 +61,7 @@ description = "date de la dernière revue qui a statué sur cette entrée"
 type = "enum"
 required = false
 description = "verdict de la dernière revue, posé par debt-review"
-values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
-          "aggravee", "pertinent", "inverifiable"]
+values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette", "aggravee", "pertinent", "inverifiable"]
 
 [sections."Constat"]
 required = true

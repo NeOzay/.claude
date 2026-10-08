@@ -2,6 +2,10 @@
 id = "consommateurs-des-marqueurs-generiques-hors-etat"
 title = "Neovim et `dette.md` ne connaissent que les deux Marqueurs génériques"
 date = 2026-10-07
+severite = "inconnue"
+chantier = "socle-contrat-evolutif"
+reference = "R4"
+pin = false
 source = "chantier socle-contrat-evolutif, audit de clôture (d5be681), R4"
 reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"

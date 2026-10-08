@@ -2,6 +2,10 @@
 id = "remontee-sarrete-au-premier-claude"
 title = "La racine de projet retenue par list-dir est le premier .claude trouvé, pas forcément le bon"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "semences-de-listes"
+reference = "R8"
+pin = false
 source = "chantier semences-de-listes, incertitude Q3 du brief et audit R8"
 reviewed = 2026-09-06
 category = "pertinent"

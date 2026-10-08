@@ -2,6 +2,10 @@
 id = "ruff-format-jamais-applique"
 title = "Le formatage ruff n'a jamais été appliqué au paquet list-dir"
 date = 2026-08-30
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier semences-de-listes, journal du suivi et audit R7"
 reviewed = 2026-09-06
 category = "aggravee"
@@ -85,3 +89,7 @@ Trancher d'abord la question de fond : le formatage fait-il partie du contrat du
 
 Ne pas mélanger le reformatage à un chantier fonctionnel : c'est ce qui rend le diff de l'un
 inaudible dans l'autre.
+
+## Assumé
+
+<OPTIONNEL>

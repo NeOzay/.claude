@@ -2,8 +2,12 @@
 id = "contexte-point-d-entree-et-logique-meles"
 title = "`contexte.py` mêle point d'entrée et logique, contre la convention Python du dépôt"
 date = "2026-10-04"
+severite = "avertissement"
+chantier = "contexte-tracker"
+reference = "R13"
+pin = true
 source = "chantier `contexte-tracker`, audits de clôture, constat R13"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

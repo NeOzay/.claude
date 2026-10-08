@@ -2,8 +2,12 @@
 id = "listdir-sans-suite-de-tests"
 title = "Le paquet `listdir` n'a aucune suite de tests"
 date = 2026-08-23
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `format-registres`, constaté à la clôture — question de l'utilisateur, aucun rapport d'audit ne l'avait relevé"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

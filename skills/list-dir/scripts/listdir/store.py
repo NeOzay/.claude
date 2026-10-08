@@ -14,13 +14,13 @@ broncher.
 from __future__ import annotations
 
 import datetime
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import final, override
 
 from gabarit.check import check_item as check_file
 from gabarit.check import notes as notes_file
-from gabarit.prefill import compose
+from gabarit.prefill import compose, typed_value
 
 from .contract import (
     CONTRACT,
@@ -415,6 +415,88 @@ class ListStore:
         if not any(c.applied for c in changes):
             return ok((item, changes))
         return ok((item.realigned(fields, sections), changes))
+
+    def fill(
+        self, name: str, text: str, ids: Sequence[str] = (), *, dry_run: bool = False
+    ) -> Result[list[Change]]:
+        """Pose `text` sur le champ `name` des éléments où il est resté au marqueur.
+
+        LE PENDANT DE `migrate`, QUI NE JUGE PAS : elle pose les champs neufs au
+        marqueur, et rien ne les remplissait ensuite qu'une édition à la main, fichier
+        par fichier. `fill` écrit une valeur que l'APPELANT a choisie — elle ne décide
+        rien non plus.
+
+        UNE VALEUR ÉCRITE N'EST JAMAIS TOUCHÉE. Sans `ids`, l'élément dont le champ est
+        déjà rempli, ou absent, est sauté. Avec `ids`, l'appelant a désigné l'élément :
+        le sauter en silence lui ferait croire la valeur posée, et l'appel échoue en le
+        nommant.
+
+        LA VALEUR PASSE LE CONTRÔLE DU TYPE DÉCLARÉ, par la conversion même de `text`
+        (`gabarit.prefill.typed_value`) : `enum` hors `values`, date non ISO, `bool`
+        autre que `true`/`false` sont refusés, et rien n'est écrit. Un marqueur aussi :
+        remplir un champ par un marqueur ne le remplit pas.
+
+        TOUT EST VÉRIFIÉ AVANT LA MOINDRE ÉCRITURE, comme pour `migrate` : un `id`
+        refusé en fin de liste ne laisse pas les premiers écrits. REJOUABLE : rien à
+        remplir → aucun fichier touché, liste de changements vide ; une écriture
+        interrompue se reprend en relançant le même appel, qui saute ce qu'il a posé.
+
+        ELLE NE REFORMATE RIEN : le front matter est reprojeté, et le diff ne montre que
+        la ligne du champ.
+        """
+        decl = self.contract.fields.get(name)
+        if decl is None:
+            connus = ", ".join(self.contract.fields) or "aucun"
+            return fail(f"{self.path}: champ « {name} » non déclaré au contrat ; connus : {connus}")
+        if decl.deprecated is not None:
+            # Un champ qu'on ne pose plus ne se remplit pas non plus : `migrate` ne
+            # l'ajoute jamais, et le remplir ferait vivre ce que le contrat retire.
+            return fail(f"{self.path}: champ « {name} » déprécié — {decl.deprecated}")
+        if is_marker(text):
+            return fail(
+                f"{self.path}: champ « {name} » — « {text} » est un marqueur, pas une valeur"
+            )
+        converted = typed_value(decl, text, str(self.path), "l'argument")
+        if not converted:
+            return Result(converted.status, None, converted.message)
+        value = converted.unwrap()
+
+        if ids:
+            targets: list[Item] = []
+            for item_id in dict.fromkeys(ids):
+                got = self.get(item_id)
+                if not got:
+                    return Result(got.status, None, got.message)
+                item = got.unwrap()
+                if not is_marker(item.fields.get(name)):
+                    actuel = item.fields.get(name)
+                    etat = "absent" if actuel is None else f"déjà rempli, « {forme_texte(actuel)} »"
+                    return fail(
+                        f"{item.path}: champ « {name} » {etat} — fill ne pose qu'un champ "
+                        "au marqueur"
+                    )
+                targets.append(item)
+        else:
+            items = self.items()
+            if not items:
+                return Result(items.status, None, items.message)
+            targets = [it for it in items.unwrap() if is_marker(it.fields.get(name))]
+
+        changes = [
+            Change(
+                it.path,
+                f"champ « {name} »",
+                f"« {it.fields[name]} » remplacé par « {forme_texte(value)} »",
+            )
+            for it in targets
+        ]
+        if dry_run:
+            return ok(changes)
+        for it in targets:
+            written = self.write(it.with_fields(**{name: value}))
+            if not written:
+                return Result(written.status, None, written.message)
+        return ok(changes)
 
     def move(self, item_id: str, target: ListStore | Path | str) -> Result[Path]:
         """Déplace un élément vers une autre liste. `git mv`, ET RIEN D'AUTRE.

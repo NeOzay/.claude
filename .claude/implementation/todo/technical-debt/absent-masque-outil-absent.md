@@ -2,6 +2,10 @@
 id = "absent-masque-outil-absent"
 title = "Un projet neuf sans list-dir affiche ABSENT plutôt que OUTIL ABSENT"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "semences-de-listes"
+reference = "R19"
+pin = false
 source = "chantier semences-de-listes, audit R19"
 reviewed = 2026-09-06
 category = "pertinent"
@@ -34,3 +38,7 @@ garde de présence : `contrat.md` réserve la vérification de présence à `san
 par session, et interdit qu'elle soit répétée dans chaque bloc. La forme reste donc à trouver — ce
 qui est en cause n'est pas la présence de l'outil, mais l'ordre dans lequel deux constats se
 recouvrent.
+
+## Assumé
+
+<OPTIONNEL>

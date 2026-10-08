@@ -2,6 +2,10 @@
 id = "statusline-hors-des-linters"
 title = "`statusline-command.py` échoue à la commande de lint documentée"
 date = 2026-08-24
+severite = "inconnue"
+chantier = "check-pipeline-python"
+reference = "R8"
+pin = false
 source = "Identifié par `check-pipeline-python`, R8 du rapport d'audit de clôture."
 reviewed = 2026-09-06
 category = "aggravee"

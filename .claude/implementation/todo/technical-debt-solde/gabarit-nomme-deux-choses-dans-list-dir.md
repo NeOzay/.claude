@@ -2,8 +2,12 @@
 id = "gabarit-nomme-deux-choses-dans-list-dir"
 title = "« gabarit » nomme à la fois les modèles de `derive` et le paquet dont list-dir dépend"
 date = 2026-09-15
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier fichier-seme, audit de clôture R8 (`5123a3d`) — clos avec"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

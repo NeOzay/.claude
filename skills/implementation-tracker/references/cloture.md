@@ -48,6 +48,10 @@ list-dir new  "$T/technical-debt" <id>          # puis remplir le fichier créé
 list-dir validate "$T/technical-debt" --filled  # aucun marqueur ne subsiste
 ```
 
+Celui qui crée l'entrée en juge la `severite`, et écrit son `chantier` et sa `reference` : il
+vient de constater la dette, il est le mieux placé pour le faire. `inconnue` n'est pas un repli.
+Échelle et graphies : [Ce qu'une entrée porte](dette.md#ce-quune-entrée-porte).
+
 Procédure complète, contrat d'une entrée et règle de solde : [Registre de dette](dette.md).
 
 **Ici et pas ailleurs.** Après l'audit, parce que c'est lui qui produit les constats et que les

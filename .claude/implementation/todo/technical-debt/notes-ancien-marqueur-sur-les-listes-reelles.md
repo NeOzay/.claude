@@ -2,6 +2,10 @@
 id = "notes-ancien-marqueur-sur-les-listes-reelles"
 title = "`validate` note l'ancien Marqueur sur chaque entrée des trois listes de dette"
 date = 2026-10-07
+severite = "inconnue"
+chantier = "socle-contrat-evolutif"
+reference = "R2"
+pin = false
 source = "chantier socle-contrat-evolutif, audit de clôture (d5be681), R2"
 reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"

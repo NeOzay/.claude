@@ -2,8 +2,12 @@
 id = "confrontation-plan-brief-auto-jugee"
 title = "La confrontation plan ↔ brief reste auto-jugée et sans trace"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `audit-integre`, R7 du rapport d'audit."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

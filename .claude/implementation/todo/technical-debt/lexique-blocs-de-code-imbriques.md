@@ -2,7 +2,13 @@
 id = "lexique-blocs-de-code-imbriques"
 title = "`lexique` ne suit pas les clôtures de bloc de code imbriquées, et son message induit en erreur"
 date = 2026-09-23
+severite = "inconnue"
+chantier = "lexique"
+reference = "R12"
+pin = false
 source = "Identifié par `lexique`, R12 du rapport d'audit de clôture."
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -27,3 +33,7 @@ mais un contrôle qui ment sur sa cause coûte plus cher qu'un contrôle qui éc
 Suivre la clôture ouvrante (caractère et longueur) et ne fermer que sur une clôture du même
 caractère et au moins aussi longue, comme CommonMark ; ajouter un test à `test_lire.py` pour les
 deux imbrications.
+
+## Assumé
+
+<OPTIONNEL>

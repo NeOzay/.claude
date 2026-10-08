@@ -2,6 +2,10 @@
 id = "deux-renvois-non-navigables"
 title = "Deux renvois du dépôt ne se suivent pas depuis l'éditeur"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, R18 du rapport d'audit et incertitude ouverte au cadrage."
 reviewed = 2026-08-17
 category = "pertinent"

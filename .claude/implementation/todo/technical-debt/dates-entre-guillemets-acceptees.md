@@ -2,8 +2,12 @@
 id = "dates-entre-guillemets-acceptees"
 title = "Une date écrite entre guillemets passe `list-dir validate`"
 date = 2026-10-04
+severite = "inconnue"
+chantier = "Hors chantier"
+reference = "Non précisée"
+pin = false
 source = "hors chantier, à l'adoption de rumdl (2026-10-04), sur l'entrée `suivis-archives-sans-champ-skills`"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

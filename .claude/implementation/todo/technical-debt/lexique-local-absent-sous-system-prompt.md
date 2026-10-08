@@ -2,7 +2,13 @@
 id = "lexique-local-absent-sous-system-prompt"
 title = "Sous `--system-prompt`, la session ne reçoit plus aucun lexique local"
 date = 2026-10-06
+severite = "inconnue"
+chantier = "Hors chantier"
+reference = "R4"
+pin = false
 source = "audit hors chantier de `lexique-local-tronque-par-le-hook-session`, troisième passage du 2026-10-06, `.claude/implementation/lexique-local-tronque.audit.md`, R4"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -24,3 +30,7 @@ outil qui le passerait perdrait le lexique en silence.
 Verser le lexique local par une voie que `--system-prompt` ne remplace pas, ou faire dire au mod,
 sur la ligne d'état, qu'il n'a trouvé aucune composition où se loger. Sinon, écrire la limite dans
 `skills/lexique/SKILL.md` (« Ce que reçoit la session »).
+
+## Assumé
+
+<OPTIONNEL>

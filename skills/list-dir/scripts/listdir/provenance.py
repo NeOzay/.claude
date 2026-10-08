@@ -34,6 +34,7 @@ from typing import cast, final
 from .contract import (
     BACKUP,
     CONTRACT,
+    MIGRATIONS,
     PATRONS,
     SEED,
     list_base,
@@ -125,9 +126,19 @@ def _peremption(list_dir: Path, origin: Origin) -> list[str]:
     courante = semence.origin.version
     version = origin.version
     if courante > version:
+        # UNE NOTE PAR VERSION FRANCHIE, dans l'ordre : un saut de v1 à v3 passe par
+        # ce que v2 demandait. Sans note, `reseed` puis `migrate` suffisent.
+        notes = [
+            str(n)
+            for v in range(version + 1, courante + 1)
+            if (n := definition / MIGRATIONS / f"{v}.md").is_file()
+        ]
+        geste = f"« list-dir reseed {list_dir} » rattrape"
+        if notes:
+            geste = f"lire {', '.join(notes)} avant « list-dir reseed {list_dir} »"
         return [
             f"{list_dir} : contrat périmé — semé en v{version}, « {nom} » est en "
-            f"v{courante} ; « list-dir reseed {list_dir} » rattrape"
+            f"v{courante} ; {geste}"
         ]
     if courante < version:
         # Une liste en avance sur sa semence : personne n'a pu l'écrire en semant.

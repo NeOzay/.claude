@@ -2,7 +2,13 @@
 id = "lexique-home-versionne-par-git"
 title = "`lexique liste` et `init` sans `--projet` visent le HOME quand il est lui-même un dépôt git"
 date = 2026-09-23
+severite = "majeur"
+chantier = "lexique"
+reference = "R14"
+pin = true
 source = "Identifié par `lexique`, R14 du rapport d'audit de clôture."
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

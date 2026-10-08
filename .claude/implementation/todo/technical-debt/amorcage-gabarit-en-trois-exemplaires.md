@@ -2,8 +2,12 @@
 id = "amorcage-gabarit-en-trois-exemplaires"
 title = "Le bloc qui trouve le paquet gabarit et relance dans le venv existe en trois exemplaires"
 date = "2026-10-04"
+severite = "avertissement"
+chantier = "shadow-skill"
+reference = "R5"
+pin = true
 source = "chantier `shadow-skill`, audit de clôture, constat R5"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

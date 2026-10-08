@@ -2,8 +2,12 @@
 id = "repli-section-marker-jamais-exerce"
 title = "Le repli de section_marker sur un titre inconnu n'est plus atteignable ni testé"
 date = 2026-08-31
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier sections-en-forme-longue, audit R4"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -19,6 +23,17 @@ branche `section is None` est morte pour le code de production, et aucun test ne
 directement.
 
 Vérifié sur `752449e` : `grep -rn section_marker` ne rend que ces trois appels et la définition.
+
+## Soldé le
+
+2026-08-31, par le chantier `2026-08-31-champs-preremplis` — seconde issue de « Pour solder » :
+`Contract.section_marker` retiré, ses appelants itérant désormais sur `contract.sections` et
+appelant `prefill.initial_section` avec la `Section` elle-même.
+
+```
+$ grep -rn "section_marker" skills/list-dir/ --include='*.py' --include='*.md' | grep -v __pycache__
+(aucune occurrence)
+```
 
 ## Pourquoi c'est gênant
 
@@ -47,14 +62,3 @@ présenter un titre inconnu.
 ## Assumé
 
 <OPTIONNEL>
-
-## Soldé le
-
-2026-08-31, par le chantier `2026-08-31-champs-preremplis` — seconde issue de « Pour solder » :
-`Contract.section_marker` retiré, ses appelants itérant désormais sur `contract.sections` et
-appelant `prefill.initial_section` avec la `Section` elle-même.
-
-```
-$ grep -rn "section_marker" skills/list-dir/ --include='*.py' --include='*.md' | grep -v __pycache__
-(aucune occurrence)
-```

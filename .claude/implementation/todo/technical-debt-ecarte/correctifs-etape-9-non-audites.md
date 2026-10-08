@@ -2,6 +2,10 @@
 id = "correctifs-etape-9-non-audites"
 title = "Les correctifs de l'étape 9 de `dette-technique` n'ont jamais été audités"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `dette-technique`, R8 à R11 du rapport d'audit."
 reviewed = 2026-08-17
 category = "inverifiable"

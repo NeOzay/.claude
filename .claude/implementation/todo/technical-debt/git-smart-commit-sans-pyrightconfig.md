@@ -2,7 +2,13 @@
 id = "git-smart-commit-sans-pyrightconfig"
 title = "`git-smart-commit` porte un `ruff.toml` mais aucun `pyrightconfig.json`"
 date = 2026-09-18
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "Étape 7"
+pin = false
 source = "chantier `skill-convention`, étape 7 — confrontation du Python à `rules/claude-python-style.md`"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -24,3 +30,7 @@ d'apparence normale sans vérifier ce que le dépôt exige.
 
 Poser `skills/git-smart-commit/pyrightconfig.json` sur le modèle de celui de `gabarit`, puis
 vérifier que `uvx --with pytest basedpyright` lancé depuis la skill sort à 0.
+
+## Assumé
+
+<OPTIONNEL>

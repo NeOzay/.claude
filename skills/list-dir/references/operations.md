@@ -1,7 +1,7 @@
 # Les opérations sur une liste
 
-Ce que fait chaque commande qui lit ou modifie des éléments : `validate`, `migrate`, `move`,
-`list`, `derive`, `merge`. Le format qu'elles appliquent est décrit dans
+Ce que fait chaque commande qui lit ou modifie des éléments : `validate`, `migrate`, `fill`,
+`move`, `list`, `derive`, `merge`. Le format qu'elles appliquent est décrit dans
 [Le format d'une liste](../references/format.md) ; la surface Python qui les expose, dans
 [Étendre `list-dir`](../references/extension.md).
 
@@ -82,7 +82,45 @@ donne une date de modification neuve, et fait apparaître dans `git status` des 
 migration n'a touchés.
 
 Enfin, une migration réécrit du contenu : son commit ne doit jamais être mêlé à un `move`, pour la
-raison dite juste en dessous.
+raison dite plus bas.
+
+## Remplir ce que `migrate` laisse au Marqueur
+
+`migrate` pose un champ neuf au Marqueur dans chaque élément, et ne le remplit jamais. Quand la
+valeur est connue — la même pour tous, ou choisie élément par élément —, `fill` l'écrit :
+
+```bash
+list-dir fill <liste> <champ> <valeur> (--id <id>… | --all) [--dry-run]
+```
+
+| Cas | Ce que fait `fill` |
+|---|---|
+| champ au Marqueur, requis ou facultatif, générique ou typé | la valeur est posée |
+| champ déjà rempli, ou absent de l'élément, avec `--all` | élément **sauté** |
+| champ déjà rempli, ou absent, avec `--id` | **échec** nommant l'élément, rien n'est écrit |
+| `--id` qui ne nomme aucun élément | échec, rien n'est écrit |
+| ni `--id` ni `--all`, ou les deux | erreur d'appel, code 2 |
+| valeur que le type refuse : hors `values`, date non ISO, `bool` autre que `true`/`false` | échec, rien n'est écrit |
+| valeur qui est elle-même un Marqueur | échec : un Marqueur ne remplit rien |
+| champ non déclaré, ou `deprecated` | échec |
+
+**La valeur est convertie comme un `text` de contrat** : `false` s'écrit en booléen, `3` en entier,
+`2026-10-07` en date nue — par la même conversion, qui accepte et refuse les mêmes formes
+([Préremplir un champ ou une section](../references/format.md#préremplir-un-champ-ou-une-section)).
+Un champ `list` ne se remplit pas ainsi.
+
+**Toute la liste se demande, par `--all`** : un `--id` oublié ne doit pas poser sur chaque élément
+une valeur pensée pour un seul. `--id` se répète pour en désigner plusieurs.
+
+**Avec `--id`, l'appelant a désigné l'élément** : le sauter en silence lui ferait croire la valeur
+posée. Tout est vérifié avant la moindre écriture, et le front matter est reprojeté comme par
+`migrate` : le diff ne montre que la ligne du champ.
+
+**Rejouable.** Rien à remplir ne fait toucher aucun fichier ; une écriture interrompue se reprend en
+relançant le même appel, qui saute ce qu'il a déjà posé. `--dry-run` montre ce qui serait rempli.
+
+`fill` ne juge pas plus que `migrate` : la valeur vient de l'appelant. Il évite seulement d'éditer
+à la main chaque fichier, et donne à un agent un moyen d'écrire qui ne touche que le champ visé.
 
 ## Déplacer un élément
 

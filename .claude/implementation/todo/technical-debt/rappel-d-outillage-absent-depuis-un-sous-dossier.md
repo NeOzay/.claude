@@ -2,7 +2,13 @@
 id = "rappel-d-outillage-absent-depuis-un-sous-dossier"
 title = "Un sous-agent lancé depuis un sous-dossier du dépôt ne reçoit aucune règle d'outillage"
 date = 2026-10-06
+severite = "avertissement"
+chantier = "mods-a-la-racine-des-skills"
+reference = "R11"
+pin = true
 source = "chantier `mods-a-la-racine-des-skills`, audit de clôture du 2026-10-06 sur `349bb96`, `.claude/implementation/mods-a-la-racine-des-skills.audit.md`, R11"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

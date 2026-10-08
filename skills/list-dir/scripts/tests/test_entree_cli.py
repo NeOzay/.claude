@@ -190,7 +190,7 @@ def test_help_seul_ne_montre_que_les_generiques() -> None:
     r = lancer("help")
 
     assert r.code == 0
-    assert "Commandes génériques (13)" in r.out
+    assert "Commandes génériques (14)" in r.out
     assert "Passer un répertoire-liste en argument" in r.out
 
 
@@ -783,6 +783,59 @@ def test_list_affiche_un_booleen_en_minuscules(tmp_path: Path) -> None:
     r = lancer("list", str(liste), "--sort", "pin")
 
     assert r.out.splitlines() == ["b false", "a true"]
+
+
+# ------------------------------------------------------------------------ fill
+def test_fill_remplit_puis_se_tait(tmp_path: Path) -> None:
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_BOOL)
+    for ident in ("a", "b"):
+        _ = element(liste, ident, f'id = "{ident}"\ntitle = "T"\npin = "<À REMPLIR bool>"\n')
+
+    premier = lancer("fill", str(liste), "pin", "false", "--all")
+    second = lancer("fill", str(liste), "pin", "false", "--all")
+
+    assert premier.code == 0
+    assert premier.out.rstrip().endswith(": 2 éléments remplis")
+    assert lancer("list", str(liste), "--where", "pin=false").out.split() == ["a", "b"]
+    assert second.code == 0
+    assert "aucun champ « pin » au marqueur, aucun fichier touché" in second.out
+
+
+def test_fill_exige_id_ou_all_et_pas_les_deux(tmp_path: Path) -> None:
+    """Remplir toute la liste se demande : un --id oublié ne doit pas la remplir
+    entière. argparse refuse : code 2, comme toute erreur d'appel."""
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_BOOL)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\npin = "<À REMPLIR bool>"\n')
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    aucun = lancer("fill", str(liste), "pin", "false")
+    les_deux = lancer("fill", str(liste), "pin", "false", "--all", "--id", "a")
+
+    assert (aucun.code, aucun.out) == (2, "")
+    assert "--id" in aucun.err and "--all" in aucun.err
+    assert (les_deux.code, les_deux.out) == (2, "")
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant
+
+
+def test_fill_plusieurs_id_en_un_appel(tmp_path: Path) -> None:
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_BOOL)
+    for ident in ("a", "b", "c"):
+        _ = element(liste, ident, f'id = "{ident}"\ntitle = "T"\npin = "<À REMPLIR bool>"\n')
+
+    r = lancer("fill", str(liste), "pin", "true", "--id", "a", "--id", "c")
+
+    assert r.code == 0
+    assert lancer("list", str(liste), "--where", "pin=true").out.split() == ["a", "c"]
+
+
+def test_fill_refus_sort_en_code_1_sur_stderr(tmp_path: Path) -> None:
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_BOOL)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\npin = "<À REMPLIR bool>"\n')
+
+    r = lancer("fill", str(liste), "pin", "oui", "--id", "a")
+
+    assert (r.code, r.out) == (1, "")
+    assert "ni « true » ni « false »" in r.err
 
 
 # ----------------------------------------------------------- l'ancien marqueur

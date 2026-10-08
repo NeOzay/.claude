@@ -2,6 +2,10 @@
 id = "clause-arbre-propre-sans-le-plan"
 title = "La clause « arbre propre » du tracker ne couvre pas le plan"
 date = 2026-08-14
+severite = "note"
+chantier = "contrat-pipeline"
+reference = "journal du Suivi"
+pin = true
 source = "Identifié par `contrat-pipeline`, journal du suivi."
 reviewed = 2026-09-06
 category = "pertinent"

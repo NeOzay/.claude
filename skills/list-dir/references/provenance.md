@@ -85,13 +85,20 @@ suivent le contrat qu'elle porte, et c'est celui-là que les commandes appliquen
 | `def` nomme un patron (`mère/dérivée`) | la péremption d'un patron n'est pas suivie, et le `contract --def … --patron …` qui imprime la semence |
 | définition introuvable dans les quatre rangs | péremption invérifiable, avec le nom cherché |
 | semence sans `[origin]`, ou illisible | dit avec le fichier fautif |
-| version de la semence plus haute | « contrat périmé — semé en v2, en v5 », et `reseed` |
+| version de la semence plus haute | « contrat périmé — semé en v2, en v5 », les notes de migration franchies, et `reseed` |
 | version de la semence plus basse | état anormal, dit tel quel |
 | contrat ou patron modifié depuis le semis | fichier par fichier |
 
 La dernière ligne se lit dans `.list/semence/` et **ne résout aucune définition** : elle vaut encore
 là où le skill qui porte la définition n'est pas installé. Sans ce répertoire — liste adoptée, ou
 semée avant lui — on se tait sur ce point, jamais sur la péremption.
+
+**Une version qui demande plus que `reseed` et `migrate` porte sa note**, `migrations/<version>.md`
+dans la définition ([Définitions de listes](definitions.md#définitions-de-listes)). L'avertissement
+de péremption nomme celles des versions franchies, dans l'ordre — de v2 à v5, `3.md`, `4.md` et
+`5.md` quand elles existent —, et les place avant `reseed` : une fois le contrat rattrapé, la liste
+ne dit plus qu'elle était périmée, et la note ne se retrouve plus. Une version sans note n'en
+réclame pas.
 
 ## `reseed` : rattraper sur ordre
 

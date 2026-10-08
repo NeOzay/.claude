@@ -2,6 +2,10 @@
 id = "prefill-marqueur-produit-accepte-en-silence"
 title = "Deux échecs silencieux du préremplissage : un marqueur produit, et une section vide"
 date = 2026-08-31
+severite = "inconnue"
+chantier = "champs-preremplis"
+reference = "R4"
+pin = false
 source = "chantier 2026-08-31-champs-preremplis, audit de clôture R4"
 reviewed = 2026-09-06
 category = "pertinent"

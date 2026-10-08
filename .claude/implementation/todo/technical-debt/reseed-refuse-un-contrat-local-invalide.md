@@ -2,8 +2,12 @@
 id = "reseed-refuse-un-contrat-local-invalide"
 title = "Une liste dont le contrat local est invalide n'est plus rattrapable par reseed"
 date = 2026-09-06
+severite = "inconnue"
+chantier = "description-obligatoire-partout"
+reference = "R3"
+pin = false
 source = "chantier description-obligatoire-partout, audit de clôture e441337, R3 — dette induite"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

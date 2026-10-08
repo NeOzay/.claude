@@ -2,7 +2,13 @@
 id = "pyrightconfig-racine-inclut-les-skills-synced"
 title = "Le `pyrightconfig.json` de la racine inclut les skills synchronisées et rend 8097 erreurs"
 date = 2026-09-18
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "Étape 7"
+pin = false
 source = "chantier `skill-convention`, étape 7 — confrontation du Python à `rules/claude-python-style.md`"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -25,3 +31,7 @@ synchronisation a déposé ce jour-là — il change sans qu'aucun fichier versi
 
 Ajouter `skills/synced` et `plugins/synced` à l'`exclude` du `pyrightconfig.json` de la racine, puis
 vérifier que la commande ne rend plus que les erreurs du code versionné.
+
+## Assumé
+
+<OPTIONNEL>

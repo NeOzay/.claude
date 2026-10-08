@@ -2,6 +2,10 @@
 id = "correctif-r21-non-audite"
 title = "Le correctif `R21` de `contrat-pipeline` n'a jamais été audité"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, décision de clôture."
 reviewed = 2026-08-17
 category = "inverifiable"

@@ -2,8 +2,12 @@
 id = "regles-hors-contrat-sans-empreinte"
 title = "Les règles dont l'autorité n'est pas contrat.md ne sont couvertes par aucune empreinte"
 date = "2026-09-02"
+severite = "inconnue"
+chantier = "recopies-hors-contrat"
+reference = "Étape 8"
+pin = false
 source = "chantier `recopies-hors-contrat`, étape 8 — renoncement écrit et motivé"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "reprise-de-cloture-sans-test-aux-rangs-intermediaires"
 title = "Deux chemins de reprise de `commit-chantier cloture` ne sont couverts par aucun test"
 date = 2026-09-14
+severite = "inconnue"
+chantier = "git-smart-commit-trois-commits"
+reference = "R15, R5"
+pin = false
 source = "chantier `git-smart-commit-trois-commits`, R15 du rapport d'audit (reliquat de R5)"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -27,3 +31,7 @@ sur un dépôt à moitié modifié. Un conseil faux y laisse une base avec un ap
 Ajouter deux tests en sous-processus sur le dépôt jouet : un checkout refusé (fichier non suivi en
 conflit sur `base:`), et un `git mv` qui échoue après un premier déplacement réussi. Vérifier le
 conseil affiché et l'état laissé.
+
+## Assumé
+
+<OPTIONNEL>

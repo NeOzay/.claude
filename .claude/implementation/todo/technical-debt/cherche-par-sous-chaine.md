@@ -2,8 +2,12 @@
 id = "cherche-par-sous-chaine"
 title = "`shadow-skill cherche` compare des sous-chaînes, sans frontière de mot"
 date = "2026-10-04"
+severite = "note"
+chantier = "shadow-skill"
+reference = "Non précisée"
+pin = true
 source = "chantier `shadow-skill`, essai des sous-commandes en session 2"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

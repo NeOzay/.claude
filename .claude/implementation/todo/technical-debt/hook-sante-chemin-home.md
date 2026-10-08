@@ -2,6 +2,10 @@
 id = "hook-sante-chemin-home"
 title = "Le hook SessionStart porte la dernière constante ancrée sur le HOME, sans être déclarée comme exception"
 date = 2026-08-29
+severite = "inconnue"
+chantier = "resolution-chemin-skill"
+reference = "R1"
+pin = false
 source = "Identifié par `resolution-chemin-skill`, R1 du rapport d'audit."
 reviewed = 2026-09-06
 category = "aggravee"
@@ -48,3 +52,7 @@ sans qu'aucune commande n'échoue, puisque son absence est justement silencieuse
 l'amorçage ne peut pas se résoudre lui-même, et l'ajouter à la liste « ce que le solde ne couvre
 pas » de la fiche `chemin-skill-code-en-dur`. Si un contrôle est ajouté, il doit tolérer cette
 ligne nommément plutôt que la forme en général.
+
+## Assumé
+
+<OPTIONNEL>

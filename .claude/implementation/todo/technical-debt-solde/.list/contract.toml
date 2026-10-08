@@ -3,7 +3,7 @@ description = "Dette soldée, avec la commande exécutée qui l'établit"
 
 [origin]
 def = "technical-debt-solde"
-version = 1
+version = 2
 
 [fields.id]
 type = "slug"
@@ -18,6 +18,28 @@ description = "l'énoncé de la dette, tel qu'il figurait en titre d'entrée"
 type = "date"
 required = true
 description = "date du constat, jamais modifiée"
+
+[fields.severite]
+type = "enum"
+required = false
+description = "gravité, reprise de l'entrée d'origine"
+# Même ordre que dans le registre, de la moindre gravité à la pire.
+values = ["inconnue", "note", "avertissement", "majeur", "critique"]
+
+[fields.chantier]
+type = "text"
+required = false
+description = "slug du Chantier qui l'a identifiée, sans préfixe daté, ou « Hors chantier »"
+
+[fields.reference]
+type = "text"
+required = false
+description = "où le Chantier l'a écrite : le R<n> du rapport, ou le lieu cité ; « Non précisée » à défaut"
+
+[fields.pin]
+type = "bool"
+required = false
+description = "épinglée pour être retrouvée sans effort ; sans autre effet"
 
 [fields.source]
 type = "text"

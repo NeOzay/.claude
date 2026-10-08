@@ -2,8 +2,12 @@
 id = "validate-avertit-hors-machine-semeuse"
 title = "validate écrit sur stderr partout où la définition n'est pas installée"
 date = 2026-09-04
+severite = "inconnue"
+chantier = "peremption-contrat"
+reference = "R6"
+pin = false
 source = "chantier peremption-contrat, audit de clôture ddebb2b, R6"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,6 +2,10 @@
 id = "definition-aplatit-les-sous-repertoires-de-templates"
 title = "L'amorçage depuis une définition perd les sous-répertoires de templates/"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "semences-de-listes"
+reference = "R5"
+pin = false
 source = "chantier semences-de-listes, audit R5"
 reviewed = 2026-09-06
 category = "pertinent"
@@ -47,3 +51,7 @@ Trancher ce que `patrons/` accepte, et le faire dire par le code :
   sous-répertoire pour le prouver.
 
 Dans les deux cas, un test : c'est son absence qui a laissé le comportement indéterminé.
+
+## Assumé
+
+<OPTIONNEL>

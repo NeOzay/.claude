@@ -2,7 +2,13 @@
 id = "impl-list-sans-configuration-de-linters"
 title = "`implementation-tracker` porte du Python sans aucune configuration de linters"
 date = 2026-09-18
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `skill-convention`, étape 7 — confrontation du Python à `rules/claude-python-style.md`"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -15,6 +21,13 @@ source = "chantier `skill-convention`, étape 7 — confrontation du Python à `
 `line-length = 100`, ni `target-version = "py312"`, ni le jeu de règles `E F I UP B SIM RUF` du
 dépôt.
 
+## Soldé le
+
+**2026-09-19, chantier `pipeline-gabarit`** — `skills/implementation-tracker/` porte son
+`ruff.toml` et son `pyrightconfig.json`, copiés de `gabarit`.
+Établi par : depuis `skills/implementation-tracker/`, `uvx ruff check .` → « All checks
+passed! » ; `uvx --with pytest basedpyright` → « 0 errors, 0 warnings, 0 notes ».
+
 ## Pourquoi c'est gênant
 
 La skill est vérifiée par une configuration qu'elle n'emporte pas : déployée seule, elle n'est plus
@@ -26,9 +39,6 @@ l'écart invisible tant qu'il n'est pas modifié.
 Copier `ruff.toml` et `pyrightconfig.json` depuis `gabarit`, les ajuster aux chemins de la skill, et
 vérifier que les deux linters lancés depuis `skills/implementation-tracker/` sortent à 0.
 
-## Soldé le
+## Assumé
 
-**2026-09-19, chantier `pipeline-gabarit`** — `skills/implementation-tracker/` porte son
-`ruff.toml` et son `pyrightconfig.json`, copiés de `gabarit`.
-Établi par : depuis `skills/implementation-tracker/`, `uvx ruff check .` → « All checks
-passed! » ; `uvx --with pytest basedpyright` → « 0 errors, 0 warnings, 0 notes ».
+<OPTIONNEL>

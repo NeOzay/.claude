@@ -2,6 +2,10 @@
 id = "trois-lignes-au-dela-de-100-colonnes"
 title = "Trois lignes du corpus dépassent l'enroulement à 100 colonnes"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, R8 puis R17 du rapport d'audit."
 reviewed = 2026-09-06
 category = "aggravee"

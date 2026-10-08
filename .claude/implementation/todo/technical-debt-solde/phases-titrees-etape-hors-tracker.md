@@ -2,8 +2,12 @@
 id = "phases-titrees-etape-hors-tracker"
 title = "`intent-brief` et `debt-review` titrent leurs phases « Étape N », en collision avec le Lexique"
 date = "2026-10-04"
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `contexte-tracker`, journal du Suivi et audits de clôture, constat R8"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

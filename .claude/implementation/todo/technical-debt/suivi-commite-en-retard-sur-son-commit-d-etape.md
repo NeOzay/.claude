@@ -2,8 +2,12 @@
 id = "suivi-commite-en-retard-sur-son-commit-d-etape"
 title = "Le suivi commité dans un commit d'étape annonce ce même commit comme restant à faire"
 date = 2026-09-15
+severite = "inconnue"
+chantier = "git-smart-commit-trois-commits"
+reference = "R18, R20"
+pin = false
 source = "chantier `git-smart-commit-trois-commits`, R18 et R20 du rapport d'audit"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -26,3 +30,7 @@ finalisation.
 Écrire la règle dans le tracker ou dans `etape.md` : la « Prochaine action » d'un suivi commité en
 commit d'étape se rédige comme si ce commit était fait (« après `<L>E<n>` : … »), sans SHA ; le SHA
 et le verdict d'audit s'inscrivent au commit suivant. Et dire à l'auditeur de ne pas le relever.
+
+## Assumé
+
+<OPTIONNEL>

@@ -2,6 +2,10 @@
 id = "table-empreintes-a-la-main"
 title = "La table d'empreintes du garde-fou est maintenue à la main"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, R9 du rapport d'audit."
 reviewed = 2026-08-17
 category = "pertinent"

@@ -2,6 +2,10 @@
 id = "impl-list-extension-gnu-find"
 title = "`impl-list.sh` dépend d'une extension GNU de `find`"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, R7 du rapport d'audit."
 reviewed = 2026-08-17
 category = "pertinent"

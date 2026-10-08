@@ -2,8 +2,12 @@
 id = "abandon-garder-la-branche-archive-des-chemins-morts"
 title = "L'abandon « garder la branche » archive un suivi dont plan: et brief: visent des fichiers absents"
 date = 2026-09-14
+severite = "inconnue"
+chantier = "git-smart-commit-trois-commits"
+reference = "R8"
+pin = false
 source = "chantier `git-smart-commit-trois-commits`, journal du suivi (hors périmètre) et R8 du rapport d'audit"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

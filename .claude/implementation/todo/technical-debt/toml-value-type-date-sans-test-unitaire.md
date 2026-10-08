@@ -2,8 +2,12 @@
 id = "toml-value-type-date-sans-test-unitaire"
 title = "La branche date de toml_value n'a plus de test unitaire direct"
 date = 2026-09-10
+severite = "inconnue"
+chantier = "supprimer-dump-value"
+reference = "R4"
+pin = false
 source = "chantier supprimer-dump-value, rapport d'audit R4 — réserve close plutôt que traitée"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "listerror-alias-de-gabariterror"
 title = "`ListError` est un alias de `GabaritError` : une trace d'exception de list-dir affiche le nom de gabarit"
 date = 2026-09-15
+severite = "inconnue"
+chantier = "fichier-seme"
+reference = "R1"
+pin = false
 source = "chantier fichier-seme, audit de clôture R1 (`fadddf1`) — élargissement accepté"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "deux-conftest-collision-collecte"
 title = "Les deux suites de tests ne se collectent plus ensemble, et le résultat dépend de l'ordre des arguments"
 date = 2026-08-24
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `tests-listdir`, R3 de l'audit de clôture"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

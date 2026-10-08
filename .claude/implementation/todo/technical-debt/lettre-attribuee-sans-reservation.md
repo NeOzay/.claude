@@ -2,8 +2,12 @@
 id = "lettre-attribuee-sans-reservation"
 title = "La lettre d'un chantier n'est réservée que par son tag E0, jamais exercé en conditions réelles"
 date = 2026-09-14
+severite = "inconnue"
+chantier = "git-smart-commit-trois-commits"
+reference = "R10"
+pin = false
 source = "chantier `git-smart-commit-trois-commits`, R10 du rapport d'audit"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -30,3 +34,7 @@ n'ayant jamais été exercé, rien ne dit que la séquence du point 9 tient en p
 Réserver la lettre à l'attribution (écriture dans `lettre:` suivie d'un contrôle d'unicité parmi les
 suivis actifs, ou tag posé par `lettre` lui-même), puis mener un chantier neuf de bout en bout par
 le type 2 — `lettre`, `E0`, commits d'étape, clôture — et le constater.
+
+## Assumé
+
+<OPTIONNEL>

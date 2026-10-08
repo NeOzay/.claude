@@ -2,8 +2,12 @@
 id = "controle-1-garde-fou-jamais-teste"
 title = "Le contrôle 1 du garde-fou de pipeline n'a jamais rien testé"
 date = 2026-08-16
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `revue-plan-deleguee`, constaté au point 1 de sa clôture. Anomalie préexistante, reproduite à l'identique sur `master`."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

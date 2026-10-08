@@ -2,6 +2,10 @@
 id = "parsing-du-contrat-avale-les-cles-inconnues"
 title = "Le parsing du contrat accepte en silence ce qu'il ne comprend pas"
 date = 2026-08-31
+severite = "avertissement"
+chantier = "sections-en-forme-longue"
+reference = "R2, R3"
+pin = false
 source = "chantier sections-en-forme-longue, audit R2 et R3"
 reviewed = 2026-09-06
 category = "pertinent"

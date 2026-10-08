@@ -2,7 +2,13 @@
 id = "agents-de-test-du-lexique-au-catalogue-de-chaque-session"
 title = "Trois agents de test du lexique figurent au catalogue de chaque session"
 date = 2026-10-05
+severite = "note"
+chantier = "lexique-des-sous-agents"
+reference = "R9"
+pin = true
 source = "chantier `lexique-des-sous-agents`, audit de clôture du 2026-10-05, R9"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

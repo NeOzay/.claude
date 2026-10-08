@@ -2,7 +2,13 @@
 id = "suivi-pose-depuis-un-gabarit-markdown"
 title = "`implementation-tracker` pose son suivi depuis un gabarit Markdown alors que la semence `suivi` existe"
 date = 2026-09-18
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `skill-convention`, étape 9 — constat noté au journal du suivi"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -14,6 +20,15 @@ confronter au contrat.
 
 La convention « Un document structuré se pose depuis un gabarit » écrite par ce chantier
 (`skills/skill-convention/references/prose.md`) n'est donc pas pratiquée par le tracker lui-même.
+
+## Soldé le
+
+**2026-09-19, chantier `pipeline-gabarit`** — le tracker pose le suivi par `gabarit new suivi` et
+le vérifie par `gabarit check --filled` avant le commit de l'état initial ; le modèle Markdown
+est supprimé, la semence est la seule structure.
+Établi par : `gabarit check .claude/implementation/pipeline-gabarit.md --filled` → « rempli et
+conforme à la semence « suivi » », code 0 ; `test ! -e
+skills/implementation-tracker/references/gabarit-suivi.md` → absent.
 
 ## Pourquoi c'est gênant
 
@@ -27,11 +42,6 @@ Faire poser le fichier de suivi par `gabarit new suivi`, puis `gabarit check` à
 d'`implementation-tracker` ; ne garder `references/gabarit-suivi.md` que si la semence ne couvre pas
 tout, et dire alors laquelle des deux fait foi.
 
-## Soldé le
+## Assumé
 
-**2026-09-19, chantier `pipeline-gabarit`** — le tracker pose le suivi par `gabarit new suivi` et
-le vérifie par `gabarit check --filled` avant le commit de l'état initial ; le modèle Markdown
-est supprimé, la semence est la seule structure.
-Établi par : `gabarit check .claude/implementation/pipeline-gabarit.md --filled` → « rempli et
-conforme à la semence « suivi » », code 0 ; `test ! -e
-skills/implementation-tracker/references/gabarit-suivi.md` → absent.
+<OPTIONNEL>

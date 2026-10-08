@@ -2,8 +2,12 @@
 id = "description-obligatoire-sur-les-sections-seulement"
 title = "« description » est obligatoire sur une section, facultative sur un champ"
 date = "2026-09-05"
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `decoupe-contrat-liste`, constat de l'utilisateur en cours d'étape 7"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

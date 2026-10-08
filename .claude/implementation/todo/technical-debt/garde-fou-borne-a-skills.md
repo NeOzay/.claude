@@ -2,6 +2,10 @@
 id = "garde-fou-borne-a-skills"
 title = "Les contrôles de chemin ne regardent que skills/, alors qu'un point converti vit hors de skills/"
 date = 2026-08-29
+severite = "inconnue"
+chantier = "resolution-chemin-skill"
+reference = "R2"
+pin = false
 source = "Identifié par `resolution-chemin-skill`, R2 du rapport d'audit."
 reviewed = 2026-09-06
 category = "pertinent"
@@ -38,3 +42,7 @@ garantie est donc plus étroite que ce que le solde de `chemin-skill-code-en-dur
 `check_renvois_skill` aux `.md` de `.claude/implementation/` — au minimum aux `README.md` et aux
 registres, l'archive `done/` devant rester exclue puisqu'elle relate un état passé et ne se
 réécrit pas. Vérifier par une sonde hors `skills/` qui doit devenir rouge.
+
+## Assumé
+
+<OPTIONNEL>

@@ -2,6 +2,10 @@
 id = "garde-fou-cinq-angles-morts"
 title = "Le garde-fou de pipeline a cinq angles morts connus"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, R4, R5, R6, R11 et R22 du rapport d'audit."
 reviewed = 2026-08-17
 category = "pertinent"

@@ -2,7 +2,13 @@
 id = "regle-python-ne-se-charge-pas-sur-ce-depot"
 title = "`rules/claude-python-style.md` ne se charge pas sur le Python de ce dépôt"
 date = 2026-09-18
+severite = "avertissement"
+chantier = "skill-convention"
+reference = "R2"
+pin = true
 source = "chantier `skill-convention`, audit de clôture R2 (`cea0665`) — report assumé par l'utilisateur"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

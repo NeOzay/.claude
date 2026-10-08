@@ -2,6 +2,10 @@
 id = "def-vide-retombe-sur-le-squelette"
 title = "list-dir init --def \"\" rend le squelette sans dire que la définition a été ignorée"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "semences-de-listes"
+reference = "R10"
+pin = false
 source = "chantier semences-de-listes, audit R10"
 reviewed = 2026-09-06
 category = "pertinent"
@@ -34,3 +38,7 @@ une valeur vide en code 2, avec le même message que le refus de `--name` — la
 de sortie existent déjà, il n'y a qu'à les appliquer.
 
 Un test dans `test_entree_cli.py`, jumeau de `test_name_avec_def_est_refuse`.
+
+## Assumé
+
+<OPTIONNEL>

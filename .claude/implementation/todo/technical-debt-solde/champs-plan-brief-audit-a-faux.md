@@ -2,8 +2,12 @@
 id = "champs-plan-brief-audit-a-faux"
 title = "Les champs `plan:` / `brief:` / `audit:` pointent à faux après archivage"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `audit-integre`, corollaire de R1 ; aggravation constatée par `dette-technique`."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

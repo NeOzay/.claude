@@ -2,8 +2,12 @@
 id = "message-de-refus-de-la-racine-ne-nomme-pas-la-racine"
 title = "Le refus d'un contrat sans description racine ne dit pas que c'est la racine"
 date = 2026-09-06
+severite = "inconnue"
+chantier = "description-obligatoire-partout"
+reference = "R1"
+pin = false
 source = "chantier description-obligatoire-partout, audit de clôture e441337, R1 — clos avec la réserve"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

@@ -2,8 +2,12 @@
 id = "ruff-echoue-sur-les-tests-de-list-dir"
 title = "`uvx ruff check .` échoue depuis `skills/list-dir/`, sur trois lignes de ses tests"
 date = 2026-09-20
+severite = "inconnue"
+chantier = "pipeline-gabarit"
+reference = "R3"
+pin = false
 source = "chantier `pipeline-gabarit`, audit de clôture `14d6464` R3"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

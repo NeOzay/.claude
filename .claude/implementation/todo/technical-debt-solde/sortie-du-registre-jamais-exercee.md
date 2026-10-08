@@ -2,6 +2,10 @@
 id = "sortie-du-registre-jamais-exercee"
 title = "La moitié « sortie du registre » de `debt-review` n'a jamais été exercée"
 date = 2026-08-17
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `revue-dette`, R12 du rapport d'audit de clôture."
 reviewed = 2026-09-06
 category = "a-solder"

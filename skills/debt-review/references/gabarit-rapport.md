@@ -16,14 +16,15 @@ en écrivant du texte : la structure vient du contrat
 
 ## La fiche
 
-`derive` la crée déjà remplie de sa structure : `id`, `title` et `date` reportés de l'entrée, tout
-le reste au marqueur. Il ne reste qu'à écrire.
+`derive` la crée déjà remplie de sa structure : `id`, `title`, `date` et `severite` reportés de
+l'entrée, tout le reste au marqueur. Il ne reste qu'à écrire.
 
 ```markdown
 +++
 id = "cache-sessions-sans-ttl"
 title = "Le cache de sessions n'expire jamais"
 date = 2025-03-04
+severite = "inconnue"
 reviewed = "<À REMPLIR date>"
 category = "<À REMPLIR>"
 +++
@@ -45,7 +46,16 @@ category = "<À REMPLIR>"
 <OPTIONNEL>
 ```
 
-**Les deux champs à écrire :**
+**Les trois champs à écrire :**
+
+- `severite` — reportée de l'entrée, elle se rejuge : l'ajuster si l'instruction la contredit, et
+  remplacer toujours `inconnue`. L'échelle est au registre
+  ([Ce qu'une entrée porte](../../implementation-tracker/references/dette.md#ce-quune-entrée-porte)),
+  les valeurs au contrat :
+
+  ```bash
+  list-dir contract --def technical-debt --patron review --values severite
+  ```
 
 - `category` — une des valeurs **déclarées par le contrat**, en ASCII kebab-case. Le contrat refuse
   toute valeur hors de la liste, donc une faute de frappe échoue à `validate` au lieu de se ranger
@@ -62,7 +72,8 @@ category = "<À REMPLIR>"
 - `reviewed` — la date de **cette** revue, jamais celle du constat. `date` porte déjà celle-là, et
   elle est reportée sans être touchée : c'est elle qui ordonne l'intérieur d'une pile.
 
-**Ce qui n'est jamais écrit dans une fiche** : la prose de l'entrée. La fiche ne porte que du
+**Ce qui n'est jamais écrit dans une fiche** : la prose de l'entrée, ni son `pin`, ignoré par la
+revue. La fiche ne porte que du
 jugement, qui n'existe nulle part ailleurs — c'est ce qui la rend légitimement éditable sans faire
 double emploi avec le registre. `show` va lire l'entrée quand il faut la relire.
 

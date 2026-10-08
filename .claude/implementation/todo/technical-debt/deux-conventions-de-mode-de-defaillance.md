@@ -2,8 +2,12 @@
 id = "deux-conventions-de-mode-de-defaillance"
 title = "Deux conventions de rédaction du mode de défaillance coexistent sans règle"
 date = "2026-09-05"
+severite = "majeur"
+chantier = "decoupe-contrat-liste"
+reference = "R6"
+pin = true
 source = "chantier `decoupe-contrat-liste`, réserve R6 de l'audit de clôture"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

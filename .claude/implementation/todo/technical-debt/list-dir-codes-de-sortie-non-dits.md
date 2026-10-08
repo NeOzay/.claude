@@ -2,8 +2,12 @@
 id = "list-dir-codes-de-sortie-non-dits"
 title = "Le SKILL.md de list-dir n'énonce pas ses codes de sortie"
 date = "2026-09-17"
+severite = "avertissement"
+chantier = "skill-convention"
+reference = "Non précisée"
+pin = true
 source = "chantier `skill-convention`, confrontation des skills à `references/prose.md`"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

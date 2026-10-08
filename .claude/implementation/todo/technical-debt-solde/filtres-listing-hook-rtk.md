@@ -2,8 +2,12 @@
 id = "filtres-listing-hook-rtk"
 title = "Les filtres de listing sont cassés par le hook `rtk`"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `audit-integre`, journal du suivi."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

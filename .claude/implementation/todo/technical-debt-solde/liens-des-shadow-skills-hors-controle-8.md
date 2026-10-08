@@ -2,8 +2,12 @@
 id = "liens-des-shadow-skills-hors-controle-8"
 title = "Les liens de `shadow-skills/` échappent au contrôle 8 de `check_pipeline.py`"
 date = "2026-10-04"
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `shadow-skill`, audit de clôture, constat R6"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -14,6 +18,14 @@ category = "<OPTIONNEL>"
 `check_pipeline.py` les contrôle », et porte des renvois à ancre (`#frontmatter`,
 `#dates-et-listing`).
 
+## Soldé le
+
+**2026-10-05, correctif `fix(pipeline)` (c1688a0)** — le contrôle 8 parcourt désormais
+`shadow-skills/` en plus de `skills/`. Établi par :
+`python3 scripts/check_pipeline.py | sed -n '/^8\./,/^9\./p'` → « 114 renvois entre skills, tous
+résolvent » (61 avant l'extension) ; les tests `test_ancre_morte_depuis_un_shadow_skill` et
+`test_renvoi_valide_depuis_un_shadow_skill` passent.
+
 ## Pourquoi c'est gênant
 
 Un intitulé renommé dans `skills/` casse en silence les ancres qui le visent depuis un Shadow-skill.
@@ -22,14 +34,6 @@ Le premier à s'en apercevoir est l'agent qui suit le lien en cours de tâche.
 ## Pour solder
 
 Étendre le contrôle 8 à `shadow-skills/`, ou corriger l'affirmation de `prose.md`.
-
-## Soldé le
-
-**2026-10-05, correctif `fix(pipeline)` (c1688a0)** — le contrôle 8 parcourt désormais
-`shadow-skills/` en plus de `skills/`. Établi par :
-`python3 scripts/check_pipeline.py | sed -n '/^8\./,/^9\./p'` → « 114 renvois entre skills, tous
-résolvent » (61 avant l'extension) ; les tests `test_ancre_morte_depuis_un_shadow_skill` et
-`test_renvoi_valide_depuis_un_shadow_skill` passent.
 
 ## Assumé
 

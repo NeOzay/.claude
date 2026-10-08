@@ -2,6 +2,10 @@
 id = "chemin-skill-code-en-dur"
 title = "Le chemin de la skill est codé en dur et répété en trois points d'édition"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `contrat-pipeline`, R15 et R19 du rapport d'audit."
 reviewed = 2026-08-17
 category = "aggravee"
@@ -34,18 +38,6 @@ contrôle 6 impose cette écriture. Seule une résolution du chemin de skill à 
 fin — écarté du périmètre de `check-pipeline-python`, qui n'aurait pas pu la mener sans changer la
 convention d'appel de toutes les skills.
 
-## Pourquoi c'est gênant
-
-c'est exactement le défaut qui a bloqué la clôture de ce chantier, sous
-une forme plus étroite. Aucune des cinq éditions n'échoue bruyamment si elle est oubliée.
-
-## Pour solder
-
-soit un contrôle du garde-fou vérifiant que chacun de ces chemins désigne un
-fichier existant, soit une résolution du chemin de la skill au lieu d'une constante. La seconde est
-la seule qui empêche le compte de croître : le contrôle 6 impose la forme, donc chaque skill neuve
-ajoute ses points d'édition.
-
 ## Soldé le
 
 **2026-08-29, chantier `resolution-chemin-skill`** — la cause est traitée, pas seulement le
@@ -69,6 +61,18 @@ posait pour son solde.
 Ce que le solde ne couvre pas : un `.md` reste libre de **citer** un chemin relatif à la racine du
 dépôt (`skills/list-dir/scripts/`), forme vérifiée par le contrôle 7 mais non résolue par `bin/`.
 Le cas d'une bibliothèque importée est traité à part, par `shutil.which`.
+
+## Pourquoi c'est gênant
+
+c'est exactement le défaut qui a bloqué la clôture de ce chantier, sous
+une forme plus étroite. Aucune des cinq éditions n'échoue bruyamment si elle est oubliée.
+
+## Pour solder
+
+soit un contrôle du garde-fou vérifiant que chacun de ces chemins désigne un
+fichier existant, soit une résolution du chemin de la skill au lieu d'une constante. La seconde est
+la seule qui empêche le compte de croître : le contrôle 6 impose la forme, donc chaque skill neuve
+ajoute ses points d'édition.
 
 ## Assumé
 

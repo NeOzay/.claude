@@ -22,7 +22,7 @@ description = "Revue du registre de dette — une fiche par entrée, un verdict 
 # l'être.
 [origin]
 def = "technical-debt/review"
-version = 1
+version = 2
 frozen = true
 
 [fields.id]
@@ -40,6 +40,14 @@ type = "date"
 required = true
 from = "date"
 description = "date du constat au registre, reportée — jamais celle de la revue"
+
+[fields.severite]
+type = "enum"
+required = true
+from = "severite"
+description = "gravité de l'entrée, reportée ; la revue l'ajuste, et remplace toujours « inconnue »"
+# Même ordre que dans le registre, de la moindre gravité à la pire.
+values = ["inconnue", "note", "avertissement", "majeur", "critique"]
 
 [fields.reviewed]
 type = "date"
@@ -60,6 +68,8 @@ values = ["a-solder", "non-pertinent", "doublon", "pas-une-dette",
 
 # `category` et `reviewed` n'ont pas de `from` : ils sont posés au marqueur, et
 # c'est au modèle de trancher. Un champ reporté d'office serait un script qui juge.
+# `severite` en a un parce qu'elle a déjà une valeur à juger — la revue part d'elle.
+# `pin` n'est pas reporté : la revue l'ignore.
 
 [sections."Vérifié par"]
 required = true

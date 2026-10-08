@@ -2,11 +2,12 @@
 name: list-dir
 description: >
   Manipule des répertoires-listes : un répertoire = une liste, un fichier = un élément, un contrat
-  embarqué qui déclare la structure. Fournit treize commandes génériques (init, new, list, show,
-  validate, migrate, move, derive, merge, defs, contract, reseed, help), des définitions de listes
-  réutilisables pour amorcer une liste dans un projet neuf, et une bibliothèque Python importable.
-  Se déclenche dès qu'il s'agit de créer, amorcer, valider, migrer, filtrer, déplacer, dériver ou
-  agglomérer les éléments d'une liste stockée en fichiers. Ne juge aucun contenu.
+  embarqué qui déclare la structure. Fournit quatorze commandes génériques (init, new, list, show,
+  validate, migrate, fill, move, derive, merge, defs, contract, reseed, help), des définitions de
+  listes réutilisables pour amorcer une liste dans un projet neuf, et une bibliothèque Python
+  importable. Se déclenche dès qu'il s'agit de créer, amorcer, valider, migrer, remplir, filtrer,
+  déplacer, dériver ou agglomérer les éléments d'une liste stockée en fichiers. Ne juge aucun
+  contenu.
 ---
 
 # list-dir — répertoires-listes
@@ -47,7 +48,7 @@ marqueurs viennent de lui, et `listdir` les réexporte plutôt que de les redéf
 plutôt que de laisser tomber un `ImportError` sur un module interne. La dépendance ne va que dans
 ce sens — `gabarit` n'importe jamais `listdir`.
 
-## Les treize commandes
+## Les quatorze commandes
 
 ```bash
 list-dir help [<liste>]                      # les commandes disponibles, avec leur description
@@ -65,6 +66,7 @@ list-dir contract <cible> --patron <nom>     # ... le patron <nom>.toml plutôt 
 list-dir contract <cible> --values <champ>   # les valeurs déclarées d'un champ, une par ligne
 list-dir validate <liste> [--filled]         # structure ; --filled exige que tout soit rempli
 list-dir migrate <liste> [--drop] [--dry-run] # remet les éléments au contrat courant
+list-dir fill <liste> <champ> <valeur> (--id <id>… | --all) [--dry-run]  # remplit un champ resté au Marqueur
 list-dir reseed <liste> [--def <nom>|--from <chemin>] [--force] [--dry-run]  # rattrape le contrat
 list-dir move <liste> <id> <liste-cible>     # git mv seul — l'historique suit
 list-dir derive <src> <dst> --patron <nom>   # projette une liste sur une liste neuve
@@ -125,6 +127,12 @@ sur un champ `int`, `date`, `bool` ou `list` est converti en sa forme typée, à
 signalé, `--drop` le retire sur ordre. Le renommage reste au modèle, qui seul sait que `severite`
 est devenu `gravite`. Un champ ou une section `deprecated` n'est jamais ajouté, et jamais retiré.
 
+**Ce que `migrate` laisse au Marqueur, `fill` le remplit.** Il pose la valeur de l'appelant sur un
+champ des seuls éléments où il est resté au Marqueur — ceux de `--id`, ou tous avec `--all`, l'un ou
+l'autre exigé. La valeur passe le contrôle du type déclaré avant toute écriture, et une valeur déjà
+écrite n'est jamais touchée : sautée avec `--all`, refusée en la nommant avec `--id`. `fill` ne
+choisit rien : il épargne l'édition à la main de chaque fichier quand la valeur est connue.
+
 **Échec fermé** : sortie non nulle et message nommant la cause — contrat introuvable, champ inconnu,
 élément non conforme, outil déclaré manquant, agglomération qui perd un élément. Jamais de succès
 silencieux sur une liste vide là où c'en est un.
@@ -160,5 +168,5 @@ Cinq références, une par sujet — chacune fait autorité sur le sien, les aut
 | `references/format.md` | structure d'un répertoire-liste, et ce qu'une liste ajoute à un gabarit : l'`id`, `from`, `[origin]`, les `LISTDIR_*` |
 | `references/definitions.md` | amorcer depuis une définition : les quatre racines, la précédence, l'autorité bornée à l'`init`, ce que `contract` vise |
 | `references/provenance.md` | la table `[origin]`, les deux formes de `def`, ce dont `validate` avertit, `reseed`, l'adoption |
-| `references/operations.md` | `validate`, `migrate`, `move`, `list`, `derive`, `merge` |
+| `references/operations.md` | `validate`, `migrate`, `fill`, `move`, `list`, `derive`, `merge` |
 | `references/extension.md` | la bibliothèque Python, la déclaration et la surcharge des commandes |

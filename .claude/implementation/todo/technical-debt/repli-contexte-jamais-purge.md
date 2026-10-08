@@ -2,8 +2,12 @@
 id = "repli-contexte-jamais-purge"
 title = "Le repli `~/.cache/claude-contexte/` de la commande `contexte` n'est jamais purgé"
 date = "2026-10-04"
+severite = "inconnue"
+chantier = "contexte-tracker"
+reference = "R7"
+pin = false
 source = "chantier `contexte-tracker`, audits de clôture, constat R7"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

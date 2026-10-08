@@ -2,6 +2,10 @@
 id = "prose-etape-0-contredit-la-branche-127"
 title = "La prose de l'Étape 0 affirme que le code 127 ne se distingue pas, alors que le bloc le distingue"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "semences-de-listes"
+reference = "R22"
+pin = false
 source = "chantier semences-de-listes, audit R22"
 reviewed = 2026-09-06
 category = "pertinent"
@@ -40,3 +44,7 @@ mentionner le 127 à part — comme le seul état que le code de retour suffit �
 
 Puis relire la phrase **contre le bloc qu'elle introduit**, ligne à ligne : c'est le contrôle qui
 manquait, et le mode de défaillance en fin de section le prescrit déjà.
+
+## Assumé
+
+<OPTIONNEL>

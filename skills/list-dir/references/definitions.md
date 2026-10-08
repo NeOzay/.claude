@@ -5,17 +5,26 @@ liste à la main, et pas assez pour recréer une liste dont le contrat est connu
 ([Le contrat](../references/format.md#le-contrat)). Une **définition** comble ce trou.
 
 Une définition est un répertoire dont le contenu **est** ce qui va dans le futur `.list/` — le
-contrat et ses patrons, rien d'autre. Une liste semée y ajoute ensuite ce qui ne vient pas d'une
-définition : ses commandes, sa semence gardée, sa sauvegarde.
+contrat et ses patrons, rien d'autre —, à ses notes de migration près, qui restent dans la
+définition. Une liste semée y ajoute ensuite ce qui ne vient pas d'une définition : ses commandes,
+sa semence gardée, sa sauvegarde.
 
 ```
 list-dir/
 └── recettes/            le nom de la définition
     ├── contract.toml          obligatoire — sans lui, ce n'est pas une définition
-    └── patrons/               facultatif, copié tel quel s'il existe
-        ├── review.toml
-        └── review.md
+    ├── patrons/               facultatif, copié tel quel s'il existe
+    │   ├── review.toml
+    │   └── review.md
+    └── migrations/            facultatif, jamais copié
+        └── 3.md                   ce que le passage à la v3 demande au-delà de reseed et migrate
 ```
+
+Une note de migration sert à rattraper une liste semée dans une version antérieure : la copier dans
+chaque liste n'apprendrait rien à celles qui sont à jour, et l'avertissement de péremption la nomme
+depuis la définition ([Ce que `validate` avertit](provenance.md#ce-que-validate-avertit)). Elle
+reste en place une fois les listes migrées : une liste en retard de plusieurs versions passe par
+chacune.
 
 ```bash
 list-dir defs                                # ce qui est définissable, et d'où

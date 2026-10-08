@@ -2,7 +2,13 @@
 id = "lexique-completion-sous-un-modificateur"
 title = "La complétion de `:Lexique` ne propose rien derrière un modificateur de commande"
 date = 2026-09-27
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `lexique-nvim`, R8 du rapport d'audit de clôture."
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

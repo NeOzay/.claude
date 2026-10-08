@@ -2,6 +2,10 @@
 id = "migrate-valeur-multilignes-casse-une-ligne-par-changement"
 title = "Une valeur préremplie multi-lignes casse l'invariant « un changement, une ligne » de migrate"
 date = 2026-08-31
+severite = "majeur"
+chantier = "champs-preremplis"
+reference = "R3"
+pin = true
 source = "chantier 2026-08-31-champs-preremplis, audit de clôture R3"
 reviewed = 2026-09-06
 category = "pertinent"

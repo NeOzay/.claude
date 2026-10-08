@@ -2,8 +2,12 @@
 id = "semence-de-test-reseed-porte-un-preremplissage"
 title = "La semence partagée de test_reseed.py porte un préremplissage que ses tests ne demandaient pas"
 date = 2026-09-06
+severite = "inconnue"
+chantier = "description-obligatoire-partout"
+reference = "R2"
+pin = false
 source = "chantier description-obligatoire-partout, audit de clôture e441337, R2 — clos avec la réserve"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

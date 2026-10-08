@@ -2,8 +2,12 @@
 id = "criteres-de-brief-bornes-a-une-extension"
 title = "Les critères d'un brief de renommage bornaient leurs greps à un répertoire et deux extensions"
 date = 2026-09-20
+severite = "inconnue"
+chantier = "deux-sens-de-gabarit"
+reference = "R1, R3"
+pin = false
 source = "chantier `deux-sens-de-gabarit`, audit de clôture R1 et R3 (`ffc2297`)"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

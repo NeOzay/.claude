@@ -2,8 +2,12 @@
 id = "conseil-de-reprise-lie-au-rang-du-geste"
 title = "Le conseil de reprise de la clôture dépend de la position du checkout dans la liste des gestes"
 date = 2026-09-14
+severite = "inconnue"
+chantier = "git-smart-commit-trois-commits"
+reference = "R16"
+pin = false
 source = "chantier `git-smart-commit-trois-commits`, R16 du rapport d'audit"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
@@ -25,3 +29,7 @@ les rangs testés ne bougent pas.
 
 Porter l'information sur le geste lui-même (par exemple un booléen « quitte `<slug>` » dans le
 tuple de `gestes`), et en dériver le conseil dans `executer`.
+
+## Assumé
+
+<OPTIONNEL>

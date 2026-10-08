@@ -2,8 +2,12 @@
 id = "grep-recursif-faux-positifs-pytest-cache"
 title = "Un critère de suppression formulé en grep -rn rend des faux positifs depuis .pytest_cache"
 date = 2026-09-10
+severite = "inconnue"
+chantier = "supprimer-dump-value"
+reference = "R8"
+pin = false
 source = "chantier supprimer-dump-value, rapport d'audit R8"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

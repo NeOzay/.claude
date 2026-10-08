@@ -2,7 +2,13 @@
 id = "conventions-jamais-confrontees-a-toutes-les-skills"
 title = "Les 16 conventions n'ont jamais été confrontées systématiquement aux skills existantes"
 date = 2026-09-18
+severite = "inconnue"
+chantier = "skill-convention"
+reference = "R1"
+pin = false
 source = "chantier `skill-convention`, audit de clôture R1 (`cea0665`) — report assumé par l'utilisateur"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -26,3 +32,7 @@ l'inverse exact de ce que le registre garantit.
 Mener le balayage : pour chacune des 16 conventions, confronter les 8 skills de `skills/` et créer
 une entrée par écart. C'est un chantier à part, avec son brief ; la lecture est déléguable à un
 agent, le jugement non.
+
+## Assumé
+
+<OPTIONNEL>

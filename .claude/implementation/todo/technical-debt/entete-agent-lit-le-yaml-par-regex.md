@@ -2,7 +2,13 @@
 id = "entete-agent-lit-le-yaml-par-regex"
 title = "`lexique.py` lit le frontmatter d'un agent par regex, pas par un lecteur YAML"
 date = 2026-10-05
+severite = "avertissement"
+chantier = "lexique-des-sous-agents"
+reference = "R5"
+pin = true
 source = "chantier `lexique-des-sous-agents`, audit de clôture du 2026-10-05, R5 (clos avec, choix de l'utilisateur)"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

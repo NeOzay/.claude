@@ -2,8 +2,12 @@
 id = "gabarit-porte-des-residus-de-liste"
 title = "Le paquet gabarit porte encore des notions et des renvois propres à une liste"
 date = 2026-09-15
+severite = "note"
+chantier = "fichier-seme"
+reference = "R4, R6"
+pin = true
 source = "chantier fichier-seme, audit de clôture R4 (`fadddf1`), reconduit par R6 (`5123a3d`) — clos avec"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

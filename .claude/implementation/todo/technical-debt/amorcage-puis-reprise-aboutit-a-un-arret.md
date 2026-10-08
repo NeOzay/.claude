@@ -2,6 +2,10 @@
 id = "amorcage-puis-reprise-aboutit-a-un-arret"
 title = "« Amorcer puis reprendre l'étape » aboutit toujours à un arrêt, sans que la puce le dise"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "semences-de-listes"
+reference = "R16"
+pin = false
 source = "chantier semences-de-listes, audit R16"
 reviewed = 2026-09-06
 category = "pertinent"
@@ -28,3 +32,7 @@ d'erreur pour une situation parfaitement normale.
 
 Une demi-phrase à la fin de la puce : la reprise dira `VIDE`, et c'est la fin normale d'un premier
 passage. Prose seule, aucun code en cause.
+
+## Assumé
+
+<OPTIONNEL>

@@ -2,8 +2,12 @@
 id = "prose-lignes-allongees-par-la-migration"
 title = "Des lignes de `prose.md` dépassent 100 colonnes depuis la réécriture de ses liens"
 date = "2026-10-04"
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "chantier `shadow-skill`, audit de clôture, constat R4"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

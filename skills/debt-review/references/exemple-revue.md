@@ -1,12 +1,13 @@
 # Une fiche instruite par catégorie
 
-Ce que le modèle écrit dans une fiche, une fois `derive` passé : les deux champs et les trois
+Ce que le modèle écrit dans une fiche, une fois `derive` passé : les trois champs et les trois
 sections requises, sur chacun des verdicts possibles. Une dernière fiche montre une section
 `Arbitrage` remplie — le seul ajout de la Phase 4.
 
 Ce qui est reproduit ici est le **corps** d'une fiche, tel qu'il apparaîtrait dans
-`done/revues/<AAAA-MM-DD>/<id>.md`. Le front matter est écrit par `derive` : `id`, `title` et `date`
-sont reportés de l'entrée, seuls `category` et `reviewed` sont à remplir.
+`done/revues/<AAAA-MM-DD>/<id>.md`. Le front matter est écrit par `derive` : `id`, `title`, `date`
+et `severite` sont reportés de l'entrée ; `category` et `reviewed` sont à remplir, `severite` à
+rejuger.
 
 > **Les entrées ci-dessous sont fictives**, ainsi que le dépôt qu'elles décrivent — un service de
 > commandes en Python qui n'existe pas. C'est délibéré : un exemple bâti sur une vraie entrée du
@@ -19,6 +20,7 @@ sont reportés de l'entrée, seuls `category` et `reviewed` sont à remplir.
 ## `a-solder` — Le cache de sessions n'expire jamais
 
 ```markdown
+severite = "majeur"
 category = "a-solder"
 reviewed = 2026-09-02
 
@@ -115,7 +117,8 @@ Inchangé depuis le constat d'origine.
 
 ## Action
 
-Rien à déplacer ; seuls `category` et `reviewed` sont écrits sur l'entrée.
+Rien à déplacer ; `category` et `reviewed` sont écrits sur l'entrée, et `severite` si la fiche l'a
+changée.
 ```
 
 ## `inverifiable` — La migration 0042 n'a jamais été rejouée sur une copie de production

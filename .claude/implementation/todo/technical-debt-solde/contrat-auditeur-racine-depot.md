@@ -2,8 +2,12 @@
 id = "contrat-auditeur-racine-depot"
 title = "Le contrat de l'auditeur et celui de l'appelant divergent sur la racine du dépôt"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `audit-integre`, R6 du rapport d'audit."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

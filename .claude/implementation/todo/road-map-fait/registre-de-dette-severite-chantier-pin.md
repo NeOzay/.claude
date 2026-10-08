@@ -59,3 +59,11 @@ propre Chantier.
   `migrate` de ce Chantier la solde), `dates-entre-guillemets-acceptees`,
   `parsing-du-contrat-avale-les-cles-inconnues` (une faute de frappe sur `deprecated` passe sans un
   mot), `consommateurs-des-marqueurs-generiques-hors-etat` (Neovim et `dette.md`)
+
+## Fait le
+
+2026-10-08, par le chantier `registre-de-dette-severite-chantier-pin`. Le registre de dette porte
+`severite` (échelle `inconnue` à `critique`), `chantier`, `reference` et `pin` ; `source` y est
+déprécié, et ses 90 entrées ont été migrées par `reseed`, `migrate`, `list-dir fill` et l'agent
+`migrateur-de-liste`, selon `technical-debt/migrations/3.md`. Archive du chantier :
+`.claude/implementation/done/2026-10-08-registre-de-dette-severite-chantier-pin.md`.

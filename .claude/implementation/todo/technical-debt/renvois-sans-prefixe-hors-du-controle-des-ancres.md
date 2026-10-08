@@ -2,8 +2,12 @@
 id = "renvois-sans-prefixe-hors-du-controle-des-ancres"
 title = "Les renvois sans préfixe ../ échappent au contrôle des ancres mortes"
 date = "2026-09-02"
+severite = "inconnue"
+chantier = "recopies-hors-contrat"
+reference = "Clôture"
+pin = false
 source = "chantier `recopies-hors-contrat`, réserve de forme de l'audit de clôture"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

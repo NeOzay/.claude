@@ -2,6 +2,10 @@
 id = "sections-de-categories-jamais-confrontees-au-contrat"
 title = "les sections de categories.md recopient l'ensemble des valeurs du contrat"
 date = 2026-08-30
+severite = "inconnue"
+chantier = "renvoi-contrat-des-categories"
+reference = "Hors-périmètre du Brief"
+pin = false
 source = "chantier renvoi-contrat-des-categories, hors-périmètre assumé"
 reviewed = 2026-09-06
 category = "pertinent"

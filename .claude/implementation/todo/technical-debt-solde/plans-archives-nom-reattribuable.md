@@ -2,8 +2,12 @@
 id = "plans-archives-nom-reattribuable"
 title = "Les plans archivés portent un nom réattribuable, sans garde-fou à l'écrasement"
 date = 2026-08-14
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "Identifié par `dette-technique`, incident constaté pendant sa propre clôture."
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 

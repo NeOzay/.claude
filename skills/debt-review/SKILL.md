@@ -207,8 +207,18 @@ Pour chacune :
 2. **Exécuter la commande** qui établit si le constat tient encore. Ce qu'elle doit être est dit
    au contrat de la liste de revue, section `Vérifié par`.
 3. Classer, selon `references/categories.md`.
-4. Écrire la fiche `$R/<id>.md` : les champs `category` et `reviewed`, puis les sections **Vérifié
-   par**, **Verdict** et **Action**. La section `Arbitrage` reste au marqueur jusqu'à la Phase 4.
+4. Juger la sévérité : la fiche reprend la `severite` de l'entrée, l'ajuster si l'instruction la
+   contredit, et remplacer **toujours** `inconnue`.
+5. Écrire la fiche `$R/<id>.md` : les champs `severite`, `category` et `reviewed`, puis les
+   sections **Vérifié par**, **Verdict** et **Action**. La section `Arbitrage` reste au marqueur
+   jusqu'à la Phase 4.
+
+**`inconnue` ne survit pas à une revue.** C'est la valeur d'une entrée que personne n'a jugée ; une
+fiche qui la garde n'a pas fait son travail. L'échelle :
+[Ce qu'une entrée porte](../implementation-tracker/references/dette.md#ce-quune-entrée-porte).
+
+**`pin` est ignoré.** Une entrée épinglée s'instruit, se classe et sort du registre comme une
+autre : ce champ sert à la retrouver, jamais à la protéger.
 
 **Ne pas grouper les vérifications.** Une passe de `grep` qui répond à six entrées d'un coup produit
 six classements adossés à la même lecture — c'est le raccourci qui fait rater les cas particuliers,
@@ -363,7 +373,8 @@ change de liste par `move`.
 3. **`aggravee`** → l'entrée ne bouge pas : réécrire son **Constat**, daté du jour.
 
 4. **`inverifiable`, `pertinent`, `aggravee`** et toute entrée restée au registre → écrire ses deux
-   champs de revue, `category` et `reviewed` (la date du jour).
+   champs de revue, `category` et `reviewed` (la date du jour), et sa `severite` quand la fiche en
+   porte une autre que l'entrée.
 
 5. **Corrections de contenu arbitrées** — une entrée vraie mais mal écrite se corrige sur place,
    quelle que soit sa catégorie. Date et `id` ne bougent pas, et la correction porte sa commande.

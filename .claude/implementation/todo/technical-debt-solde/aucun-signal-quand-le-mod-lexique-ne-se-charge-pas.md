@@ -2,7 +2,13 @@
 id = "aucun-signal-quand-le-mod-lexique-ne-se-charge-pas"
 title = "Rien ne signale que le mod lexique-sous-agent n'est pas chargé"
 date = 2026-10-06
+severite = "<OPTIONNEL>"
+chantier = "<OPTIONNEL>"
+reference = "<OPTIONNEL>"
+pin = "<OPTIONNEL bool>"
 source = "audit hors chantier de `lexique-local-tronque-par-le-hook-session`, troisième passage du 2026-10-06, `.claude/implementation/lexique-local-tronque.audit.md`, R17 (R6 du premier passage)"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat
@@ -12,18 +18,6 @@ Le lexique local de la session ne vient plus que du mod `lexique-sous-agent`, no
 Si le mod ne se charge pas (dossier déplacé, variable retirée, API de mod changée, `--bare`), la
 session n'a aucun lexique local. Constaté le 2026-10-06 : `scripts/sante_skills.py`, seul hook
 `SessionStart` restant, ne cite ni le mod ni `CLAUDE_CODE_PLUGIN_DIRS`.
-
-## Pourquoi c'est gênant
-
-C'est le tort que la dette `lexique-local-tronque-par-le-hook-session` décrivait (« rien ne le dit
-»), déplacé : la session perd tout le lexique local sans le moindre message, et seule une phrase du
-modèle employant mal un terme le laisse deviner.
-
-## Pour solder
-
-Faire vérifier par `sante_skills.py` que `CLAUDE_CODE_PLUGIN_DIRS` nomme un dossier de mod existant
-qui porte un `hooks/hooks.json`, et qu'il dise l'anomalie dans son stdout, comme pour les autres
-dépendances.
 
 ## Soldé le
 
@@ -45,3 +39,19 @@ et signale la variable si elle revient dans `settings.json`.
 Limite : un module présent qui échoue au chargement échappe au contrôle ; seul le journal de
 `claude --debug` le montre (docstring de `mods_en_defaut`, `claude-code-mods`). Reste au registre :
 `sante-skills-plante-sur-une-dependance-objet`.
+
+## Pourquoi c'est gênant
+
+C'est le tort que la dette `lexique-local-tronque-par-le-hook-session` décrivait (« rien ne le dit
+»), déplacé : la session perd tout le lexique local sans le moindre message, et seule une phrase du
+modèle employant mal un terme le laisse deviner.
+
+## Pour solder
+
+Faire vérifier par `sante_skills.py` que `CLAUDE_CODE_PLUGIN_DIRS` nomme un dossier de mod existant
+qui porte un `hooks/hooks.json`, et qu'il dise l'anomalie dans son stdout, comme pour les autres
+dépendances.
+
+## Assumé
+
+<OPTIONNEL>

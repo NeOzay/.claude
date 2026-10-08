@@ -2,7 +2,13 @@
 id = "ruff-format-non-juge-par-l-auditeur"
 title = "Rien ne fait compter à l'auditeur un fichier Python hors format comme un écart"
 date = 2026-10-06
+severite = "inconnue"
+chantier = "mods-a-la-racine-des-skills"
+reference = "R12"
+pin = false
 source = "chantier `mods-a-la-racine-des-skills`, audit de clôture du 2026-10-06 sur `349bb96`, `.claude/implementation/mods-a-la-racine-des-skills.audit.md`, R12"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

@@ -2,7 +2,13 @@
 id = "sante-skills-plante-sur-une-dependance-objet"
 title = "Une dépendance de mod écrite en objet fait planter sante_skills.py"
 date = 2026-10-06
+severite = "inconnue"
+chantier = "mods-a-la-racine-des-skills"
+reference = "R10"
+pin = false
 source = "chantier `mods-a-la-racine-des-skills`, audit de clôture du 2026-10-06 sur `349bb96`, `.claude/implementation/mods-a-la-racine-des-skills.audit.md`, R10"
+reviewed = "<OPTIONNEL date>"
+category = "<OPTIONNEL>"
 +++
 
 ## Constat

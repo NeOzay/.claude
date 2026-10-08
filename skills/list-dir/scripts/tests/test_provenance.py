@@ -14,7 +14,15 @@ import os
 from pathlib import Path
 
 from jouet import ecrire
-from listdir.contract import CONTRACT, LIST_DIR, PATRONS, SEED, load_contract, parse_contract
+from listdir.contract import (
+    CONTRACT,
+    LIST_DIR,
+    MIGRATIONS,
+    PATRONS,
+    SEED,
+    load_contract,
+    parse_contract,
+)
 from listdir.provenance import warnings
 from listdir.store import init_list
 from listdir.types import Contract, Result
@@ -311,6 +319,35 @@ def test_semence_plus_recente_dit_la_peremption_et_le_geste(tmp_path: Path) -> N
 
     (dit,) = dits(cible)
     assert "v2" in dit and "v5" in dit and "reseed" in dit
+
+
+def test_peremption_nomme_les_notes_de_migration_franchies(tmp_path: Path) -> None:
+    """Une note par version franchie, dans l'ordre ; une note hors de l'écart ne se
+    dit pas, et une version sans note n'en invente pas."""
+    definition, cible = semer(tmp_path, version=2)
+    _ = ecrire(definition, CONTRACT, BASE + '\n[origin]\ndef = "semee"\nversion = 5\n')
+    for v in (2, 3, 5):
+        _ = ecrire(definition, f"{MIGRATIONS}/{v}.md", f"# v{v}\n")
+    _chdir(tmp_path)
+
+    (dit,) = dits(cible)
+
+    trois, cinq = definition / MIGRATIONS / "3.md", definition / MIGRATIONS / "5.md"
+    assert f"lire {trois}, {cinq} avant « list-dir reseed" in dit
+    assert "2.md" not in dit
+
+
+def test_les_notes_de_migration_ne_sont_pas_semees(tmp_path: Path) -> None:
+    """Elles disent comment passer d'une version à l'autre : leur place est dans la
+    définition, pas dans chaque liste qu'elle sème."""
+    definition = tmp_path / "def"
+    _ = ecrire(definition, CONTRACT, BASE)
+    _ = ecrire(definition, f"{MIGRATIONS}/2.md", "# v2\n")
+    cible = tmp_path / "neuve"
+
+    _ = init_list(cible, definition=definition).unwrap()
+
+    assert not list(cible.rglob(MIGRATIONS))
 
 
 def test_frozen_tait_la_peremption(tmp_path: Path) -> None:

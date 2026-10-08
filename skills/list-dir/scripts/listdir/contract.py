@@ -38,6 +38,11 @@ SEED = "semence"
 de `reseed`. Elle a la FORME D'UNE DÉFINITION — un contrat et ses patrons — ce qui
 la rend lisible par `load_source` sans une ligne de plus."""
 
+MIGRATIONS = "migrations"
+"""Les notes `<version>.md` d'une définition : ce que le passage à cette version demande
+au-delà de `reseed` et `migrate`. Elles restent dans la définition — ni `init` ni
+`reseed` ne les copient sous .list/ — et l'avertissement de péremption les nomme."""
+
 BACKUP = "backup"
 """Ce que le dernier `reseed` a remplacé. Une seule marche arrière : l'historique
 plus ancien est le travail de git."""

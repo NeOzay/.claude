@@ -132,6 +132,38 @@ parlait, et le registre des payées deviendrait une liste de dates.
 Ce qui suit n'est **pas** dans le contrat, et c'est pourquoi c'est écrit ici : les règles de tenue
 que la structure ne sait pas porter.
 
+**La sévérité se juge, deux fois.** Celui qui crée la dette la juge, puis chaque `debt-review`
+l'ajuste. L'échelle, de la plus grave à la moindre :
+
+| `severite` | Ce qu'elle dit |
+|---|---|
+| `critique` | fait mentir un contrôle ou corrompt un résultat sans le dire ; à traiter dans les prochains chantiers |
+| `majeur` | coût récurrent ou défaillance silencieuse probable ; perturbe le fonctionnement d'une fonction clé |
+| `avertissement` | gêne ou risque identifié, contournable |
+| `note` | observation sans coût démontré |
+| `inconnue` | jamais jugée |
+
+`inconnue` est la valeur des entrées migrées sans jugement, que la prochaine revue remplace. Ce
+n'est **jamais** un repli pour qui crée une dette : il vient de la constater, il est le mieux placé
+pour la juger.
+
+**`chantier` s'écrit sous une seule graphie** : le slug du Chantier, sans le préfixe daté de son
+archive en `done/`, ou « Hors chantier ». `--sort chantier` ne regroupe que ce qui s'écrit pareil.
+**`reference`** dit où le Chantier l'a écrite — le `R<n>` du rapport d'audit, ou le lieu cité ;
+« Non précisée » n'est admis que pour une entrée migrée dont l'ancien `source` ne disait rien.
+
+**`pin` sert à retrouver une dette, et à rien d'autre** (`--where pin=true`). Une entrée épinglée
+se revoit, se solde et s'écarte comme les autres : `debt-review` l'ignore.
+
+**`source` est déprécié dans `technical-debt`**, remplacé par `chantier` et `reference` : les
+entrées qui le portent le gardent, une entrée neuve ne l'écrit plus. Il ne l'est **pas** dans
+`-solde` et `-ecarte`, dont les entrées n'ont pas été migrées : un `deprecated` y ferait avertir
+`validate` sur chacune, sans qu'aucune action ne le résolve.
+
+> *Limite assumée* — les `values` de `severite` sont recopiées dans quatre fichiers : les trois
+> contrats et le patron `review`. Aucun contrôle ne les rapproche : une valeur ajoutée l'est aux
+> quatre, dans le même ordre.
+
 **L'`id` ne se renomme pas.** Il est la seule identité d'un élément de liste
 ([Un élément](../../list-dir/references/format.md#un-élément)) ; ce qui en découle ici,
 c'est que par lui une entrée se cite, et sur lui que le point 3 d'*Alimenter* dédoublonne. Le
@@ -161,7 +193,7 @@ list-dir list "$T/technical-debt" --where category=aggravee
 ```
 
 Un registre dont on soupçonne qu'il est périmé ne se lit plus — c'est ce que l'ancienne ligne
-protégeait. Une entrée dont `reviewed` est resté à `<OPTIONNEL>` n'a **jamais** été confrontée au
+protégeait. Une entrée dont `reviewed` est resté au Marqueur n'a **jamais** été confrontée au
 dépôt depuis son écriture, et le tri le montre sans qu'on ait à le croire sur parole.
 
 ---
@@ -316,6 +348,9 @@ chantier.
 
 ```bash
 list-dir list "$T/technical-debt" --sort date       # tout, du plus ancien au plus récent
+list-dir list "$T/technical-debt" --sort=-severite  # du plus grave au moins grave
+list-dir list "$T/technical-debt" --sort chantier   # groupées par chantier
+list-dir list "$T/technical-debt" --where pin=true  # les épinglées
 list-dir show "$T/technical-debt" <id>              # une entrée
 ```
 

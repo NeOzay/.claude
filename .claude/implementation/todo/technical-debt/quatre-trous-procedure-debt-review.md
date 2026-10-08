@@ -2,6 +2,10 @@
 id = "quatre-trous-procedure-debt-review"
 title = "Quatre trous de procédure de `debt-review` sont connus et non traités"
 date = 2026-08-17
+severite = "inconnue"
+chantier = "revue-dette"
+reference = "R5 à R8"
+pin = false
 source = "Identifié par `revue-dette`, R5 à R8 des rapports d'audit."
 reviewed = 2026-09-06
 category = "pertinent"

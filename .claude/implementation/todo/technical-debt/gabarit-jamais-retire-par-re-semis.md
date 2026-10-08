@@ -2,8 +2,12 @@
 id = "gabarit-jamais-retire-par-re-semis"
 title = "un gabarit ne peut pas être retiré par un re-semis, et rien ne le dit"
 date = 2026-09-04
+severite = "inconnue"
+chantier = "peremption-contrat"
+reference = "R8"
+pin = false
 source = "chantier peremption-contrat, audit de clôture ddebb2b, R8"
-reviewed = "<OPTIONNEL>"
+reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
 
