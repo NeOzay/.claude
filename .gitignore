@@ -27,6 +27,8 @@ daemon.status.json
 # Sessions / exécution, spécifiques à la machine
 sessions/
 projects/
+# Dumps de discussions (session-dump) : des sessions entières, jamais versionnées
+.claude/session-dump/
 session-env/
 ide/
 jobs/

@@ -1,0 +1,16 @@
+# Configuration ruff du skill session-dump.
+#
+# Elle vit ici, et non à la racine du dépôt : la skill est déployable ailleurs, et sa
+# configuration voyage avec elle. Identique à celle d'implementation-tracker : un code qui
+# passe de l'une à l'autre ne change pas de règles en chemin.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[format]
+# ruff formate aussi les blocs de code des `.md`, dont les commentaires sont alignés
+# à la main pour se lire comme un tableau : le formateur ne touche qu'au Python.
+exclude = ["*.md"]
