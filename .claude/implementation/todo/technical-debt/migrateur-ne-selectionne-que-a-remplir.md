@@ -5,7 +5,7 @@ date = 2026-10-08
 severite = "majeur"
 chantier = "registre-de-dette-severite-chantier-pin"
 reference = "R13"
-pin = false
+pin = true
 reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"
 +++
