@@ -55,8 +55,8 @@ contexte
 
 | Mesure | Action |
 |---|---|
-| Au-delà de 300 000 tokens | Demander à l'utilisateur s'il veut la Passation |
-| 300 000 tokens ou moins | Rien |
+| Au-delà de 300 000 tokens | Demander à l'utilisateur s'il veut la Passation, mesure à l'appui |
+| 300 000 tokens ou moins | Rien, et la mesure ne se dit pas |
 | Indisponible (sortie non nulle) | Le dire, avec le message rendu, et ne rien proposer |
 
 Le seuil laisse à l'Étape suivante la marge qui la tient sous 400 000 tokens. Après un commit

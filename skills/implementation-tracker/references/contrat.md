@@ -80,8 +80,8 @@ des suivis, qui ne descend qu'à un niveau.
 > fichier de suivi : le contrôle des chemins de frontmatter y chercherait des champs `plan`, `brief`
 > et `audit` qu'il n'a pas, et le listing lui-même compterait un chantier qui n'existe pas.
 
-**Slug** : kebab-case, court (`auth-refactor`, pas `refonte-complete-du-systeme-dauth`). Arrêté au
-brief, il ne change plus — le suivi le reprend **exactement**.
+**Slug** : kebab-case, court (`auth-refactor`, pas `refonte-complete-du-systeme-dauth`). Arrêté à
+la validation du brief, il ne change plus — le suivi le reprend **exactement**.
 
 > *Mode de défaillance* — le slug est la seule chose qui apparie brief, suivi, audit et plan
 > archivé. Réinventé au suivi, il désapparie les quatre : plus rien ne relie l'intention au travail.
@@ -233,8 +233,26 @@ légitimement local au dépôt.
 > n'existe pas : l'appel relatif y renvoie code 127 et une **sortie vide**, que la Phase 1 du
 > tracker lit comme « aucune implémentation en cours » avant de proposer d'en créer une — en
 > ignorant les chantiers réellement présents. Constaté à l'audit du 2026-08-14.
-
+>
 > *Mode de défaillance* — le hook `rtk` réécrit `ls` en ajoutant une colonne de taille en fin de
 > ligne, ce qui empêche toute ancre `$` de matcher : un `grep -vE '\.(brief|audit)\.md$'` écrit en
 > ligne n'exclut plus rien, et les trois copies du filtre ont cassé ensemble. Un script échappe à
 > cette réécriture, qui ne s'applique qu'aux appels Bash du modèle.
+
+## Messages à l'utilisateur
+
+Vaut pour tout message qu'intent-brief, implementation-tracker et git-smart-commit rendent à
+l'utilisateur.
+
+**Un message ne redit pas ce que l'utilisateur voit ailleurs** : les fichiers et les diffs dans son
+éditeur, la taille du contexte dans la ligne d'état. Un chemin stagé, un diff recopié ou un décompte
+de tokens lui fait relire ce qu'il a déjà sous les yeux, pour y chercher la seule ligne qui attend
+sa réponse.
+
+**Une mesure ou une inscription au Suivi ne se dit que si elle appelle une décision.** Une mesure
+sous son seuil, un verdict reporté au Suivi n'en appellent aucune : les annoncer dit seulement que
+la procédure s'est déroulée, ce que l'absence d'alerte dit déjà.
+
+**Aucun rappel ne revient d'un message à l'autre sans rien apprendre** — « Je ne la lance pas sans
+votre feu vert », « Le suivi et le rapport d'audit restent non commités ». Une formule répétée
+cesse d'être lue dès le deuxième message, et ce qu'elle côtoie se perd avec elle.

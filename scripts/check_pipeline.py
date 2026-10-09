@@ -284,6 +284,7 @@ EMPREINTES: dict[str, tuple[str, ...]] = {
     "modèle-dimplémentation": ("Au moindre doute, Opus",),  # choix par défaut
     "contrat-des-sous-agents": ("rev-parse --show-toplevel",),  # racine du dépôt
     "dates-et-listing": ("jamais devinée",),
+    "messages-à-lutilisateur": ("appelle une décision",),  # mesure et inscription tues
 }
 
 

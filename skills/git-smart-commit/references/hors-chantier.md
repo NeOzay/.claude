@@ -45,7 +45,8 @@ Cas qui arrêtent ou changent la suite :
 Puis regrouper par **domaine fonctionnel** en lisant le diff : quelle fonctionnalité est touchée ?
 Correctif, fonctionnalité, refactor, docs, tests, config ? Y a-t-il un breaking change ?
 
-Des sujets distincts → proposer plusieurs commits, un par sujet.
+Des sujets distincts → proposer plusieurs commits, un par sujet. Pour chaque commit, les fichiers
+gardés pour les suivants comptent parmi ses exclusions ([`staging.md`](staging.md)).
 
 ## 4. Rédiger le message
 
@@ -54,7 +55,7 @@ Format, types et règles de rédaction :
 
 ## 5. Proposer, puis committer après accord
 
-Présenter le message, les chemins à stager et un résumé des changements :
+Présenter le message, et les exclusions s'il y en a :
 
 ```
 Message de commit proposé :
@@ -66,12 +67,11 @@ Sessions are persisted via JWT tokens.
 
 Closes #42
 ─────────────────────────────────────────
-Chemins stagés : src/auth/google.ts, routes/login.ts
-3 fichiers modifiés, 2 ajoutés, 0 supprimé
+Exclusions : notes/brouillon.md
 ```
 
 Ce qui compte comme accord et ce qu'on propose à l'utilisateur :
 [`confirmation.md`](confirmation.md).
 
-Sur accord, stager les chemins présentés et committer — forme de la commande :
-[`staging.md`](staging.md). Confirmer par `git log --oneline -1`.
+Sur accord, stager et committer — forme de la commande : [`staging.md`](staging.md). Confirmer par
+`git log --oneline -1`.

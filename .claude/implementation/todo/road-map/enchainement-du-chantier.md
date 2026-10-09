@@ -24,6 +24,10 @@ Faire tenir chaque passage obligé d'un Chantier en un seul tour de l'utilisateu
   1. Valider et passer à l'Étape suivante ;
   2. Valider et attendre ;
   3. Autre chose.
+
+  Décidé au Brief de `messages-du-pipeline` (2026-10-09) : ces trois choix valent aussi pour une
+  Retouche, qui est un commit d'Étape ; « Valider » s'ajuste au contexte ; les choix et le
+  déroulement qu'ils entraînent relèvent de cette entrée, pas de `messages-du-pipeline`.
 - **« Commit » sans proposition préalable** : quand l'utilisateur demande un commit et qu'aucun
   message n'a été proposé avant, lancer directement `git commit` avec le message rédigé. La demande
   de permission de Claude Code (règle `ask`) tient lieu de proposition. Cela suppose une règle

@@ -27,3 +27,8 @@ code-blocks = false
 tables = false
 headings = false
 reflow = true
+
+[per-file-ignores]
+# MD041 — premier titre de niveau 1 : un brief ou un suivi posé depuis sa semence commence
+#         par un front matter, puis des sections `## ` que la semence déclare.
+".claude/implementation/*.md" = ["MD041"]

@@ -55,7 +55,7 @@ Propre à l'audit, en plus des chemins du suivi et du brief :
 n'est pas un audit. Relancer l'agent, ou exécuter les commandes soi-même avant de conclure. Un
 verdict rendu sans exécution vaut celui qu'on cherchait à remplacer.
 
-Puis, dans tous les cas, **inscrire dans le suivi** :
+Puis, dans tous les cas, **inscrire dans le suivi**, sans l'annoncer :
 
 - `## État courant` → `**Dernier audit** : <sha> — <VERDICT> — <date>`
 - frontmatter → `audit = ".claude/implementation/<slug>.audit.md"`, au premier audit du chantier
@@ -63,6 +63,20 @@ Puis, dans tous les cas, **inscrire dans le suivi** :
 
 Le raisonnement reste dans `<slug>.audit.md` : le suivi porte le verdict, le fichier d'audit porte
 le pourquoi.
+
+**Restituer** en une ligne — verdict et chemin du rapport —, puis, s'il y a des réserves, le
+tableau `# | Réserve | Gravité réelle`, avec un commentaire court par réserve : ce qu'elle coûte
+vraiment, que le rapport ne pèse pas.
+
+```md
+L'audit de clôture rend **RÉSERVES** : `.claude/implementation/dump-sessions.audit.md`.
+
+| # | Réserve | Gravité réelle |
+|---|---|---|
+| R1 | Le résumé de compaction est compté comme un tour. | Fausse `tours`. |
+```
+
+Le reste du rapport, l'utilisateur le lit dans le fichier.
 
 **Rien ne part dans le registre de dette au retour de l'audit.** Les constats y sont versés à la
 clôture, en une seule passe — un audit intermédiaire qui alimenterait le registre ferait écrire deux

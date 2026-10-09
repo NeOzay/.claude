@@ -22,9 +22,10 @@ message.
    ```
 
    `REFUS` → s'arrêter et rendre la main avec le message du script. Il n'a rien touché.
-3. **Présenter la sortie du dry-run et attendre l'accord** : elle liste exactement ce que
-   l'exécution fera — commits réunis, déplacements, champs réécrits, branche et tags supprimés,
-   message. [`confirmation.md`](confirmation.md).
+3. **Proposer et attendre l'accord** ([`confirmation.md`](confirmation.md)) : le titre du
+   message et, sur une ligne, les gestes irréversibles — branche `<slug>` et tags de sa lettre
+   supprimés —, avec les choix « Réaliser la Clôture » et « Autre chose ». La sortie du dry-run ne
+   se recopie pas : elle n'a rien refusé, et ce qu'elle liste découle du suivi et de la branche.
 4. **Exécuter** la même commande, sans `--dry-run`.
 
    `ÉCHEC` → **s'arrêter net** et rendre la main avec la sortie du script, sans rien réparer
@@ -76,9 +77,10 @@ Pourquoi chacun de ces gestes :
 ## Abandon
 
 Pas d'aplatissement ici ([`branche-chantier.md`](branche-chantier.md)). Les commits sont nommés,
-chacun présenté et accordé ([`confirmation.md`](confirmation.md)), stagés par chemins
-([`staging.md`](staging.md)). La décision — raison, dette, sort de la branche — appartient à
-l'appelant ; seuls les gestes sont ici.
+chacun présenté et accordé ([`confirmation.md`](confirmation.md)). Le commit `<slug>: abandon` se
+stage selon [`staging.md`](staging.md). Les commits d'archivage se stagent par les `git add` des
+blocs ci-dessous, qui nomment les fichiers que l'archivage vient de produire. La décision — raison,
+dette, sort de la branche — appartient à l'appelant ; seuls les gestes sont ici.
 
 1. **Sur `<slug>`**, une fois le suivi passé en `statut = "abandonné"` : commit
    `<slug>: abandon` du suivi.

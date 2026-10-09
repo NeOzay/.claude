@@ -58,6 +58,11 @@ Question à trancher au Brief ou au Plan :
   les fichiers de l'Étape ? La mémoire `index-avant-commit` rappelle qu'un commit de 4 fichiers en
   a pris 31 le 2026-10-04, parce que l'utilisateur avait indexé les autres pendant sa relecture.
 
+## Fait le
+
+2026-10-09, par le chantier `messages-du-pipeline`. Archive :
+`.claude/implementation/done/2026-10-09-messages-du-pipeline.md`.
+
 ## Références
 
 - Brief : `skills/intent-brief/SKILL.md`, Phases 2 et 5 ;

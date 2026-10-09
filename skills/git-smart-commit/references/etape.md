@@ -2,7 +2,7 @@
 
 Commit pris sur la branche d'un chantier conduit par `implementation-tracker`. Le message est
 **prédéterminé** : on n'analyse pas le diff et on ne rédige rien. L'appelant fournit le slug, la
-lettre, le cas, et les chemins à stager.
+lettre et le cas.
 
 Branche et nom : [`branche-chantier.md`](branche-chantier.md). Lettre et tags :
 [`tags-etape.md`](tags-etape.md).
@@ -32,14 +32,26 @@ au suivi. Le commit de Passation garde sa forme et n'entre pas dans la numérota
 
 1. **Vérifier la branche** : `git branch --show-current` doit rendre `<slug>`. Sinon, s'arrêter et
    le dire.
-2. **Confronter l'arbre aux chemins fournis** : `git status --short`. Un fichier modifié ou non
-   suivi qui n'est pas dans la liste **ne se stage pas**, il se signale — c'est souvent le travail
-   partiel d'un outil ou d'une session interrompue, dont le sort se tranche avant le commit.
+2. **Relever les exclusions** : `git status --short`. Un fichier modifié ou non suivi sans rapport
+   avec le Chantier est une exclusion, présentée avec la proposition — c'est souvent le travail
+   partiel d'un outil ou d'une session interrompue, dont l'utilisateur tranche le sort à l'accord.
 3. **Cas état initial** : la lettre doit déjà figurer dans `lettre` du suivi. Sinon, l'obtenir
    ([`tags-etape.md`](tags-etape.md#lettre)) et l'écrire avant de continuer.
-4. **Proposer** le message, les chemins et le tag, puis attendre l'accord :
-   [`confirmation.md`](confirmation.md).
-5. **Committer** en stageant les chemins présentés : [`staging.md`](staging.md). Puis, pour les cas
+4. **Proposer**, puis attendre l'accord ([`confirmation.md`](confirmation.md)), exclusions
+   comprises s'il y en a :
+   - état initial, session, Passation — des commits mécaniques : l'accord se demande sans le
+     titre ;
+   - Étape — sous cette forme :
+
+     ```md
+     Commit d'Étape proposé :
+     - Message : `<slug>: E<n> — <intitulé de l'étape>`.
+     - Tag : <L>E<n>.
+     ```
+
+   - Retouche — sous la même forme, titrée `Commit de Retouche proposé :`, avec son message et son
+     tag.
+5. **Committer** selon [`staging.md`](staging.md). Puis, pour les cas
    état initial et étape :
 
    ```bash

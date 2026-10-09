@@ -1,7 +1,8 @@
 # Grille de questions — cadrage d'intention
 
 Réservoir d'axes, pas checklist. N'utiliser que ce que la reconnaissance (Phase 1) n'a pas
-couvert. Une question par tour, toujours ancrée dans ce qui a été observé dans le dépôt.
+couvert. Deux questions au plus par tour, regroupées par thème, toujours ancrées dans ce qui a été
+observé dans le dépôt.
 
 ---
 
@@ -27,21 +28,12 @@ spontanément.
 - « J'ai vu que <X> est dans un sale état à côté — dedans ou dehors ? »
 - « Si je trouve un bug adjacent, je le corrige ou je le signale ? »
 
-### 3. Signaux de dérive
-
-L'axe le plus efficace, et le plus rarement posé. Donne un **test de fausseté**, pas seulement
-une cible : utilisable en cours d'implémentation pour détecter l'erreur tôt.
-
-- « À quoi tu verrais, en lisant le diff, que je me suis trompé de direction ? »
-- « Quel genre de solution serait techniquement correcte mais quand même la mauvaise ? »
-
 ---
 
 ## Axes secondaires
 
 Une question chacun, si le chantier s'y prête :
 
-- **Critères de réussite** — « quelle commande tu lances pour vérifier que c'est fini ? »
 - **Historique** — « l'historique montre <X> réécrit deux fois : qu'est-ce qui a cassé ? »
   (invisible dans le code, souvent décisif)
 - **Intouchable** — « ce module a des consommateurs hors dépôt ? »
@@ -49,6 +41,21 @@ Une question chacun, si le chantier s'y prête :
   (un modèle qui ne connaît pas l'existant le recrée)
 - **Rejets a priori** — « une approche ou une dépendance que tu refuses d'emblée ? »
 - **Ambition** — « correctif minimal ou refonte de la zone ? »
+
+---
+
+## Critères et signaux
+
+Ils ne se demandent pas aux échanges : l'agent les propose à la fin du cadrage (Phase 5), tirés de
+ce que les échanges et le dépôt ont établi, et l'utilisateur les décide. Demandés d'emblée, ils
+récoltent une réponse générique ; proposés, ils se corrigent.
+
+- **Signaux de dérive** — l'axe le plus efficace : un **test de fausseté**, pas seulement une
+  cible, utilisable en cours d'implémentation pour détecter l'erreur tôt. Chaque signal proposé
+  répond à « à quoi verrait-on, en lisant le diff, que le chantier part dans la mauvaise
+  direction ? » ou à « quelle solution serait techniquement correcte, mais la mauvaise ? ».
+- **Critères de réussite** — une commande qui dit que c'est fini, plutôt qu'une phrase : une
+  commande se rejoue.
 
 ---
 

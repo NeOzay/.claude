@@ -31,6 +31,8 @@ d'origine a disparu, en rejouant les commandes plutôt qu'en concluant sur mémo
 moment où l'on peut voir qu'on a construit la bonne solution au mauvais problème — et la raison
 pour laquelle ce regard est confié à un agent qui n'a pas écrit le code.
 
+Le verdict se restitue sous la forme que dit [Au retour](audit.md#au-retour).
+
 **Sans avis favorable, la clôture s'arrête ici.** `DÉFAVORABLE` → `statut = "bloqué"`, verdict au
 journal, rendre la main. `RÉSERVES` → l'utilisateur tranche entre clore avec, ou traiter d'abord ;
 ne pas décider à sa place, et ne pas requalifier une réserve en détail pour pouvoir continuer.

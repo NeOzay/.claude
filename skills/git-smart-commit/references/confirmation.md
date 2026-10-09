@@ -5,15 +5,25 @@ globale, `CLAUDE.md`). Proposer, attendre, exécuter.
 
 ## Ce qui est présenté
 
-Tout ce que l'exécution fera, et rien de plus : le message exact, les chemins stagés, et ce qui
-s'y ajoute selon la procédure (tag posé, branche supprimée, fichiers déplacés). L'utilisateur
-valide ce qu'il a vu — une opération absente de la présentation n'est pas couverte par son accord.
+Le message, le tag s'il y en a un, et les exclusions s'il y en a : les fichiers en attente qui ne
+partent pas ([`staging.md`](staging.md)). Un aplatissement y ajoute, sur une ligne, ses gestes
+irréversibles : branche et tags supprimés. Rien d'autre : les fichiers et le diff, l'utilisateur les
+voit dans son éditeur
+([Messages à l'utilisateur](../../implementation-tracker/references/contrat.md#messages-à-lutilisateur)).
 
-Proposer trois réponses :
+L'accord couvre toutes les modifications en attente, sauf les exclusions présentées, et les gestes
+présentés. Une opération absente de la présentation n'est pas couverte par l'accord.
 
-1. **Valider** — exécuter tel quel ;
-2. **Modifier** — l'utilisateur ajuste, et la proposition modifiée est présentée à nouveau ;
-3. **Voir le diff complet** — avant de décider.
+Un commit mécanique — état initial, session, Passation ([`etape.md`](etape.md)) — se propose sans
+son titre : son message est prédéterminé, et l'afficher n'apprend rien. L'accord se demande quand
+même.
+
+Proposer deux réponses :
+
+1. **Valider**, libellé ajusté au contexte — « Committer l'état initial », « Réaliser la
+   Clôture » ;
+2. **Autre chose** — l'utilisateur dit ce qu'il veut changer, et la proposition modifiée est
+   présentée à nouveau.
 
 ## Ce qui compte comme accord
 

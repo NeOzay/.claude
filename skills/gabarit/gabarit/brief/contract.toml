@@ -1,8 +1,8 @@
 # Semence du brief d'intention d'intent-brief.
 #
-# Le brief est posé en brouillon à la Phase 2 d'intent-brief, alimenté au fil du cadrage, puis
-# figé à la validation. Chaque description dit ce que le champ ou la section porte, et d'où
-# vient la valeur : la skill n'en décrit pas la structure, elle renvoie ici.
+# Le brief est posé en brouillon à la Phase 3 d'intent-brief, après les échanges, corrigé par
+# l'utilisateur, puis figé à la validation. Chaque description dit ce que le champ ou la section
+# porte, et d'où vient la valeur : la skill n'en décrit pas la structure, elle renvoie ici.
 
 name = "brief"
 description = """
@@ -13,8 +13,9 @@ bornes, contraintes. Une page au plus — au-delà, c'est un plan déguisé."""
 type = "slug"
 required = true
 description = """
-Kebab-case, court. Arrêté au brief, il ne change plus : le suivi, l'audit et le plan archivé le
-reprennent exactement."""
+Kebab-case, court. Choisi à l'écriture du brief, il se renomme jusqu'à la validation — le fichier
+et ce champ ensemble —, puis ne change plus : le suivi, l'audit et le plan archivé le reprennent
+exactement."""
 
 [fields.titre]
 type = "text"
@@ -25,7 +26,8 @@ description = "Le chantier en une ligne, dans les mots de l'utilisateur."
 type = "enum"
 required = true
 description = """
-- `brouillon` : pendant le cadrage, le brief sert de registre ;
+- `brouillon` : de l'écriture à la validation, l'utilisateur le corrige et le brief sert de
+  registre ;
 - `validé` : l'utilisateur a validé, le brief est figé et la suite s'écrit dans le suivi."""
 values = ["brouillon", "validé"]
 text = "brouillon"
@@ -86,8 +88,8 @@ Une puce sans source est une supposition, à retirer."""
 [sections."Incertitudes à lever en plan"]
 required = true
 description = """
-Le registre des ambiguïtés. Chacune y entre dès qu'elle apparaît, dans sa formulation
-d'origine, et en sort :
+Le registre des ambiguïtés. Chacune y entre à l'écriture du brief, ou dès qu'elle apparaît
+ensuite, dans sa formulation d'origine, et en sort :
 - levée : la réponse part dans la section concernée ;
 - tranchée : la décision est écrite, en **Décision** des contraintes ;
 - reportée : elle reste ici, mission explicite du plan.

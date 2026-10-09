@@ -29,6 +29,9 @@ Chaque procédure y renvoie au moment où elle en a besoin. Inutile de les lire 
 
 - [`references/confirmation.md`](references/confirmation.md) — rien n'est commité sans accord
   explicite.
-- [`references/staging.md`](references/staging.md) — stager des chemins nommés, jamais `-A`.
+- [`references/staging.md`](references/staging.md) — stager toutes les modifications en attente,
+  sauf les exclusions.
 - [`references/conventional-commits.md`](references/conventional-commits.md) — format et règles de
   rédaction d'un message rédigé.
+- [Messages à l'utilisateur](../implementation-tracker/references/contrat.md#messages-à-lutilisateur)
+  — une proposition de commit ne redit pas ce que l'éditeur montre.

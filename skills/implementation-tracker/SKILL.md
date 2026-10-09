@@ -31,6 +31,11 @@ Arborescence, nommage des fichiers et règle du slug :
 Ce qui s'y joue pour ce skill : `done/` porte des archives figées, `todo/` des registres vivants
 que le pipeline **alimente sans jamais les lire de lui-même**.
 
+## Messages
+
+Une mesure ou une inscription au suivi se tait tant qu'elle n'appelle aucune décision :
+[Messages à l'utilisateur](references/contrat.md#messages-à-lutilisateur).
+
 ---
 
 ## Phase 0 — Vérifications préalables

@@ -28,9 +28,14 @@ Argument éventuel = sujet du chantier : il amorce le slug et oriente la reconna
 
 **Ne jamais poser une question dont le dépôt contient la réponse.**
 
-D'où l'ordre non négociable : **explorer → restituer → questionner les trous**. Explorer d'abord
-est ce qui rend les questions spécifiques ; sauter la Phase 1 ramène au questionnaire générique,
-qui fatigue l'utilisateur et ne produit rien.
+D'où l'ordre non négociable : **explorer → questionner → écrire**. Explorer d'abord est ce qui rend
+les questions spécifiques ; sauter la Phase 1 ramène au questionnaire générique, qui fatigue
+l'utilisateur et ne produit rien. Écrire après les échanges donne à l'utilisateur un fichier qu'il
+relit dans son éditeur, en entier, au lieu d'une lecture à réfuter phrase à phrase dans la
+conversation.
+
+Un message ne rend que ce que l'utilisateur ne voit pas déjà dans son éditeur :
+[Messages à l'utilisateur](../implementation-tracker/references/contrat.md#messages-à-lutilisateur).
 
 ## Quand ne pas cadrer
 
@@ -41,19 +46,18 @@ Le cadrage a un coût. Il ne se justifie pas pour :
 - une tâche que l'utilisateur a déjà décrite avec ses critères.
 
 Dans ces cas : le dire en une ligne et renvoyer directement à `/implementation-tracker`, qui sait
-ouvrir un chantier sans brief. **Sortie anticipée** également si, après la Phase 2, l'utilisateur
-valide la restitution sans correction et qu'aucune ambiguïté n'est ouverte : proposer un brief
-minimal — intention et hors-périmètre, les autres sections à `— non abordé` — et passer à
-la Phase 5.
+ouvrir un chantier sans brief. **Sortie anticipée** également si, au terme des échanges, aucune
+ambiguïté n'est ouverte et que l'utilisateur n'a rien à ajouter : écrire un brief minimal —
+intention et hors-périmètre, les autres sections à `— non abordé` — et passer à la Phase 6.
 
 ## Règle du sourçage
 
 **Toute affirmation du brief est sourcée : dite par l'utilisateur, ou vérifiée dans le dépôt.**
 
-Supposer n'est pas interdit — la Phase 2 est une supposition assumée, et c'est la meilleure du
-dispositif. La ligne de partage est **exposée / silencieuse** : une supposition affichée appelle
-la réfutation, une supposition non marquée devient une vérité de référence que plus rien ne
-remettra en cause.
+Supposer n'est pas interdit — le brief écrit à la Phase 3 expose ce que l'agent a compris, pour
+que l'utilisateur le corrige. La ligne de partage est **exposée / silencieuse** : une supposition
+affichée appelle la réfutation, une supposition non marquée devient une vérité de référence que
+plus rien ne remettra en cause.
 
 - Les puces de `## Contraintes connues` et `## Signaux de dérive` portent leur source :
   `(dit)` ou `(dépôt: <chemin ou sha>)`. Une puce sans marqueur est une supposition — la retirer.
@@ -65,8 +69,10 @@ remettra en cause.
 ## Registre des ambiguïtés
 
 Le registre **est le fichier brief**, pas la mémoire de la conversation — c'est là qu'elles
-s'évaporent. Toute ambiguïté est appendue à `## Incertitudes à lever en plan` **au moment où elle
-apparaît**, dans la formulation d'origine.
+s'évaporent. Pendant les échanges, le fichier n'existe pas encore : une ambiguïté se nomme dans le
+tour où elle apparaît, et toutes celles qui restent ouvertes entrent à
+`## Incertitudes à lever en plan` dès l'écriture, dans leur formulation d'origine. Ensuite, chacune
+y est appendue **au moment où elle apparaît**.
 
 Chacune finit dans un de trois états :
 
@@ -120,28 +126,33 @@ et pas de narration fichier par fichier.
 **Plafond** : pour une demande ciblée, une passe de recherche et cinq fichiers lus. Au-delà, c'est
 du plan, pas du cadrage.
 
-## Phase 2 — Restitution de la compréhension
+## Phase 2 — Échanges
 
-La phase la plus rentable : un malentendu se corrige ici en une phrase, au lieu d'être découvert
-dans l'implémentation.
+Puiser dans `references/grille-questions.md`. **Réservoir, pas checklist** : n'en tirer que les
+axes que la Phase 1 n'a pas couverts. Aucun fichier ne s'écrit à ce stade.
 
-```
-Ma lecture :
-- Ce que je crois que tu veux : …
-- Ce que je crois que fait le code aujourd'hui : … (au moins un fait daté ou nommé du dépôt)
-- Ce que je m'attends à toucher : …
-- Ce dont je ne suis pas sûr : …
-```
+- **Deux questions au plus par tour, regroupées par thème.** Une salve récolte des réponses
+  bâclées ; deux questions d'un même thème se répondent d'un même mouvement.
+- Des questions ouvertes, ancrées dans le concret observé : « j'ai vu `TokenStore` réécrit deux
+  fois — qu'est-ce qui a cassé ? » vaut mieux que « des contraintes particulières ? ».
+- **Contrainte de vérification** : le premier tour cite au moins un fait concret du dépôt — un
+  commit, un fichier, un test, une fonction. Sans citation, la Phase 1 n'a pas eu lieu : la
+  refaire.
+- Une réponse ambiguë → la nommer dans ce tour : elle entrera au registre à l'écriture.
+- S'arrêter quand les réponses cessent d'apporter du neuf. Typiquement 3 à 6 questions.
+- Une réponse qui ouvre une zone inconnue → creuser là, quitte à ignorer le reste de la grille.
 
-Puis : **« Qu'est-ce qui est faux là-dedans ? »** Demander ce qui est faux, pas si c'est correct :
-une question fermée récolte un « oui » poli, une ouverte récolte la correction.
+Critères de réussite et signaux de dérive ne se demandent pas ici : l'agent les propose à la
+Phase 5.
 
-**Contrainte de vérification** : la restitution doit citer au moins un fait concret du dépôt — un
-commit, un fichier, un test, une fonction. Sans citation, la Phase 1 n'a pas eu lieu : la refaire.
+**Axes prioritaires si le temps manque** : intention réelle, hors-périmètre.
 
-Puis **arrêter le slug**, tiré de l'argument ou du sujet. Il nomme le fichier et ne change plus :
-**le brief fait autorité**, le fichier de suivi le reprendra tel quel. Forme et conséquence :
+## Phase 3 — Écriture
+
+**Choisir le slug**, tiré de l'argument ou du sujet. Forme :
 [Arborescence et nommage](../implementation-tracker/references/contrat.md#arborescence-et-nommage).
+Jusqu'à la validation, il se renomme — le fichier et le champ `slug` ensemble ; validé, il ne
+change plus, et le fichier de suivi le reprendra tel quel.
 
 **Poser le brief** depuis sa semence, qui le crée en brouillon :
 
@@ -150,33 +161,31 @@ gabarit new brief .claude/implementation/<slug>.brief.md
 gabarit contract brief
 ```
 
-Le contrat dit ce que chaque champ et chaque section attend : le lire avant de remplir, puis y
-écrire ce qui est déjà établi. Le brief sert de registre à partir d'ici.
+Le contrat dit ce que chaque champ et chaque section attend : le lire, puis écrire tout ce que les
+échanges ont établi, chaque puce avec sa source, et toutes les ambiguïtés restées ouvertes aux
+incertitudes. Critères de réussite et signaux de dérive restent au Marqueur jusqu'à la Phase 5.
 
-## Phase 3 — Questions ouvertes, une par tour
+Le message donne le chemin du brief et ses incertitudes, rien d'autre : le reste, l'utilisateur le
+lit dans le fichier.
 
-Puiser dans `references/grille-questions.md`. **Réservoir, pas checklist** : n'en tirer que les
-axes que la Phase 1 n'a pas couverts.
+## Phase 4 — Corrections et arbitrages
 
-- **Une seule question par tour.** Une salve récolte des réponses bâclées.
-- Ancrer dans le concret observé : « j'ai vu `TokenStore` réécrit deux fois — qu'est-ce qui a
-  cassé ? » vaut mieux que « des contraintes particulières ? ».
-- Écrire chaque réponse dans le brief au fil de l'eau, avec son marqueur de source.
-- Une réponse ambiguë → l'appender aux incertitudes **immédiatement**.
-- S'arrêter quand les réponses cessent d'apporter du neuf. Typiquement 3 à 6 questions.
-- Une réponse qui ouvre une zone inconnue → creuser là, quitte à ignorer le reste de la grille.
+L'utilisateur corrige le brief : il ajuste, résout une incertitude, exige. L'agent reporte chaque
+correction dans le fichier, avec sa source. Chaque message qui modifie le brief redonne son chemin
+et les incertitudes restantes, rien d'autre.
 
-**Axes prioritaires si le temps manque** : intention réelle, hors-périmètre, signaux de dérive.
+Les incertitudes restantes dont les réponses sont fermées se tranchent par `AskUserQuestion`, en
+un seul appel qui les groupe toutes : ce sont des arbitrages, pas de l'exploration. Ne pas y
+recycler les questions ouvertes des échanges. S'il n'y a rien à trancher, passer.
 
-## Phase 4 — Arbitrages fermés
+## Phase 5 — Critères et signaux
 
-Sur les seules ambiguïtés relevées aux Phases 2-3, utiliser `AskUserQuestion`. Grouper plusieurs
-questions dans un même appel est ici **permis** : ce sont des arbitrages à choix fermés, pas de
-l'exploration — la règle « une question par tour » ne s'applique qu'à la Phase 3.
+L'agent propose les critères de réussite et les signaux de dérive, tirés des échanges et du dépôt ;
+l'utilisateur les décide. Ce qu'un bon critère et un bon signal portent :
+`references/grille-questions.md`, section « Critères et signaux ». Ceux que l'utilisateur retient
+s'écrivent au brief.
 
-Ne pas y recycler les questions ouvertes déjà posées. S'il n'y a rien à trancher, sauter la phase.
-
-## Phase 5 — Finalisation
+## Phase 6 — Validation
 
 **Contrôles avant de figer :**
 
@@ -191,15 +200,13 @@ Puis :
    gabarit check .claude/implementation/<slug>.brief.md --filled
    ```
 
-   Un échec nomme ce qui reste à remplir : le brief ne se présente pas à la validation tant qu'il
+   Un échec nomme ce qui reste à remplir : le brief ne se propose pas à la validation tant qu'il
    n'est pas conforme. Un axe resté vide s'écrit `— non abordé`, jamais une supposition.
-2. Restituer les trois sections décisives — intention, hors-périmètre, incertitudes — et pointer
-   le fichier pour le reste. Ne pas recopier le brief entier.
-3. Sur validation : `statut` passe à `validé`. Le brief est figé.
+2. Sur validation : `statut` passe à `validé`. Le brief est figé, slug compris.
 
 Le brief tient en une page. S'il déborde, c'est un plan déguisé.
 
-## Phase 6 — Passage au suivi
+## Phase 7 — Passage au suivi
 
 Le brief est figé : il lui faut maintenant un fichier de suivi, sinon tout ce travail vit dans une
 conversation qui se fermera. **Le proposer explicitement** — `implementation-tracker` ne s'invoque
