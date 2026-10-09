@@ -13,6 +13,11 @@ L'idée : en faire une liste `list-dir`, un audit par élément, dont le front m
 partir des audits précédents du chantier. L'ensemble est à discuter et à approfondir avant tout
 chantier : forme de la liste, emplacement, préremplissage, archivage à la clôture.
 
+## Écartée le
+
+2026-10-09 — doublon : l'idée est reprise comme piste par `refonte-de-l-audit`, qui traite le
+rapport avec le verdict, la relance et la restitution de l'audit.
+
 ## Références
 
 - `skills/implementation-tracker/references/audit.md`, section « Gabarit du rapport »
