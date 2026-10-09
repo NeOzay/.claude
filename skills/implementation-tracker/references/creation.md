@@ -139,6 +139,7 @@ committer ou les mettre de côté) avant de relancer.
     sur chaque tour suivant sans plus servir à l'implémentation, et la session de création est
     celle qui en sait le plus sans l'avoir écrit.
 
-    La Passation acceptée, dire à l'utilisateur de faire `/model <modèle>` dans la session vierge,
-    avant `/implementation-tracker @<suivi>` : c'est là que l'implémentation commence, et rien ne
-    change le modèle à sa place.
+    La Passation acceptée, dire à l'utilisateur de faire `/model <modèle>`
+    **pour la session seulement** dans la session vierge, avant `/implementation-tracker @<suivi>` :
+    c'est là que l'implémentation commence, et rien ne change le modèle à sa place. Jamais en
+    défaut, pour la raison que donne [Modèle d'implémentation](contrat.md#modèle-dimplémentation).

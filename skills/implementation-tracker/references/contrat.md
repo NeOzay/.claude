@@ -164,7 +164,13 @@ Une étape tient en **un seul tour d'exécution**. Elle se découpe au figeage, 
 
 Un Chantier est conduit par **un seul modèle**, Sonnet ou Opus, choisi au Plan pour toute
 l'implémentation. La session qui suit la Passation de la création démarre à vide : l'utilisateur y
-fait `/model <modèle>`. Rien ne change le modèle à sa place, ni par Étape, ni par session.
+fait `/model <modèle>` **pour la session seulement**, sans l'enregistrer comme défaut. Le défaut
+s'écrit dans `~/.claude/settings.json`, que la configuration versionne : un Chantier de la
+configuration trouverait son arbre sale dès la première commande, sa création refusée et sa
+Passation dite périmée. Un choix pour la session seulement ne lui survit pas : à chaque reprise,
+implementation-tracker compare le modèle de la session au champ `modèle` et signale l'écart. Rien
+ne change le modèle à la place de l'utilisateur, ni d'une Étape à l'autre, ni d'une reprise à
+l'autre.
 
 **Sonnet** pour un travail bien délimité, **Opus** pour un travail complexe et mal délimité. Trois
 critères le disent :

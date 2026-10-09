@@ -20,6 +20,15 @@ avant d'écrire ou de relire un fichier de skill.
 linters, tests, comparaison à la base, exposition d'un exécutable dans `bin/`. Le lire avant de
 lancer l'un de ces outils.
 
+## Le modèle d'une session
+
+Ce dépôt versionne `settings.json`, où `/model` enregistre le modèle choisi comme défaut : un
+`/model` en défaut salit l'arbre, et un Chantier ne se crée ni ne se reprend sur un arbre sale.
+Dans une session ouverte ici, `/model` se fait donc **pour la session seulement**. L'utilisateur
+règle le modèle de démarrage dans `.claude/settings.local.json`, ignoré par git, qui l'emporte sur
+`settings.json` ; un agent n'écrit jamais ce fichier, rien ne change le modèle à la place de
+l'utilisateur. Le `settings.local.json` de la racine, versionné, ne sert pas à cela.
+
 ## Neovim, visionneuse de certains skills
 
 Neovim sert de visionneuse à certains skills : on y recherche, liste et affiche leurs données.
