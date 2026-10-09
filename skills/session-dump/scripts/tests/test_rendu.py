@@ -133,7 +133,8 @@ def test_le_corps_garde_la_discussion_et_une_ligne_par_outil() -> None:
     assert corps == (
         "## Utilisateur\n\nBonjour\n\n"
         "## Assistant\n\nJe lis.\n\n"
-        "- `Read` /a/b.py\n- `Bash` Lister les fichiers\n- `Skill` lexique\n- `Agent` Explore\n\n"
+        "> - `Read` /a/b.py\n> - `Bash` Lister les fichiers\n"
+        "> - `Skill` lexique\n> - `Agent` Explore\n\n"
         "Voilà.\n\n"
         "## Utilisateur\n\nMerci\n"
     )
@@ -182,7 +183,7 @@ def test_cible_outil() -> None:
     questions = {"questions": [{"header": "Modèle"}, {"header": "Portée"}, {"question": "?"}]}
     assert cible("AskUserQuestion", questions) == "Modèle, Portée"
     assert cible("WebFetch", {"url": "https://exemple.fr"}) == ""
-    assert sd.ligne_outil({"name": "WebFetch", "input": {}}) == "- `WebFetch`"
+    assert sd.ligne_outil({"name": "WebFetch", "input": {}}) == "> - `WebFetch`"
 
 
 def test_rendre_assemble_frontmatter_et_corps() -> None:

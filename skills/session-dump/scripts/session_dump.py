@@ -433,10 +433,10 @@ def cible_outil(nom: str, entree: Ligne) -> str:
 
 
 def ligne_outil(bloc: Ligne) -> str:
-    """La ligne d'un appel d'outil : `` - `<Outil>` <cible> ``."""
+    """La ligne d'un appel d'outil : `` > - `<Outil>` <cible> ``."""
     nom = chaine(bloc.get("name")) or "?"
     cible = cible_outil(nom, dictionnaire(bloc.get("input")))
-    return f"- `{nom}` {cible}".rstrip()
+    return f"> - `{nom}` {cible}".rstrip()
 
 
 def paragraphes_assistant(ligne: Ligne) -> list[tuple[str, bool]]:
@@ -463,7 +463,7 @@ def rendre_corps(lignes: Iterable[Ligne]) -> str:
     """La discussion, dans l'ordre, sous des titres `## Utilisateur` et `## Assistant`.
 
     Un titre n'est écrit que quand l'interlocuteur change. Les appels d'outils consécutifs
-    forment une liste, sans ligne vide entre eux.
+    forment une seule citation à puces, sans ligne vide entre eux.
     """
     blocs: list[str] = []
     interlocuteur = ""
@@ -563,40 +563,36 @@ def repertoire_config(environ: Mapping[str, str]) -> Path:
 
 
 def remplacer(destination: Path, contenus: Mapping[str, str]) -> None:
-    """Écrit `contenus` (nom → texte) dans un répertoire voisin, puis le substitue à `destination`.
+    """Écrit `contenus` (nom → texte) dans `destination`, dont le contenu précédent est vidé.
 
-    TOUT LE RÉPERTOIRE EST REMPLACÉ : un dump périmé ne survit pas à un nouveau. L'ancien n'est
-    retiré qu'une fois le nouveau en place ; un échec en cours de route le laisse intact.
+    TOUT LE CONTENU EST REMPLACÉ : un dump périmé ne survit pas à un nouveau. Le répertoire lui-même
+    reste le même, car un outil peut l'avoir ouvert ou s'y tenir. Les fichiers sont d'abord écrits
+    dans un répertoire voisin : un échec d'écriture laisse `destination` intact.
 
     Un caractère qui ne s'encode pas en UTF-8 (une moitié de paire de substitution) est remplacé
     par U+FFFD : une seule ligne de ce genre n'empêche pas de dumper tout le projet.
 
     Raises:
-        OSError: l'écriture ou la substitution a échoué ; rien n'a changé à `destination`.
+        OSError: l'écriture a échoué ; rien n'a changé à `destination`.
     """
     destination.parent.mkdir(parents=True, exist_ok=True)
-    pid = os.getpid()
-    neuf = destination.parent / f".{destination.name}.neuf-{pid}"
-    ancien = destination.parent / f".{destination.name}.ancien-{pid}"
-    for reste in (neuf, ancien):
-        shutil.rmtree(reste, ignore_errors=True)
+    neuf = destination.parent / f".{destination.name}.neuf-{os.getpid()}"
+    shutil.rmtree(neuf, ignore_errors=True)
     neuf.mkdir()
     try:
         for nom, texte in contenus.items():
             (neuf / nom).write_text(SUBSTITUT_SEUL.sub("\ufffd", texte), encoding="utf-8")
-        if destination.exists():
-            destination.rename(ancien)
-        try:
-            neuf.rename(destination)
-        except OSError:
-            if ancien.exists():
-                ancien.rename(destination)
-            raise
-    except Exception:
-        # Quelle que soit l'erreur, le répertoire en construction ne reste pas sur le disque.
+        destination.mkdir(exist_ok=True)
+        for ancien in destination.iterdir():
+            if ancien.is_dir() and not ancien.is_symlink():
+                shutil.rmtree(ancien)
+            else:
+                ancien.unlink()
+        for ecrit in neuf.iterdir():
+            ecrit.rename(destination / ecrit.name)
+    finally:
+        # Quelle que soit l'issue, le répertoire en construction ne reste pas sur le disque.
         shutil.rmtree(neuf, ignore_errors=True)
-        raise
-    shutil.rmtree(ancien, ignore_errors=True)
 
 
 def dumper(projet: Path, environ: Mapping[str, str]) -> Bilan | Echec:

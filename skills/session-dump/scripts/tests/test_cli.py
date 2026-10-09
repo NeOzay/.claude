@@ -77,6 +77,18 @@ def test_dumper_ecrase_les_dumps_perimes(monde: tuple[Path, Path, dict[str, str]
     assert voisins == [bilan.destination.name]
 
 
+def test_remplacer_vide_le_repertoire_sans_le_remplacer(tmp_path: Path) -> None:
+    destination = tmp_path / "dumps" / "id"
+    (destination / "sous").mkdir(parents=True)
+    (destination / "sous" / "reste.md").write_text("périmé", encoding="utf-8")
+    (destination / "ancien.md").write_text("périmé", encoding="utf-8")
+    inode = destination.stat().st_ino
+    sd.remplacer(destination, {"a.md": "neuf"})
+    assert [p.name for p in destination.iterdir()] == ["a.md"]
+    assert destination.stat().st_ino == inode
+    assert [p.name for p in destination.parent.iterdir()] == ["id"]
+
+
 def test_dumper_chemin_inexistant(tmp_path: Path) -> None:
     echec = sd.dumper(tmp_path / "absent", {})
     assert isinstance(echec, sd.Echec)

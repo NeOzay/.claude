@@ -40,8 +40,9 @@ Un fichier `<date de création, UTC>-<titre en kebab-case>.md` par session princ
 au même nom portent toutes deux le suffixe des 8 premiers caractères de leur UUID. Le titre est
 celui que l'utilisateur a donné, sinon le titre généré, sinon l'UUID.
 
-**Un dump écrase les précédents** : le répertoire `<id>/` est construit à côté puis substitué à
-l'ancien, qui reste intact si l'écriture échoue.
+**Un dump écrase les précédents** : les fichiers sont écrits à côté, puis le répertoire `<id>/` est
+vidé et reçoit les neufs. Le répertoire reste le même ; si l'écriture échoue, son contenu reste
+intact.
 
 **Le frontmatter** écrit ses nombres par groupes de trois chiffres séparés par `_` (`45_372_384`),
 que TOML admet et que `tomllib` relit. Il porte, en champs plats : `session`, `titre`, `cree`,
@@ -56,9 +57,9 @@ que TOML admet et que `tomllib` relit. Il porte, en champs plats : `session`, `t
 - `tours` compte les messages que l'utilisateur a saisis, commandes `/` comprises.
 
 **Le corps** ne garde que la discussion, sous `## Utilisateur` et `## Assistant`. Chaque appel
-d'outil y tient en une ligne, `` - `<Outil>` <cible> ``, sans le contenu de ses arguments. Résultats
-d'outils, thinking, messages méta et blocs `<system-reminder>` en sont absents : la réponse à une
-question posée par `AskUserQuestion` est un résultat d'outil, donc absente aussi.
+d'outil y tient en une ligne, `` > - `<Outil>` <cible> ``, sans le contenu de ses arguments.
+Résultats d'outils, thinking, messages méta et blocs `<system-reminder>` en sont absents : la
+réponse à une question posée par `AskUserQuestion` est un résultat d'outil, donc absente aussi.
 
 Une session sans aucun tour n'est pas une discussion : elle n'est pas dumpée, et la sortie compte
 celles qu'elle écarte. La session en cours y figure, partielle.
