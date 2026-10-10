@@ -52,8 +52,9 @@ solution au mauvais problème."""
 [sections."Critères de réussite"]
 required = true
 description = """
-Une puce par critère, observable et vérifiable.
-Une commande plutôt qu'une phrase : une commande se rejoue."""
+Une puce par critère, numérotée — `- **C1** — …` —, observable et vérifiable.
+Une commande plutôt qu'une phrase : une commande se rejoue. Le numéro sert de renvoi : le plan, sa
+relecture et l'audit citent C3, pas la phrase."""
 
 [sections."Hors-périmètre"]
 required = true
@@ -64,8 +65,8 @@ Personne ne le formule spontanément : il se demande."""
 [sections."Signaux de dérive"]
 required = true
 description = """
-Une puce par signal : à quoi on reconnaît, en lisant le diff, qu'on part dans la mauvaise
-direction. Repris dans le suivi comme déclencheur d'arrêt.
+Une puce par signal, numérotée — `- **S1** — …` : à quoi on reconnaît, en lisant le diff, qu'on
+part dans la mauvaise direction. Repris dans le suivi comme déclencheur d'arrêt.
 
 Axe non posé : `— non abordé`, et y revenir — c'est le seul contenu du brief qui reste actif
 pendant l'implémentation."""

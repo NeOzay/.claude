@@ -13,9 +13,10 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-Claude Code remplace tout `additionalContext` de plus de 10 000 caractères (`HXo = 1e4` dans le binaire
-2.1.289, non configurable) par un aperçu de 2 Ko et range le reste dans un fichier. Constaté le 2026-10-05 :
-le lexique local de `claude-translator`, 12 973 caractères, arrive tronqué à la session principale.
+Claude Code remplace tout `additionalContext` de plus de 10 000 caractères (`HXo = 1e4` dans le
+binaire 2.1.289, non configurable) par un aperçu de 2 Ko et range le reste dans un fichier. Constaté
+le 2026-10-05 : le lexique local de `claude-translator`, 12 973 caractères, arrive tronqué à la
+session principale.
 
 ## Soldé le
 
@@ -50,8 +51,8 @@ session.
 
 ## Pour solder
 
-Verser le lexique local à la session par une voie sans plafond (un mod, comme pour les sous-agents), ou
-le garder sous 10 000 caractères, et faire dire à `lexique liste` qu'il dépasse.
+Verser le lexique local à la session par une voie sans plafond (un mod, comme pour les sous-agents),
+ou le garder sous 10 000 caractères, et faire dire à `lexique liste` qu'il dépasse.
 
 ## Assumé
 

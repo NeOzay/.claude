@@ -17,6 +17,9 @@ des fichiers hors de son diff : cinq entrées de `todo/` (`technical-debt/`, `te
 `road-map-fait/`) et `.claude/implementation/lexique-local-tronque.audit.md`, rapport d'audit resté
 suivi à la racine de `.claude/implementation/` au lieu de `done/`.
 
+Le 2026-10-10, le chantier `enchainement-du-chantier` a reformaté ces six fichiers (son Étape 6) :
+`uvx rumdl fmt --check .` passe. Reste le rapport d'audit orphelin, toujours hors de `done/`.
+
 ## Pourquoi c'est gênant
 
 Le critère « `rumdl fmt --check .` passe » ne peut être tenu par aucun Chantier sans reformater ce
@@ -25,8 +28,8 @@ parmi les anciens.
 
 ## Pour solder
 
-Reformater ces fichiers par `uvx rumdl fmt`, et archiver le rapport d'audit orphelin dans `done/`
-sous son nom daté ; `uvx rumdl fmt --check .` passe alors sur `master`.
+Archiver le rapport d'audit orphelin, `lexique-local-tronque.audit.md`, dans `done/` sous son nom
+daté.
 
 ## Assumé
 

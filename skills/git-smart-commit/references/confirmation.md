@@ -16,7 +16,7 @@ présentés. Une opération absente de la présentation n'est pas couverte par l
 
 Un commit mécanique — état initial, session, Passation ([`etape.md`](etape.md)) — se propose sans
 son titre : son message est prédéterminé, et l'afficher n'apprend rien. L'accord se demande quand
-même.
+même, hors l'exception ci-dessous.
 
 Proposer deux réponses :
 
@@ -25,10 +25,18 @@ Proposer deux réponses :
 2. **Autre chose** — l'utilisateur dit ce qu'il veut changer, et la proposition modifiée est
    présentée à nouveau.
 
+Un Chantier a ses propres choix pour l'état initial, l'Étape et la Retouche :
+[`etape.md`](etape.md), point 4.
+
 ## Ce qui compte comme accord
 
 Une réponse de l'utilisateur **à cette proposition-là**. Un accord donné pour un commit ne vaut pas
 pour le suivant, même dans la même session et au sein de la même procédure.
+
+Une seule exception : **Valider et faire la Passation (commit inclus)**, au commit d'état initial,
+couvre aussi le commit de Passation qui le suit. Rien n'est encore implémenté : la section ne
+transmet que ce que la création a établi, dans la session où l'utilisateur vient d'arbitrer le Brief
+et le Plan, et la branche ne rejoint la Base qu'aplatie, après audit.
 
 > *Mode de défaillance* — un accord étendu en silence au commit suivant fait entrer dans
 > l'historique un contenu que personne n'a regardé. C'est irréversible une fois poussé, et rien ne

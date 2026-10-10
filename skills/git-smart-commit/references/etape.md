@@ -15,7 +15,7 @@ Branche et nom : [`branche-chantier.md`](branche-chantier.md). Lettre et tags :
 | Session | pendant une étape `[>]`, à la reprise sur un arbre modifié ou en fin de session | `<slug>: session N — <étape en cours>` | aucun |
 | Étape | quand l'étape n passe en `[x]`, même juste après un commit de session | `<slug>: E<n> — <intitulé de l'étape>` | `<L>E<n>` |
 | Retouche | après le tag `<L>E<n>`, tant que l'étape n+1 n'est pas passée en `[>]` | `<slug>: E<n>.<k> — <objet>` | `<L>E<n>.<k>` |
-| Passation | la Passation acceptée, une fois la section `## Passation` du suivi réécrite | `<slug>: passation — session N, après <tag>` | aucun |
+| Passation | la Passation choisie, une fois la section `## Passation` du suivi réécrite | `<slug>: passation — session N, après <tag>` | aucun |
 
 `N` est la valeur de `session` au frontmatter du suivi. `<tag>` est le dernier tag posé, d'étape
 ou de Retouche. L'`<objet>` d'une Retouche est fourni par l'appelant, en quelques mots ; son tag
@@ -39,8 +39,11 @@ au suivi. Le commit de Passation garde sa forme et n'entre pas dans la numérota
    ([`tags-etape.md`](tags-etape.md#lettre)) et l'écrire avant de continuer.
 4. **Proposer**, puis attendre l'accord ([`confirmation.md`](confirmation.md)), exclusions
    comprises s'il y en a :
-   - état initial, session, Passation — des commits mécaniques : l'accord se demande sans le
-     titre ;
+   - session, Passation — des commits mécaniques : l'accord se demande sans le titre, sauf pour la
+     Passation qui suit « Valider et faire la Passation (commit inclus) », déjà accordée ;
+   - état initial — de même, avec deux choix :
+     1. **Valider et faire la Passation (commit inclus)** ;
+     2. **Valider et passer à l'Étape suivante** ;
    - Étape — sous cette forme :
 
      ```md
@@ -49,8 +52,19 @@ au suivi. Le commit de Passation garde sa forme et n'entre pas dans la numérota
      - Tag : <L>E<n>.
      ```
 
-   - Retouche — sous la même forme, titrée `Commit de Retouche proposé :`, avec son message et son
-     tag.
+     avec trois choix :
+     1. **Valider et passer à l'Étape suivante** — après la dernière Étape,
+        **Valider et lancer l'audit de Clôture** ;
+     2. **Valider et attendre** ;
+     3. **Autre chose**.
+
+     Quand l'appelant le demande, **Valider et commencer la Passation** s'ajoute avant « Autre
+     chose » ;
+   - Retouche — sous la même forme, titrée `Commit de Retouche proposé :`, avec son message, son
+     tag et les mêmes choix.
+
+   Ce qui suit le commit — commencer l'Étape suivante, écrire la Passation, lancer l'audit —
+   revient à l'appelant, `implementation-tracker`.
 5. **Committer** selon [`staging.md`](staging.md). Puis, pour les cas
    état initial et étape :
 

@@ -163,8 +163,10 @@ Une étape tient en **un seul tour d'exécution**. Elle se découpe au figeage, 
 ## Modèle d'implémentation
 
 Un Chantier est conduit par **un seul modèle**, Sonnet ou Opus, choisi au Plan pour toute
-l'implémentation. La session qui suit la Passation de la création démarre à vide : l'utilisateur y
-fait `/model <modèle>` **pour la session seulement**, sans l'enregistrer comme défaut. Le défaut
+l'implémentation. Quand la Passation suit la création, la session suivante démarre à vide :
+l'utilisateur y fait `/model <modèle>` **pour la session seulement**, sans l'enregistrer comme
+défaut ; sinon, l'Étape 1 tourne sur le modèle de la session de création, et l'écart se signale à
+la proposition du commit `<L>E0`. Le défaut
 s'écrit dans `~/.claude/settings.json`, que la configuration versionne : un Chantier de la
 configuration trouverait son arbre sale dès la première commande, sa création refusée et sa
 Passation dite périmée. Un choix pour la session seulement ne lui survit pas : à chaque reprise,

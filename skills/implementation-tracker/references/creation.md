@@ -35,7 +35,7 @@ committer ou les mettre de côté) avant de relancer.
    brief validé : il ne planifie pas et ne confronte pas.
 3. **Faire relire le plan avant de le présenter.** Le harness assigne un fichier de plan dès
    l'entrée en plan mode et en autorise l'écriture : y écrire le plan, puis lancer le sous-agent
-   `plan-reviewer` **avant `ExitPlanMode`**.
+   `plan-reviewer` **une fois, avant `ExitPlanMode`**.
 
    Lui transmettre trois chemins **absolus** — racine du dépôt, fichier de plan, brief — et
    **rien d'autre** : il lit tout lui-même.
@@ -46,19 +46,22 @@ committer ou les mettre de côté) avant de relancer.
    Pourquoi avant, et non après : celui qui vient d'écrire le plan est le plus mal placé pour juger
    sa propre conformité — il relit son intention, pas son texte. Et un plan approuvé par
    l'utilisateur puis contredit dans la foulée coûte un aller-retour entier. `ExitPlanMode` présente
-   donc **le plan et le verdict ensemble**.
+   donc **un plan déjà arbitré**.
+
+   **Consigner le verdict** dans une section `## Relecture`, en tête du plan : le bloc de sortie de
+   `plan-reviewer` tel quel. Puis :
 
    | `VERDICT` | Action |
    |---|---|
-   | `CONFORME` | Présenter le plan |
-   | `RÉSERVES` | Présenter le plan **avec** les constats — l'utilisateur valide en les connaissant |
-   | `NON CONFORME` | Présenter le plan avec le verdict, et laisser l'utilisateur trancher entre corriger le plan et élargir le brief |
+   | `CONFORME` sans constat | `ExitPlanMode`, sans question |
+   | `CONFORME` avec constats, `RÉSERVES` | `AskUserQuestion` sur les constats à trancher, chaque réponse notée sous son constat, plan corrigé selon les réponses, puis `ExitPlanMode` |
+   | `NON CONFORME` | De même, la question portant aussi sur corriger le plan ou élargir le brief |
 
-   **Ne jamais corriger le plan d'office** sur un verdict, quel qu'il soit. L'écart entre le plan et
-   le brief est précisément l'information qu'on paie en lançant l'agent : l'effacer avant que
-   l'utilisateur l'ait vue détruit ce qu'on cherchait. Seuls les défauts de rédaction relevés en
-   `QUALITÉ` — une citation fausse, une commande de vérification inopérante — se corrigent sans
-   arbitrage, et se disent quand même.
+   **Ne jamais corriger le plan d'office** sur un verdict, quel qu'il soit : seule une réponse le
+   corrige. L'écart entre le plan et le brief est précisément l'information qu'on paie en lançant
+   l'agent : l'effacer avant que l'utilisateur l'ait vue détruit ce qu'on cherchait. Seuls les
+   défauts de rédaction relevés en `QUALITÉ` — une citation fausse, une commande de vérification
+   inopérante — se corrigent sans arbitrage, et se notent dans `## Relecture`.
 
    Le plan est persisté dans `.claude/plans/` (voir `plansDirectory`), sous un nom
    **généré par le harness**, sans rapport avec le slug. Son chemin est donné à l'entrée en plan
@@ -133,13 +136,15 @@ committer ou les mettre de côté) avant de relancer.
    trois sessions plus tard, et c'est là que le trou coûte.
 9. **Committer l'état initial** — brief, plan et suivi — par `git-smart-commit`, type 2, cas « état
    initial » : [Commit rapide de chantier](../../git-smart-commit/references/etape.md). Le tag
-   `<L>E0` qu'il pose est le point de départ des plages d'étapes.
-10. **Proposer la Passation**, toujours :
-    [Passation](execution.md#passation). Le cadrage, l'exploration et la relecture du plan pèsent
-    sur chaque tour suivant sans plus servir à l'implémentation, et la session de création est
-    celle qui en sait le plus sans l'avoir écrit.
+   `<L>E0` qu'il pose est le point de départ des plages d'étapes. Ses deux choix :
 
-    La Passation acceptée, dire à l'utilisateur de faire `/model <modèle>`
-    **pour la session seulement** dans la session vierge, avant `/implementation-tracker @<suivi>` :
-    c'est là que l'implémentation commence, et rien ne change le modèle à sa place. Jamais en
-    défaut, pour la raison que donne [Modèle d'implémentation](contrat.md#modèle-dimplémentation).
+   - **Valider et faire la Passation (commit inclus)** — la Passation suit, commit compris :
+     [Passation](execution.md#passation). Le cadrage, l'exploration et la relecture du plan pèsent
+     sur chaque tour suivant sans plus servir à l'implémentation, et la session de création est
+     celle qui en sait le plus sans l'avoir écrit. Dire ensuite à l'utilisateur de faire `/clear`,
+     puis `/model <modèle>` **pour la session seulement**, avant `/implementation-tracker @<suivi>`.
+     C'est là que l'implémentation commence, et rien ne change le modèle à sa place. Jamais en
+     défaut, pour la raison que donne [Modèle d'implémentation](contrat.md#modèle-dimplémentation).
+   - **Valider et passer à l'Étape suivante** — l'Étape 1 commence dans la session de création. Un
+     écart entre le modèle de la session et le champ `modèle` se signale en une ligne à la
+     proposition, sans bloquer.

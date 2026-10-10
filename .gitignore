@@ -66,3 +66,6 @@ dev-mods/
 # lui-même ignoré : versionné, il ne vaudrait rien là où le mod ne s'est jamais chargé.
 skills/*/tsconfig.json
 .claude/skills/*/tsconfig.json
+
+# Brouillons de retours de Claude Code, locaux à la machine.
+feedback/

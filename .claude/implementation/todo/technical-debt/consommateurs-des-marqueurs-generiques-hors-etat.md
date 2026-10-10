@@ -38,10 +38,10 @@ c'est un affichage et une prose, que personne ne confronte au code.
 
 ## Pour solder
 
-Reprendre les trois : faire reconnaître la forme typée aux deux tables Lua (un motif
-`^<À REMPLIR` / `^<OPTIONNEL`, plutôt qu'une table de chaînes exactes), et dire dans `dette.md` que
-`reviewed` non relu porte `<OPTIONNEL date>` ou, sur une liste non migrée, `<OPTIONNEL>`. L'adaptation
-de Neovim est le Chantier annoncé par le Brief du chantier `socle-contrat-evolutif`.
+Reprendre les trois : faire reconnaître la forme typée aux deux tables Lua (un motif `^<À REMPLIR` /
+`^<OPTIONNEL`, plutôt qu'une table de chaînes exactes), et dire dans `dette.md` que `reviewed` non
+relu porte `<OPTIONNEL date>` ou, sur une liste non migrée, `<OPTIONNEL>`. L'adaptation de Neovim
+est le Chantier annoncé par le Brief du chantier `socle-contrat-evolutif`.
 
 Solde établi par `grep -rn 'OPTIONNEL' ~/.config/nvim/lua/chantier.lua
 ~/.config/nvim/plugins/listdir/lua/listdir/picker/items.lua`, dont les tables reconnaissent la forme

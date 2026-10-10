@@ -85,8 +85,8 @@ silence. `claude plugin list` le montre chargé ici (`lexique-sous-agent@inline`
 ### Qualité du code
 
 **R7 — Le refactor d'`agent.spawn` préserve le comportement.** `lancer` reprend le `try` à
-l'identique ; `tirer` est appelé dans le `try`, si bien qu'un `JSON.parse` en échec reste rattrapé et
-dit sur la ligne d'état, comme avant. Les quatre tests antérieurs passent sans retouche. Le style
+l'identique ; `tirer` est appelé dans le `try`, si bien qu'un `JSON.parse` en échec reste rattrapé
+et dit sur la ligne d'état, comme avant. Les quatre tests antérieurs passent sans retouche. Le style
 suit les fichiers voisins : noms français, commentaires qui disent pourquoi, `next(… : e)` en sortie
 unique.
 
@@ -116,16 +116,16 @@ leurs homologues, ouvrent le fichier ; et `blocsVus` ne suit pas le nommage de `
 ### Dette induite
 
 **R10 — `Moteur` est tiré du seul `agent.spawn`.**
-`type Moteur = Parameters<Hook<'agent.spawn'>>[0]` type aussi le `$` de `prompt.context`. `tsc` passe,
-donc les deux `$` sont aujourd'hui compatibles ; mais `lancer` dépend du type d'un événement qu'elle
-ne sert qu'à moitié, et une évolution du `$` propre à `agent.spawn` se propagerait au hook de session
-sans que rien ne le signale à la lecture.
+`type Moteur = Parameters<Hook<'agent.spawn'>>[0]` type aussi le `$` de `prompt.context`. `tsc`
+passe, donc les deux `$` sont aujourd'hui compatibles ; mais `lancer` dépend du type d'un événement
+qu'elle ne sert qu'à moitié, et une évolution du `$` propre à `agent.spawn` se propagerait au hook
+de session sans que rien ne le signale à la lecture.
 
 **R11 — Une autre entrée du Registre décrit désormais un état révolu.**
 `technical-debt/hook-sante-chemin-home.md`, paragraphe « Aggravée le 2026-09-23 » et son « Établi
 par » : « quatre lignes : deux hooks `SessionStart` (`sante_skills.py`, `lexique-cli.py session`) ».
-Le second hook est retiré, il n'en reste que trois. L'entrée n'est pas de ce périmètre et n'a pas été
-modifiée : à reprendre à sa prochaine revue.
+Le second hook est retiré, il n'en reste que trois. L'entrée n'est pas de ce périmètre et n'a pas
+été modifiée : à reprendre à sa prochaine revue.
 
 ### Ce qui interdit le solde
 
@@ -167,10 +167,11 @@ le sort ordinaire d'une longue session. Je retiens donc le verdict le plus sév�
 ### Vérifications exécutées
 
 Claude Code 2.1.291. Sessions lancées dans `/home/debian/projects/claude-translator` (lexique local
-de 13 338 octets, sortie de `lexique session` de 13 093 caractères). La CLI `claude -p … < /dev/null`
-ou `--input-format stream-json`. Chaque comptage est fait **sur la transcription**
-(`~/.claude/projects/-home-debian-projects-claude-translator/<id>.jsonl`), pas sur la seule réponse du
-modèle : `haiku` a compté une copie là où la transcription en portait deux.
+de 13 338 octets, sortie de `lexique session` de 13 093 caractères). La CLI
+`claude -p … < /dev/null` ou `--input-format stream-json`. Chaque comptage est fait
+**sur la transcription** (`~/.claude/projects/-home-debian-projects-claude-translator/<id>.jsonl`),
+pas sur la seule réponse du modèle : `haiku` a compté une copie là où la transcription en portait
+deux.
 
 | Commande | Résultat réel |
 |---|---|
@@ -407,7 +408,8 @@ section, mémorisée. D'où l'absence de duplication. C'est aussi ce qui produit
 
 **R3 — Contrat des sous-agents : respecté.** Le tableau de `SKILL.md` est vérifié ligne à ligne par
 les trois témoins, et le prompt système de chaque sous-agent ne porte pas la section. Le mod sonde
-montre que `prompt.compose` n'est appelé que pour la boucle principale. R3 et R4 (1er) restent levés.
+montre que `prompt.compose` n'est appelé que pour la boucle principale. R3 et R4 (1er) restent
+levés.
 
 **R4 — Sous `--system-prompt`, la session principale n'a plus aucun lexique local.** Avec un
 prompt système fourni, la composition du moteur est remplacée et la section du mod disparaît. Le
@@ -570,8 +572,8 @@ du moteur, et il ne peut rien en dire. R4 et R5 rangent deux modes de plus parmi
 manque en silence.
 
 **R18 — `hook-sante-chemin-home.md` décrit un état révolu (R11 (1er), non traité sciemment).**
-L'entrée compte toujours « deux hooks `SessionStart` (`sante_skills.py`, `lexique-cli.py session`) »,
-alors que `settings.json` n'en porte plus qu'un. Elle est à reprendre à sa prochaine revue.
+L'entrée compte toujours « deux hooks `SessionStart` (`sante_skills.py`, `lexique-cli.py session`)
+», alors que `settings.json` n'en porte plus qu'un. Elle est à reprendre à sa prochaine revue.
 
 ### Suivi des constats des passages précédents
 

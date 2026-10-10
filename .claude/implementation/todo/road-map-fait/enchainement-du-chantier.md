@@ -56,6 +56,16 @@ Questions à trancher au Brief ou au Plan :
 - la règle `ask` sur `git commit` vaut aussi pour les commits que le pipeline propose déjà. Faut-il
   la borner, ou admettre une double confirmation pour ceux-là ?
 
+## Fait le
+
+2026-10-10, par le chantier `enchainement-du-chantier`. Un commit de Chantier se propose avec des
+choix qui disent la suite : à `<L>E0`, « Valider et faire la Passation (commit inclus) » ou
+« Valider et passer à l'Étape suivante » ; après une Étape ou une Retouche, passer à la suivante,
+attendre, ou lancer l'audit de Clôture, avec la Passation au-delà de 300 000 tokens. La relecture
+du Plan se tranche par `AskUserQuestion` avant `ExitPlanMode`, la reprise tient en un court
+message, et le Brief se valide par une proposition dédiée. Archive du chantier :
+`.claude/implementation/done/2026-10-10-enchainement-du-chantier.md`.
+
 ## Références
 
 - création : `skills/implementation-tracker/references/creation.md`, points 3 (relecture du

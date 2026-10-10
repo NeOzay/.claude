@@ -202,23 +202,34 @@ Puis :
 
    Un échec nomme ce qui reste à remplir : le brief ne se propose pas à la validation tant qu'il
    n'est pas conforme. Un axe resté vide s'écrit `— non abordé`, jamais une supposition.
-2. Sur validation : `statut` passe à `validé`. Le brief est figé, slug compris.
+2. **Proposer la validation**, dans un message à elle seule : le chemin du brief, et le fait que
+   rien n'y sera plus ajouté. Deux choix :
+   1. **Valider le Brief et passer au Plan** ;
+   2. **Autre chose** — la correction demandée renvoie à la Phase 4.
+
+   Seule une réponse à cette proposition vaut validation : un accord donné en cours d'échange porte
+   sur ce qui vient d'être dit, pas sur le brief entier.
+3. Sur validation : `statut` passe à `validé`. Le brief est figé, slug compris.
 
 Le brief tient en une page. S'il déborde, c'est un plan déguisé.
 
 ## Phase 7 — Passage au suivi
 
 Le brief est figé : il lui faut maintenant un fichier de suivi, sinon tout ce travail vit dans une
-conversation qui se fermera. **Le proposer explicitement** — `implementation-tracker` ne s'invoque
-qu'à la main, le modèle ne peut pas l'appeler :
+conversation qui se fermera. La suite dépend de l'appel :
 
-> Brief validé dans `.claude/implementation/<slug>.brief.md`.
->
-> Ouvre le suivi avec `/implementation-tracker` pour figer les étapes et démarrer — il reprendra
-> ce brief.
+- **lancé par `implementation-tracker`**, à sa création : le Plan commence aussitôt, au point 2 de
+  la Phase 2 du tracker ;
+- **lancé seul** : **proposer explicitement le tracker** — `implementation-tracker` ne s'invoque
+  qu'à la main, le modèle ne peut pas l'appeler :
 
-C'est la sortie unique de ce skill. Le plan se construit dans le tracker, qui le fait relire par
-`plan-reviewer` avant de le présenter : ni l'un ni l'autre ne se fait ici.
+  > Brief validé dans `.claude/implementation/<slug>.brief.md`.
+  >
+  > Ouvre le suivi avec `/implementation-tracker` pour figer les étapes et démarrer — il
+  > reprendra ce brief.
+
+Ce sont les deux seules sorties de ce skill. Le plan se construit dans le tracker, qui le fait
+relire par `plan-reviewer` avant de le présenter : ni l'un ni l'autre ne se fait ici.
 
 ---
 

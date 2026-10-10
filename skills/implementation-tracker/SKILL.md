@@ -107,14 +107,8 @@ Lire [`references/creation.md`](references/creation.md) au moment de créer, et 
 
 ## Phase 3 — Reprise (implémentation existante)
 
-Lire le fichier en entier, puis restituer en quelques lignes — pas de récitation intégrale :
-
-- l'objectif,
-- l'étape en cours et la prochaine action concrète,
-- les blocages éventuels,
-- les commandes de vérification à rejouer,
-- la section `## Passation`, si elle est à jour : ce que la session précédente avait en cours et
-  ce qu'elle a appris.
+Lire le fichier en entier, section `## Passation` comprise : elle se lit, elle ne se restitue
+pas.
 
 **La section `## Passation` est à jour** quand son commit de Passation est le dernier de la
 branche et que `git status --short` (Phase 0) ne montre rien d'autre que `<slug>.audit.md` — le
@@ -126,7 +120,7 @@ git log -1 --format=%s   # attendu : <slug>: passation — …
 ```
 
 Sinon, du travail a eu lieu depuis sans nouvelle Passation : la dire périmée, avec ce que porte son
-bloc `**Écrite** :`, et ne pas la restituer comme actuelle. Ni la session ni l'Étape ne suffisent à
+bloc `**Écrite** :`, et ne pas la lire comme actuelle. Ni la session ni l'Étape ne suffisent à
 le voir : une session qui continue après sa Passation garde le même numéro.
 
 Comparer le champ `branche` du front matter à la branche git courante. **Divergence → le signaler**,
@@ -143,10 +137,21 @@ Remettre au contexte les Shadow-skills du Chantier : `shadow-skill depuis-suivi 
 `shadow-skill charge <nom>` pour ceux dont l'étape en cours a besoin. Un champ `skills` vide n'a
 rien à rendre ; une erreur sur un nom se signale, sans bloquer la reprise.
 
-**Modifications non commitées détectées** (`git status --short` non vide, Phase 0) → le signaler en
-tout début de conversation et **proposer** un commit avant de continuer, par `git-smart-commit`,
-type 2 : [Commit rapide de chantier](../git-smart-commit/references/etape.md). Un commit de
-session si une Étape est `[>]` ; sinon, un commit de Retouche de la dernière Étape livrée.
+**Modifications non commitées détectées** (`git status --short` non vide, Phase 0) → les signaler
+et **proposer** un commit avant de continuer, par `git-smart-commit`, type 2 :
+[Commit rapide de chantier](../git-smart-commit/references/etape.md). Un commit de session si une
+Étape est `[>]` ; sinon, un commit de Retouche de la dernière Étape livrée.
+
+**Le message de reprise** tient en quelques lignes, dans cet ordre :
+
+1. les écarts relevés — Passation périmée, branche, modèle, modifications non commitées —, une
+   ligne chacun, sans bloquer la suite ;
+2. l'Étape en cours et sa prochaine action ;
+3. les blocages, s'il y en a ;
+4. la proposition de commencer l'Étape X — de reprendre l'Étape `[>]` s'il y en a une, de lancer
+   l'audit de Clôture si toutes sont `[x]` —, précédée, sur un arbre modifié, de celle du commit.
+
+Aucune Étape ne commence sans la réponse de l'utilisateur.
 
 La reprise faite, passer à la Phase 4 : sa référence porte la mesure du contexte et la
 Passation.
@@ -162,7 +167,8 @@ commit de l'état initial ou après la reprise —, et le suivre.
 
 ## Phase 5 — Clôture
 
-Sur `/implementation-tracker close` ou quand l'utilisateur déclare l'implémentation terminée : lire
+Sur `/implementation-tracker close`, sur le choix « Valider et lancer l'audit de Clôture » d'un
+commit, ou quand l'utilisateur déclare l'implémentation terminée : lire
 `references/cloture.md`, section « Clôture », et suivre la procédure —
 **audit par `implementation-auditor`**, contrôle des étapes, finalisation du suivi, puis
 aplatissement et archivage en `done/` par `git-smart-commit`, type 3.
