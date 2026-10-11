@@ -111,8 +111,8 @@ Lire le fichier en entier, section `## Passation` comprise : elle se lit, elle n
 pas.
 
 **La section `## Passation` est à jour** quand son commit de Passation est le dernier de la
-branche et que `git status --short` (Phase 0) ne montre rien d'autre que `<slug>.audit.md` — le
-rapport d'audit n'est committé qu'à l'aplatissement, il ne dit aucun travail fait après la
+branche et que `git status --short` (Phase 0) ne montre rien d'autre que `<slug>.audit/` — les
+rapports d'audit ne sont committés qu'à l'aplatissement, ils ne disent aucun travail fait après la
 Passation :
 
 ```bash

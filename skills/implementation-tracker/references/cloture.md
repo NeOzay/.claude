@@ -23,8 +23,8 @@ avant d'auditer.
 Vérifier ensuite que toutes les étapes sont cochées — sinon demander quoi faire des restantes ;
 auditer un chantier inachevé fait juger du travail que personne n'a fini.
 
-Puis lancer l'audit de clôture : voir `audit.md` — sous-agent `implementation-auditor`, ce qu'on
-lui transmet, ce qu'on fait de son verdict.
+Puis lancer l'audit de clôture : voir `audit.md` — `audit new <slug> --cloture`, le sous-agent
+`implementation-auditor`, ce qu'on lui transmet, ce qu'on fait de son verdict.
 
 C'est lui qui **confronte le résultat aux critères de réussite** et constate si le **symptôme**
 d'origine a disparu, en rejouant les commandes plutôt qu'en concluant sur mémoire. C'est le seul
@@ -50,8 +50,9 @@ list-dir new  "$T/technical-debt" <id>          # puis remplir le fichier créé
 list-dir validate "$T/technical-debt" --filled  # aucun marqueur ne subsiste
 ```
 
-Celui qui crée l'entrée en juge la `severite`, et écrit son `chantier` et sa `reference` : il
-vient de constater la dette, il est le mieux placé pour le faire. `inconnue` n'est pas un repli.
+Toute la Dette actuelle du rapport de clôture y part, sans arbitrage dette par dette ; ni la
+Dette corrigée ni la Dette écartée. Celui qui crée l'entrée reprend la `severite` de la dette, et
+écrit son `chantier` et sa `reference`, le `R<n>`. `inconnue` n'est pas un repli.
 Échelle et graphies : [Ce qu'une entrée porte](dette.md#ce-quune-entrée-porte).
 
 Procédure complète, contrat d'une entrée et règle de solde : [Registre de dette](dette.md).
@@ -117,7 +118,8 @@ et l'écriture se perd. C'est un chemin d'échec silencieux — le seul type qui
 Par `git-smart-commit`, type 3 :
 [Aplatissement d'un chantier](../../git-smart-commit/references/aplatissement.md). Message écrit
 dans un fichier, dry-run présenté, accord, puis `commit-chantier cloture` : tous les commits de
-`<slug>` deviennent **un seul commit sur `base`**, suivi, brief, audit et plan partent en `done/`,
+`<slug>` deviennent **un seul commit sur `base`**, tout `<slug>.*` — suivi, brief, rapports
+d'audit — et le plan partent en `done/`,
 la branche et ses tags sont supprimés.
 
 **`REFUS` ou `ÉCHEC` du script → s'arrêter net** et rendre la main. Une clôture à moitié faite est

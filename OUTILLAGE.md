@@ -12,7 +12,7 @@ l'outillage d'un dépôt n'a rien à y faire.
 
 ## Ce dont le dépôt dépend
 
-Le dépôt dépend de sept commandes, d'un interpréteur, de git, de deux linters, d'un formateur
+Le dépôt dépend de huit commandes, d'un interpréteur, de git, de deux linters, d'un formateur
 Markdown et de l'outillage TypeScript des mods — et de rien d'autre :
 
 | Dépendance | Ce qui en dépend | Contrôle |
@@ -24,7 +24,8 @@ Markdown et de l'outillage TypeScript des mods — et de rien d'autre :
 | `contexte` | la taille du contexte d'une session, écrite par la statusline, lue par l'agent d'un Chantier | `command -v contexte` |
 | `commit-chantier` | la lettre des tags d'étape et l'aplatissement d'un Chantier à sa Clôture, par `git-smart-commit` | `command -v commit-chantier` |
 | `lexique` | la tenue des lexiques, et `:Lexique` dans Neovim | `command -v lexique` |
-| Python ≥ 3.12 | `list-dir`, `gabarit` et `shadow-skill` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
+| `audit` | le rapport d'un audit de Chantier : sa pose et son contrôle, par `implementation-auditor` et le tracker | `command -v audit` |
+| Python ≥ 3.12 | `list-dir`, `gabarit`, `shadow-skill` et `audit` (syntaxe PEP 695) | chacune sort non nul en nommant la version trouvée |
 | `git` | `move`, l'aplatissement de clôture | déclaré par `REQUIRES` dans la commande, vérifié avant appel |
 | `ruff`, `basedpyright` | la vérification et le formatage du code Python versionné | **absents du `PATH`** : se lancent par `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` |
 | `rumdl` | le formatage du Markdown versionné | **absent du `PATH`** : se lance par `uvx rumdl fmt .`, et `uvx rumdl fmt --check .` pour vérifier |
@@ -195,7 +196,7 @@ se lit jusqu'à la ligne « the engine reported », où un hook ignoré ne fait 
 
 ## Les tests
 
-Le venv du dépôt porte `pytest` et `tomlkit`, épinglés dans `requirements.txt` :
+Le venv du dépôt porte `pytest`, `tomlkit` et `pydantic`, épinglés dans `requirements.txt` :
 
 ```bash
 uv venv ~/.claude/.venv

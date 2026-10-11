@@ -48,6 +48,18 @@ Pistes à confronter au Brief :
 - l'utilité de l'audit intermédiaire, proposé au-delà de 400 lignes de diff ;
 - la restitution du verdict : une ligne et un tableau, objet de l'entrée `messages-du-pipeline`.
 
+## Fait le
+
+2026-10-11, par le chantier `refonte-de-l-audit`. Un rapport TOML par audit,
+`<slug>.audit/<NN>-<sha>.toml`, posé par `audit new` : en-tête tiré du Suivi et de git, `vérif:`
+des Étapes exécutées d'avance, Dette précédente et cumuls repris du seul audit précédent.
+L'auditeur le remplit par `audit range`, `audit dette` et `Edit`, sans `Write` ; `audit check
+--filled` contrôle le rapport et sa suite, `audit export` le rend en Markdown dans le scratchpad.
+Le verdict suit la sévérité de la Dette actuelle, sur une échelle où `bloquant` est propre à
+l'audit. Restent en road-map `audit-intermediaire-au-plan`, `dette-d-audit-au-format-du-registre`
+et `verdict-d-audit-restitue-puis-attendu`. Archive du chantier :
+`.claude/implementation/done/2026-10-11-refonte-de-l-audit.md`.
+
 ## Références
 
 - `skills/implementation-tracker/references/audit.md` : « Quand auditer », « Au retour » (audit

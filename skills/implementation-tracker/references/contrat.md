@@ -33,11 +33,12 @@ un schéma se survole.
 <repo>/.claude/implementation/
   <slug>.md                      # suivi actif — commité avec le code
   <slug>.brief.md                # brief d'intention, figé après validation
-  <slug>.audit.md                # rapports d'audit successifs, appendus
+  <slug>.audit/                  # un rapport d'audit par audit, posé par `audit new`
+    <NN>-<sha>.toml              #   NN : rang de l'audit ; sha : commit audité
   done/
-    <AAAA-MM-DD>-<slug>.md       # archivés à la clôture
+    <AAAA-MM-DD>-<slug>.md       # archivés à la clôture : tout <slug>.*, et le plan
     <AAAA-MM-DD>-<slug>.brief.md
-    <AAAA-MM-DD>-<slug>.audit.md
+    <AAAA-MM-DD>-<slug>.audit/
     <AAAA-MM-DD>-<slug>.plan.md
     revues/
       <AAAA-MM-DD>-revue.md      # rapports de revue du registre, un par passage
@@ -99,8 +100,8 @@ leur semence, et nulle part ailleurs : `gabarit contract brief`, `gabarit contra
 fiche est posée par `gabarit new` et vérifiée par `gabarit check --filled` ; une structure recopiée
 d'un modèle en prose divergerait du contrat sans que rien ne le signale. Le front matter est du
 TOML entre `+++`. Seules les archives de `done/` antérieures aux semences restent en YAML `---`,
-lues en repli et jamais réécrites. Le rapport d'audit `<slug>.audit.md` n'a pas de semence : son
-front matter ne porte que `slug`.
+lues en repli et jamais réécrites. Un rapport d'audit n'a pas de semence : c'est un fichier TOML,
+déclaré par le modèle de `audit` et vérifié par `audit check` ([Le rapport](audit.md#le-rapport)).
 
 Ce qui suit est ce que les champs **font** au pipeline, et que leur description ne suffit pas à
 garantir :
@@ -224,7 +225,8 @@ l'exécution.
 impl-list .claude/implementation
 ```
 
-Il remonte les seuls fichiers de suivi : ni `.brief.md`, ni `.audit.md`, ni `.plan.md`.
+Il remonte les seuls fichiers de suivi : ni brief, ni plan, ni rapport d'audit — ceux des
+archives de `done/` compris, antérieurs au répertoire `<slug>.audit/`.
 
 Le chemin est **absolu et ancré dans la skill**, jamais relatif au dépôt courant. Règle générale
 pour tout script appelé depuis un skill : soit un chemin absolu ancré dans la skill, soit un appel

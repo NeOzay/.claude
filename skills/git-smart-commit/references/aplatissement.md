@@ -45,8 +45,8 @@ Refus, tous **avant la première écriture** :
 - suivi introuvable, sans frontmatter fermé, ou sans `base`, `lettre`, `plan`, `statut` ou `maj` ;
 - `lettre` qui n'est pas une lettre de A à Z ;
 - plan ou branche de base introuvable ;
-- fichier modifié ou non suivi qui n'est pas une annexe du chantier (suivi, brief, audit, plan,
-  `todo/`) ;
+- fichier modifié ou non suivi hors du chantier : ni `.claude/implementation/<slug>.*`, ni le
+  plan, ni `todo/` ;
 - fichier de message introuvable, message vide, titre de plus de 50 caractères, ligne 2 non vide ;
 - une cible `done/<date>-…` déjà présente ;
 - un conflit prévisible entre `<slug>` et `base` (`git merge-tree`).
@@ -57,13 +57,16 @@ Puis, dans l'ordre :
    et commit `<slug>: finalisation du suivi` s'il y a quelque chose à committer — une relance le
    trouve déjà fait ;
 2. `git checkout <base>` et `git merge --squash <slug>` ;
-3. `git mv` du suivi, du brief, de l'audit et du plan vers
-   `done/<date>-<slug>[.brief|.audit|.plan].md`, et réécriture des champs `plan`, `brief` et `audit`
-   du suivi archivé ;
+3. `git mv` de tout `.claude/implementation/<slug>.*` vers `done/<date>-<slug>.*` — suivi, brief,
+   annexe du brief, répertoire `<slug>.audit/` des rapports d'audit —, et du plan vers
+   `done/<date>-<slug>.plan.md` ; réécriture des champs `plan`, `brief` et `audit` du suivi
+   archivé qui désignent l'un d'eux ;
 4. `git commit -F <fichier>`, `git branch -D <slug>`, `git tag -d` des tags de sa lettre.
 
 Pourquoi chacun de ces gestes :
 
+- **Le chantier est tout `<slug>.*`, pas une liste.** Une liste fermée laissait derrière elle ce
+  qu'elle ne nommait pas : l'annexe d'un brief, un format de rapport nouveau.
 - **Les annexes sont commitées sur `<slug>` avant de changer de branche.** Non suivies, elles
   resteraient hors de l'aplatissement. Suivies et modifiées, elles feraient refuser le
   `git checkout`.
@@ -93,7 +96,7 @@ dette, sort de la branche — appartient à l'appelant ; seuls les gestes sont i
      d=.claude/implementation/done; j=$(date +%F)
      git checkout <slug> -- <suivi> <brief> <audit> <plan>   # ne citer que ceux qui existent
      git mv <suivi> $d/$j-<slug>.md
-     git mv <brief> $d/$j-<slug>.brief.md                    # idem audit et plan
+     git mv <brief> $d/$j-<slug>.brief.md                    # idem tout <slug>.*, et le plan
      # réécrire plan:, brief:, audit: du suivi archivé vers ces cibles
      git add $d/$j-<slug>.md .claude/implementation/todo/
      git commit -m "<slug>: abandon — archivage"

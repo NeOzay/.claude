@@ -1,7 +1,7 @@
 # Audit d'implémentation
 
-L'audit est rendu par le sous-agent `implementation-auditor` (Opus, contexte isolé, lecture seule).
-Il juge la conformité à l'intention, la qualité du code et la dette induite — et
+L'audit est rendu par le sous-agent `implementation-auditor` (Opus, contexte isolé), qui n'écrit
+que son rapport. Il juge la conformité à l'intention, la qualité du code et la dette induite — et
 **exécute lui-même** les commandes de vérification plutôt que de croire le suivi.
 
 Il est indépendant par construction : il n'a pas écrit le code et n'a pas le droit d'y toucher.
@@ -37,46 +37,74 @@ fois, si le diff a de nouveau doublé.
 
 ## Lancer l'audit
 
-Transmettre à l'agent, et **rien d'autre** — il lit le plan, le diff et le code lui-même. Règles
+**Poser d'abord le rapport**, depuis la racine du dépôt, sur la branche du chantier :
+
+```bash
+audit new <slug> --intermediaire   # ou --cloture
+```
+
+La commande écrit `.claude/implementation/<slug>.audit/<NN>-<sha>.toml` et affiche son chemin :
+l'en-tête tiré du suivi et de git, la Dette précédente et les cumuls repris du dernier rapport, la
+revue posée depuis le brief, et les vérifications des étapes cochées, **exécutées d'avance** avec
+leur sortie. Le reste est au Marqueur, pour l'auditeur. Elle sort en 1, en nommant la cause, hors
+de la branche du chantier, ou quand le dernier rapport du répertoire n'est pas rempli — un audit
+interrompu, à supprimer avant d'en poser un autre.
+
+Transmettre ensuite à l'agent le **chemin absolu du rapport** et la racine du dépôt, et **rien
+d'autre** : l'en-tête lui donne le reste, et il lit le plan, le diff et le code lui-même. Règles
 générales de l'appel — chemins absolus, racine du dépôt, ce qu'on ne recopie jamais :
 [Contrat des sous-agents](contrat.md#contrat-des-sous-agents).
-
-Propre à l'audit, en plus des chemins du suivi et du brief :
-
-- `base` et `<slug>` (nom de la branche de chantier),
-- SHA de `HEAD` sur la branche (`git rev-parse HEAD`),
-- le type d'audit : `intermédiaire` ou `clôture`.
 
 ---
 
 ## Au retour
 
-**Contrôle préalable** : un rapport dont `VÉRIFICATIONS` ne porte aucune sortie de commande réelle
-n'est pas un audit. Relancer l'agent, ou exécuter les commandes soi-même avant de conclure. Un
-verdict rendu sans exécution vaut celui qu'on cherchait à remplacer.
+**Contrôle préalable**, avant de lire le verdict :
+
+```bash
+audit check --filled <rapport>
+```
+
+Sortie non nulle → le rapport n'est pas rendu : relancer l'agent sur le même rapport, avec les
+fautes nommées. Et un rapport dont `VÉRIFICATIONS` ne porte aucune sortie de commande réelle n'est
+pas un audit : relancer l'agent, ou exécuter les commandes soi-même avant de conclure. Un verdict
+rendu sans exécution vaut celui qu'on cherchait à remplacer.
 
 Puis, dans tous les cas, **inscrire dans le suivi**, sans l'annoncer :
 
 - `## État courant` → `**Dernier audit** : <sha> — <VERDICT> — <date>`
-- frontmatter → `audit = ".claude/implementation/<slug>.audit.md"`, au premier audit du chantier
+- frontmatter → `audit = ".claude/implementation/<slug>.audit"`, au premier audit du chantier
 - `maj` actualisé.
 
-Le raisonnement reste dans `<slug>.audit.md` : le suivi porte le verdict, le fichier d'audit porte
-le pourquoi.
+Le raisonnement reste dans le rapport : le suivi porte le verdict, le rapport porte le pourquoi.
 
-**Restituer** en une ligne — verdict et chemin du rapport —, puis, s'il y a des réserves, le
-tableau `# | Réserve | Gravité réelle`, avec un commentaire court par réserve : ce qu'elle coûte
+**Exporter le rapport** pour qu'il se lise, dans le scratchpad de la session — jamais dans le
+dépôt, où l'export doublerait le rapport :
+
+```bash
+audit export <rapport> <scratchpad>
+```
+
+La commande nomme l'export `<slug>-<NN>-<sha>.md`, et affiche son chemin complet.
+
+**Restituer** en une ligne — verdict et chemin complet de l'export —, puis, s'il y a des réserves,
+le tableau `# | Réserve | Gravité réelle`, avec un commentaire court par réserve : ce qu'elle coûte
 vraiment, que le rapport ne pèse pas.
 
 ```md
-L'audit de clôture rend **RÉSERVES** : `.claude/implementation/dump-sessions.audit.md`.
+L'audit de clôture rend **RÉSERVES** : `/tmp/…/scratchpad/dump-sessions-02-a1b2c3d.md`.
 
 | # | Réserve | Gravité réelle |
 |---|---|---|
 | R1 | Le résumé de compaction est compté comme un tour. | Fausse `tours`. |
 ```
 
-Le reste du rapport, l'utilisateur le lit dans le fichier.
+Le reste du rapport, l'utilisateur le lit dans l'export.
+
+**Une dette que l'utilisateur écarte** — un critère invérifiable qu'il valide, une réserve qu'il
+renonce à payer — s'écrit, sur son accord et par l'orchestrateur, en `## Dettes écartées` du
+suivi : `- R<n> — justificatif — date`. L'audit suivant la range en Dette écartée par
+`audit range`, qui lit la ligne ; sans elle, la dette reste actuelle.
 
 **Rien ne part dans le registre de dette au retour de l'audit.** Les constats y sont versés à la
 clôture, en une seule passe — un audit intermédiaire qui alimenterait le registre ferait écrire deux
@@ -97,51 +125,28 @@ soulevés : le correctif a produit un nouveau diff, qui n'a jamais été jugé.
 
 ---
 
-## Gabarit du rapport
+## Le rapport
 
-Fichier : `.claude/implementation/<slug>.audit.md`. Les audits successifs s'y **appendent**, du plus
-ancien au plus récent.
+Un fichier TOML par audit : `.claude/implementation/<slug>.audit/<NN>-<sha>.toml`, `NN` le rang de
+l'audit dans le chantier, `sha` le commit audité. Le répertoire n'est commité qu'à l'aplatissement,
+archivé en `done/` avec le suivi.
 
-```markdown
----
-slug: auth-refactor
----
+Son format est le modèle de `skills/implementation-tracker/scripts/rapport_audit/modele.py`, et
+nulle part ailleurs : l'en-tête, les vérifications exécutées, la revue du brief point par point,
+quatre tableaux de dettes, le verdict en dernier.
 
-## 2026-07-20 — clôture — `a1b2c3d`
+| Tableau | Ce qu'il porte |
+|---|---|
+| `dette.precedente` | la Dette actuelle de l'audit d'avant, copiée par `audit new` |
+| `dette.actuelle` | ce qui reste à l'heure de l'audit : dettes précédentes rangées là, dettes neuves |
+| `dette.corrigee` | cumul : chaque dette dont un audit a constaté la correction, avec sa preuve |
+| `dette.ecartee` | cumul : chaque dette que l'utilisateur a écartée, avec son justificatif |
 
-**Verdict** : RÉSERVES
+Chaque dette précédente se range dans l'un des trois autres tableaux, et rien ne sort d'un cumul :
+**le dernier rapport porte tout l'état du chantier**, et aucun audit n'a à relire les plus anciens.
+Un `R<n>` ne désigne qu'une dette dans tout le chantier.
 
-### Vérifications exécutées
-
-- `cargo test auth` → 47 passés, 0 échec
-- `cargo test mw::auth` → 12 passés, 0 échec
-- critère « un token expiré renvoie 401 » → NON EXÉCUTÉE : nécessite un serveur lancé
-
-### Conformité à l'intention
-
-- Critère « `cargo test auth` passe » : atteint, vérifié.
-- Critère « token expiré → 401 » : invérifiable en l'état — code lu, chemin correct, non exécuté.
-- Hors-périmètre : respecté, `legacy/` intact.
-- Signaux de dérive : aucun matérialisé.
-- Symptôme d'origine : disparu.
-
-### Qualité du code
-
-- **R1** — `src/auth/token.rs:88` — l'erreur de désérialisation est avalée en `None`, un token
-  corrompu devient indistinguable d'un token absent.
-
-### Dette induite
-
-- **R2** — `verify_claims()` duplique la validation d'expiration déjà dans `Claims::is_valid()`.
-
-### Bloquants
-
-Aucun.
-```
-
-Une section par audit. Un axe sans constat s'écrit « rien à signaler » — une section absente ne se
-distingue pas d'un axe oublié.
-
-**Chaque constat porte son numéro `R<n>` là où il est posé**, dans l'ordre du rapport et toutes
-sections confondues. Un constat développé sous un titre à lui, sans numéro, mais cité par numéro
-ailleurs, est introuvable pour qui lit le rapport.
+**Le verdict suit la sévérité réelle de la Dette actuelle**, écrit par l'auditeur, vérifié par
+`audit check` : `DÉFAVORABLE` dès une dette `bloquant` ou `critique`, `RÉSERVES` dès une `majeur`,
+`FAVORABLE` sans rien au-dessus de `note` ; des `avertissement` laissent le choix entre `RÉSERVES`
+et `FAVORABLE`, justifié. `bloquant` est propre à l'audit et n'entre jamais au registre de dette.

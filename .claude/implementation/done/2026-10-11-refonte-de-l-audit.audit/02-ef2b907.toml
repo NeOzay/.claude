@@ -1,0 +1,347 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "refonte-de-l-audit"
+audit = "02-ef2b907"
+rang = 2
+type = "clôture"
+date = 2026-10-11
+base = "master"
+commit = "ef2b907"
+precedent = "01-d0cf0ec"
+brief = ".claude/implementation/refonte-de-l-audit.brief.md"
+suivi = ".claude/implementation/refonte-de-l-audit.md"
+plan = ".claude/plans/majestic-hugging-newell.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "~/.claude/.venv/bin/python -c 'import pydantic' && ~/.claude/.venv/bin/python -m pytest scripts/tests/test_sante_skills.py -q"
+statut = "passée"
+sortie = """..................................                                       [100%]
+34 passed in 0.28s"""
+
+[[verification]]
+origine = "Étape 2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_modele.py -q"
+statut = "passée"
+sortie = """.....................                                                    [100%]
+21 passed in 1.11s"""
+
+[[verification]]
+origine = "Étape 3"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_pose.py -q"
+statut = "passée"
+sortie = """..................                                                       [100%]
+18 passed in 1.44s"""
+
+[[verification]]
+origine = "Étape 4"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_pose.py -q -k verification"
+statut = "passée"
+sortie = """.......                                                                  [100%]
+7 passed, 11 deselected in 0.64s"""
+
+[[verification]]
+origine = "Étape 5"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_dettes.py -q"
+statut = "passée"
+sortie = """...........                                                              [100%]
+11 passed in 2.21s"""
+
+[[verification]]
+origine = "Étape 6"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_export.py -q"
+statut = "passée"
+sortie = """.......                                                                  [100%]
+7 passed in 0.55s"""
+
+[[verification]]
+origine = "Étape 7"
+commande = "gabarit contract suivi | grep 'Dettes écartées' && ~/.claude/.venv/bin/python -m pytest skills/git-smart-commit/scripts/tests/ scripts/tests/ -q && python3 scripts/check_pipeline.py"
+statut = "passée"
+sortie = """4. Indépendance des sous-agents
+  ✓ 6 agents, aucun renvoi au contrat
+
+5. Chemins du frontmatter des chantiers archivés
+  ✓ 40 archives, tous les champs plan/brief/audit résolvent
+
+6. Portabilité des appels de script
+  ✓ 43 fichiers examinés, aucun appel relatif non gardé
+
+7. Chemins de skill cités : existence et forme
+  ✓ 36 chemins de skill cités, tous existent
+
+8. Renvois documentaires entre skills
+  ✓ 127 renvois entre skills, tous résolvent
+
+9. pyright n'est cité que pour être écarté
+  ✓ 6 mention(s) de « pyright », toutes des interdictions
+
+Pipeline conforme.
+Règle des guillemets : seuls les champs slug, text, enum gardent les leurs. Un champ date, list, int, bool s'écrit sans guillemets : en le remplissant, retirer ceux de son marqueur (reviewed = "<OPTIONNEL date>" devient reviewed = 2026-10-07)."""
+
+[[verification]]
+origine = "Étape 8"
+commande = "grep '^tools:.*Edit' agents/implementation-auditor.md && ! grep -n 'plus sévère\\|\\.audit\\.md' agents/implementation-auditor.md"
+statut = "passée"
+sortie = "tools: Read, Grep, Glob, Bash, Edit"
+
+[[verification]]
+origine = "Étape 9"
+commande = "! grep -rn '\\.audit\\.md' agents/ skills/ | grep -v -e scripts/impl_list.py -e list-dir/technical-debt/migrations/ && python3 scripts/check_pipeline.py && git diff --name-only --diff-filter=d master...HEAD -- '*.md' | xargs -r uvx rumdl fmt --check"
+statut = "passée"
+sortie = """✓ 40 archives, tous les champs plan/brief/audit résolvent
+
+6. Portabilité des appels de script
+  ✓ 43 fichiers examinés, aucun appel relatif non gardé
+
+7. Chemins de skill cités : existence et forme
+  ✓ 36 chemins de skill cités, tous existent
+
+8. Renvois documentaires entre skills
+  ✓ 127 renvois entre skills, tous résolvent
+
+9. pyright n'est cité que pour être écarté
+  ✓ 6 mention(s) de « pyright », toutes des interdictions
+
+Pipeline conforme.
+
+Issues: Found 21 issues in 2/11 files (73ms)
+grep: skills/git-smart-commit/scripts/__pycache__/commit_chantier.cpython-314.pyc: binary file matches
+grep: skills/implementation-tracker/scripts/__pycache__/impl_list.cpython-312.pyc: binary file matches
+grep: skills/implementation-tracker/scripts/__pycache__/impl_list.cpython-314.pyc: binary file matches"""
+
+[[verification]]
+origine = "Étape 10"
+commande = "uvx ruff check skills/implementation-tracker skills/git-smart-commit scripts && uvx ruff format --check skills/implementation-tracker skills/git-smart-commit scripts && uvx --with pytest --with pydantic basedpyright -p skills/implementation-tracker"
+statut = "passée"
+sortie = """All checks passed!
+33 files already formatted
+0 errors, 0 warnings, 0 notes"""
+
+[[verification]]
+origine = "Étape 11"
+commande = "dans la session neuve, la liste des agents donne à `implementation-auditor` l'outil `Edit`"
+statut = "non-exécutée"
+sortie = "vérification en prose, pas une commande : à mener par l'auditeur"
+
+[[verification]]
+origine = "C1"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_pose.py -q -k 'premier or deuxieme or cumuls'"
+statut = "passée"
+sortie = """...                                                                      [100%]
+3 passed, 15 deselected in 0.56s"""
+
+[[verification]]
+origine = "C2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_pose.py -q -k verification"
+statut = "passée"
+sortie = """.......                                                                  [100%]
+7 passed, 11 deselected in 0.66s"""
+
+[[verification]]
+origine = "C3"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_modele.py -q"
+statut = "passée"
+sortie = """.....................                                                    [100%]
+21 passed in 1.02s"""
+
+[[verification]]
+origine = "C4"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/test_dettes.py -q"
+statut = "passée"
+sortie = """...........                                                              [100%]
+11 passed in 2.05s"""
+
+[[verification]]
+origine = "C5"
+commande = "! grep -rn '\\.audit\\.md' agents/ skills/ | grep -v -e scripts/impl_list.py -e list-dir/technical-debt/migrations/ && ! git diff --name-only master...refonte-de-l-audit | grep '\\.audit\\.md$'"
+statut = "passée"
+sortie = """aucune ligne sur la sortie standard, code 0 (la décision du 2026-10-11 au Journal de décisions exclut les deux fichiers filtrés).
+Sur stderr seulement : « binary file matches » sur trois __pycache__/*.pyc ignorés par .gitignore:52.
+Sans filtre, `grep -rn` rend 4 lignes : impl_list.py:4, impl_list.py:30, migrations/3.md:136, migrations/3.md:181."""
+
+[[verification]]
+origine = "C6"
+commande = "grep '^tools:.*Edit' agents/implementation-auditor.md && gabarit contract suivi | grep 'Dettes écartées' && ! grep -n 'plus sévère' agents/implementation-auditor.md"
+statut = "passée"
+sortie = """tools: Read, Grep, Glob, Bash, Edit
+[sections."Dettes écartées"]"""
+
+[[verification]]
+origine = "C7"
+commande = "~/.claude/.venv/bin/python -c 'import pydantic; print(pydantic.VERSION)' && grep -n '^pydantic' requirements.txt"
+statut = "passée"
+sortie = """2.14.0
+12:pydantic==2.14.0"""
+
+[[verification]]
+origine = "C8"
+commande = "audit check --filled .claude/implementation/refonte-de-l-audit.audit/02-ef2b907.toml"
+statut = "passée"
+sortie = "verdicts admis : FAVORABLE ou RÉSERVES"
+
+[[conformite.critere]]
+id = "C1"
+critere = "`audit new <slug> --intermediaire` pose `01-<sha>.toml` sur un Chantier sans audit, puis `02-<sha>.toml` dont la Dette précédente est la Dette actuelle du `01`, cumuls repris (`pytest`)."
+etat = "atteint"
+constat = "Vérification C1 passée (3 tests). test_pose.py:40 pose `01-<sha>.toml` sur le dépôt jouet sans audit, précédent absent ; test_pose.py:72 pose `02-<sha>.toml` après un `01` rempli, et vérifie `dette.precedente == premier.dette.actuelle` ; test_pose.py:85 vérifie la reprise des cumuls corrigée et écartée au `03`. Le code : pose.py:291-301 copie `actuelle`, `corrigee` et `ecartee` du dernier rapport, exigé rempli. Le rapport que j'audite a lui-même été posé ainsi, au rang 2, avec la Dette actuelle du `01` en précédente."
+
+[[conformite.critere]]
+id = "C2"
+critere = "`audit new` exécute les `vérif:` des Étapes du Suivi et consigne `statut` et `sortie` en `[[verification]]` (`pytest`)."
+etat = "atteint"
+constat = "Vérification C2 passée (7 tests -k verification). pose.py:188-194 lit les `— vérif:` des seules Étapes cochées, Étape enroulée comprise ; pose.py:149-185 exécute depuis la racine et déduit `statut` du code de sortie : `échouée` avec `dette` au Marqueur, `non-exécutée` pour 126 ou 127, une prose ou un délai dépassé (décision du Journal, 2026-10-11). Constaté sur ce rapport : 10 vérifications d'Étape exécutées avec leur sortie réelle, et l'Étape 11 en prose posée `non-exécutée`."
+
+[[conformite.critere]]
+id = "C3"
+critere = "`audit check --filled` accepte les deux audits factices et refuse chaque faute de l'annexe : dette précédente non rangée, renvoi vers une dette absente, `R<n>` déjà servi, verdict non admis, cote d'office non respectée (`pytest`)."
+etat = "atteint"
+constat = "Vérification C3 passée (21 tests). test_modele.py:35 accepte les deux audits factices sous `--filled`. test_modele.py:59-92 dérive une faute par contrôle de l'annexe et vérifie chaque message de refus : dette précédente non rangée, renvoi vers une dette absente, `R<n>` déjà servi, verdict non admis, cote d'office non respectée. Le contrôle de suite ne vérifie pas d'où vient une dette qui entre dans un cumul : c'est R3, hors de la liste de l'annexe."
+
+[[conformite.critere]]
+id = "C4"
+critere = "`audit range` range une dette précédente sans recopie, vers `ecartee` avec le justificatif lu dans `## Dettes écartées` du Suivi ; `audit dette` attribue le `R<n>` suivant et `trouvee` (`pytest`)."
+etat = "atteint"
+constat = "Vérification C4 passée (11 tests). dettes.py:101-132 copie la dette depuis `dette.precedente` sans recopie ; vers `ecartee`, justificatif et date sont lus en `## Dettes écartées` du Suivi (dettes.py:80-98), ligne absente refusée (test_dettes.py:72). dettes.py:135-162 attribue le `R<n>` qui suit le plus haut du rapport et pose `trouvee`. Rejoué sur ce rapport : `audit range` R1 et R2 vers corrigée, puis `audit dette`, qui a rendu R3."
+
+[[conformite.critere]]
+id = "C5"
+critere = "`grep -rn '\\.audit\\.md' agents/ skills/` ne rend rien, et `git diff --name-only master...refonte-de-l-audit | grep '\\.audit\\.md$'` non plus."
+etat = "atteint"
+constat = "Vérification C5 passée. Le premier `grep` rend 4 lignes, toutes dans `scripts/impl_list.py` et `list-dir/technical-debt/migrations/3.md`. La décision du 2026-10-11 au Journal de décisions exclut ces deux fichiers de C5 : le filtre d'impl-list doit continuer d'écarter les archives `.audit.md`, et une migration passée ne se réécrit pas. Hors de ces deux fichiers, rien sur la sortie standard. Le `git diff --name-only` ne rend aucun `.audit.md`. Le Suivi fait foi sur le Brief pour ce périmètre ajusté."
+
+[[conformite.critere]]
+id = "C6"
+critere = "`grep '^tools:.*Edit' agents/implementation-auditor.md` rend une ligne, `gabarit contract suivi | grep 'Dettes écartées'` aussi, et `grep -n 'plus sévère' agents/implementation-auditor.md` rien."
+etat = "atteint"
+constat = "Vérification C6 passée : `tools: Read, Grep, Glob, Bash, Edit` ; `gabarit contract suivi` déclare la section « Dettes écartées » ; aucune occurrence de « plus sévère » dans l'agent."
+
+[[conformite.critere]]
+id = "C7"
+critere = "`~/.claude/.venv/bin/python -c 'import pydantic'` réussit, Pydantic étant déclaré dans `requirements.txt`."
+etat = "atteint"
+constat = "Vérification C7 passée : `import pydantic` réussit dans le venv (2.14.0), et requirements.txt:12 déclare `pydantic==2.14.0`, avec la raison en commentaire aux lignes 10-11."
+
+[[conformite.critere]]
+id = "C8"
+critere = "L'audit de Clôture de ce Chantier est écrit au nouveau format, dans `refonte-de-l-audit.audit/`, et passe `audit check --filled`."
+etat = "atteint"
+constat = "Ce rapport est au nouveau format, dans `.claude/implementation/refonte-de-l-audit.audit/02-ef2b907.toml`, posé par `audit new`. Ses dettes sont rangées par `audit range` et `audit dette`. Il passe `audit check --filled` : la vérification C8 est rejouée en dernier, après le verdict."
+
+[[conformite.hors_perimetre]]
+exclusion = "Quand un audit intermédiaire est pertinent : décidé au Plan, en road-map."
+etat = "respecté"
+constat = "Le diff n'ajoute aucune règle qui dise quand un audit intermédiaire est pertinent. audit.md:1-37 (seuil et redoublement du diff) n'est pas touché, la Semence du Plan non plus. L'entrée de road-map `audit-intermediaire-au-plan.md` existe en todo/road-map/."
+
+[[conformite.hors_perimetre]]
+exclusion = "Un nombre d'audits borné par Chantier ; un contre-audit borné au diff depuis le SHA audité : l'audit reste complet."
+etat = "respecté"
+constat = "Aucune borne sur le nombre d'audits dans pose.py (rang jusqu'à 99, contrainte de format NN). Aucun contre-audit borné au diff : l'agent lit `git diff <base>...<commit>` en entier (agents/implementation-auditor.md, Entrée, point 5)."
+
+[[conformite.hors_perimetre]]
+exclusion = "La restitution du verdict en une ligne et un tableau, déjà livrée."
+etat = "respecté"
+constat = "audit.md, Au retour, garde la ligne et le tableau `# | Réserve | Gravité réelle`. Seul change le chemin restitué, celui de l'export au lieu du rapport : c'est la décision `audit export` du Brief et la Q4 du Plan."
+
+[[conformite.hors_perimetre]]
+exclusion = "La correspondance d'une dette de l'audit avec le contrat du Registre, en road-map."
+etat = "respecté"
+constat = "Le contrat du Registre (`todo/technical-debt/.list/contract.toml`) est hors du diff. dette.md et cloture.md disent seulement que la Dette actuelle part au Registre, sévérité et `R<n>` repris, comme le Brief le décide. Ce sont les correspondances que l'entrée de road-map `dette-d-audit-au-format-du-registre` constate déjà. Le format d'une entrée n'est pas aligné."
+
+[[conformite.hors_perimetre]]
+exclusion = "Les rapports `.audit.md` existants, dans `done/` comme `lexique-local-tronque.audit.md`."
+etat = "respecté"
+constat = "`git diff --name-only master...ef2b907` ne rend aucun fichier en `.audit.md` : aucun `.audit.md` archivé n'est touché. impl_list.py garde son filtre `.audit.md`, ce que le Journal de décisions consigne."
+
+[[conformite.hors_perimetre]]
+exclusion = "Le Brief et sa semence."
+etat = "respecté"
+constat = "`git diff --stat master...ef2b907` ne touche ni `skills/gabarit/gabarit/brief/` ni le skill intent-brief. Le Brief du Chantier y figure comme fichier ajouté par le Chantier lui-même, au cadrage (E0)."
+
+[[conformite.signal]]
+id = "S1"
+signal = "Une instruction fait recopier une dette à la main par l'auditeur ou l'orchestrateur, au lieu d'`audit new`, `audit range` ou `audit dette`."
+etat = "absent"
+constat = "agents/implementation-auditor.md impose `audit range` et `audit dette` (« Une dette ne se recopie jamais à la main »), et l'Edit sert seulement à remplir. audit.md fait poser le rapport par `audit new`, et dette.md fait lire la Dette actuelle, sans recopie entre rapports. Le contrôle ne verrouille pas encore une recopie en cumul (R3), mais aucune instruction ne la demande."
+
+[[conformite.signal]]
+id = "S2"
+signal = "Une commande ou une instruction lit des audits antérieurs au précédent : le rapport se suffit avec un seul précédent."
+etat = "absent"
+constat = "pose.py:210-217 et :291-296 ne lisent que le dernier rapport du répertoire. modele.py:555-575 ne lit que le précédent nommé par `precedent`, sans remonter. L'agent interdit d'ouvrir un autre rapport, et dette.md, étape 1, dit que le dernier rapport suffit."
+
+[[conformite.signal]]
+id = "S3"
+signal = "Le verdict est écrit par une commande et non par l'auditeur ; `audit check` ne fait que vérifier qu'il est admis."
+etat = "absent"
+constat = "pose.py:289 pose le verdict au Marqueur. Aucune commande n'écrit `verdict.valeur` : `audit check` affiche les verdicts admis (audit-cli.py:55-65) et refuse un verdict hors de l'ensemble (modele.py:370-375). Le choix reste à l'auditeur."
+
+[[conformite.signal]]
+id = "S4"
+signal = "Le diff touche la semence `brief`, le contrat du Registre, le seuil de 400 lignes ou un `.audit.md` existant."
+etat = "absent"
+constat = "Le diff ne touche ni la Semence `brief`, ni `todo/technical-debt/.list/contract.toml`, ni aucun `.audit.md` existant. Les hunks d'audit.md, aux lignes 1, 37 et 97, laissent le seuil de 400 lignes intact (`git diff master...ef2b907 -- skills/implementation-tracker/references/audit.md`)."
+
+[[conformite.signal]]
+id = "S5"
+signal = "L'échelle de l'audit change hors décision : `inconnue` revient, ou `bloquant` entre au contrat du Registre."
+etat = "absent"
+constat = "modele.py:100 : `bloquant | critique | majeur | avertissement | note`, sans `inconnue`. `bloquant` n'entre pas au Registre : l'échelle de dette.md:140-150 est inchangée, et dette.md:98-99 dit que `bloquant` est propre à l'audit. Le `inconnue` qui reste dans dette.md est celui du Registre, inchangé."
+
+[conformite.symptome]
+symptome = "« les audits sont empilés dans un fichier .md qui gonfle à chaque audit » ; le verdict ne conclut presque jamais (74 `RÉSERVES`, 12 `DÉFAVORABLE`, 1 `FAVORABLE` dans les rapports archivés)."
+etat = "disparu"
+constat = "Plus d'empilement : un fichier TOML par audit, dans `<slug>.audit/<NN>-<sha>.toml`. Chaque rapport reprend du seul précédent l'état des dettes ; ce rapport-ci fait environ 350 lignes et ne recopie aucun audit antérieur. Le verdict suit la sévérité de la Dette actuelle, vérifiée par `audit check`. La règle « dans le doute, prends le plus sévère » est retirée de l'agent (C6). Une Dette actuelle sans rien au-dessus d'`avertissement` admet FAVORABLE : c'est le cas de ce rapport. La répartition des verdicts sur de nombreux Chantiers ne se mesurera qu'aux audits futurs, mais les deux causes de l'excès de RÉSERVES sont levées."
+
+[[dette.precedente]]
+id = "R1"
+nature = "qualité"
+emplacement = "skills/implementation-tracker/scripts/tests/test_dettes.py:13, test_pose.py:14, conftest.py:21"
+constat = "Les deux suites neuves importent `from conftest import SLUG`. Le module `conftest` qu'elles trouvent dépend de l'ordre de collecte : lancée après une autre suite, la commande qui rassemble tous les tests du dépôt échoue. La **Vérification** de `## État courant` du Suivi, telle qu'écrite, sort en erreur sur le HEAD audité : `~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/ scripts/tests/ skills/git-smart-commit/scripts/tests/ -q` → `ImportError: cannot import name 'SLUG' from 'conftest' (/home/debian/.claude/scripts/tests/conftest.py)` sur test_dettes.py et test_pose.py, « 2 errors in 0.51s ». Sur un arbre extrait de `master`, la même commande rend « 214 passed ». Aucune vérification d'Étape ne le voyait, car chacune lance un seul répertoire. Le dépôt documente ce piège et l'évite dans deux modules voisins, scripts/tests/depot_jouet.py:3-9 et skills/list-dir/scripts/tests/jouet.py:8-13 : « conftest.py ne garde que les fixtures, qui ne s'importent jamais ». skills/shadow-skill/scripts/tests/ y tombait déjà, et le Chantier en ajoute une instance."
+trouvee = "01-d0cf0ec"
+solution = "Sortir `SLUG`, et ce que les tests importent de conftest, dans un module au nom unique, par exemple `scripts/tests/chantier_jouet.py`, sur le modèle de `depot_jouet.py`. `conftest.py` ne garde alors que la fixture `chantier`. Vérifier en lançant la commande de `## État courant` dans ses deux ordres."
+severite = "majeur"
+
+[[dette.precedente]]
+id = "R2"
+nature = "style"
+emplacement = "skills/implementation-tracker/scripts/rapport_audit/__init__.py:3-4"
+constat = "La docstring du paquet dit « PORTÉE : le modèle du rapport et son contrôle (`modele`) ». Le paquet porte aussi `pose` (`audit new`), `dettes` (`audit range`, `audit dette`) et `export` : la portée écrite à l'Étape 2 n'a pas suivi les Étapes 3 à 6."
+trouvee = "01-d0cf0ec"
+solution = "Réécrire le paragraphe PORTÉE pour nommer les quatre modules et ce que chacun sert : le modèle et son contrôle, la pose, le rangement et l'ajout des dettes, l'export."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R3"
+nature = "qualité"
+emplacement = "skills/implementation-tracker/scripts/rapport_audit/modele.py:476-512"
+constat = "`verifier_suite` ne contrôle que les identifiants d'une dette qui entre dans un cumul. Il ne vérifie ni qu'elle venait de la Dette précédente, ni que ses champs sont restés ceux de la précédente. Pour Dette écartée, rien ne vérifie non plus que la ligne figure en `## Dettes écartées` du Suivi. Établi sur une copie des fixtures `contexte-tracker.audit/` : j'ai ajouté au `02` un `[[dette.corrigee]]` R50 inventé, `trouvee = \"01-38d27af\"` alors que le `01` ne l'a jamais porté, et `audit check --filled` rend « verdicts admis : RÉSERVES », rc=0. Une dette recopiée ou retouchée à la main par `Edit` en rangeant, ce que S1 veut proscrire, passe donc le contrôle sans rien signaler. Aujourd'hui seules les instructions de l'agent l'interdisent."
+trouvee = "02-ef2b907"
+solution ="Dans `verifier_suite`, exiger qu'une dette neuve de `courant.dette.corrigee` ou `courant.dette.ecartee` (absente des cumuls du précédent) soit une dette de `precedent.dette.actuelle`, avec les mêmes champs communs, et que `corrigee` vaille l'audit courant. Ajouter à `test_modele.py` une faute par cas : dette inventée en corrigée, dette retouchée en rangeant."
+severite = "avertissement"
+
+[[dette.corrigee]]
+id = "R1"
+nature = "qualité"
+emplacement = "skills/implementation-tracker/scripts/tests/test_dettes.py:13, test_pose.py:14, conftest.py:21"
+constat = "Les deux suites neuves importent `from conftest import SLUG`. Le module `conftest` qu'elles trouvent dépend de l'ordre de collecte : lancée après une autre suite, la commande qui rassemble tous les tests du dépôt échoue. La **Vérification** de `## État courant` du Suivi, telle qu'écrite, sort en erreur sur le HEAD audité : `~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/ scripts/tests/ skills/git-smart-commit/scripts/tests/ -q` → `ImportError: cannot import name 'SLUG' from 'conftest' (/home/debian/.claude/scripts/tests/conftest.py)` sur test_dettes.py et test_pose.py, « 2 errors in 0.51s ». Sur un arbre extrait de `master`, la même commande rend « 214 passed ». Aucune vérification d'Étape ne le voyait, car chacune lance un seul répertoire. Le dépôt documente ce piège et l'évite dans deux modules voisins, scripts/tests/depot_jouet.py:3-9 et skills/list-dir/scripts/tests/jouet.py:8-13 : « conftest.py ne garde que les fixtures, qui ne s'importent jamais ». skills/shadow-skill/scripts/tests/ y tombait déjà, et le Chantier en ajoute une instance."
+trouvee = "01-d0cf0ec"
+solution = "Sortir `SLUG`, et ce que les tests importent de conftest, dans un module au nom unique, par exemple `scripts/tests/chantier_jouet.py`, sur le modèle de `depot_jouet.py`. `conftest.py` ne garde alors que la fixture `chantier`. Vérifier en lançant la commande de `## État courant` dans ses deux ordres."
+severite = "majeur"
+corrigee = "02-ef2b907"
+preuve = "Commande de la Vérification de ## État courant, dans ses deux ordres, sur ef2b907 : ~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/ scripts/tests/ skills/git-smart-commit/scripts/tests/ -q → « 274 passed in 15.78s » ; ordre inverse (scripts/tests/ skills/git-smart-commit/scripts/tests/ skills/implementation-tracker/scripts/tests/) → « 274 passed in 15.71s ». SLUG vit dans skills/implementation-tracker/scripts/tests/chantier_jouet.py:11, seul module de ce nom du dépôt ; test_dettes.py:13 et test_pose.py:14 l'importent, conftest.py:21 aussi."
+
+[[dette.corrigee]]
+id = "R2"
+nature = "style"
+emplacement = "skills/implementation-tracker/scripts/rapport_audit/__init__.py:3-4"
+constat = "La docstring du paquet dit « PORTÉE : le modèle du rapport et son contrôle (`modele`) ». Le paquet porte aussi `pose` (`audit new`), `dettes` (`audit range`, `audit dette`) et `export` : la portée écrite à l'Étape 2 n'a pas suivi les Étapes 3 à 6."
+trouvee = "01-d0cf0ec"
+solution = "Réécrire le paragraphe PORTÉE pour nommer les quatre modules et ce que chacun sert : le modèle et son contrôle, la pose, le rangement et l'ajout des dettes, l'export."
+severite = "note"
+corrigee = "02-ef2b907"
+preuve = "skills/implementation-tracker/scripts/rapport_audit/__init__.py:3-5 nomme les quatre modules : « le modèle du rapport et son contrôle (`modele`), la pose d'un rapport et ses vérifications (`pose`), le rangement et l'ajout des dettes (`dettes`), le rendu en Markdown (`export`) »."
+
+[verdict]
+valeur = "FAVORABLE"
+justification = "Les huit critères sont atteints, et chacun est prouvé par une commande que j'ai exécutée. Le Hors-périmètre est respecté, aucun Signal de dérive ne se matérialise, et le symptôme a disparu. Les deux dettes de l'audit 01 sont corrigées. Pour R1, la suite entière passe dans les deux ordres, 274 tests. Pour R2, la docstring nomme les quatre modules. L'Étape 11, posée `non-exécutée` parce qu'elle est en prose, est établie par cet audit même : l'agent tourne avec `Edit` et sans `Write`. La Dette actuelle ne porte qu'un `avertissement`, R3. Le contrôle de suite ne vérifie pas d'où vient une dette qui entre dans un cumul. C'est un durcissement à faire, contournable : les instructions de l'agent interdisent déjà la recopie, et `audit range` est le seul chemin documenté. Aucun critère, aucune décision du Journal n'en dépend. Une seule réserve de ce poids ne justifie pas RÉSERVES : elle part au Registre à la Clôture."

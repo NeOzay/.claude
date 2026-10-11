@@ -1,0 +1,92 @@
+# Audit n° 1 factice du Chantier contexte-tracker.
+slug = "contexte-tracker"
+audit = "01-38d27af"
+rang = 1
+type = "intermédiaire"
+date = 2026-10-02
+base = "master"
+commit = "38d27af"
+brief = ".claude/implementation/contexte-tracker.brief.md"
+suivi = ".claude/implementation/contexte-tracker.md"
+plan = ".claude/plans/sleepy-coalescing-marshmallow.md"
+
+[[verification]]
+origine = "C3"
+commande = "python3 -m pytest skills/implementation-tracker/tests -k reprise"
+statut = "échouée"
+sortie = "1 failed : test_passation_perimee_apres_audit"
+dette = "R2"
+
+[[conformite.critere]]
+id = "C1"
+critere = "La reprise signale une Passation périmée."
+etat = "atteint"
+constat = "skills/implementation-tracker/SKILL.md:120-128 lu : la condition est écrite."
+
+[[conformite.critere]]
+id = "C3"
+critere = "`contexte --session courante` rend la taille du contexte."
+etat = "non-atteint"
+constat = "La vérification C3 échoue : le rapport d'audit non commité rend la Passation périmée."
+dette = "R2"
+
+[[conformite.hors_perimetre]]
+exclusion = "La ligne de statut au-delà du compteur de contexte."
+etat = "respecté"
+constat = "git diff master...38d27af -- statusline-command.py : seules les lignes 80-95 changent."
+
+[[conformite.signal]]
+id = "S1"
+signal = "Un script lit le rapport d'audit en entier."
+etat = "absent"
+constat = "grep -rn 'audit.md' skills/ scripts/ : aucune lecture hors de la documentation."
+
+[conformite.symptome]
+symptome = "La session suivante reprend une Passation écrite avant trois Étapes livrées."
+etat = "persiste"
+constat = "Même cause que R2 : la Passation est jugée périmée à tort."
+dette = "R2"
+
+[[dette.actuelle]]
+id = "R1"
+nature = "qualité"
+emplacement = "skills/implementation-tracker/references/execution.md:75-77"
+constat = """
+« Rendre la main après la Passation » ne dit pas ce que devient la mesure du contexte quand
+l'utilisateur refuse la Passation puis continue."""
+trouvee = "01-38d27af"
+solution = "Écrire dans execution.md:75-77 le cas du refus : la mesure reste affichée, la Passation se réécrit à la suivante."
+severite = "majeur"
+
+[[dette.actuelle]]
+id = "R2"
+nature = "alignement"
+emplacement = "Brief, C3"
+constat = """
+Critère non atteint : un rapport d'audit présent et non commité rend périmée une Passation
+fraîche, cas normal après tout audit intermédiaire."""
+trouvee = "01-38d27af"
+solution = "Exclure `<slug>.audit/` du contrôle « arbre propre » de la Phase 3."
+severite = "bloquant"
+
+[[dette.actuelle]]
+id = "R5"
+nature = "qualité"
+emplacement = "statusline-command.py:84-88"
+constat = "La somme des trois champs d'usage est calculée hors du `try`."
+trouvee = "01-38d27af"
+solution = "Entrer la somme dans le `try`, et afficher un tiret sur un champ absent."
+severite = "avertissement"
+
+[[dette.actuelle]]
+id = "R8"
+nature = "style"
+emplacement = "LEXIQUE.md"
+constat = "« Passation » porte une majuscule sans être un terme défini."
+trouvee = "01-38d27af"
+solution = "Proposer « Passation » au Lexique global."
+severite = "avertissement"
+
+[verdict]
+valeur = "DÉFAVORABLE"
+justification = "R2 est `bloquant` : le critère C3 n'est pas atteint."

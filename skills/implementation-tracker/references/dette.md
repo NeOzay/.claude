@@ -44,7 +44,7 @@ Un contrat rattrapé rend les entrées écrites avant lui non conformes : `migra
 ensuite.
 
 Le pipeline produisait déjà des constats de dette — l'auditeur en fait un axe de jugement — mais
-n'avait nulle part où les déposer : ils vivaient dans `<slug>.audit.md`, archivé en `done/` à la
+n'avait nulle part où les déposer : ils vivaient dans le rapport d'audit, archivé en `done/` à la
 clôture. Le registre est cet endroit.
 
 ---
@@ -53,9 +53,10 @@ clôture. Le registre est cet endroit.
 
 C'est la distinction dont tout le reste découle.
 
-Le rapport d'audit **s'appende** : une section par audit, du plus ancien au plus récent
-(`audit.md`, « Gabarit du rapport »). La répétition y est le format — elle date les constats et
-montre ce qui avait déjà été signalé.
+Le rapport d'audit **suit un chantier** : un fichier par audit, dont chacun reprend la Dette
+actuelle du précédent et la range — toujours là, corrigée, écartée
+([Le rapport](audit.md#le-rapport)). Il date chaque dette et montre ce qui avait déjà été signalé,
+mais il ne vaut que pour son chantier.
 
 Le registre, lui, dit ce qui reste vrai **aujourd'hui**. Un constat qui y figure deux fois est un
 doublon, et une entrée qu'un correctif a soldée n'a plus rien à y faire. D'où les deux règles qui
@@ -68,8 +69,8 @@ tiennent tout le dispositif :
   contrat n'ouvre qu'un seul fichier en écriture, et ce n'est pas celui-ci.
 
 Contrepartie assumée : c'est l'auteur du travail qui reporte ses propres dettes. Ce qui la rend
-tenable est que chaque constat du rapport porte son `R<n>` — la complétude se vérifie après coup en
-confrontant le rapport au registre.
+tenable est que chaque dette du rapport porte son `R<n>` — la complétude se vérifie après coup en
+confrontant la Dette actuelle du dernier rapport au registre.
 
 **L'état est porté par le répertoire, jamais par un champ.** Une entrée soldée n'est pas une entrée
 marquée soldée : c'est une entrée qui a changé de liste. Un champ `statut` autoriserait une entrée
@@ -81,8 +82,8 @@ payée à traîner dans le registre actif, ce que la ligne précédente interdit
 
 Tout problème **non résolu** au moment de clore :
 
-- les constats de la section « Dette induite » du rapport d'audit ;
-- les réserves que l'utilisateur a choisi de clore avec plutôt que de traiter ;
+- la Dette actuelle du rapport de clôture, **toute**, sans arbitrage dette par dette : clore avec
+  des réserves, c'est les verser au registre ;
 - le hors-périmètre assumé au brief, quand c'est un problème qu'on a vu et laissé ;
 - une étape retirée en cours de route, ou un contournement laissé en place.
 
@@ -91,7 +92,11 @@ Tout problème **non résolu** au moment de clore :
 - les idées d'amélioration — le registre ne liste que du constaté, vérifié dans le dépôt. Elles
   vont dans `road-map/`, à côté, et la frontière entre les deux se lit là-bas :
   [Road-map](road-map.md#la-frontière-avec-le-registre-de-dette) ;
-- ce qui a été corrigé pendant le chantier : le rapport en garde la trace, pas le registre ;
+- ce qui a été corrigé pendant le chantier : la Dette corrigée du rapport en garde la trace, pas
+  le registre ;
+- ce que l'utilisateur a écarté : la Dette écartée du rapport en garde le justificatif ;
+- une dette `bloquant` ou `critique` : elle rend l'audit `DÉFAVORABLE`, et la clôture s'arrête
+  avant ce point. `bloquant` est propre à l'audit : l'échelle du registre ne le connaît pas ;
 - les préférences de style qu'aucun critère ne porte.
 
 Le filtre à l'entrée est volontairement large : mieux vaut une entrée que l'utilisateur supprimera
@@ -200,16 +205,14 @@ dépôt depuis son écriture, et le tri le montre sans qu'on ait à le croire su
 
 ## Alimenter — à la clôture
 
-1. Relire le rapport d'audit **en entier**, toutes sections d'audit confondues, et parcourir ses
-   `R<n>` un par un : traité pendant le chantier, ou survivant ? Seuls les survivants deviennent
-   des entrées.
+1. Lire la Dette actuelle du rapport de clôture — dans son export, ou le TOML : chacune de ses
+   dettes devient une entrée, sa sévérité reprise, son `R<n>` en `reference`.
 
-   **Le dernier audit ne suffit pas.** Rien n'oblige un auditeur à reprendre les réserves des
-   passages précédents : il peut ne consigner que ses constats neufs, et une réserve non traitée
-   de la première section disparaîtrait alors sans une seule erreur. Le rapport est un journal —
-   c'est le fichier entier qui fait foi, pas sa dernière page.
-2. Y ajouter ce que le rapport ne pouvait pas connaître — les arbitrages rendus après lui
-   (« clore avec ces réserves »), le hors-périmètre assumé, ce qui a été laissé en route.
+   **Le dernier rapport suffit.** `audit check` y a exigé que chaque dette des audits précédents
+   soit rangée — toujours là, corrigée, écartée — : une dette non traitée y figure encore en Dette
+   actuelle, et aucune ne disparaît en route.
+2. Y ajouter ce que le rapport ne pouvait pas connaître — le hors-périmètre assumé, ce qui a été
+   laissé en route.
 3. **Lire le registre avant d'écrire.** Un constat déjà présent ne se duplique pas : le compléter,
    en gardant sa date d'origine. C'est le seul contrôle qui empêche le registre de gonfler.
 
@@ -256,8 +259,8 @@ L'entrée déplacée reçoit alors la section de solde que son nouveau contrat d
 montrer, c'est la forme de la preuve — date, chantier, puis la commande et sa sortie réelle :
 
 > **2026-09-02, chantier `listing-fix`** — les listings filtrent désormais sur le nom du fichier.
-> Établi par : `ls .claude/implementation/*.md | grep -vE 'brief|audit'` → 2 lignes, aucun
-> `.brief.md` ni `.audit.md` remonté.
+> Établi par : `ls .claude/implementation/*.md | grep -vE 'brief|plan'` → 2 lignes, aucun
+> `.brief.md` ni `.plan.md` remonté.
 
 **Sans commande exécutée et sa sortie réelle, l'entrée reste dans le registre.** C'est le même
 principe que le point d'intégrité de l'auditeur : celui qui vient de faire le travail est le plus

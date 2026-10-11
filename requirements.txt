@@ -7,3 +7,6 @@
 # de tous les éléments, pas dans une exception.
 tomlkit==0.15.1
 pytest==9.1.1
+# pydantic porte le modèle du rapport d'audit (`audit`, implementation-tracker) :
+# le contrat se déclare en classes, et ses messages de refus sont ceux de la validation.
+pydantic==2.14.0

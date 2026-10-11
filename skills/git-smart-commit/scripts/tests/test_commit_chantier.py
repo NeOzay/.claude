@@ -31,7 +31,7 @@ BASE = "principale"
 PLAN = ".claude/plans/plan-genere.md"
 SUIVI = f".claude/implementation/{SLUG}.md"
 BRIEF = f".claude/implementation/{SLUG}.brief.md"
-AUDIT = f".claude/implementation/{SLUG}.audit.md"
+AUDIT = f".claude/implementation/{SLUG}.audit"
 DATE = datetime.date.today().isoformat()
 DONE = ".claude/implementation/done"
 
@@ -223,15 +223,47 @@ def test_cloture_aplatit_archive_et_nettoie(depot: Path) -> None:
     assert git(depot, "tag", "--list") == ""
 
 
-def test_cloture_accepte_un_audit_non_suivi(depot: Path) -> None:
-    ecrire(depot, AUDIT, "audit\n")
+def test_cloture_accepte_des_rapports_d_audit_non_suivis(depot: Path) -> None:
+    ecrire(depot, f"{AUDIT}/01-abcdef0.toml", "audit 1\n")
+    ecrire(depot, f"{AUDIT}/02-1234567.toml", "audit 2\n")
     proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
     assert proc.returncode == 0, proc.stderr
-    archive = f"{DONE}/{DATE}-{SLUG}.audit.md"
-    assert git(depot, "ls-files", archive).strip() == archive
+    archive = f"{DONE}/{DATE}-{SLUG}.audit"
+    assert git(depot, "ls-files", archive).split() == [
+        f"{archive}/01-abcdef0.toml",
+        f"{archive}/02-1234567.toml",
+    ]
     assert "audit =" not in (depot / DONE / f"{DATE}-{SLUG}.md").read_text(
         encoding="utf-8"
     )  # le champ n'existait pas : rien n'est inventé
+
+
+def test_cloture_reecrit_le_champ_audit_vers_le_repertoire_archive(depot: Path) -> None:
+    ecrire(depot, f"{AUDIT}/01-abcdef0.toml", "audit 1\n")
+    suivi = depot / SUIVI
+    suivi.write_text(
+        suivi.read_text(encoding="utf-8").replace(
+            f'brief = "{BRIEF}"\n', f'brief = "{BRIEF}"\naudit = "{AUDIT}"\n'
+        ),
+        encoding="utf-8",
+    )
+    _ = git(depot, "commit", "-q", "-am", "audit au suivi")
+    proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
+    assert proc.returncode == 0, proc.stderr
+    texte = (depot / DONE / f"{DATE}-{SLUG}.md").read_text(encoding="utf-8")
+    assert f'audit = "{DONE}/{DATE}-{SLUG}.audit"\n' in texte
+
+
+def test_cloture_archive_toute_annexe_du_chantier(depot: Path) -> None:
+    ecrire(depot, f".claude/implementation/{SLUG}.brief.annexe.py", "annexe\n")
+    ecrire(depot, ".claude/implementation/autre-chantier.md", "autre\n")
+    _ = git(depot, "add", "-A")
+    _ = git(depot, "commit", "-q", "-m", "annexe")
+    proc = lancer(depot, "cloture", SLUG, "--message", message(depot))
+    assert proc.returncode == 0, proc.stderr
+    archive = f"{DONE}/{DATE}-{SLUG}.brief.annexe.py"
+    assert git(depot, "ls-files", archive).strip() == archive
+    assert (depot / ".claude/implementation/autre-chantier.md").is_file()
 
 
 def test_cloture_ne_supprime_que_les_tags_de_sa_lettre(depot: Path) -> None:

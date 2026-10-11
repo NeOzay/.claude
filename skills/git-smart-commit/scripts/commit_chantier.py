@@ -282,13 +282,20 @@ def preparer(slug: str, message: Path) -> Cloture:
     if not plan.is_file():
         raise Refus(f"plan introuvable : {plan}")
 
-    brief = IMPLEMENTATION / f"{slug}.brief.md"
-    audit = IMPLEMENTATION / f"{slug}.audit.md"
-    annexes = {p.as_posix() for p in (suivi, brief, audit, plan)}
+    # LE CHANTIER, C'EST TOUT `<slug>.*` DE `.claude/implementation/` : suivi, brief, annexe du
+    # brief, répertoire des rapports d'audit. Une liste fermée laissait derrière elle tout ce
+    # qu'elle ne nommait pas. Le slug ne porte pas de point : `<slug>.` ne prend aucun autre
+    # chantier. Les fichiers non suivis d'un répertoire arrivent un par un de `statut_porcelain`.
+    prefixe = (IMPLEMENTATION / f"{slug}.").as_posix()
+    annexes = sorted(
+        p for p in IMPLEMENTATION.iterdir() if p.as_posix().startswith(prefixe) and p != suivi
+    )
     etrangers = [
         c
         for c in statut_porcelain()
-        if c not in annexes and not c.startswith(TODO.as_posix() + "/")
+        if not c.startswith(prefixe)
+        and c != plan.as_posix()
+        and not c.startswith(TODO.as_posix() + "/")
     ]
     if etrangers:
         raise Refus(
@@ -299,14 +306,18 @@ def preparer(slug: str, message: Path) -> Cloture:
     verifier_message(message)
 
     date = datetime.date.today().isoformat()
-    deplacements = [(suivi, DONE / f"{date}-{slug}.md")]
-    champs_cibles: dict[str, str] = {}
-    for champ, source in (("brief", brief), ("audit", audit), ("plan", plan)):
-        if source.is_file():
-            cible = DONE / f"{date}-{slug}.{champ}.md"
-            deplacements.append((source, cible))
-            if champ in champs:  # un champ absent n'est pas inventé
-                champs_cibles[champ] = cible.as_posix()
+    deplacements = [
+        (suivi, DONE / f"{date}-{slug}.md"),
+        *((p, DONE / f"{date}-{p.name}") for p in annexes),
+        (plan, DONE / f"{date}-{slug}.plan.md"),
+    ]
+    # Un champ qui désigne un fichier déplacé suit le fichier ; un champ absent n'est pas inventé.
+    cibles = {s.as_posix(): c.as_posix() for s, c in deplacements}
+    champs_cibles = {
+        champ: cibles[Path(champs[champ]).as_posix()]
+        for champ in ("brief", "audit", "plan")
+        if champ in champs and Path(champs[champ]).as_posix() in cibles
+    }
     for _, cible in deplacements:
         if cible.exists():
             raise Refus(f"{cible} existe déjà : rien n'est écrasé")

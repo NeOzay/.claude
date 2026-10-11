@@ -89,6 +89,17 @@ def test_archive_toml_resout(tmp_path: Path) -> None:
     assert [f.ok for f in check_archives(tmp_path)] == [True]
 
 
+def test_archive_toml_audit_en_repertoire_resout(tmp_path: Path) -> None:
+    _ = ecrire(tmp_path, ".claude/implementation/done/2026-01-01-x.audit/01-abcdef0.toml", "")
+    archive(
+        tmp_path,
+        "2026-01-01-x.md",
+        'audit = ".claude/implementation/done/2026-01-01-x.audit"\n',
+        "+++",
+    )
+    assert [f.ok for f in check_archives(tmp_path)] == [True]
+
+
 def test_archive_toml_pointe_dans_le_vide(tmp_path: Path) -> None:
     archive(tmp_path, "chantier.md", 'brief = ".claude/implementation/disparu.md"\n', "+++")
     assert any("brief: pointe dans le vide" in m for m in rouges_archives(tmp_path))

@@ -436,7 +436,8 @@ def check_archives(root: Path) -> list[Finding]:
         champs = cast("dict[str, str]", getattr(front, "champs", {}))
         for champ in ("plan", "brief", "audit"):
             cible = champs.get(champ, "").strip()
-            if cible and not (root / cible).is_file():
+            # `exists` et non `is_file` : `audit` désigne le répertoire des rapports.
+            if cible and not (root / cible).exists():
                 findings.append(Finding(False, f"{nom} → {champ}: pointe dans le vide ({cible})"))
     if not findings:
         findings.append(
