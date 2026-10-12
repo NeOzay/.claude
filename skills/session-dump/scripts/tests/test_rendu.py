@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import tomllib
 from datetime import UTC, datetime
+from typing import cast
 
 import session_dump as sd
 
@@ -213,3 +214,82 @@ def test_les_collisions_recoivent_toutes_le_suffixe_uuid() -> None:
         "cccccccc-3": "2026-10-08-autre.md",
     }
     assert sd.noms_de_fichiers([c, b, a]) == noms
+
+
+def sous_agent(
+    identifiant: str, famille: str, sortie: int, description: str | None = None
+) -> sd.SousAgent:
+    tokens = sd.Tokens(entree=1, sortie=sortie, cache_lu=100, cache_cree=10)
+    return sd.SousAgent(identifiant, famille, description, None, tokens)
+
+
+def test_sans_sous_agent_aucune_table_n_est_rendue() -> None:
+    fm = frontmatter(sd.rendre_frontmatter(session()))
+    assert "sous_agents" not in fm
+    assert "familles_sous_agents" not in fm
+
+
+def test_les_sous_agents_se_rendent_par_famille_et_par_lancement() -> None:
+    sous_agents = (
+        sous_agent("a1", "implementation-auditor", 20, "Audit de clôture"),
+        sous_agent("a2", "Explore", 5),
+        sous_agent("a3", "implementation-auditor", 30, "Second audit"),
+    )
+    fm = frontmatter(sd.rendre_frontmatter(session(sous_agents=sous_agents)))
+    familles = cast("dict[str, dict[str, int]]", fm["familles_sous_agents"])
+    lancements = cast("list[dict[str, object]]", fm["sous_agents"])
+    assert list(familles) == ["Explore", "implementation-auditor"]
+    assert familles["implementation-auditor"] == {
+        "lancements": 2,
+        "total": 2 + 50 + 200 + 20,
+        "entree": 2,
+        "sortie": 50,
+        "cache_lu": 200,
+        "cache_cree": 20,
+    }
+    assert [lancement["id"] for lancement in lancements] == ["a1", "a2", "a3"]
+    assert lancements[0] == {
+        "id": "a1",
+        "famille": "implementation-auditor",
+        "description": "Audit de clôture",
+        "total": 131,
+        "entree": 1,
+        "sortie": 20,
+        "cache_lu": 100,
+        "cache_cree": 10,
+    }
+    assert "description" not in lancements[1]
+
+
+def test_le_total_d_une_famille_est_la_somme_de_ses_lancements_relus() -> None:
+    sous_agents = tuple(sous_agent(f"a{n}", "x", n * 7) for n in range(1, 4))
+    fm = frontmatter(sd.rendre_frontmatter(session(sous_agents=sous_agents)))
+    famille = cast("dict[str, int]", cast("dict[str, object]", fm["familles_sous_agents"])["x"])
+    lancements = cast("list[dict[str, int]]", fm["sous_agents"])
+    assert famille["lancements"] == len(lancements)
+    for champ in ("total", "entree", "sortie", "cache_lu", "cache_cree"):
+        assert famille[champ] == sum(lancement[champ] for lancement in lancements)
+
+
+def test_une_famille_a_deux_points_et_une_description_a_guillemets_se_relisent() -> None:
+    sous_agents = (sous_agent("a1", "plugin:agent", 3, 'Dit "oui"\net `non`'),)
+    fm = frontmatter(sd.rendre_frontmatter(session(sous_agents=sous_agents)))
+    familles = cast("dict[str, object]", fm["familles_sous_agents"])
+    lancements = cast("list[dict[str, object]]", fm["sous_agents"])
+    assert list(familles) == ["plugin:agent"]
+    assert lancements[0]["famille"] == "plugin:agent"
+    assert lancements[0]["description"] == 'Dit "oui"\net `non`'
+
+
+def test_les_tables_des_sous_agents_viennent_apres_tokens_et_duree() -> None:
+    texte_fm = sd.rendre_frontmatter(session(sous_agents=(sous_agent("a1", "x", 3),)))
+    assert texte_fm.index("[tokens]") < texte_fm.index("[duree]")
+    assert texte_fm.index("[duree]") < texte_fm.index("[familles_sous_agents.")
+    assert texte_fm.index("[familles_sous_agents.") < texte_fm.index("[[sous_agents]]")
+
+
+def test_le_corps_ne_change_pas_avec_les_sous_agents() -> None:
+    lignes = [assistant(texte("Bonjour"))]
+    sans = sd.rendre(session(), lignes).split("+++\n", 2)[2]
+    avec = sd.rendre(session(sous_agents=(sous_agent("a1", "x", 3),)), lignes).split("+++\n", 2)[2]
+    assert avec == sans

@@ -32,3 +32,11 @@ sont les premières dont l'analyse a eu besoin.
 - format : `projects/-home-debian--claude/<session>/subagents/agent-<id>.meta.json` (`agentType`)
   et `agent-<id>.jsonl` (`usage` de chaque message) ; champ `entrypoint` des lignes de session
 - entrée liée : `refonte-de-l-audit`, qui cite la mesure des audits
+
+## Fait le
+
+2026-10-12, par le chantier `affiner-session-dump`. Le dump porte les tokens de chaque sous-agent,
+par lancement et par famille, et le répertoire de dumps n'est plus peuplé que de discussions : les
+sessions sans tour, lancées par `claude -p` ou à moins de 2 tours et 10 000 tokens sont écartées,
+et la sortie les compte par motif. Archive du chantier :
+`.claude/implementation/done/2026-10-12-affiner-session-dump.md`.

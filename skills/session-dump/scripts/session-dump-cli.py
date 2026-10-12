@@ -27,7 +27,14 @@ import os
 from pathlib import Path
 from typing import cast
 
-from session_dump import Bilan, dumper
+from session_dump import TOKENS_MIN, TOURS_MIN, Bilan, Motif, dumper
+
+# Le libellé de chaque motif d'écart, dans l'ordre où la commande les rapporte.
+LIBELLES: dict[Motif, str] = {
+    "sans-tour": "sans tour",
+    "claude-p": "lancée(s) par claude -p",
+    "trop-courte": f"moins de {TOURS_MIN} tours et de {TOKENS_MIN:_} tokens".replace("_", " "),
+}
 
 
 def main(argv: list[str]) -> int:
@@ -47,8 +54,9 @@ def main(argv: list[str]) -> int:
         sys.stderr.write(resultat.message + "\n")
         return resultat.code
     print(f"session-dump : {resultat.ecrits} dumps écrits dans {resultat.destination}")
-    if resultat.ecartes:
-        print(f"session-dump : {resultat.ecartes} session(s) sans tour écartée(s)")
+    for motif, libelle in LIBELLES.items():
+        if resultat.ecartes.get(motif):
+            print(f"session-dump : {resultat.ecartes[motif]} session(s) écartée(s) — {libelle}")
     if resultat.illisibles:
         sys.stderr.write(f"session-dump : {resultat.illisibles} ligne(s) illisible(s) ignorée(s)\n")
     return 0

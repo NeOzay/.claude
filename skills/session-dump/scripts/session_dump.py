@@ -1,15 +1,21 @@
 """Lit une session Claude Code et en tire des statistiques, sans rien interpréter.
 
 PORTÉE : la lecture des JSONL de `projects/<id>/`, le calcul de tokens, coût, durée, tours,
-titre, date de création et branches, puis le rendu d'un dump (frontmatter TOML, corps, nom de
-fichier). Rien ici ne classe ni n'analyse le contenu d'une discussion : le corps ne garde que ce
-que l'utilisateur a saisi, ce que l'assistant a écrit, et une ligne par appel d'outil. Résultats
+titre, date de création, branches et sous-agents, l'écart des sessions qui ne sont pas une
+discussion (`motif_d_ecart`), puis le rendu d'un dump (frontmatter TOML, corps, nom de fichier).
+Rien ici ne classe ni n'analyse le contenu d'une discussion : le corps ne garde que ce que
+l'utilisateur a saisi, ce que l'assistant a écrit, et une ligne par appel d'outil. Résultats
 d'outils, thinking, messages méta et attachments n'y entrent jamais.
 
 TOKENS : de la dernière ligne `cost-state` quand la session en porte une — son `modelUsage` est
 seul cohérent avec `totalCostUSD`, il compte aussi les appels annexes (titres, classifieur) et
 les sous-agents. À défaut, recalculés depuis les transcriptions (principale et sous-agents), et
 le coût comme la durée restent absents : aucun nombre inventé.
+
+SOUS-AGENTS : lus de `<uuid>/subagents/` dans tous les cas, avec leurs tokens depuis leurs
+transcriptions et leur famille depuis leur `.meta.json`. Ils s'ajoutent au total d'une session
+sans `cost-state` seulement ; sous `cost-state`, `tokens` ne change pas. Aucun coût par
+sous-agent : la commande ne connaît aucun prix.
 
 DÉDOUBLONNAGE : un message `assistant` est éclaté en plusieurs lignes de même `message.id`, qui
 répètent son `usage`. Sommer ligne à ligne compterait plusieurs fois le même message.
@@ -46,6 +52,16 @@ PREFIXES_AUTOMATIQUES = (
     "[Request interrupted by user",
 )
 
+# Écart d'une session du répertoire de dumps. Définis ICI ET NULLE PART AILLEURS : la commande
+# s'appuie sur les mêmes valeurs pour son libellé. ENTREE_SDK : valeur d'`entrypoint` d'une session
+# lancée par `claude -p`, qui n'est pas une discussion. TOURS_MIN et TOKENS_MIN : en deçà des deux
+# à la fois, une session n'a rien à dire.
+ENTREE_SDK = "sdk-cli"
+TOURS_MIN = 2
+TOKENS_MIN = 10_000
+
+type Motif = Literal["sans-tour", "claude-p", "trop-courte"]
+
 # Bloc de rappel que le harnais ajoute au texte d'un message utilisateur.
 SYSTEM_REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>", re.DOTALL)
 
@@ -81,6 +97,17 @@ class Duree:
 
 
 @dataclass(frozen=True)
+class SousAgent:
+    """Un lancement de sous-agent : ce qu'il a consommé, d'après sa transcription."""
+
+    id: str
+    famille: str
+    description: str | None
+    debut: datetime | None
+    tokens: Tokens
+
+
+@dataclass(frozen=True)
 class Session:
     """Les statistiques d'une session principale."""
 
@@ -94,6 +121,8 @@ class Session:
     cout_usd: float | None
     duree: Duree | None
     illisibles: int
+    sous_agents: tuple[SousAgent, ...] = ()
+    entrypoint: str | None = None
 
 
 def analyser_ligne(brute: str) -> Ligne | None:
@@ -205,6 +234,63 @@ def cout_cost_state(cost_state: Ligne) -> float | None:
     return float(cout) if isinstance(cout, int | float) and not isinstance(cout, bool) else None
 
 
+# Famille d'un lancement sans `agentType` dans son `.meta.json` : même repli que `ligne_outil`.
+FAMILLE_INCONNUE = "?"
+
+
+def lire_meta(chemin: Path) -> tuple[Ligne, bool]:
+    """Le `.meta.json` d'un sous-agent, et vrai s'il existe mais est illisible.
+
+    Un fichier absent n'est pas illisible : il rend un objet vide, sans signalement.
+    """
+    try:
+        brut = chemin.read_text(encoding="utf-8", errors="replace")
+    except FileNotFoundError:
+        return {}, False
+    except OSError:
+        return {}, True
+    objet = analyser_ligne(brut)
+    return (objet, False) if objet is not None else ({}, True)
+
+
+def lire_sous_agents(repertoire: Path) -> tuple[list[SousAgent], int]:
+    """Les lancements de `repertoire` (`<uuid>/subagents/`), et le nombre d'éléments illisibles.
+
+    Chaque `agent-<id>.jsonl` est un lancement ; son `agent-<id>.meta.json` en donne la famille
+    (`agentType`) et la description. Les lancements sont classés par date de leur première ligne,
+    puis par `id` : un ordre fixe, aucun classement. Un `.meta.json` absent donne la famille
+    `"?"` sans signalement ; une ligne de transcription ou un `.meta.json` illisibles se comptent.
+    """
+    sous_agents: list[SousAgent] = []
+    illisibles = 0
+    for transcription in sorted(repertoire.glob("agent-*.jsonl")):
+        lignes, ill = lire_jsonl(transcription)
+        meta, meta_illisible = lire_meta(transcription.with_suffix(".meta.json"))
+        illisibles += ill + int(meta_illisible)
+        sous_agents.append(
+            SousAgent(
+                id=transcription.stem.removeprefix("agent-"),
+                famille=chaine(meta.get("agentType")) or FAMILLE_INCONNUE,
+                description=chaine(meta.get("description")),
+                debut=creation(lignes),
+                tokens=tokens_transcriptions(lignes),
+            )
+        )
+    sans_date = datetime.max.replace(tzinfo=UTC)
+    sous_agents.sort(key=lambda sous: (sous.debut or sans_date, sous.id))
+    return sous_agents, illisibles
+
+
+def familles(sous_agents: Iterable[SousAgent]) -> dict[str, tuple[int, Tokens]]:
+    """Le nombre de lancements et la somme des tokens de chaque famille, par ordre alphabétique."""
+    lancements: Counter[str] = Counter()
+    tokens: dict[str, Tokens] = {}
+    for sous in sous_agents:
+        lancements[sous.famille] += 1
+        tokens[sous.famille] = tokens.get(sous.famille, Tokens()) + sous.tokens
+    return {famille: (lancements[famille], tokens[famille]) for famille in sorted(tokens)}
+
+
 def titre(lignes: Iterable[Ligne], uuid: str) -> str:
     """Le dernier `custom-title`, sinon le dernier `ai-title`, sinon l'UUID.
 
@@ -249,6 +335,15 @@ def branches(lignes: Iterable[Ligne]) -> tuple[str, ...]:
         if isinstance(branche, str) and branche:
             vues.setdefault(branche)
     return tuple(vues)
+
+
+def entrypoint(lignes: Iterable[Ligne]) -> str | None:
+    """La valeur de `entrypoint` de la première ligne qui la porte (`cli`, `sdk-cli`…)."""
+    for ligne in lignes:
+        valeur = chaine(ligne.get("entrypoint"))
+        if valeur:
+            return valeur
+    return None
 
 
 def texte_utilisateur(message: Ligne) -> str | None:
@@ -302,10 +397,12 @@ def analyser(chemin: Path) -> Session:
 def analyser_lignes(chemin: Path, lignes: Sequence[Ligne], illisibles: int) -> Session:
     """Les statistiques d'une session dont `lignes` est le JSONL principal, lu de `chemin`.
 
-    Les transcriptions des sous-agents (`<uuid>/subagents/*.jsonl`) ne se lisent que si la
-    session n'a pas de `cost-state`.
+    Les sous-agents (`<uuid>/subagents/`) se lisent dans tous les cas. Leurs tokens ne s'ajoutent
+    au total que si la session n'a pas de `cost-state`, dont le `modelUsage` les compte déjà.
     """
     uuid = chemin.stem
+    sous_agents, illisibles_sous = lire_sous_agents(chemin.parent / uuid / "subagents")
+    illisibles += illisibles_sous
     cost_state = dernier_cost_state(lignes)
     if cost_state is not None:
         mesure: Literal["cost-state", "transcriptions"] = "cost-state"
@@ -314,11 +411,7 @@ def analyser_lignes(chemin: Path, lignes: Sequence[Ligne], illisibles: int) -> S
         duree = duree_cost_state(cost_state)
     else:
         mesure = "transcriptions"
-        tokens = tokens_transcriptions(lignes)
-        for sous in sorted((chemin.parent / uuid / "subagents").glob("*.jsonl")):
-            lignes_sous, illisibles_sous = lire_jsonl(sous)
-            tokens += tokens_transcriptions(lignes_sous)
-            illisibles += illisibles_sous
+        tokens = sum((sous.tokens for sous in sous_agents), tokens_transcriptions(lignes))
         cout = None
         duree = None
     return Session(
@@ -332,7 +425,25 @@ def analyser_lignes(chemin: Path, lignes: Sequence[Ligne], illisibles: int) -> S
         cout_usd=cout,
         duree=duree,
         illisibles=illisibles,
+        sous_agents=tuple(sous_agents),
+        entrypoint=entrypoint(lignes),
     )
+
+
+def motif_d_ecart(session: Session) -> Motif | None:
+    """Pourquoi `session` n'est pas une discussion à dumper, ou None si elle en est une.
+
+    Dans cet ordre : aucun tour ; lancée par `claude -p` ; moins de `TOURS_MIN` tours et moins
+    de `TOKENS_MIN` tokens (le total du frontmatter, sous-agents compris). Aucun autre critère :
+    ni le titre ni le contenu ne jugent une session.
+    """
+    if session.tours == 0:
+        return "sans-tour"
+    if session.entrypoint == ENTREE_SDK:
+        return "claude-p"
+    if session.tours < TOURS_MIN and session.tokens.total < TOKENS_MIN:
+        return "trop-courte"
+    return None
 
 
 def sessions_du_projet(repertoire: Path) -> list[Path]:
@@ -356,13 +467,47 @@ def chaine_toml(valeur: str) -> str:
     return json.dumps(valeur, ensure_ascii=False).replace("\x7f", "\\u007f")
 
 
+def champs_tokens(tokens: Tokens) -> list[str]:
+    """Les cinq champs de tokens, dans l'ordre de `[tokens]`."""
+    return [
+        f"total = {tokens.total:_}",
+        f"entree = {tokens.entree:_}",
+        f"sortie = {tokens.sortie:_}",
+        f"cache_lu = {tokens.cache_lu:_}",
+        f"cache_cree = {tokens.cache_cree:_}",
+    ]
+
+
+def rendre_sous_agents(sous_agents: Sequence[SousAgent]) -> list[str]:
+    """Les tables des sous-agents : une par famille, puis une par lancement.
+
+    Aucune ligne pour une session sans sous-agent. Les champs de tokens sont ceux de `[tokens]`,
+    sans coût.
+    """
+    lignes: list[str] = []
+    for famille, (lancements, tokens) in familles(sous_agents).items():
+        lignes += [
+            "",
+            f"[familles_sous_agents.{chaine_toml(famille)}]",
+            f"lancements = {lancements:_}",
+            *champs_tokens(tokens),
+        ]
+    for sous in sous_agents:
+        lignes += ["", "[[sous_agents]]", f"id = {chaine_toml(sous.id)}"]
+        lignes.append(f"famille = {chaine_toml(sous.famille)}")
+        if sous.description is not None:
+            lignes.append(f"description = {chaine_toml(sous.description)}")
+        lignes += champs_tokens(sous.tokens)
+    return lignes
+
+
 def rendre_frontmatter(session: Session) -> str:
     """Le frontmatter TOML de `session`, délimité par `+++`, champs plats dans un ordre fixe.
 
     `session`, `titre`, `cree` et `branches` identifient la session ; ils ne sont pas des
-    métriques. `cout_usd` et `[duree]` n'existent que si la mesure vient de `cost-state`. Les
-    nombres s'écrivent par groupes de trois chiffres séparés par `_` (`45_372_384`), que TOML
-    admet et que `tomllib` relit.
+    métriques. `cout_usd` et `[duree]` n'existent que si la mesure vient de `cost-state` ; les
+    tables des sous-agents, que si la session en a. Les nombres s'écrivent par groupes de trois
+    chiffres séparés par `_` (`45_372_384`), que TOML admet et que `tomllib` relit.
     """
     lignes = [
         "+++",
@@ -379,16 +524,7 @@ def rendre_frontmatter(session: Session) -> str:
     ]
     if session.cout_usd is not None:
         lignes.append(f"cout_usd = {session.cout_usd:_.4f}")
-    tokens = session.tokens
-    lignes += [
-        "",
-        "[tokens]",
-        f"total = {tokens.total:_}",
-        f"entree = {tokens.entree:_}",
-        f"sortie = {tokens.sortie:_}",
-        f"cache_lu = {tokens.cache_lu:_}",
-        f"cache_cree = {tokens.cache_cree:_}",
-    ]
+    lignes += ["", "[tokens]", *champs_tokens(session.tokens)]
     if session.duree is not None:
         lignes += [
             "",
@@ -396,6 +532,7 @@ def rendre_frontmatter(session: Session) -> str:
             f"totale_s = {session.duree.totale_s:_}",
             f"api_s = {session.duree.api_s:_}",
         ]
+    lignes += rendre_sous_agents(session.sous_agents)
     lignes.append("+++")
     return "\n".join(lignes) + "\n"
 
@@ -538,7 +675,7 @@ class Bilan:
 
     destination: Path
     ecrits: int
-    ecartes: int
+    ecartes: Mapping[Motif, int]
     illisibles: int
 
 
@@ -598,8 +735,8 @@ def remplacer(destination: Path, contenus: Mapping[str, str]) -> None:
 def dumper(projet: Path, environ: Mapping[str, str]) -> Bilan | Echec:
     """Écrit un dump par session principale de `projet` dans `<projet>/.claude/session-dump/<id>/`.
 
-    Une session sans aucun tour n'est pas une discussion : elle n'est pas dumpée, et le bilan la
-    compte. Le dump de la session en cours y figure, partiel.
+    Une session que `motif_d_ecart` écarte n'est pas une discussion : elle n'est pas dumpée, et le
+    bilan la compte par motif. Le dump de la session en cours y figure, partiel.
     """
     if not projet.is_dir():
         return Echec(2, f"session-dump : {projet} n'est pas un répertoire.")
@@ -611,14 +748,15 @@ def dumper(projet: Path, environ: Mapping[str, str]) -> Bilan | Echec:
 
     sessions: list[Session] = []
     corps: dict[str, Sequence[Ligne]] = {}
-    ecartes = 0
+    ecartes: Counter[Motif] = Counter()
     illisibles = 0
     for chemin in sessions_du_projet(source):
         lignes, ill = lire_jsonl(chemin)
         session = analyser_lignes(chemin, lignes, ill)
         illisibles += session.illisibles
-        if session.tours == 0:
-            ecartes += 1
+        motif = motif_d_ecart(session)
+        if motif is not None:
+            ecartes[motif] += 1
             continue
         sessions.append(session)
         corps[session.uuid] = lignes
@@ -630,4 +768,4 @@ def dumper(projet: Path, environ: Mapping[str, str]) -> Bilan | Echec:
         remplacer(destination, contenus)
     except OSError as erreur:
         return Echec(1, f"session-dump : écriture impossible dans {destination} : {erreur}")
-    return Bilan(destination, len(contenus), ecartes, illisibles)
+    return Bilan(destination, len(contenus), dict(ecartes), illisibles)

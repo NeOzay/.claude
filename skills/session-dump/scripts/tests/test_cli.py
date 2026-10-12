@@ -19,10 +19,9 @@ CLI = Path(__file__).resolve().parent.parent / "session-dump-cli.py"
 
 
 def session_jsonl(titre: str = "Un titre", **extra: object) -> list[Ligne]:
-    return [
-        {"type": "user", "message": {"role": "user", "content": "salut"}} | extra,
-        {"type": "ai-title", "aiTitle": titre},
-    ]
+    """Une session de deux tours : assez longue pour n'être écartée par aucun motif."""
+    tour: Ligne = {"type": "user", "message": {"role": "user", "content": "salut"}} | extra
+    return [tour, tour, {"type": "ai-title", "aiTitle": titre}]
 
 
 @pytest.fixture
@@ -54,7 +53,7 @@ def test_dumper_ecrit_un_dump_par_session_avec_tour(
     projet, _, environ = monde
     bilan = sd.dumper(projet, environ)
     assert isinstance(bilan, sd.Bilan)
-    assert (bilan.ecrits, bilan.ecartes, bilan.illisibles) == (2, 1, 0)
+    assert (bilan.ecrits, dict(bilan.ecartes), bilan.illisibles) == (2, {"sans-tour": 1}, 0)
     attendu = projet / ".claude" / "session-dump" / sd.id_projet(projet.resolve())
     assert bilan.destination == attendu
     fichiers = sorted(p.name for p in attendu.iterdir())
@@ -140,7 +139,7 @@ def test_un_demi_caractere_n_empeche_pas_le_dump_et_ne_laisse_rien(
     # `json.dumps` écrit la moitié de paire en échappement ASCII `\ud83d`, que `json.loads` relit.
     ecrire_jsonl(source / "dddddddd.jsonl", session_jsonl("Titre \ud83d seul"))
     ligne = {"type": "user", "message": {"role": "user", "content": "texte \ud83d seul"}}
-    ecrire_jsonl(source / "eeeeeeee.jsonl", [ligne])
+    ecrire_jsonl(source / "eeeeeeee.jsonl", [ligne, ligne])
     bilan = sd.dumper(projet, environ)
     assert isinstance(bilan, sd.Bilan)
     assert bilan.ecrits == 4
@@ -182,7 +181,7 @@ def test_la_commande_sans_argument_prend_le_repertoire_courant(
     resultat = lancer(projet, environ)
     assert resultat.returncode == 0, resultat.stderr
     assert "2 dumps écrits" in resultat.stdout
-    assert "1 session(s) sans tour écartée(s)" in resultat.stdout
+    assert "1 session(s) écartée(s) — sans tour" in resultat.stdout
 
 
 def test_la_commande_avec_le_chemin_d_un_autre_projet(
@@ -207,3 +206,49 @@ def test_la_commande_sort_1_sans_session(tmp_path: Path) -> None:
     resultat = lancer(tmp_path, {"CLAUDE_CONFIG_DIR": str(tmp_path / "vide")})
     assert resultat.returncode == 1
     assert "aucune session" in resultat.stderr
+
+
+def test_dumper_compte_les_ecartees_par_motif(
+    monde: tuple[Path, Path, dict[str, str]], ecrire_jsonl: Ecrire
+) -> None:
+    projet, source, environ = monde
+    ecrire_jsonl(source / "dddddddd.jsonl", session_jsonl("Par -p", entrypoint="sdk-cli"))
+    ecrire_jsonl(source / "eeeeeeee.jsonl", session_jsonl("Par -p bis", entrypoint="sdk-cli"))
+    ecrire_jsonl(source / "ffffffff.jsonl", session_jsonl("Courte")[1:])
+    bilan = sd.dumper(projet, environ)
+    assert isinstance(bilan, sd.Bilan)
+    assert bilan.ecrits == 2
+    assert dict(bilan.ecartes) == {"sans-tour": 1, "claude-p": 2, "trop-courte": 1}
+    assert sorted(p.name for p in bilan.destination.iterdir()) == [
+        "sans-date-première.md",
+        "sans-date-seconde.md",
+    ]
+
+
+def test_la_commande_rapporte_chaque_motif_d_ecart(
+    monde: tuple[Path, Path, dict[str, str]], ecrire_jsonl: Ecrire
+) -> None:
+    projet, source, environ = monde
+    ecrire_jsonl(source / "dddddddd.jsonl", session_jsonl("Par -p", entrypoint="sdk-cli"))
+    ecrire_jsonl(source / "ffffffff.jsonl", session_jsonl("Courte")[1:])
+    resultat = lancer(projet, environ)
+    assert resultat.returncode == 0, resultat.stderr
+    assert resultat.stdout.splitlines()[1:] == [
+        "session-dump : 1 session(s) écartée(s) — sans tour",
+        "session-dump : 1 session(s) écartée(s) — lancée(s) par claude -p",
+        "session-dump : 1 session(s) écartée(s) — moins de 2 tours et de 10 000 tokens",
+    ]
+
+
+def test_la_commande_ne_dit_rien_des_motifs_sans_ecartee(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    projet = tmp_path / "p"
+    projet.mkdir()
+    config = tmp_path / "config"
+    ecrire_jsonl(
+        config / "projects" / sd.id_projet(projet.resolve()) / "aaaaaaaa.jsonl", session_jsonl()
+    )
+    resultat = lancer(projet, {"CLAUDE_CONFIG_DIR": str(config)})
+    assert resultat.returncode == 0, resultat.stderr
+    assert len(resultat.stdout.splitlines()) == 1

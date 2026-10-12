@@ -189,3 +189,192 @@ def test_sessions_du_projet_ne_prend_que_les_jsonl_de_la_racine(
     ecrire_jsonl(tmp_path / "a.jsonl", [])
     ecrire_jsonl(tmp_path / "a" / "subagents" / "agent-1.jsonl", [])
     assert [p.name for p in sd.sessions_du_projet(tmp_path)] == ["a.jsonl", "b.jsonl"]
+
+
+def lancement(
+    repertoire: Path, ecrire_jsonl: Ecrire, identifiant: str, sortie: int, meta: str | None = None
+) -> None:
+    """Pose `agent-<identifiant>.jsonl` et, si `meta` n'est pas None, son `.meta.json`."""
+    horodatage = {"timestamp": f"2026-10-08T09:00:{sortie:02d}Z"}
+    ecrire_jsonl(
+        repertoire / f"agent-{identifiant}.jsonl",
+        [assistant(f"m-{identifiant}", sortie) | horodatage],
+    )
+    if meta is not None:
+        (repertoire / f"agent-{identifiant}.meta.json").write_text(meta, encoding="utf-8")
+
+
+def test_lire_sous_agents_lit_la_famille_et_la_description_du_meta(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    meta = '{"agentType": "implementation-auditor", "description": "Audit", "spawnDepth": 1}'
+    lancement(tmp_path, ecrire_jsonl, "a1", 12, meta)
+    sous_agents, illisibles = sd.lire_sous_agents(tmp_path)
+    assert illisibles == 0
+    assert sous_agents == [
+        sd.SousAgent(
+            id="a1",
+            famille="implementation-auditor",
+            description="Audit",
+            debut=datetime(2026, 10, 8, 9, 0, 12, tzinfo=UTC),
+            tokens=sd.Tokens(entree=2, sortie=12, cache_lu=100, cache_cree=10),
+        )
+    ]
+
+
+def test_un_meta_absent_donne_la_famille_inconnue_sans_signalement(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    lancement(tmp_path, ecrire_jsonl, "a1", 12)
+    sous_agents, illisibles = sd.lire_sous_agents(tmp_path)
+    assert [(s.famille, s.description) for s in sous_agents] == [("?", None)]
+    assert illisibles == 0
+
+
+def test_un_meta_illisible_ou_sans_agent_type_donne_la_famille_inconnue(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    lancement(tmp_path, ecrire_jsonl, "a1", 10, "{pas du json")
+    lancement(tmp_path, ecrire_jsonl, "a2", 11, "[1, 2]")
+    lancement(tmp_path, ecrire_jsonl, "a3", 12, '{"description": "sans type"}')
+    sous_agents, illisibles = sd.lire_sous_agents(tmp_path)
+    assert [s.famille for s in sous_agents] == ["?", "?", "?"]
+    assert illisibles == 2
+
+
+def test_lire_sous_agents_compte_les_lignes_illisibles_des_transcriptions(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    lancement(tmp_path, ecrire_jsonl, "a1", 10, '{"agentType": "x"}')
+    with (tmp_path / "agent-a1.jsonl").open("a", encoding="utf-8") as flux:
+        flux.write("illisible\n")
+    assert sd.lire_sous_agents(tmp_path)[1] == 1
+
+
+def test_lire_sous_agents_sans_repertoire_ne_rend_rien(tmp_path: Path) -> None:
+    assert sd.lire_sous_agents(tmp_path / "absent") == ([], 0)
+
+
+def test_lire_sous_agents_classe_par_date_puis_par_id(tmp_path: Path, ecrire_jsonl: Ecrire) -> None:
+    lancement(tmp_path, ecrire_jsonl, "b", 30)
+    lancement(tmp_path, ecrire_jsonl, "d", 10)
+    lancement(tmp_path, ecrire_jsonl, "a", 20)
+    ecrire_jsonl(tmp_path / "agent-c.jsonl", [assistant("m-c", 1)])  # sans date : en dernier
+    ecrire_jsonl(tmp_path / "agent-0.jsonl", [assistant("m-0", 1)])
+    sous_agents, _ = sd.lire_sous_agents(tmp_path)
+    assert [s.id for s in sous_agents] == ["d", "a", "b", "0", "c"]
+
+
+def test_un_message_eclate_d_un_sous_agent_compte_une_fois(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    ecrire_jsonl(
+        tmp_path / "agent-a1.jsonl", [assistant("m1", 5), assistant("m1", 30), assistant("m2", 7)]
+    )
+    sous_agents, _ = sd.lire_sous_agents(tmp_path)
+    assert sous_agents[0].tokens.sortie == 37
+
+
+def test_familles_somme_les_lancements_de_chaque_famille() -> None:
+    def sous(identifiant: str, famille: str, sortie: int) -> sd.SousAgent:
+        return sd.SousAgent(identifiant, famille, None, None, sd.Tokens(1, sortie, 100, 10))
+
+    resultat = sd.familles([sous("a", "zeta", 5), sous("b", "alpha", 7), sous("c", "zeta", 9)])
+    assert list(resultat) == ["alpha", "zeta"]
+    assert resultat["alpha"] == (1, sd.Tokens(1, 7, 100, 10))
+    assert resultat["zeta"] == (2, sd.Tokens(2, 14, 200, 20))
+    assert sd.familles([]) == {}
+
+
+def test_analyser_porte_les_sous_agents_sans_toucher_aux_tokens_de_cost_state(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    chemin = ecrire_jsonl(tmp_path / "abc.jsonl", [utilisateur("salut"), cost_state()])
+    lancement(tmp_path / "abc" / "subagents", ecrire_jsonl, "a1", 12, '{"agentType": "x"}')
+    session = sd.analyser(chemin)
+    assert session.mesure == "cost-state"
+    assert session.tokens.total == 380
+    assert [s.id for s in session.sous_agents] == ["a1"]
+    assert session.sous_agents[0].tokens.sortie == 12
+
+
+def test_analyser_sans_cost_state_porte_aussi_les_sous_agents(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    chemin = ecrire_jsonl(tmp_path / "abc.jsonl", [utilisateur("salut"), assistant("m1", 30)])
+    lancement(tmp_path / "abc" / "subagents", ecrire_jsonl, "a1", 12, '{"agentType": "x"}')
+    lancement(tmp_path / "abc" / "subagents", ecrire_jsonl, "a2", 8)
+    session = sd.analyser(chemin)
+    assert session.tokens.sortie == 50
+    assert [s.id for s in session.sous_agents] == ["a2", "a1"]
+
+
+def test_les_illisibles_d_un_sous_agent_s_ajoutent_a_ceux_de_la_session(
+    tmp_path: Path, ecrire_jsonl: Ecrire
+) -> None:
+    chemin = ecrire_jsonl(tmp_path / "abc.jsonl", [utilisateur("salut"), cost_state()])
+    lancement(tmp_path / "abc" / "subagents", ecrire_jsonl, "a1", 12, "{pas du json")
+    assert sd.analyser(chemin).illisibles == 1
+
+
+def test_entrypoint_est_celui_de_la_premiere_ligne_qui_le_porte() -> None:
+    lignes = [{"type": "queue-operation"}, {"entrypoint": "sdk-cli"}, {"entrypoint": "cli"}]
+    assert sd.entrypoint(lignes) == "sdk-cli"
+    assert sd.entrypoint([{"type": "mode"}, {"entrypoint": 3}]) is None
+
+
+def une_session(**extra: object) -> sd.Session:
+    champs: dict[str, object] = {
+        "uuid": "abc",
+        "titre": "t",
+        "cree": None,
+        "branches": (),
+        "tours": 5,
+        "mesure": "transcriptions",
+        "tokens": sd.Tokens(sortie=50_000),
+        "cout_usd": None,
+        "duree": None,
+        "illisibles": 0,
+    } | extra
+    return sd.Session(**champs)  # pyright: ignore[reportArgumentType]
+
+
+def test_une_discussion_n_est_pas_ecartee() -> None:
+    assert sd.motif_d_ecart(une_session()) is None
+    assert sd.motif_d_ecart(une_session(entrypoint="cli")) is None
+
+
+def test_motif_sans_tour() -> None:
+    assert sd.motif_d_ecart(une_session(tours=0)) == "sans-tour"
+
+
+def test_motif_claude_p() -> None:
+    assert sd.motif_d_ecart(une_session(entrypoint="sdk-cli")) == "claude-p"
+
+
+def test_motif_trop_courte_et_ses_limites() -> None:
+    courte = {"tours": 1, "tokens": sd.Tokens(sortie=9_999)}
+    assert sd.motif_d_ecart(une_session(**courte)) == "trop-courte"
+    assert sd.motif_d_ecart(une_session(tours=2, tokens=sd.Tokens(sortie=9_999))) is None
+    assert sd.motif_d_ecart(une_session(tours=1, tokens=sd.Tokens(sortie=10_000))) is None
+
+
+def test_les_tokens_d_ecart_sont_le_total_du_frontmatter() -> None:
+    assert sd.motif_d_ecart(une_session(tours=1, tokens=sd.Tokens(2, 3, 9_000, 995))) is None
+    assert sd.motif_d_ecart(une_session(tours=1, tokens=sd.Tokens(2, 3, 9_000, 994))) == (
+        "trop-courte"
+    )
+
+
+def test_priorite_des_motifs() -> None:
+    assert sd.motif_d_ecart(une_session(tours=0, entrypoint="sdk-cli")) == "sans-tour"
+    court = {"tours": 1, "tokens": sd.Tokens(), "entrypoint": "sdk-cli"}
+    assert sd.motif_d_ecart(une_session(**court)) == "claude-p"
+
+
+def test_analyser_lit_l_entrypoint(tmp_path: Path, ecrire_jsonl: Ecrire) -> None:
+    chemin = ecrire_jsonl(
+        tmp_path / "abc.jsonl",
+        [{"type": "queue-operation"}, utilisateur("salut", entrypoint="sdk-cli")],
+    )
+    assert sd.analyser(chemin).entrypoint == "sdk-cli"

@@ -1,0 +1,237 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "affiner-session-dump"
+audit = "01-be6978c"
+rang = 1
+type = "clôture"
+date = 2026-10-12
+base = "master"
+commit = "be6978c"
+brief = ".claude/implementation/affiner-session-dump.brief.md"
+suivi = ".claude/implementation/affiner-session-dump.md"
+plan = ".claude/plans/inherited-tinkering-swan.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "~/.claude/.venv/bin/python -m pytest skills/session-dump/scripts/tests/"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 68 items
+
+skills/session-dump/scripts/tests/test_cli.py .................          [ 25%]
+skills/session-dump/scripts/tests/test_lecture.py ...................... [ 57%]
+...........                                                              [ 73%]
+skills/session-dump/scripts/tests/test_rendu.py ..................       [100%]
+
+============================== 68 passed in 0.85s =============================="""
+
+[[verification]]
+origine = "Étape 2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/session-dump/scripts/tests/"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 68 items
+
+skills/session-dump/scripts/tests/test_cli.py .................          [ 25%]
+skills/session-dump/scripts/tests/test_lecture.py ...................... [ 57%]
+...........                                                              [ 73%]
+skills/session-dump/scripts/tests/test_rendu.py ..................       [100%]
+
+============================== 68 passed in 0.79s =============================="""
+
+[[verification]]
+origine = "Étape 3"
+commande = "~/.claude/.venv/bin/python -m pytest skills/session-dump/scripts/tests/"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 68 items
+
+skills/session-dump/scripts/tests/test_cli.py .................          [ 25%]
+skills/session-dump/scripts/tests/test_lecture.py ...................... [ 57%]
+...........                                                              [ 73%]
+skills/session-dump/scripts/tests/test_rendu.py ..................       [100%]
+
+============================== 68 passed in 0.74s =============================="""
+
+[[verification]]
+origine = "Étape 4"
+commande = "section « Vérification » du plan (C1 à C5, S3)"
+statut = "passée"
+sortie = """Menée par l'auditeur, détail dans les vérifications C1, C2, C3, C5 ci-dessous. Le dump d'avant (S3)
+et celui d'après sont écrits dans des projets du scratchpad, `CLAUDE_CONFIG_DIR` pointant par lien vers
+`projects/-home-debian--claude`, pour ne rien écrire dans le dépôt ; la Base vient de `git archive master`.
+Avant (master) : 92 dumps écrits, 2 session(s) sans tour écartée(s).
+Après (be6978c) : 68 dumps écrits ; 2 sans tour, 15 claude -p, 9 trop courtes.
+S3 : 68 sessions communes, 0 écart(s) [] (exit 0).
+Contrôle supplémentaire S4 : 68 communes ; frontmatter hors tables des sous-agents différent : [] ; corps différent : [] (exit 0)."""
+
+[[verification]]
+origine = "C1"
+commande = "CLAUDE_CONFIG_DIR=$S/config python3 skills/session-dump/scripts/session-dump-cli.py $S/apres/projet   ($S/config/projects/<id> : lien vers projects/-home-debian--claude)"
+statut = "passée"
+sortie = """session-dump : 68 dumps écrits dans …/scratchpad/audit/apres/projet/.claude/session-dump/-tmp-claude-1000--home-debian--claude-0ca7f4c0-…-audit-apres-projet
+session-dump : 2 session(s) écartée(s) — sans tour
+session-dump : 15 session(s) écartée(s) — lancée(s) par claude -p
+session-dump : 9 session(s) écartée(s) — moins de 2 tours et de 10 000 tokens
+exit 0"""
+
+[[verification]]
+origine = "C1"
+commande = "python3 -I $S/scripts/controle.py $S/apres/projet   (script de la section Vérification du plan, chemins adaptés au scratchpad, plus un contrôle des champs de chaque lancement et du nombre de lancements par transcription agent-*.jsonl)"
+statut = "passée"
+sortie = """68 dumps, 38 à sous-agents, 79 lancements ; familles {'claude-code-guide': 1, 'implementation-auditor': 48, 'lexique-test-injecte': 3, 'lexique-test-isole': 1, 'migrateur-de-liste': 3, 'plan-reviewer': 21, 'step-implementer': 2}
+C1, C2, C3 : conformes
+exit 0"""
+
+[[verification]]
+origine = "C2"
+commande = "python3 -I $S/scripts/controle.py $S/apres/projet   (même script : par dump, familles = ensemble des familles des lancements, lancements et 5 champs de famille = somme des lancements, champs id/famille/total/entree/sortie/cache_lu/cache_cree présents)"
+statut = "passée"
+sortie = """68 dumps, 38 à sous-agents, 79 lancements ; …
+C1, C2, C3 : conformes
+exit 0"""
+
+[[verification]]
+origine = "C3"
+commande = "python3 -I $S/scripts/controle.py $S/apres/projet   (même script : compteur des familles des dumps comparé aux agentType des *.meta.json des sessions dumpées)"
+statut = "passée"
+sortie = """79 lancements dumpés = 79 *.meta.json des sessions dumpées (83 au total dans le dépôt ; les 4 autres, lexique-test-isole, sont dans des sessions sdk-cli écartées, lecture actée au journal du 2026-10-11)
+C1, C2, C3 : conformes
+exit 0"""
+
+[[verification]]
+origine = "C5"
+commande = "/home/debian/.claude/.venv/bin/python -m pytest -q skills/session-dump/scripts/tests/"
+statut = "passée"
+sortie = """68 passed in 0.78s
+exit 0"""
+
+[[verification]]
+origine = "C5"
+commande = "cd skills/session-dump && uvx ruff check . && uvx ruff format --check ."
+statut = "passée"
+sortie = """All checks passed!
+6 files already formatted
+exit 0"""
+
+[[verification]]
+origine = "C5"
+commande = "cd skills/session-dump && uvx --with pytest basedpyright"
+statut = "passée"
+sortie = """0 errors, 0 warnings, 0 notes
+exit 0"""
+
+[[verification]]
+origine = "C5"
+commande = "uvx rumdl fmt --check skills/session-dump/SKILL.md"
+statut = "passée"
+sortie = """Success: No issues found in 1 file (15ms)
+exit 0"""
+
+[[conformite.critere]]
+id = "C1"
+critere = "`session-dump`, lancé sur ce dépôt, n'écrit aucun dump de session `sdk-cli` ni de session à moins de 2 tours et moins de 10 000 tokens ; sa sortie compte les écartées par motif (sans tour, `claude -p`, trop courte)."
+etat = "atteint"
+constat = "Lancée sur les sessions de ce dépôt (vérification C1), la commande écrit 68 dumps et rapporte une ligne par motif : 2 sans tour, 15 claude -p, 9 trop courtes — les 15 sdk-cli et les 9 courtes que le brief dénombre. Le script de contrôle ne trouve aucun dump dont le JSONL porte `\"entrypoint\":\"sdk-cli\"` ni aucun à `tours < 2` et `[tokens].total < 10 000`. Code : `motif_d_ecart` (session_dump.py:433-446), `dumper` (751-760), `LIBELLES` de la CLI."
+
+[[conformite.critere]]
+id = "C2"
+critere = "Lu par `tomllib`, le dump d'une session à sous-agents porte une entrée par lancement et une par famille, chacune avec les champs de `[tokens]` ; le total d'une famille égale la somme de ses lancements."
+etat = "atteint"
+constat = "Vérification C2 : les 68 dumps se relisent par `tomllib` ; dans les 38 à sous-agents, chaque `[[sous_agents]]` porte `id`, `famille` et les cinq champs de `[tokens]`, chaque `[familles_sous_agents.\"<famille>\"]` porte `lancements` et les cinq champs, égaux à la somme de ses lancements ; le nombre de lancements égale celui des `agent-*.jsonl` de la session. Rendu : `rendre_sous_agents` et `champs_tokens` (session_dump.py:470-501) ; tests `test_rendu.py` (relecture tomllib, famille à `:`, description à guillemets)."
+
+[[conformite.critere]]
+id = "C3"
+critere = "Sur l'ensemble des dumps, le nombre de lancements par famille égale celui des `*.meta.json` qui portent cet `agentType`."
+etat = "atteint"
+constat = "Vérification C3 : le compte des lancements par famille sur les 68 dumps (79 lancements, 7 familles) égale celui des `agentType` des `*.meta.json` des sessions dumpées. Lu, comme le journal de décisions du 2026-10-11 le tranche, sur les sessions dumpées seulement : les 4 autres `*.meta.json` du dépôt (83 en tout) appartiennent à des sessions sdk-cli écartées par C1."
+
+[[conformite.critere]]
+id = "C4"
+critere = "`skills/session-dump/SKILL.md`, « Ce qu'elle écrit », décrit les tables des sous-agents et les règles d'écart."
+etat = "atteint"
+constat = "Lu `skills/session-dump/SKILL.md:37-90` : le paragraphe « Les sous-agents » décrit les deux tables, leur ordre, leurs champs, l'origine de la famille et des tokens, et l'absence de coût ; le tableau « Trois motifs écartent une session » donne les motifs, leur ordre et la sortie par motif. Une ambiguïté de rédaction reste (R1, note), sans manque de contenu."
+
+[[conformite.critere]]
+id = "C5"
+critere = "`pytest skills/session-dump/scripts/tests/`, `ruff` et `basedpyright` passent, selon `OUTILLAGE.md`."
+etat = "atteint"
+constat = "Vérifications C5 : pytest 68 passés, `ruff check` et `ruff format --check` propres, basedpyright (typeCheckingMode « all » de la skill) 0 erreur, rumdl propre sur SKILL.md ; tous en sortie 0."
+
+[[conformite.hors_perimetre]]
+exclusion = "L'analyse des dumps : la skill n'en analyse aucun."
+etat = "respecté"
+constat = "Le diff `master...be6978c` ne touche ni n'ajoute aucune lecture de dump : il étend la lecture des sessions (`lire_sous_agents`, `entrypoint`) et le rendu. La description de SKILL.md garde « N'analyse aucun dump »."
+
+[[conformite.hors_perimetre]]
+exclusion = "Le dump des transcriptions des sous-agents : seules leurs statistiques entrent au frontmatter de la session parente."
+etat = "respecté"
+constat = "`rendre_corps` n'est pas modifié ; les sous-agents n'entrent qu'au frontmatter par `rendre_sous_agents`. Contrôle S4 (Étape 4) : les corps des 68 dumps communs sont identiques avant et après ; aucun dump n'est écrit par sous-agent (68 fichiers pour 68 sessions retenues)."
+
+[[conformite.hors_perimetre]]
+exclusion = "Le coût par sous-agent : `cost-state` ne le ventile pas, et il ne s'estime pas ; le coût reste celui de la session (tranché)."
+etat = "respecté"
+constat = "`SousAgent` ne porte que des tokens ; aucune table de prix ni champ `cout` dans `rendre_sous_agents` ; les dumps relus n'ont de `cout_usd` qu'au niveau de la session. SKILL.md le dit (« le coût d'un sous-agent n'est pas calculé »)."
+
+[[conformite.signal]]
+id = "S1"
+signal = "Un critère d'écart autre que `sdk-cli` ou « moins de 2 tours et moins de 10 k tokens » : fondé sur le titre, le contenu, ou un autre seuil."
+etat = "absent"
+constat = "`motif_d_ecart` (session_dump.py) teste seulement `tours == 0` (règle préexistante), `entrypoint == ENTREE_SDK` et `tours < TOURS_MIN and tokens.total < TOKENS_MIN`, constantes à 2 et 10 000. Aucun autre test sur le titre ou le contenu ; les comptes réels (15 claude -p, 9 courtes) égalent ceux du brief."
+
+[[conformite.signal]]
+id = "S2"
+signal = "Un coût par sous-agent, ou une table de prix, dans le diff."
+etat = "absent"
+constat = "Lu le diff de `session_dump.py` et de la CLI : aucun prix, aucun calcul de coût ajouté ; `cout_cost_state` est inchangé."
+
+[[conformite.signal]]
+id = "S3"
+signal = "Le `[tokens]` d'une session à `cost-state` change, recalculé depuis les transcriptions."
+etat = "absent"
+constat = "Vérification de l'Étape 4 (contrôle S3) : sur les 68 sessions dumpées avant (code de `master` par `git archive`) et après, `[tokens]` identique partout, 0 écart, sessions `transcriptions` comprises. Code : la branche `cost-state` de `analyser_lignes` est inchangée ; test `test_analyser_porte_les_sous_agents_sans_toucher_aux_tokens_de_cost_state`."
+
+[[conformite.signal]]
+id = "S4"
+signal = "Le corps du dump change : transcriptions des sous-agents, résultats d'outils."
+etat = "absent"
+constat = "Contrôle S4 (Étape 4) : corps identique, et frontmatter identique hors tables des sous-agents, pour les 68 dumps communs avant et après. `rendre_corps` hors du diff ; test `test_le_corps_ne_change_pas_avec_les_sous_agents`."
+
+[[conformite.signal]]
+id = "S5"
+signal = "Le diff interprète ou classe le contenu des sessions au lieu de l'extraire."
+etat = "absent"
+constat = "Les valeurs ajoutées sont extraites telles quelles : `agentType` et `description` du `.meta.json`, `usage` des transcriptions, `entrypoint` de la première ligne qui le porte. Les ordres (familles alphabétiques, lancements par date puis `id`) sont fixes, non fondés sur le contenu. Le seul jugement est l'écart, borné aux règles du brief (S1)."
+
+[conformite.symptome]
+symptome = "« Mesurer le poids des audits a demandé de relire les transcriptions brutes de `<session>/subagents/` » ; les sessions lancées par `claude -p` « se mêlent aux discussions dans le répertoire de dumps » (road-map: `session-dump-sous-agents-et-sessions-de-test`)."
+etat = "disparu"
+constat = "Les deux moitiés sont levées sur les données réelles du dépôt. Le poids des audits se lit au frontmatter : par exemple `[familles_sous_agents.\"implementation-auditor\"]` de `2026-09-27-lexique-dans-nvim.md` donne 2 lancements et 3 071 601 tokens, et le cumul des dumps compte 48 lancements `implementation-auditor`, sans ouvrir `<session>/subagents/`. Les 15 sessions sdk-cli ne sont plus dumpées (vérifications C1)."
+
+[[dette.actuelle]]
+id = "R1"
+nature = "style"
+emplacement = "skills/session-dump/SKILL.md:39-40, 90"
+constat = "« par session principale que les règles d'écart ci-dessous ne retiennent pas » se lit dans deux sens : « retenir » au sens de « saisir » (les règles ne l'attrapent pas, sens voulu) ou de « garder » (les règles ne la gardent pas, sens contraire). Le tableau des motifs et la phrase « Une session écartée n'a pas de dump » lèvent l'ambiguïté plus bas. À la ligne 90, « La session en cours y figure, partielle » suit une phrase sur les sessions écartées : le « y » n'a plus d'antécédent clair (les dumps) et semble dire que la session en cours échappe aux motifs, ce que le code ne fait pas (`motif_d_ecart` la juge comme les autres)."
+trouvee = "01-be6978c"
+solution = "Écrire « par session principale qu'aucune règle d'écart ci-dessous n'écarte », et rattacher la session en cours aux dumps : « Le dump de la session en cours, quand elle n'est pas écartée, est partiel. »"
+severite = "note"
+
+[[dette.actuelle]]
+id = "R2"
+nature = "qualité"
+emplacement = "skills/session-dump/scripts/session_dump.py:269 ; skills/session-dump/scripts/session-dump-cli.py:61"
+constat = "Un `.meta.json` illisible est compté dans `Bilan.illisibles` avec les lignes JSONL illisibles, comme le décide le journal (Q8). Mais la CLI rapporte ce total en « N ligne(s) illisible(s) ignorée(s) » : un `.meta.json` n'est pas une ligne, et son illisibilité n'est pas ignorée (elle donne `famille = \"?\"`). Le message est légèrement inexact ; aucun cas réel dans le dépôt (aucun illisible au lancement)."
+trouvee = "01-be6978c"
+solution = "Libeller le total en « N élément(s) illisible(s) ignoré(s) », comme la docstring de `lire_sous_agents` dit déjà « éléments illisibles », ou compter les `.meta.json` à part."
+severite = "note"
+
+[verdict]
+valeur = "FAVORABLE"
+justification = "Les cinq critères sont atteints, et je l'ai vérifié en lançant les commandes sur les sessions réelles du dépôt, pas seulement les tests. Les trois exclusions sont respectées, les cinq signaux absents, le symptôme a disparu. S3 et S4 sont prouvés par comparaison au code de `master` extrait par `git archive` : 0 écart de `[tokens]`, corps identiques. Le code suit le style du module : constantes définies une fois avec leur motif, valeurs JSON vérifiées par `chaine`, échecs de lecture comptés et jamais fatals, tests un par sujet. La Dette actuelle ne porte que deux notes sans coût démontré : une ambiguïté de rédaction dans SKILL.md (R1), un libellé d'illisibles inexact (R2)."

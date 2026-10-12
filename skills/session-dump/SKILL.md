@@ -36,9 +36,10 @@ Le chemin désigne le répertoire du projet. La commande le résout en chemin ab
 
 ## Ce qu'elle écrit
 
-Un fichier `<date de création, UTC>-<titre en kebab-case>.md` par session principale. Deux sessions
-au même nom portent toutes deux le suffixe des 8 premiers caractères de leur UUID. Le titre est
-celui que l'utilisateur a donné, sinon le titre généré, sinon l'UUID.
+Un fichier `<date de création, UTC>-<titre en kebab-case>.md` par discussion, c'est-à-dire par
+session principale que les règles d'écart ci-dessous ne retiennent pas. Deux sessions au même nom
+portent toutes deux le suffixe des 8 premiers caractères de leur UUID. Le titre est celui que
+l'utilisateur a donné, sinon le titre généré, sinon l'UUID.
 
 **Un dump écrase les précédents** : les fichiers sont écrits à côté, puis le répertoire `<id>/` est
 vidé et reçoit les neufs. Le répertoire reste le même ; si l'écriture échoue, son contenu reste
@@ -47,7 +48,8 @@ intact.
 **Le frontmatter** écrit ses nombres par groupes de trois chiffres séparés par `_` (`45_372_384`),
 que TOML admet et que `tomllib` relit. Il porte, en champs plats : `session`, `titre`, `cree`,
 `branches`, `tours`, `mesure`, `cout_usd`, puis les tables `[tokens]` (`total`, `entree`, `sortie`,
-`cache_lu`, `cache_cree`) et `[duree]` (`totale_s`, `api_s`).
+`cache_lu`, `cache_cree`) et `[duree]` (`totale_s`, `api_s`), puis, pour une session qui a lancé
+des sous-agents, les tables des sous-agents.
 
 - Les tokens et le coût viennent de la dernière ligne `cost-state` de la session, sous-agents
   compris. `mesure = "cost-state"` le dit.
@@ -56,13 +58,36 @@ que TOML admet et que `tomllib` relit. Il porte, en champs plats : `session`, `t
 - `sortie` contient le thinking, déjà compté dans les tokens de sortie.
 - `tours` compte les messages que l'utilisateur a saisis, commandes `/` comprises.
 
+**Les sous-agents** se lisent dans `<uuid>/subagents/`, pour toute session. Deux niveaux de tables,
+absents d'une session sans sous-agent :
+
+- `[familles_sous_agents."<famille>"]` : une table par famille, par ordre alphabétique, avec
+  `lancements` et les champs de `[tokens]` (`total`, `entree`, `sortie`, `cache_lu`,
+  `cache_cree`). Le total d'une famille est la somme de ses lancements.
+- `[[sous_agents]]` : une entrée par lancement, par date de sa première ligne puis par `id`, avec
+  `id`, `famille`, `description` quand elle existe, et les mêmes champs de tokens.
+
+La famille est l'`agentType` du `agent-<id>.meta.json` du lancement, `?` quand ce fichier manque
+ou ne la dit pas ; ses tokens viennent de la transcription `agent-<id>.jsonl`, un message compté
+une fois. Ils n'entrent pas dans `[tokens]` d'une session à `cost-state`, dont le total les compte
+déjà, et le coût d'un sous-agent n'est pas calculé : aucun prix n'est connu de la commande.
+
 **Le corps** ne garde que la discussion, sous `## Utilisateur` et `## Assistant`. Chaque appel
 d'outil y tient en une ligne, `` > - `<Outil>` <cible> ``, sans le contenu de ses arguments.
 Résultats d'outils, thinking, messages méta et blocs `<system-reminder>` en sont absents : la
 réponse à une question posée par `AskUserQuestion` est un résultat d'outil, donc absente aussi.
 
-Une session sans aucun tour n'est pas une discussion : elle n'est pas dumpée, et la sortie compte
-celles qu'elle écarte. La session en cours y figure, partielle.
+**Trois motifs écartent une session**, testés dans cet ordre ; la sortie compte les écartées, une
+ligne par motif non nul :
+
+| Motif | Sens |
+|---|---|
+| sans tour | aucun message saisi par l'utilisateur |
+| lancée par `claude -p` | `entrypoint` vaut `sdk-cli` : un appel de script, pas une discussion |
+| moins de 2 tours et de 10 000 tokens | les deux à la fois ; le total du frontmatter, sous-agents compris, fait foi |
+
+Aucun autre critère n'écarte une session : ni son titre ni son contenu. Une session écartée n'a
+pas de dump, et ses sous-agents n'entrent dans aucun. La session en cours y figure, partielle.
 
 ## Ignorer les dumps
 
