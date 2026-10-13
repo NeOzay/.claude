@@ -1,0 +1,5 @@
+{
+  "name": "pv2-actions",
+  "version": "0.1.0",
+  "description": "Prototype de pipeline-v2 : ouvrir Suivi, Brief et audit en un geste, choix de fin d'Étape en boutons, proposition de commit générée."
+}

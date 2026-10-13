@@ -1,0 +1,5 @@
+{
+  "name": "pv2-veille",
+  "version": "0.1.0",
+  "description": "Prototype de pipeline-v2 : surveille les fichiers touchés, les Signaux de dérive et les sous-agents d'un Chantier."
+}

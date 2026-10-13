@@ -12,12 +12,12 @@ category = "<OPTIONNEL>"
 
 ## Constat
 
-Dans `skills/session-dump/SKILL.md`, section « Ce qu'elle écrit », la phrase « par session principale
-que les règles d'écart ci-dessous ne retiennent pas » se lit dans deux sens : « retenir » au sens de
-« saisir » (sens voulu) ou de « garder » (sens contraire). Plus bas, « La session en cours y
-figure, partielle » suit une phrase sur les sessions écartées : le « y » n'a plus d'antécédent clair
-et semble dire que la session en cours échappe aux motifs, alors que `motif_d_ecart` la juge comme
-les autres. Relevé à l'audit `01-be6978c`.
+Dans `skills/session-dump/SKILL.md`, section « Ce qu'elle écrit », la phrase « par session
+principale que les règles d'écart ci-dessous ne retiennent pas » se lit dans deux sens : « retenir »
+au sens de « saisir » (sens voulu) ou de « garder » (sens contraire). Plus bas, « La session en
+cours y figure, partielle » suit une phrase sur les sessions écartées : le « y » n'a plus
+d'antécédent clair et semble dire que la session en cours échappe aux motifs, alors que
+`motif_d_ecart` la juge comme les autres. Relevé à l'audit `01-be6978c`.
 
 ## Pourquoi c'est gênant
 

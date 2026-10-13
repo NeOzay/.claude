@@ -1,0 +1,6 @@
+{
+  "name": "pv2-etat",
+  "version": "0.1.0",
+  "description": "Prototype de pipeline-v2 : affiche l'état du Chantier lu dans son Suivi (Étapes, contexte, Passation, blocages, incertitudes, dette).",
+  "types": "./types/index.d.ts"
+}

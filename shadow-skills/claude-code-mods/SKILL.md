@@ -61,10 +61,12 @@ travaille sur un mod, dans la session même.
   qu'un mod est chargé.
 - **Les types** : le moteur écrit dans `<mod>/.claude-plugin/types/` ceux de `claude-code`, un
   `tsconfig.json` que celui du mod étend, et le contrat de chaque `dependencies`
-  (`types/mod-commun/index.d.ts`). `claude -p` les pose pour un mod chargé par `--plugin-dir` ou
-  `CLAUDE_CODE_PLUGIN_DIRS`, pas pour un mod chargé `@skills-dir` (2.1.291 : le journal écrit
-  `type root of <mod>` pour les premiers seulement). Les rafraîchir :
-  `claude -p --plugin-dir <mod> "Réponds OK." < /dev/null`.
+  (`types/mod-commun/index.d.ts`). `claude -p` ne les pose plus, même pour un mod chargé par
+  `--plugin-dir` : le journal n'écrit aucun `type root of <mod>`, et le dossier reste absent
+  (2.1.296, `pipeline-v2/proto-sonde`). Une session interactive `claude --plugin-dir <mod>` les pose
+  (2.1.296 : `type root of <mod> at … wrote …`). À défaut, le skill `plugin-authoring`, chargé,
+  donne le chemin de `types/claude-code.d.ts`, que le `tsconfig.json` temporaire nomme dans son
+  `include` (2.1.296, recette dans `pipeline-v2/README.md`).
 - **`tsc`**, absent du `PATH`, passe par `npx`. Aucun `tsconfig.json` n'est versionné : ils
   étendent des types que le moteur pose et que git ignore. Un `tsconfig.json` temporaire, hors du
   mod, étend celui d'un mod qui a déjà ses types, avec son `typeRoots` en chemin absolu, et nomme
@@ -123,6 +125,10 @@ travaille sur un mod, dans la session même.
 
 ### Limites constatées
 
+- **Le contrat d'un `$.state`** (2.1.296) : `claude plugin validate` ne lit une clé que déclarée
+  en objet littéral sous le nom du mod, `interface PluginState { '<mod>': { <clé>: … } }` ; un
+  alias (`'<mod>': Jetable`) laisse chaque clé « not declared ». Le contrat exporte au moins un
+  type, et rien d'autre : un `export {}` est refusé (`pipeline-v2/proto-etat`).
 - **Un import ne sort pas du dossier du plugin** : `import '../../autre/lib.ts'` est refusé par
   `claude plugin validate` et au chargement (« outside the plugin's folder »), et un lien
   symbolique posé dans le dossier aussi (« resolves outside the plugin's folder ») : le module
@@ -148,6 +154,74 @@ travaille sur un mod, dans la session même.
 - **Verser du contexte à un sous-agent** : deux voies, le `prompt` réécrit avant `next` (celle du
   mod `lexique`) ou `$.session.append` après `next`. Ni l'une ni l'autre n'est essayée
   sur un sous-agent `fork`, refusé dans cette configuration.
+
+### Où un mod dessine
+
+Établi par la sonde de `pipeline-v2` (`pipeline-v2/constats.md`, section « Surfaces »), d'après
+ce que l'utilisateur a vu et ce que la sonde a noté du moteur.
+
+- **Le navigateur ne dessine rien** (2.1.296) : une session suivie sur claude.ai/code par Remote
+  Control ne montre ni panneau, ni bande, ni ligne d'état, ni toast. Le client web ne se déclare pas
+  surface (aucun `session.attach`) ; une commande `/` tapée au navigateur arrive à la session et
+  s'exécute, mais le panneau qu'elle ouvre se place au terminal de la machine.
+- **Desktop attaché par Remote Control à une session CLI** (2.1.296) ne dessine rien non plus : même
+  comportement que le navigateur.
+- **Desktop qui lance la session** (2.1.295), ici par SSH sur la machine, est une surface
+  `desktop` : un `session.attach` (`clientId` `desktop-2`) ; panneau, bande, `Markdown` et ses liens
+  `https:` et `file:`, toast et `Button` s'affichent, et un appui arrive au mod.
+- **Desktop en SSH tourne sa propre CLI**, 2.1.295, posée sous `~/.claude/remote/`, avec son état
+  d'exécution et les plugins qu'il synchronise. Le mod s'y est chargé par
+  `CLAUDE_CODE_PLUGIN_DIRS` du `settings.json` de l'utilisateur ; la même variable dans
+  `.claude/settings.local.json` du projet ne l'a pas chargé, et aucune voie de passer
+  `--plugin-dir` n'a été trouvée (2.1.295).
+- **La ligne d'état sous Desktop** (2.1.295) : `$.ui.status` s'affiche préfixé du nom du mod
+  (`pv2-sonde pv2-sonde : ligne d'état`), sur une ligne étroite partagée avec d'autres éléments
+  de l'interface : le texte n'a pas à répéter le nom du mod.
+- **`$.ui.notify` sans canal** : `no-channel` au terminal (2.1.296), `no-surface` sous Desktop en
+  SSH (2.1.295).
+
+### Mémoire, contexte et rechargement
+
+Établi par `pipeline-v2/proto-etat`, d'après son journal et ce que l'utilisateur a vu.
+
+- **`$.store` survit à tout** (2.1.296 et 2.1.295) : d'une session à l'autre, et du terminal à
+  Desktop en SSH sur la même machine, qui partagent le même magasin.
+- **`$.state` survit au rechargement à chaud** (2.1.296), pas à une nouvelle session ; sous
+  Desktop, `/clear` relance `session.start` et `$.state` repart vide (2.1.295).
+- **`claude --plugin-dir <mod>` interactif** (2.1.296) recharge le mod à chaque modification de
+  ses fichiers : « reloaded », puis `session.start: raised for <mod> (loaded later)`.
+- **Un processus lancé par un mod n'a pas `CLAUDE_CODE_SESSION_ID`** (2.1.296 et 2.1.295) : une
+  commande qui en dépend échoue, comme `contexte`. Sous `claude -p` lancé depuis une autre
+  session, il hérite au contraire de celui de l'appelant, et lit la mauvaise session.
+- **`$.session.usage()` donne le contexte de la session du mod** (2.1.295) : `context.tokens` et
+  `percent` absents avant la première requête, puis remplis après chaque tour, avec
+  `context.window`.
+- **Le texte d'un panneau ne se sélectionne pas dans Desktop** (2.1.295) ; au terminal, si.
+
+### Actions depuis l'interface
+
+Établi par `pipeline-v2/proto-actions` sous Desktop, d'après son journal et ce que l'utilisateur
+a vu.
+
+- **`$.command.run` n'atteint pas les commandes du mod appelant** (2.1.295) : le moteur exclut ses
+  hooks, et répond « registered /<nom> but no command.run hook answered it ». Le mod appelle sa
+  fonction directement.
+- **`$.ui.ask` depuis un `onPress`** (2.1.295) : le dialogue s'affiche et le mod reçoit le choix,
+  mais Desktop tourne ensuite dans le vide.
+- **`$.prompt.fill`** (2.1.295) remplit l'invite sans l'envoyer ; **`$.prompt.submit`** l'envoie
+  comme un tour, d'origine `{ kind: 'plugin', name }`, auquel le modèle répond.
+- **`$.model.complete`** (2.1.295), Haiku sur un diff de 1 225 caractères : 2,4 s, 422 tokens.
+- **Un hook `tool.call` sur `Edit` et `Write` ne voit pas tout ce qui s'écrit** (2.1.295) : un
+  modèle qui écrit par `Bash` (`printf … >`) passe à côté. Les fichiers touchés se lisent dans
+  l'arbre de travail.
+- **Le rapport d'un sous-agent n'est pas dans le résultat de `Agent`** (2.1.295) : il arrive par
+  un message à part (« SubagentHandback »), et le résultat ne dit que « This agent's report was
+  delivered to you as a message ».
+- **Un `command.run` qui lève** (2.1.295) : Desktop affiche « registered /<nom> but no command.run
+  hook answered it », sans l'erreur. **Un `ui.render` qui lève** fait disparaître la bande, et la
+  barre d'état sous l'invite avec elle.
+- **Les props de `Code`** (2.1.296) : `source`, pas `code` ; `tsc` le voit, `claude plugin
+  validate` non.
 
 ### Tester
 
@@ -226,12 +300,10 @@ printf '%s\n' '{"type":"user","message":{"role":"user","content":"/clear"}}' \
 
 ### Non essayé
 
-La session interactive, la compaction automatique, le rechargement à chaud d'un mod en cours de
-session et un coéquipier d'équipe d'agents.
+La compaction automatique et un coéquipier d'équipe d'agents.
 
 D'après la référence de `plugin-authoring` (2.1.291), non vérifié :
 
-- `CLAUDE_CODE_PLUGIN_DIRS` n'est jamais lu dans les réglages d'un projet ;
 - un module importe un autre fichier de son plugin par un `import` statique ; un `import()`
   empêche le chargement ;
 - l'ordre d'appel de deux mods qui ajoutent chacun un nom, ou d'un client qui l'appelle depuis

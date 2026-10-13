@@ -1,0 +1,5 @@
+{
+  "name": "pv2-sonde",
+  "version": "0.1.0",
+  "description": "Prototype de pipeline-v2 : sonde ce que chaque surface de Claude Code affiche (panneau, bande, ligne d'état, toast, notification)."
+}

@@ -1,0 +1,378 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "pipeline-v2"
+audit = "01-485fa8c"
+rang = 1
+type = "clôture"
+date = 2026-10-13
+base = "master"
+commit = "485fa8c"
+brief = ".claude/implementation/pipeline-v2.brief.md"
+suivi = ".claude/implementation/pipeline-v2.md"
+plan = ".claude/plans/quiet-popping-mountain.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "`claude plugin validate pipeline-v2/proto-sonde`, puis chargement, typage, format et garde de `pipeline-v2/README.md`"
+statut = "échouée"
+sortie = '''Rejouée par l'auditeur, contrôles de pipeline-v2/README.md lancés depuis la racine :
+validate proto-sonde : « ✔ Validation passed with warnings » (seul avertissement : author), exit 0
+chargement : claude -p --debug --plugin-dir pipeline-v2/proto-sonde → CHARGE-OK, « hooks module pv2-sonde@inline loaded »
+typage (recette du README, TY = types/claude-code.d.ts de plugin-authoring 2.1.296) : tsc exit 0
+format : biome format pipeline-v2 → « Checked 8 files … No fixes applied », exit 0 ; uvx rumdl fmt --check . → exit 1,
+  « Would fix: 1/17 issues in 1 file », .claude/implementation/todo/technical-debt/session-dump-ecart-ambigu-dans-skill-md.md
+garde : GARDE-OK ; git status --short -- pipeline-v2 : vide (ni types ni journal suivis)'''
+dette = "R1"
+
+[[verification]]
+origine = "Étape 2"
+commande = "contrôles des constats, de `claude-code-mods`, format et garde de `pipeline-v2/README.md`"
+statut = "échouée"
+sortie = '''Rejouée par l'auditeur, sur l'état final (485fa8c) :
+constats : CONSTATS-OK (12 sections numérotées)
+claude-code-mods : MODS-OK
+format : biome exit 0 ; uvx rumdl fmt --check . → exit 1, le même fichier de todo/technical-debt/ (voir R1)
+garde : GARDE-OK'''
+dette = "R1"
+
+[[verification]]
+origine = "Étape 3"
+commande = "`claude plugin validate pipeline-v2/proto-etat`, puis chargement, typage, format, garde, constats"
+statut = "échouée"
+sortie = '''Rejouée par l'auditeur :
+validate proto-etat : « ✔ Validation passed with warnings » (author), state writes/reads pv2-etat.compteur, pv2-etat.horodatage, exit 0
+chargement : CHARGE-OK, « hooks module pv2-etat@inline loaded »
+typage, recette du README (include = TY + $M/hooks), TY = types de plugin-authoring comme TY = types de session
+  pipeline-v2/proto-etat/.claude-plugin/types/claude-code/index.d.ts : tsc exit 2
+  register.tsx(165,40): error TS2345: Argument of type '{ readonly plugin: "pv2-etat"; readonly key: "compteur"; }'
+    is not assignable to parameter of type 'StateRef<never, "compteur">' (idem 166,42 pour horodatage)
+  la recette d'OUTILLAGE.md (extends du tsconfig de session) : même erreur, exit 2
+  include complété de $M/types, ou tsc -p pipeline-v2/proto-etat/.claude-plugin/types/tsconfig.json : exit 0
+format : biome exit 0 ; rumdl --check . exit 1 (R1)
+garde : GARDE-OK ; constats : CONSTATS-OK'''
+dette = "R2"
+
+[[verification]]
+origine = "Étape 4"
+commande = "`claude plugin validate pipeline-v2/proto-actions`, puis chargement, typage, format, garde, constats"
+statut = "échouée"
+sortie = '''Rejouée par l'auditeur :
+validate proto-actions : « ✔ Validation passed with warnings » (author ; « gating hook without .catch » sur command.run fin et proposer), exit 0
+chargement : CHARGE-OK, « hooks module pv2-actions@inline loaded »
+typage (recette du README, comme celle d'OUTILLAGE.md) : tsc exit 0
+format : biome exit 0 ; rumdl --check . exit 1 (R1)
+garde : GARDE-OK ; constats : CONSTATS-OK'''
+dette = "R1"
+
+[[verification]]
+origine = "Étape 5"
+commande = "`claude plugin validate pipeline-v2/proto-veille`, puis chargement, typage, format, garde, constats"
+statut = "échouée"
+sortie = '''Rejouée par l'auditeur :
+validate proto-veille : « ✔ Validation passed with warnings » (author ; « gating hook without .catch » sur tool.call), exit 0
+chargement : CHARGE-OK, « hooks module pv2-veille@inline loaded »
+typage (recette du README, TY = types de plugin-authoring 2.1.296 ; aucun types/ de session pour ce prototype) : tsc exit 0
+format : biome exit 0 ; rumdl --check . exit 1 (R1)
+garde : GARDE-OK ; constats : CONSTATS-OK'''
+dette = "R1"
+
+[[verification]]
+origine = "Étape 6"
+commande = "`python3 -I pipeline-v2/api/inventaire.py <types> --compare pipeline-v2/api/<version>.txt` rend un diff vide ; `uvx ruff check pipeline-v2` ; `uvx --with pytest basedpyright pipeline-v2`"
+statut = "passée"
+sortie = '''Rejouée par l'auditeur :
+inventaire.py pipeline-v2/proto-sonde/.claude-plugin/types/claude-code/index.d.ts --compare pipeline-v2/api/2.1.296.txt : sortie vide, exit 0
+même commande, types/claude-code.d.ts de plugin-authoring 2.1.296 : sortie vide, exit 0
+contre-épreuve : inventaire privé de la ligne « $ clock.now » → « + $ clock.now », exit 1 (la comparaison voit un écart)
+uvx ruff check pipeline-v2 : All checks passed!
+uvx ruff format --check pipeline-v2 : 1 file already formatted
+uvx --with pytest basedpyright pipeline-v2 : 0 errors, 0 warnings, 0 notes'''
+
+[[verification]]
+origine = "Étape 7"
+commande = "contrôles des constats, de `claude-code-mods`, format, garde"
+statut = "échouée"
+sortie = '''Rejouée par l'auditeur :
+constats : CONSTATS-OK ; claude-code-mods : MODS-OK
+« Non essayé » de claude-code-mods relu (git show 485fa8c:shadow-skills/claude-code-mods/SKILL.md) : ne reste que
+  « La compaction automatique et un coéquipier d'équipe d'agents » ; la session interactive et le rechargement à chaud en sont sortis
+format : biome exit 0 ; rumdl --check . exit 1 (R1)
+garde : GARDE-OK'''
+dette = "R1"
+
+[[verification]]
+origine = "Étape 8"
+commande = "`git log --format=%h -1 -- pipeline-v2/conclusion.md` non vide ; format ; garde — **sans objet** : conclusion mitigée, exploration arrêtée"
+statut = "passée"
+sortie = '''Étape sans objet (aucune spécification écrite) ; ce qui s'en vérifie :
+git log --format='%h %s' --diff-filter=A -- pipeline-v2/conclusion.md → 485fa8c pipeline-v2: E7 — Conclusion
+git log --oneline --name-only master..485fa8c -- pipeline-v2/spec → vide : aucun fichier de spécification
+garde : GARDE-OK (le format relève de R1, porté par les Étapes qui l'ont produit)'''
+
+[[verification]]
+origine = "Étape 9"
+commande = "format ; garde ; C5 relu point par point — **sans objet** : conclusion mitigée, exploration arrêtée"
+statut = "non-exécutée"
+sortie = "sans objet : la conclusion n'est pas de poursuivre, pipeline-v2/spec/ n'existe pas, il n'y a ni commits.md ni transverse.md à relire contre C5"
+
+[[verification]]
+origine = "C1"
+commande = "ls pipeline-v2 ; claude -p --debug --model haiku 'Réponds OK.' < /dev/null ; grep -o '[a-z0-9-]*@skills-dir' sur le journal ; grep CLAUDE_CODE_PLUGIN_DIRS settings.json"
+statut = "passée"
+sortie = '''ls pipeline-v2 : README.md conclusion.md constats.md api/ proto-actions/ proto-etat/ proto-sonde/ proto-veille/
+claude -p : « OK. », exit 0 ; journal debug/eeec1364-….txt, mods @skills-dir : lexique, mod-commun, outillage (aucun prototype)
+MAIS le même journal porte « Loaded inline plugin from path: pv2-veille » et « hooks module pv2-veille@inline loaded » :
+  l'environnement hérité de la session du Chantier porte CLAUDE_CODE_PLUGIN_DIRS=~/.claude/pipeline-v2/proto-veille (voir R3)
+grep -c CLAUDE_CODE_PLUGIN_DIRS settings.json : 0, exit 1'''
+
+[[verification]]
+origine = "C1"
+commande = "env -u CLAUDE_CODE_PLUGIN_DIRS claude -p --debug --model haiku 'Réponds OK.' < /dev/null ; ! grep -q 'pv2-' <journal> ; ! grep -q CLAUDE_CODE_PLUGIN_DIRS settings.json"
+statut = "passée"
+sortie = '''« OK. », exit 0 ; journal debug/964be3cf-….txt
+AUCUN-PV2 ; mods chargés : lexique@skills-dir, mod-commun@skills-dir, outillage@skills-dir
+SETTINGS-OK'''
+
+[[verification]]
+origine = "C2"
+commande = "for p in sonde etat actions veille: claude plugin validate pipeline-v2/proto-$p"
+statut = "passée"
+sortie = '''proto-sonde, proto-etat, proto-actions, proto-veille : « ✔ Validation passed with warnings », exit 0 chacun
+avertissement commun : « author: No author information provided » ; proto-actions et proto-veille : « gating hook without .catch »'''
+
+[[verification]]
+origine = "C2"
+commande = "for p in sonde etat actions veille: env -u CLAUDE_CODE_PLUGIN_DIRS claude -p --debug --model haiku --plugin-dir pipeline-v2/proto-$p 'Réponds OK.' < /dev/null ; grep -q pv2-$p <journal> && echo CHARGE-OK"
+statut = "passée"
+sortie = '''proto-sonde CHARGE-OK : hooks module pv2-sonde@inline loaded ; events: session.start,session.attach,command.run,ui.render
+proto-etat CHARGE-OK : hooks module pv2-etat@inline loaded ; events: session.attach,session.start,turn.complete,command.run,ui.render
+proto-actions CHARGE-OK : hooks module pv2-actions@inline loaded ; events: session.start,command.run,ui.render
+proto-veille CHARGE-OK : hooks module pv2-veille@inline loaded ; events: session.start,tool.call,command.run,ui.render'''
+
+[[verification]]
+origine = "C3"
+commande = "contrôle « Constats » de pipeline-v2/README.md (grep -c '^### ' contre '^Vu par ' + '^### Non essayé', puis awk sur les sections numérotées)"
+statut = "passée"
+sortie = "CONSTATS-OK, exit 0 ; grep -c '^## [0-9]' pipeline-v2/constats.md → 12"
+
+[[verification]]
+origine = "C6"
+commande = "git diff master -U0 -- shadow-skills/claude-code-mods/SKILL.md | grep '^+- ' | grep -v '2.1.' | grep -q . && echo 'CONSTAT SANS VERSION' || echo MODS-OK"
+statut = "passée"
+sortie = "MODS-OK"
+
+[[verification]]
+origine = "C7"
+commande = "git diff master --stat -- skills/implementation-tracker skills/intent-brief skills/git-smart-commit"
+statut = "passée"
+sortie = "sortie vide (0 ligne), exit 0"
+
+[[verification]]
+origine = "C8"
+commande = "uvx rumdl fmt --check ."
+statut = "échouée"
+sortie = '''--- .claude/implementation/todo/technical-debt/session-dump-ecart-ambigu-dans-skill-md.md
++++ .claude/implementation/todo/technical-debt/session-dump-ecart-ambigu-dans-skill-md.md
+(re-césure d'un paragraphe)
+Would fix: 1/17 issues in 1 file
+exit 1
+Sur l'arbre de master extrait par git archive : même fichier, « Would fix: 1/19 issues in 1 file », exit 1'''
+dette = "R1"
+
+[[verification]]
+origine = "C8"
+commande = "npx --yes @biomejs/biome@2 format pipeline-v2"
+statut = "passée"
+sortie = "Checked 8 files in 18ms. No fixes applied. — exit 0"
+
+[[verification]]
+origine = "C8"
+commande = "tsc par la recette « Typage » de pipeline-v2/README.md, pour chaque pipeline-v2/proto-*, TY = types/claude-code.d.ts de plugin-authoring 2.1.296"
+statut = "échouée"
+sortie = '''proto-sonde : exit 0 ; proto-actions : exit 0 ; proto-veille : exit 0
+proto-etat : exit 2
+  pipeline-v2/proto-etat/hooks/register.tsx(165,40): error TS2345: Argument of type '{ readonly plugin: "pv2-etat"; readonly key: "compteur"; }'
+  is not assignable to parameter of type 'StateRef<never, "compteur">'. … Type '"pv2-etat"' is not assignable to type 'never'.
+  register.tsx(166,42): même erreur pour « horodatage »'''
+dette = "R2"
+
+[[verification]]
+origine = "C8"
+commande = "npx --yes -p typescript@5 tsc -p pipeline-v2/proto-etat/.claude-plugin/types/tsconfig.json --noEmit"
+statut = "passée"
+sortie = "exit 0, aucune erreur : le tsconfig que le moteur pose inclut ../../types, le contrat de $.state du mod"
+
+[[conformite.critere]]
+id = "C1"
+critere = "`pipeline-v2/` existe à la racine du dépôt ; aucun prototype ne se charge seul : le journal de `claude -p --debug` n'en nomme aucun `@skills-dir`, et `settings.json` ne porte aucun `CLAUDE_CODE_PLUGIN_DIRS`."
+etat = "atteint"
+constat = "Vérifications C1 : pipeline-v2/ existe ; les journaux --debug ne nomment que lexique, mod-commun et outillage en @skills-dir ; settings.json ne porte pas la variable, et git diff master -- skills .claude/skills settings.json est vide. Le dépôt ne charge donc aucun prototype. Un premier claude -p lancé depuis cette session a pourtant chargé pv2-veille en @inline : la variable reste dans l'environnement de la session du Chantier, hors de tout fichier versionné (R3)."
+
+[[conformite.critere]]
+id = "C2"
+critere = "Chaque prototype passe `claude plugin validate pipeline-v2/<proto>` et se charge par `claude --plugin-dir`."
+etat = "atteint"
+constat = "Vérifications C2 : les quatre prototypes (sonde, etat, actions, veille) passent validate, avec le seul avertissement author ; chacun se charge par --plugin-dir, et le journal --debug écrit « hooks module pv2-<nom>@inline loaded » avec ses événements."
+
+[[conformite.critere]]
+id = "C3"
+critere = "Chaque élément à afficher des Décisions a, dans `pipeline-v2/`, un constat : la surface essayée, son rendu au navigateur ou son absence, qui l'a observé ; ou la raison pour laquelle il n'a pas été essayé."
+etat = "atteint"
+constat = "Contrôle des constats passé (C3), et pipeline-v2/constats.md relu en entier. Les douze éléments du Plan ont chacun leur section. Onze portent un constat Desktop « Vu par utilisateur, le 2026-10-13, Claude Code 2.1.295 » ; le 6 (Passation en attente) porte « ### Non essayé » et sa raison : aucune Passation pendant l'observation. L'absence au navigateur vaut pour tous les éléments : la section « Surfaces » l'établit, journal --debug à l'appui (aucun session.attach du client web)."
+
+[[conformite.critere]]
+id = "C4"
+critere = "`pipeline-v2/` porte une conclusion, poursuivre ou annuler la v2, motivée par les constats de C3 et jugée selon le critère « décevante » fixé au Plan."
+etat = "atteint"
+constat = "pipeline-v2/conclusion.md, lu en entier, porte un verdict « mitigé : l'exploration s'arrête pour le moment ». Il le juge expressément sur le critère « décevante », élargi à Desktop : non rempli dans Desktop, rempli au navigateur. Un tableau des douze éléments le motive, constat par constat, et la conclusion dit quand reprendre. Ce n'est ni poursuivre ni annuler, mais ce troisième terme est une décision de l'utilisateur, datée au journal du Suivi (2026-10-13, « ni poursuivre ni annuler (C4) »), et l'élargissement à Desktop est daté en « Objectif et périmètre » : le Suivi fait foi."
+
+[[conformite.critere]]
+id = "C5"
+critere = "Si la conclusion est de poursuivre : la spécification couvre au moins le Suivi, les Étapes et les commits, et dit pour chacun ce que Claude Code mémorise, ce que le mod fait, ce qui reste au jugement du modèle ; elle dit comment se suit l'évolution de l'API des mods."
+etat = "atteint"
+constat = "Critère conditionnel, sa condition n'est pas remplie : la conclusion n'est pas de poursuivre (C4). Les Étapes 8 et 9 sont notées sans objet, et pipeline-v2/spec/ n'existe pas (vérification de l'Étape 8). Le suivi de l'API est tout de même outillé : pipeline-v2/api/inventaire.py et son inventaire 2.1.296. La comparaison rend vide sur les types de la version et voit un écart à la contre-épreuve (vérification de l'Étape 6), et la conclusion dit comment s'en servir pour savoir quand reprendre."
+
+[[conformite.critere]]
+id = "C6"
+critere = "`shadow-skills/claude-code-mods/SKILL.md` porte les constats établis, et sa section « Non essayé » perd les surfaces essayées."
+etat = "atteint"
+constat = "Contrôle de claude-code-mods passé (MODS-OK, C6). Diff du fichier lu : trois sections neuves, « Où un mod dessine », « Mémoire, contexte et rechargement » et « Actions depuis l'interface », chaque ligne datée de sa version (2.1.295 ou 2.1.296). Le constat sur les types est corrigé : « claude -p ne les pose plus », en remplacement, non à côté. Le contrat d'un $.state est ajouté. « Non essayé » perd la session interactive et le rechargement à chaud. La ligne « CLAUDE_CODE_PLUGIN_DIRS n'est jamais lu dans les réglages d'un projet » passe dans les constats établis (2.1.295)."
+
+[[conformite.critere]]
+id = "C7"
+critere = "`git diff master --stat -- skills/implementation-tracker skills/intent-brief skills/git-smart-commit` est vide."
+etat = "atteint"
+constat = "Vérification C7 : sortie vide. Le --stat de master...485fa8c ne nomme aucun fichier sous skills/."
+
+[[conformite.critere]]
+id = "C8"
+critere = "`uvx rumdl fmt --check .` passe, ainsi que `tsc` et Biome sur les prototypes, selon `OUTILLAGE.md`."
+etat = "non-atteint"
+constat = "Vérifications C8. Biome passe. uvx rumdl fmt --check . échoue (exit 1) sur un fichier de todo/technical-debt/ étranger au Chantier, et échoue de même sur l'arbre de master extrait : le défaut est antérieur, et le journal du Suivi (2026-10-13) le dit hors périmètre, « C8 ne passera qu'une fois corrigé ailleurs ». Le critère reste non atteint (R1). Le code des prototypes se type sans erreur, proto-etat par le tsconfig que le moteur pose. En revanche, la recette « Typage » du README, qu'impose le Plan, échoue sur proto-etat (R2)."
+dette = "R1"
+
+[[conformite.hors_perimetre]]
+exclusion = "Toute modification de la v1 : `implementation-tracker`, `intent-brief`, `git-smart-commit` et leurs `references/` restent tels quels jusqu'à la Clôture."
+etat = "respecté"
+constat = "C7 vide, et le --stat de master...485fa8c ne touche que .claude/implementation/, .claude/plans/, .gitignore, biome.json, pipeline-v2/ et shadow-skills/claude-code-mods/SKILL.md."
+
+[[conformite.hors_perimetre]]
+exclusion = "Un mod fonctionnel, ou la mise en service de la v2 : les prototypes ne servent qu'à comprendre."
+etat = "respecté"
+constat = "Les quatre register.tsx sont lus. Chacun est déclaré « Prototype jetable, sans gestion d'erreurs (S3) » et code en dur le Suivi de ce Chantier (SUIVI = '.claude/implementation/pipeline-v2.md'). Aucun ne commit : les boutons de proto-actions journalisent, « rien n'est commité ». Aucun n'écrit le Suivi : $.fs.write ne sert qu'au journal.log du mod. Aucun ne se charge sans --plugin-dir ou la variable (C1, C2), et aucun skill ne les appelle."
+
+[[conformite.hors_perimetre]]
+exclusion = "Un prototype qui se charge de lui-même dans une session."
+etat = "respecté"
+constat = "Dans le livrable, aucun prototype ne se charge seul : aucun lien sous skills/ ni .claude/skills/, aucune variable dans settings.json, et un claude -p sans environnement hérité ne charge aucun pv2- (C1). Le seul chargement constaté vient de la variable restée dans l'environnement de la session du Chantier, posée le temps de l'observation Desktop selon le journal du Suivi. Ce résidu de session n'est ni versionné ni dans le livrable (R3)."
+
+[[conformite.hors_perimetre]]
+exclusion = "La redéfinition des concepts Chantier, Brief, Suivi, Étape, Passation et Plan : ils restent."
+etat = "respecté"
+constat = "Aucune spécification n'est écrite (pipeline-v2/spec/ absent), et git diff master -- LEXIQUE.md est vide. La conclusion et les constats emploient les six termes dans leur sens du lexique, sans les redéfinir."
+
+[[conformite.signal]]
+id = "S1"
+signal = "La v1 est touchée : `git diff master --stat -- skills/implementation-tracker skills/intent-brief skills/git-smart-commit` n'est pas vide."
+etat = "absent"
+constat = "La commande du signal rend vide (vérification C7) ; GARDE-OK."
+
+[[conformite.signal]]
+id = "S2"
+signal = "Un prototype se charge seul : `git diff master --name-only -- skills .claude/skills settings.json` nomme un fichier de prototype, ou `grep CLAUDE_CODE_PLUGIN_DIRS settings.json` trouve la variable."
+etat = "absent"
+constat = "git diff master --name-only -- skills .claude/skills settings.json : 0 ligne ; grep CLAUDE_CODE_PLUGIN_DIRS settings.json : 0, exit 1. Le journal du Suivi rapporte S2 déclenché puis levé : la variable a été posée le temps de l'observation Desktop, puis retirée, jamais commitée. Elle subsiste dans l'environnement de la session en cours, ce que les deux commandes du signal ne voient pas (R3)."
+
+[[conformite.signal]]
+id = "S3"
+signal = "Un prototype grossit vers un mod fonctionnel avant que l'exploration graphique ait conclu : gestion d'erreurs, tests de cas limites, persistance réelle."
+etat = "absent"
+constat = "Aucun *.test.ts sous pipeline-v2/. Côté erreurs, validate signale des « gating hook without .catch » ; les seuls .catch sont ceux de la lecture d'un journal ou d'un fichier absent, qui gardent l'observation en vie. Il n'y a pas de gestion d'erreurs. $.state et $.store ne reçoivent que le compteur et l'horodatage jetables de la décision Q7 (proto-etat, register.tsx:93-106), et l'état du Chantier reste lu dans le Suivi. Chaque prototype tient en 120 à 200 lignes, en dur sur ce Chantier."
+
+[[conformite.signal]]
+id = "S4"
+signal = "La spécification s'écrit avant la conclusion : `git log` montre un fichier de spécification de `pipeline-v2/` commité avant le fichier de conclusion."
+etat = "absent"
+constat = "git log master..485fa8c -- pipeline-v2/spec est vide : aucun fichier de spécification n'existe. La conclusion est ajoutée par 485fa8c (E7)."
+
+[[conformite.signal]]
+id = "S5"
+signal = "Un constat sur l'interface n'a pas été vu en session : un `grep` trouve un constat sans sa ligne « vu par …, le …, version … »."
+etat = "absent"
+constat = "Contrôle des constats passé : chaque ### de constats.md a sa ligne « Vu par … » ou est un « ### Non essayé ». Contrôle de claude-code-mods passé : chaque ligne ajoutée porte sa version. Relu : chaque section neuve de claude-code-mods dit d'où viennent ses constats (« d'après ce que l'utilisateur a vu et ce que la sonde a noté du moteur »). Un seul constat porte sur du code modifié après l'observation, le filtre des incertitudes de l'élément 9 (« corrigé depuis ») : c'est une remarque sur la lecture de la prose, non sur l'interface."
+
+[[conformite.signal]]
+id = "S6"
+signal = "La spécification redéfinit l'un des six concepts, ou un terme entre au lexique sans accord : `git diff master -- LEXIQUE.md` n'est pas vide."
+etat = "absent"
+constat = "git diff master -- LEXIQUE.md : 0 ligne. La ligne qu'on a ajoutée à LEXIQUE.md pour provoquer S6 pendant l'observation (constats.md, élément 12) n'est pas restée. Il n'y a pas de spécification."
+
+[[conformite.signal]]
+id = "S7"
+signal = "La spécification laisse au modèle une action mécanique, ou fait de la prose le recours d'un mod qui échoue."
+etat = "absent"
+constat = "Il n'y a pas de spécification (Étapes 8 et 9 sans objet). Sur l'échec d'un mod, la conclusion dit que « le mod doit rendre son échec visible lui-même ; la spécification le règle sans prose de recours ». Elle ne retient donc pas la prose comme recours."
+
+[conformite.symptome]
+symptome = "le pipeline des Chantiers vit en prose de skills que le modèle relit et applique ; le Suivi se relit en entier à chaque reprise, le contexte se mesure après chaque commit (road-map: `etude-pipeline-en-mods`)."
+etat = "persiste"
+constat = "Le pipeline vit toujours en prose de skills : la v1 n'est pas touchée (C7), et aucune spécification ni aucun mod en service ne la remplace. L'issue était voulue par le Brief, qui ne promettait qu'une exploration et une conclusion, et l'arrêt est une décision de l'utilisateur datée au journal du Suivi. La conclusion dit quand reprendre. Une entrée de road-map, reprendre-pipeline-v2-au-navigateur, est indexée, mais hors du commit audité."
+dette = "R4"
+
+[[dette.actuelle]]
+id = "R1"
+nature = "alignement"
+emplacement = "Brief, C8 ; .claude/implementation/todo/technical-debt/session-dump-ecart-ambigu-dans-skill-md.md"
+constat = "uvx rumdl fmt --check . sort en 1 : un paragraphe de ce fichier de todo/technical-debt/ est à re-césurer. Le défaut est antérieur au Chantier : il se reproduit sur l'arbre de master extrait. Le journal du Suivi (2026-10-13) le classe hors périmètre, mais n'amende pas C8, qui exige que la commande passe. C8 est donc non atteint, et le format des vérifications des Étapes 1 à 5 et 7 échoue avec lui."
+trouvee = "01-485fa8c"
+solution = "Deux voies. Formater le fichier (uvx rumdl fmt sur ce seul fichier), sur master ou sur la branche, avec l'accord de l'utilisateur, puis relancer uvx rumdl fmt --check . Ou faire écarter R1 par l'utilisateur en « ## Dettes écartées » du Suivi, en citant la décision du journal du 2026-10-13."
+severite = "bloquant"
+
+[[dette.actuelle]]
+id = "R2"
+nature = "qualité"
+emplacement = "pipeline-v2/README.md:102-113 (« Typage »)"
+constat = "La recette de typage du README limite le tsconfig temporaire à include = [TY, $M/hooks]. Elle laisse dehors le contrat de types du mod, types/index.d.ts, que plugin.json déclare. Sur proto-etat, tsc sort donc en 2 : TS2345, « 'pv2-etat' is not assignable to type 'never' » sur $.state.get(COMPTEUR) et $.state.get(HORODATAGE) (register.tsx:165-166), que TY soit le fichier de plugin-authoring ou celui de session. Le code est juste : tsc -p sur le tsconfig que le moteur pose (include ../../types) sort en 0. C'est le contrôle de C8 et des Étapes 3 à 5 qui ment : il rejette un prototype correct, et l'Étape 3 n'a pu le passer tel qu'écrit. La recette d'OUTILLAGE.md, antérieure au Chantier, a le même angle mort."
+trouvee = "01-485fa8c"
+solution = "Ajouter « $M/types » à l'include du tsconfig temporaire dans pipeline-v2/README.md, puis relancer la recette sur les quatre prototypes ; tsc doit sortir en 0 sur proto-etat. Le même manque dans OUTILLAGE.md relève du registre de dette, hors de ce Chantier."
+severite = "bloquant"
+
+[[dette.actuelle]]
+id = "R3"
+nature = "alignement"
+emplacement = "environnement de la session du Chantier ; pipeline-v2/README.md:24-37 (« Une session témoin »)"
+constat = "La session du Chantier (claude -c, PID 77068) porte CLAUDE_CODE_PLUGIN_DIRS=~/.claude/pipeline-v2/proto-veille dans son environnement. La variable ne vient ni du profil du shell ni de l'environnement initial du processus : elle a été prise dans settings.json au démarrage, pendant l'observation. Son retrait du fichier ne l'a pas ôtée de la session. Conséquence : tout claude lancé depuis cette session charge pv2-veille. Le premier claude -p de l'audit l'a fait : journal debug/eeec1364-….txt, « Loaded inline plugin from path: pv2-veille », trois $.process.run bash, journal.log réécrit. La session du Chantier elle-même l'a sans doute chargé, contre la décision du Plan (« La session du Chantier ne charge aucun prototype ») et contre le journal du Suivi (« posé le temps d'une observation puis retiré »). Le README dit de retirer la variable, mais pas de redémarrer les sessions ouvertes pendant qu'elle y était."
+trouvee = "01-485fa8c"
+solution = "Redémarrer la session du Chantier, ou unset CLAUDE_CODE_PLUGIN_DIRS, avant les commandes de Clôture qui lancent claude. Ajouter au README, « Une session témoin », qu'une session démarrée pendant que la variable était posée la garde jusqu'à sa fin, et la passe à tout claude qu'elle lance. Verser ce constat à claude-code-mods, avec sa version."
+severite = "avertissement"
+
+[[dette.actuelle]]
+id = "R4"
+nature = "alignement"
+emplacement = "Brief, Intention (Symptôme) ; pipeline-v2/conclusion.md"
+constat = "Le symptôme d'origine persiste : le Suivi se relit toujours en entier, et le contexte se mesure toujours après chaque commit. C'est l'issue attendue d'une exploration que l'utilisateur a arrêtée par une décision datée au journal. La conclusion dit le signe qui ferait reprendre. Aucun coût n'est démontré au-delà de l'état d'avant le Chantier."
+trouvee = "01-485fa8c"
+solution = "Rien à corriger dans ce Chantier. Commiter avec la Clôture l'entrée de road-map reprendre-pipeline-v2-au-navigateur, aujourd'hui indexée, pour que la reprise reste tracée hors de pipeline-v2/conclusion.md."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R5"
+nature = "qualité"
+emplacement = "pipeline-v2/api/inventaire.py:128, 137"
+constat = "Un fichier de types ou un inventaire --compare introuvable fait lever FileNotFoundError avec sa trace. Ce n'est pas l'échec nommé (Echec, sortie 2) que le module promet pour un en-tête manquant. La règle Python du dépôt veut qu'une valeur lue de l'extérieur rende un échec nommé. L'échec reste bruyant, pas silencieux : aucun coût démontré."
+trouvee = "01-485fa8c"
+solution = "Vérifier l'existence des deux chemins dans main() et rendre un Echec nommé (« types introuvables : <chemin> »), sortie 2, comme pour les autres échecs de lecture."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R6"
+nature = "qualité"
+emplacement = "biome.json:9-14"
+constat = "Pour pipeline-v2, files.includes n'ajoute que pipeline-v2/*/hooks/**, alors que les skills y ont aussi skills/*/types/**. Le contrat pipeline-v2/proto-etat/types/index.d.ts échappe donc au contrôle de format : biome format le déclare ignoré. Formaté à part, avec les mêmes réglages, il ne change pas : aucun défaut aujourd'hui."
+trouvee = "01-485fa8c"
+solution = "Ajouter « pipeline-v2/*/types/** » à files.includes de biome.json, sur le modèle de skills/*/types/**."
+severite = "note"
+
+[verdict]
+valeur = "DÉFAVORABLE"
+justification = "Deux bloquants, cotés d'office. R1 : C8 non atteint, uvx rumdl fmt --check . échoue sur un fichier étranger au Chantier, défaut antérieur que le journal dit hors périmètre sans que C8 soit amendé. Il se solde en une ligne, ou par un écartement de l'utilisateur. R2 : la recette de typage du README rejette proto-etat, faute d'inclure le contrat types/ du mod, alors que le code se type sans erreur. Hors ces deux contrôles, l'intention est tenue : prototypes validés et chargés, douze constats, conclusion motivée sur le critère « décevante », claude-code-mods à jour, v1 et lexique intacts, aucun signal de dérive. R3 (avertissement) demande de redémarrer la session avant la Clôture."

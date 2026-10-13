@@ -43,6 +43,12 @@ Questions à trancher au Brief :
   (`session.append`, les noms ajoutés à `$`). Quel risque de casse est acceptable pour un pipeline
   dont dépendent tous les Chantiers ?
 
+## Fait le
+
+2026-10-13, Chantier `pipeline-v2`, archivé en
+`.claude/implementation/done/2026-10-13-pipeline-v2.md`. Conclusion mitigée :
+`pipeline-v2/conclusion.md` ; reprise notée en road-map, `reprendre-pipeline-v2-au-navigateur`.
+
 ## Références
 
 - Shadow-skill `claude-code-mods` : `shadow-skills/claude-code-mods/SKILL.md`, sections « Ce qui

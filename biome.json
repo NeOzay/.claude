@@ -6,7 +6,12 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["skills/*/hooks/**", "skills/*/types/**", ".claude/skills/*/hooks/**"]
+    "includes": [
+      "skills/*/hooks/**",
+      "skills/*/types/**",
+      ".claude/skills/*/hooks/**",
+      "pipeline-v2/*/hooks/**"
+    ]
   },
   "formatter": {
     "enabled": true,

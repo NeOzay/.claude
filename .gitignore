@@ -69,3 +69,11 @@ skills/*/tsconfig.json
 
 # Brouillons de retours de Claude Code, locaux à la machine.
 feedback/
+
+# Prototypes de pipeline-v2 : le tsconfig.json, comme celui d'un mod de skill, et le journal
+# qu'une session témoin écrit.
+pipeline-v2/*/tsconfig.json
+pipeline-v2/*/journal.log
+
+# Desktop en session SSH : sa CLI, ses plugins synchronisés et son état d'exécution.
+remote/
