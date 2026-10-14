@@ -2,10 +2,10 @@
 id = "lexique-depend-du-path-de-la-session"
 title = "Le mod lexique dépend du PATH de la session"
 date = 2026-10-06
-severite = "inconnue"
+severite = "note"
 chantier = "mods-a-la-racine-des-skills"
 reference = "R6"
-pin = false
+pin = true
 source = "chantier `mods-a-la-racine-des-skills`, audit de clôture du 2026-10-06 sur `349bb96`, `.claude/implementation/mods-a-la-racine-des-skills.audit.md`, R6 (premier audit intermédiaire, `ff927cc`), resté ouvert"
 reviewed = "<OPTIONNEL date>"
 category = "<OPTIONNEL>"

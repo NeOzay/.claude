@@ -2,7 +2,7 @@
 id = "conversation-reprise-sans-lexique-local-jusqua-compaction"
 title = "Une conversation reprise garde son prompt système enregistré, donc son lexique local d'origine ou son absence"
 date = 2026-10-06
-severite = "critique"
+severite = "avertissement"
 chantier = "Hors chantier"
 reference = "R5"
 pin = true

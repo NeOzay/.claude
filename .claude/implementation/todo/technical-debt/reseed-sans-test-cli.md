@@ -2,7 +2,7 @@
 id = "reseed-sans-test-cli"
 title = "reseed n'a aucun test de bout en bout par la ligne de commande"
 date = 2026-09-04
-severite = "majeur"
+severite = "avertissement"
 chantier = "peremption-contrat"
 reference = "R4"
 pin = true
