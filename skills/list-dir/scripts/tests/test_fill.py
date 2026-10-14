@@ -228,3 +228,129 @@ def test_id_inconnu_echoue(tmp_path: Path) -> None:
 
     assert not r
     assert "élément « z » introuvable" in r.message
+
+
+# ------------------------------------------------------------------- --override
+def liste_ecrite(tmp_path: Path) -> Path:
+    """Un élément `a` dont tous les champs sont écrits, `b` voisin pour le contrôle."""
+    liste = monter_liste(tmp_path / "jouet", CONTRAT_FILL)
+    ecrit = (
+        '+++\n# légende\nid = "{i}"\ntitle = "T"\ndate = 2026-08-24\ncategory = "rouge"\n'
+        'pin = false\ncompte = 3\ntags = ["x"]\nancien = "z"\n+++\n\n## Constat\n\nx\n'
+    )
+    for ident in ("a", "b"):
+        _ = (liste / f"{ident}.md").write_text(ecrit.format(i=ident), encoding="utf-8")
+    return liste
+
+
+def test_override_reecrit_un_bool_et_seule_sa_ligne_change(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+    avant = front(liste, "a")
+
+    changes = ouvrir(liste).fill("pin", "true", ["a"], override=True).unwrap()
+
+    assert str(changes[0]).endswith("champ « pin » — « false » remplacé par « true »")
+    assert front(liste, "a") == avant.replace("pin = false", "pin = true")
+    assert ouvrir(liste).get("a").unwrap().fields["pin"] is True
+
+
+def test_override_reecrit_text_int_date_et_enum(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+
+    _ = ouvrir(liste).fill("title", "Neuf", ["a"], override=True).unwrap()
+    _ = ouvrir(liste).fill("compte", "7", ["a"], override=True).unwrap()
+    _ = ouvrir(liste).fill("date", "2026-10-14", ["a"], override=True).unwrap()
+    _ = ouvrir(liste).fill("category", "vert", ["a"], override=True).unwrap()
+
+    fields = ouvrir(liste).get("a").unwrap().fields
+    assert fields["title"] == "Neuf"
+    assert fields["compte"] == 7
+    assert fields["date"] == datetime.date(2026, 10, 14)
+    assert fields["category"] == "vert"
+    assert ouvrir(liste).get("b").unwrap().fields["compte"] == 3
+
+
+def test_override_pose_encore_un_champ_au_marqueur(tmp_path: Path) -> None:
+    liste = liste_au_marqueur(tmp_path)
+
+    changes = ouvrir(liste).fill("category", "vert", ["a"], override=True).unwrap()
+
+    assert [c.path.stem for c in changes] == ["a"]
+    assert ouvrir(liste).get("a").unwrap().fields["category"] == "vert"
+
+
+def test_override_valeur_identique_ne_touche_aucun_fichier(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+    dates = {p.name: p.stat().st_mtime_ns for p in liste.glob("*.md")}
+
+    assert ouvrir(liste).fill("pin", "false", ["a"], override=True).unwrap() == []
+    assert ouvrir(liste).fill("compte", "3", ["a", "b"], override=True).unwrap() == []
+    assert {p.name: p.stat().st_mtime_ns for p in liste.glob("*.md")} == dates
+
+
+def test_override_dry_run_n_ecrit_rien(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+    avant = front(liste, "a")
+
+    changes = ouvrir(liste).fill("pin", "true", ["a"], override=True, dry_run=True).unwrap()
+
+    assert len(changes) == 1
+    assert front(liste, "a") == avant
+
+
+def test_override_sans_id_echoue_en_code_2(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+    avant = front(liste, "a")
+
+    r = ouvrir(liste).fill("pin", "true", override=True)
+
+    assert not r
+    assert r.status == 2
+    assert "override ne vaut que pour des éléments désignés" in r.message
+    assert front(liste, "a") == avant
+
+
+def test_override_refuse_sans_rien_ecrire(tmp_path: Path) -> None:
+    """list, deprecated, id, champ absent, et les valeurs que le contrat refuse."""
+    liste = liste_ecrite(tmp_path)
+    _ = (liste / "c.md").write_text('+++\nid = "c"\ntitle = "T"\n+++\n\n## Constat\n\nx\n')
+    avant = {p.name: p.read_text(encoding="utf-8") for p in liste.glob("*.md")}
+    lst = ouvrir(liste)
+
+    refus = {
+        "list": lst.fill("tags", "y", ["a"], override=True),
+        "deprecated": lst.fill("ancien", "y", ["a"], override=True),
+        "id": lst.fill("id", "b", ["a"], override=True),
+        "absent": lst.fill("category", "vert", ["c"], override=True),
+        "enum": lst.fill("category", "bleu", ["a"], override=True),
+        "date": lst.fill("date", "07/10/2026", ["a"], override=True),
+        "bool": lst.fill("pin", "True", ["a"], override=True),
+    }
+
+    assert [k for k, r in refus.items() if r] == []
+    assert "de type list" in refus["list"].message
+    assert "déprécié" in refus["deprecated"].message
+    assert "il vaut le nom du fichier" in refus["id"].message
+    assert "champ « category » absent" in refus["absent"].message
+    assert {p.name: p.read_text(encoding="utf-8") for p in liste.glob("*.md")} == avant
+
+
+def test_override_verifie_tout_avant_d_ecrire(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+    avant = front(liste, "a")
+
+    r = ouvrir(liste).fill("pin", "true", ["a", "z"], override=True)
+
+    assert not r
+    assert front(liste, "a") == avant
+
+
+def test_sans_override_une_valeur_ecrite_reste_refusee(tmp_path: Path) -> None:
+    liste = liste_ecrite(tmp_path)
+    avant = front(liste, "a")
+
+    r = ouvrir(liste).fill("pin", "true", ["a"])
+
+    assert not r
+    assert "a.md: champ « pin » déjà rempli, « false »" in r.message
+    assert front(liste, "a") == avant

@@ -417,7 +417,13 @@ class ListStore:
         return ok((item.realigned(fields, sections), changes))
 
     def fill(
-        self, name: str, text: str, ids: Sequence[str] = (), *, dry_run: bool = False
+        self,
+        name: str,
+        text: str,
+        ids: Sequence[str] = (),
+        *,
+        override: bool = False,
+        dry_run: bool = False,
     ) -> Result[list[Change]]:
         """Pose `text` sur le champ `name` des éléments où il est resté au marqueur.
 
@@ -430,6 +436,13 @@ class ListStore:
         déjà rempli, ou absent, est sauté. Avec `ids`, l'appelant a désigné l'élément :
         le sauter en silence lui ferait croire la valeur posée, et l'appel échoue en le
         nommant.
+
+        `override` LÈVE CETTE RÈGLE, ET RIEN D'AUTRE : l'élément désigné voit sa valeur
+        écrite réécrite. Il exige `ids` — réécrire une valeur écrite sur toute la liste
+        serait un geste qu'on ne fait pas par omission — et refuse un champ `list`, dont
+        `text` ne dit pas le contenu, et `id`, qui vaut le nom du fichier. Une valeur
+        identique à celle qui est écrite ne touche aucun fichier. Un champ absent reste
+        refusé : ajouter un champ est l'affaire de `migrate`.
 
         LA VALEUR PASSE LE CONTRÔLE DU TYPE DÉCLARÉ, par la conversion même de `text`
         (`gabarit.prefill.typed_value`) : `enum` hors `values`, date non ISO, `bool`
@@ -452,6 +465,18 @@ class ListStore:
             # Un champ qu'on ne pose plus ne se remplit pas non plus : `migrate` ne
             # l'ajoute jamais, et le remplir ferait vivre ce que le contrat retire.
             return fail(f"{self.path}: champ « {name} » déprécié — {decl.deprecated}")
+        if override:
+            if not ids:
+                return fail(f"{self.path}: override ne vaut que pour des éléments désignés", 2)
+            if decl.type == "list":
+                return fail(
+                    f"{self.path}: champ « {name} » de type list — override ne le réécrit pas"
+                )
+            if name == "id":
+                return fail(
+                    f"{self.path}: champ « id » — il vaut le nom du fichier, "
+                    "override ne le réécrit pas"
+                )
         if is_marker(text):
             return fail(
                 f"{self.path}: champ « {name} » — « {text} » est un marqueur, pas une valeur"
@@ -468,35 +493,105 @@ class ListStore:
                 if not got:
                     return Result(got.status, None, got.message)
                 item = got.unwrap()
-                if not is_marker(item.fields.get(name)):
-                    actuel = item.fields.get(name)
+                actuel = item.fields.get(name)
+                if is_marker(actuel):
+                    targets.append(item)
+                elif actuel is not None and override:
+                    # UNE VALEUR IDENTIQUE NE RÉÉCRIT RIEN : le fichier garde sa date, et
+                    # `git status` reste vide.
+                    if forme_texte(actuel) != forme_texte(value):
+                        targets.append(item)
+                else:
                     etat = "absent" if actuel is None else f"déjà rempli, « {forme_texte(actuel)} »"
                     return fail(
                         f"{item.path}: champ « {name} » {etat} — fill ne pose qu'un champ "
                         "au marqueur"
                     )
-                targets.append(item)
         else:
             items = self.items()
             if not items:
                 return Result(items.status, None, items.message)
             targets = [it for it in items.unwrap() if is_marker(it.fields.get(name))]
 
+        return self._poser(name, [(it, value) for it in targets], dry_run)
+
+    def _poser(
+        self, name: str, cibles: Sequence[tuple[Item, FieldValue]], dry_run: bool
+    ) -> Result[list[Change]]:
+        """Écrit chaque valeur sur le champ `name` de son élément. LE SEUL CHEMIN D'ÉCRITURE
+        d'une valeur posée ou réécrite : l'appelant a déjà vérifié le type et désigné les
+        éléments, ici on ne fait que dire le changement et reprojeter le front matter.
+        """
         changes = [
             Change(
                 it.path,
                 f"champ « {name} »",
-                f"« {it.fields[name]} » remplacé par « {forme_texte(value)} »",
+                f"« {forme_texte(it.fields[name])} » remplacé par « {forme_texte(value)} »",
             )
-            for it in targets
+            for it, value in cibles
         ]
         if dry_run:
             return ok(changes)
-        for it in targets:
+        for it, value in cibles:
             written = self.write(it.with_fields(**{name: value}))
             if not written:
                 return Result(written.status, None, written.message)
         return ok(changes)
+
+    def toggle(
+        self, name: str, ids: Sequence[str], *, dry_run: bool = False
+    ) -> Result[list[Change]]:
+        """Inverse le booléen `name` des éléments désignés par `ids`.
+
+        LE PENDANT DE `fill --override` POUR UN GESTE QUI N'A PAS DE VALEUR À DIRE : le
+        nouvel état se déduit de l'ancien, et l'appelant n'a pas à le lire d'abord pour
+        le contredire. Il passe par le même contrôle de type et le même chemin d'écriture
+        (`_poser`) : `toggle` ne décide rien de plus que `fill`.
+
+        RÉSERVÉ AU `bool` ÉCRIT, et à des éléments désignés — jamais toute la liste.
+        Un champ d'un autre type, un `bool` resté au marqueur ou absent n'ont pas d'état à
+        inverser : l'appel échoue en le nommant, et rien n'est écrit.
+
+        TOUT EST VÉRIFIÉ AVANT LA MOINDRE ÉCRITURE, comme pour `fill`.
+        """
+        if not ids:
+            return fail(f"{self.path}: toggle ne vaut que pour des éléments désignés", 2)
+        decl = self.contract.fields.get(name)
+        if decl is None:
+            connus = ", ".join(self.contract.fields) or "aucun"
+            return fail(f"{self.path}: champ « {name} » non déclaré au contrat ; connus : {connus}")
+        if decl.deprecated is not None:
+            return fail(f"{self.path}: champ « {name} » déprécié — {decl.deprecated}")
+        if decl.type != "bool":
+            return fail(
+                f"{self.path}: champ « {name} » de type {decl.type} — toggle ne bascule qu'un bool"
+            )
+
+        cibles: list[tuple[Item, FieldValue]] = []
+        for item_id in dict.fromkeys(ids):
+            got = self.get(item_id)
+            if not got:
+                return Result(got.status, None, got.message)
+            item = got.unwrap()
+            actuel = item.fields.get(name)
+            if not isinstance(actuel, bool):
+                etat = (
+                    "absent"
+                    if actuel is None
+                    else "au marqueur"
+                    if is_marker(actuel)
+                    else f"écrit « {forme_texte(actuel)} », qui n'est pas un booléen"
+                )
+                return fail(
+                    f"{item.path}: champ « {name} » {etat} — toggle n'inverse qu'un bool écrit"
+                )
+            converted = typed_value(
+                decl, forme_texte(not actuel), str(item.path), "la valeur inverse"
+            )
+            if not converted:
+                return Result(converted.status, None, converted.message)
+            cibles.append((item, converted.unwrap()))
+        return self._poser(name, cibles, dry_run)
 
     def move(self, item_id: str, target: ListStore | Path | str) -> Result[Path]:
         """Déplace un élément vers une autre liste. `git mv`, ET RIEN D'AUTRE.

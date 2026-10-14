@@ -8,6 +8,10 @@ recopie autant de fois qu'il y a d'éléments.
 ELLE NE JUGE PAS NON PLUS : la valeur vient de l'appelant. Elle ne touche jamais une
 valeur écrite — avec `--all`, l'élément est sauté ; avec `--id`, l'appel échoue en le
 nommant. La valeur est contrôlée contre le type déclaré avant toute écriture.
+
+`--override` EST LA SEULE EXCEPTION, ET ELLE SE DEMANDE : avec `--id`, il réécrit la
+valeur écrite de l'élément désigné. Il refuse `--all`, en code 2 — réécrire toute une
+liste ne se fait pas par omission.
 """
 
 from __future__ import annotations
@@ -17,7 +21,7 @@ from typing import cast
 
 from listdir.types import Result, Utils
 
-DESCRIPTION = "pose une valeur sur un champ resté au marqueur"
+DESCRIPTION = "pose une valeur sur un champ resté au marqueur, ou la réécrit avec --override"
 REQUIRES: list[str] = []
 
 
@@ -43,6 +47,11 @@ def register(parser: argparse.ArgumentParser) -> None:
         help="remplir tous les éléments où le champ est au marqueur ; les autres sont sautés",
     )
     parser.add_argument(
+        "--override",
+        action="store_true",
+        help="réécrit la valeur déjà écrite des éléments désignés par --id (refuse --all)",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="montre ce qui serait fait sans écrire dans aucun fichier",
@@ -57,16 +66,22 @@ def command(args: argparse.Namespace, utils: Utils) -> Result[str]:
 
     champ = cast("str", args.champ)
     dry_run = cast("bool", args.dry_run)
+    override = cast("bool", args.override)
+    if override and cast("bool", args.tous):
+        return utils.fail("--override ne s'emploie qu'avec --id, jamais avec --all", 2)
     r = lst.fill(
         champ,
         cast("str", args.valeur),
         cast("list[str]", args.ids),
+        override=override,
         dry_run=dry_run,
     )
     if not r:
-        return utils.fail(r.message)
+        return utils.fail(r.message, r.status)
 
     changes = r.unwrap()
+    if not changes and override:
+        return utils.ok(f"{lst.path} : valeur déjà en place, aucun fichier touché")
     if not changes:
         return utils.ok(f"{lst.path} : aucun champ « {champ} » au marqueur, aucun fichier touché")
 

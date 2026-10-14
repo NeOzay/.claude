@@ -190,7 +190,8 @@ def test_help_seul_ne_montre_que_les_generiques() -> None:
     r = lancer("help")
 
     assert r.code == 0
-    assert "Commandes génériques (14)" in r.out
+    assert "Commandes génériques (15)" in r.out
+    assert "toggle" in r.out
     assert "Passer un répertoire-liste en argument" in r.out
 
 
@@ -836,6 +837,91 @@ def test_fill_refus_sort_en_code_1_sur_stderr(tmp_path: Path) -> None:
 
     assert (r.code, r.out) == (1, "")
     assert "ni « true » ni « false »" in r.err
+
+
+def liste_pin_ecrit(racine: Path) -> Path:
+    liste = monter_liste(racine / "jouet", CONTRAT_BOOL)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\npin = false\n')
+    return liste
+
+
+def test_fill_override_reecrit_en_code_0(tmp_path: Path) -> None:
+    liste = liste_pin_ecrit(tmp_path)
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    r = lancer("fill", str(liste), "pin", "true", "--override", "--id", "a")
+
+    assert r.code == 0
+    assert r.out.rstrip().endswith(": 1 élément rempli")
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant.replace(
+        "pin = false", "pin = true"
+    )
+
+
+def test_fill_override_avec_all_sort_en_code_2_sans_rien_ecrire(tmp_path: Path) -> None:
+    liste = liste_pin_ecrit(tmp_path)
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    r = lancer("fill", str(liste), "pin", "true", "--override", "--all")
+
+    assert (r.code, r.out) == (2, "")
+    assert "--override ne s'emploie qu'avec --id" in r.err
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant
+
+
+def test_fill_override_valeur_deja_en_place_se_dit_comme_telle(tmp_path: Path) -> None:
+    liste = liste_pin_ecrit(tmp_path)
+
+    r = lancer("fill", str(liste), "pin", "false", "--override", "--id", "a")
+
+    assert r.code == 0
+    assert "valeur déjà en place, aucun fichier touché" in r.out
+    assert "au marqueur" not in r.out
+
+
+def test_fill_id_sans_override_refuse_une_valeur_ecrite(tmp_path: Path) -> None:
+    liste = liste_pin_ecrit(tmp_path)
+
+    r = lancer("fill", str(liste), "pin", "true", "--id", "a")
+
+    assert (r.code, r.out) == (1, "")
+    assert "déjà rempli" in r.err
+
+
+# ---------------------------------------------------------------------- toggle
+def test_toggle_inverse_le_pin_en_code_0(tmp_path: Path) -> None:
+    liste = liste_avec_pins(tmp_path)
+    avant = (liste / "a.md").read_text(encoding="utf-8")
+
+    r = lancer("toggle", str(liste), "pin", "--id", "a")
+
+    assert r.code == 0
+    assert r.out.rstrip().endswith(": 1 élément basculé")
+    assert (liste / "a.md").read_text(encoding="utf-8") == avant.replace(
+        "pin = true", "pin = false"
+    )
+
+
+def test_toggle_ne_connait_pas_all_et_exige_id(tmp_path: Path) -> None:
+    liste = liste_avec_pins(tmp_path)
+    avant = {p.name: p.read_text(encoding="utf-8") for p in liste.glob("*.md")}
+
+    avec_all = lancer("toggle", str(liste), "pin", "--id", "a", "--all")
+    sans_id = lancer("toggle", str(liste), "pin")
+
+    assert (avec_all.code, avec_all.out) == (2, "")
+    assert "--all" in avec_all.err
+    assert (sans_id.code, sans_id.out) == (2, "")
+    assert {p.name: p.read_text(encoding="utf-8") for p in liste.glob("*.md")} == avant
+
+
+def test_toggle_refus_sort_en_code_1_sur_stderr(tmp_path: Path) -> None:
+    liste = liste_avec_pins(tmp_path)
+
+    r = lancer("toggle", str(liste), "title", "--id", "a")
+
+    assert (r.code, r.out) == (1, "")
+    assert "toggle ne bascule qu'un bool" in r.err
 
 
 # ----------------------------------------------------------- l'ancien marqueur

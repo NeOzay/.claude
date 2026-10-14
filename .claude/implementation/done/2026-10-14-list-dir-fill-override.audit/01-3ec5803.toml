@@ -1,0 +1,309 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "list-dir-fill-override"
+audit = "01-3ec5803"
+rang = 1
+type = "clôture"
+date = 2026-10-14
+base = "master"
+commit = "3ec5803"
+brief = ".claude/implementation/list-dir-fill-override.brief.md"
+suivi = ".claude/implementation/list-dir-fill-override.md"
+plan = ".claude/plans/sorted-finding-sutherland.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/ -q -k fill"
+statut = "passée"
+sortie = """......................................................                   [100%]
+54 passed, 471 deselected in 2.47s"""
+
+[[verification]]
+origine = "Étape 2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/ -q"
+statut = "passée"
+sortie = """........................................................................ [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 41%]
+........................................................................ [ 54%]
+........................................................................ [ 68%]
+........................................................................ [ 82%]
+........................................................................ [ 96%]
+.....................                                                    [100%]
+525 passed in 18.48s"""
+
+[[verification]]
+origine = "Étape 3"
+commande = "le bloc de l'Étape 3 du Plan, d'un seul tenant"
+statut = "non-exécutée"
+sortie = "vérification en prose, pas une commande : à mener par l'auditeur"
+
+[[verification]]
+origine = "Étape 3"
+commande = "pytest skills/list-dir/scripts/tests/ scripts/tests/ -q && uvx ruff check $(git diff --name-only master -- '*.py') && uvx ruff format --check . && test \"$(cd skills/list-dir && uvx --with pytest basedpyright --outputjson | jq '.summary.errorCount')\" -le 13 && uvx rumdl fmt --check . && ! grep -n quatorze skills/list-dir/SKILL.md   (le bloc du Plan, rejoué d'un seul tenant par l'auditeur)"
+statut = "passée"
+sortie = """666 passed in 19.26s
+All checks passed!
+126 files already formatted
+
+Issues: Found 18 issues in 10/256 files (249ms)
+code=0
+(les issues de rumdl sont des règles de lint non corrigibles par fmt, toutes dans des fichiers étrangers au Chantier — dette technical-debt-solde, CLAUDE.md, shadow-skills, debt-review — et déjà présentes sur la Base : 16 issues dans 8 fichiers sur l'arbre extrait de master ; `rumdl fmt --check skills/list-dir` et les fichiers du Chantier : « No issues found in 8 files »)"""
+
+[[verification]]
+origine = "C1"
+commande = "copie git de .claude/implementation/todo/technical-debt ; list-dir fill $D pin true --override --id abandon-garder-la-branche-archive-des-chemins-morts ; git diff -U0 | grep '^[-+][^-+]'"
+statut = "passée"
+sortie = """dettes/abandon-garder-la-branche-archive-des-chemins-morts.md: champ « pin » — « false » remplacé par « true »
+
+dettes : 1 élément rempli
+code=0 status:[ M dettes/abandon-garder-la-branche-archive-des-chemins-morts.md]
+diff:
+-pin = false
++pin = true"""
+
+[[verification]]
+origine = "C2"
+commande = "list-dir fill $D pin false --override --all ; test $? -eq 2 && test -z \"$(git status --short)\" ; list-dir fill $D pin false --id <id> ; test $? -eq 1 && test -z \"$(git status --short)\""
+statut = "passée"
+sortie = """--- C2 override+all
+--override ne s'emploie qu'avec --id, jamais avec --all
+code=2 status:[]
+--- C2 id sans override
+dettes/abandon-garder-la-branche-archive-des-chemins-morts.md: champ « pin » déjà rempli, « true » — fill ne pose qu'un champ au marqueur
+code=1 status:[]"""
+
+[[verification]]
+origine = "C3"
+commande = "sur la copie git, contrat augmenté d'un champ `tags` de type list et un élément privé de `reviewed` : list-dir fill $D <champ> <valeur> --override --id <id> pour tags, source (deprecated), id, reviewed (absent), severite=bleu, date=14/10/2026, pin=True ; chacun attendu en code 1 avec git status --short vide"
+statut = "passée"
+sortie = """--- C3 list
+dettes: champ « tags » de type list — override ne le réécrit pas
+code=1 status:[]
+--- C3 deprecated
+dettes: champ « source » déprécié — Remplacé par chantier et reference ; ne plus l'écrire.
+code=1 status:[]
+--- C3 id
+dettes: champ « id » — il vaut le nom du fichier, override ne le réécrit pas
+code=1 status:[]
+--- C3 absent
+dettes/amorcage-puis-reprise-aboutit-a-un-arret.md: champ « reviewed » absent — fill ne pose qu'un champ au marqueur
+code=1 status:[]
+--- C3 hors values
+dettes: champ « severite » — valeur issue de l'argument refusée : « bleu » hors des valeurs déclarées : inconnue, note, avertissement, majeur, critique
+code=1 status:[]
+--- C3 date non ISO
+dettes: champ « date » — valeur issue de l'argument refusée : « 14/10/2026 » n'est pas une date ISO (AAAA-MM-JJ)
+code=1 status:[]
+--- C3 bool ambigu
+dettes: champ « pin » — valeur issue de l'argument refusée : « True » n'est ni « true » ni « false »
+code=1 status:[]"""
+
+[[verification]]
+origine = "C4"
+commande = "après C1 commité : list-dir fill $D pin true --override --id <id> ; test -z \"$(git status --short)\""
+statut = "passée"
+sortie = """dettes : valeur déjà en place, aucun fichier touché
+code=0 status:[]"""
+
+[[verification]]
+origine = "C5"
+commande = "list-dir toggle $D pin --id <id> ; git diff -U0 ; puis toggle sur severite (enum), sur un pin au Marqueur, sur un élément sans pin, avec --all seul et avec --id … --all : codes 1, 1, 1, 2, 2 attendus, git status --short vide"
+statut = "passée"
+sortie = """--- C5 toggle
+dettes/abandon-garder-la-branche-archive-des-chemins-morts.md: champ « pin » — « true » remplacé par « false »
+
+dettes : 1 élément basculé
+code=0 status:[ M dettes/abandon-garder-la-branche-archive-des-chemins-morts.md]
+diff:
+-pin = true
++pin = false
+--- C5 non bool
+dettes: champ « severite » de type enum — toggle ne bascule qu'un bool
+code=1 status:[]
+--- C5 marqueur
+dettes/basedpyright-treize-erreurs-non-tenues.md: champ « pin » au marqueur — toggle n'inverse qu'un bool écrit
+code=1 status:[]
+--- C5 absent
+dettes/amorcage-puis-reprise-aboutit-a-un-arret.md: champ « pin » absent — toggle n'inverse qu'un bool écrit
+code=1 status:[]
+--- C5 --all
+list-dir.py toggle: error: the following arguments are required: --id
+code=2 status:[]
+--- C5 --all avec id
+list-dir.py toggle: error: unrecognized arguments: --all
+code=2 status:[]"""
+
+[[verification]]
+origine = "C6"
+commande = "~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/ -q"
+statut = "passée"
+sortie = "525 passed in 18.75s"
+
+[[verification]]
+origine = "C6"
+commande = "uvx ruff check $(git diff --name-only master...3ec5803 -- '*.py') && uvx ruff format --check ."
+statut = "passée"
+sortie = """All checks passed!
+126 files already formatted
+(`uvx ruff check .` littéral : « Found 2 errors », les deux E501 de test_fusion.py:268 et :295, identiques sur l'arbre extrait de master — C6 amendé au Suivi le 2026-10-14)"""
+
+[[verification]]
+origine = "C6"
+commande = "cd skills/list-dir && uvx --with pytest basedpyright --outputjson | jq '.summary' ; même commande sur l'arbre extrait de master (git archive), puis diff des deux listes d'erreurs (fichier|règle|message)"
+statut = "passée"
+sortie = """tête : {"filesAnalyzed": 46, "errorCount": 13, "warningCount": 0}
+base : {"filesAnalyzed":44,"errorCount":13,"warningCount":0}
+diff des erreurs : IDENTIQUES — 4 dans listdir/provenance.py, 9 dans tests/test_prefill.py, aucune dans un fichier touché"""
+
+[[verification]]
+origine = "C7"
+commande = "list-dir help | grep -n 'génériques\\|toggle' ; grep -n 'quinze\\|quatorze' skills/list-dir/SKILL.md ; grep -n 'override\\|toggle' skills/list-dir/references/operations.md"
+statut = "passée"
+sortie = """3:Commandes génériques (15) :
+17:  toggle    inverse un booléen écrit sur les éléments désignés
+SKILL.md 5:  embarqué qui déclare la structure. Fournit quinze commandes génériques (init, new, list, show,
+SKILL.md 51:## Les quinze commandes
+operations.md 93, 106-108 : --override dans la synopsis et le tableau de fill ; 128-134 : paragraphe --override ; 141-157 : section « Basculer un booléen » (toggle)"""
+
+[[conformite.critere]]
+id = "C1"
+critere = "Sur un pin écrit à `false`, `list-dir fill <dettes> pin true --override --id <id>` le passe à `true`, et `git diff` ne montre que la ligne `pin`."
+etat = "atteint"
+constat = "Vérification C1 rejouée sur une copie git du registre de dette réel : code 0, `git diff` réduit à `-pin = false` / `+pin = true`. Couvert aussi par test_fill.py::test_override_reecrit_un_bool_et_seule_sa_ligne_change (fichier entier comparé) et test_entree_cli.py::test_fill_override_reecrit_en_code_0."
+
+[[conformite.critere]]
+id = "C2"
+critere = "`fill --override --all` sort en code 2 sans rien écrire ; `fill --id` sans `--override` refuse toujours une valeur écrite."
+etat = "atteint"
+constat = "Vérification C2 : `--override --all` sort en 2 avant tout appel à la bibliothèque (commands/fill.py:70-71), git status vide ; `--id` sans `--override` sort en 1 sur « déjà rempli ». La bibliothèque refuse aussi `override` sans `ids`, en 2 (store.py:469-470). Tests : test_fill_override_avec_all_sort_en_code_2_sans_rien_ecrire, test_fill_id_sans_override_refuse_une_valeur_ecrite, test_sans_override_une_valeur_ecrite_reste_refusee, test_override_sans_id_echoue_en_code_2."
+
+[[conformite.critere]]
+id = "C3"
+critere = "`--override` échoue sans rien écrire sur un champ `list`, un champ `deprecated`, le champ `id`, un champ absent de l'élément, et une valeur que le contrat refuse (hors `values`, date non ISO, `bool` autre que `true`/`false`)."
+etat = "atteint"
+constat = "Vérification C3 : les sept refus sortent en 1, git status vide après chacun. Lu : `list` et `id` refusés sous override avant toute lecture d'élément (store.py:468-479), `deprecated` par le contrôle existant, champ absent par la branche `else` (store.py:504-509), valeurs refusées par `typed_value` avant la boucle. Test : test_fill.py::test_override_refuse_sans_rien_ecrire compare tous les fichiers avant/après."
+
+[[conformite.critere]]
+id = "C4"
+critere = "Une valeur identique à la valeur écrite ne touche aucun fichier : `git status --short` reste vide."
+etat = "atteint"
+constat = "Vérification C4 : second `fill … --override` identique, code 0, « valeur déjà en place, aucun fichier touché », git status vide. Lu : comparaison `forme_texte(actuel) != forme_texte(value)` qui saute l'élément (store.py:499-503). Test : test_override_valeur_identique_ne_touche_aucun_fichier, mtime compris, sur un bool et sur un int à deux éléments."
+
+[[conformite.critere]]
+id = "C5"
+critere = "`list-dir toggle <dettes> pin --id <id>` inverse le pin, et le diff ne montre que la ligne `pin` ; la commande échoue sur un champ non `bool`, un `bool` resté au Marqueur ou un champ absent, et ne connaît pas `--all`."
+etat = "atteint"
+constat = "Vérification C5 : toggle code 0 et diff réduit à la ligne `pin` ; enum, Marqueur, absent en code 1, `--all` en code 2 (argparse : option inconnue, `--id` requis), git status vide à chaque refus. commands/toggle.py ne déclare pas `--all`. Tests : test_toggle.py (inversion, ligne seule, refus sans écriture) et test_entree_cli.py::test_toggle_ne_connait_pas_all_et_exige_id."
+
+[[conformite.critere]]
+id = "C6"
+critere = "`~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/` passe, avec des tests neufs pour chacun des cas de C1 à C5 ; `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` sont propres."
+etat = "atteint"
+constat = "Lu dans la forme amendée au Suivi (Journal, 2026-10-14 : rien de neuf par rapport à la Base). pytest : 525 passés, dont 9 tests neufs dans test_fill.py, 7 dans test_toggle.py, 7 dans test_entree_cli.py, qui couvrent C1 à C5. ruff check sur les fichiers Python touchés et ruff format --check . propres ; ruff check . littéral garde les deux E501 de test_fusion.py, identiques sur la Base. basedpyright dans skills/list-dir : 13 erreurs, ensemble identique à celui de la Base par diff, aucune dans un fichier touché."
+
+[[conformite.critere]]
+id = "C7"
+critere = "`list-dir help` liste `toggle` ; `SKILL.md` dit « quinze commandes », dans sa description et dans son titre de section ; `references/operations.md` décrit `--override` et `toggle`."
+etat = "atteint"
+constat = "Vérification C7 : `list-dir help` affiche « Commandes génériques (15) » et la ligne `toggle` ; SKILL.md dit « quinze commandes » l. 5 et « ## Les quinze commandes » l. 51, plus aucun « quatorze » ; operations.md porte `--override` (l. 93, 106-108, 128-134) et la section « Basculer un booléen » (l. 136-157). Le critère est tenu ; references/extension.md, qu'il ne nomme pas, reste en retard (R1)."
+
+[[conformite.hors_perimetre]]
+exclusion = "Une commande `set` distincte : `fill` existe déjà, l'option s'y ajoute."
+etat = "respecté"
+constat = "`git diff --stat master...3ec5803` : seul commands/toggle.py est créé parmi les commandes ; aucun `set`, ni dans le code ni dans `list-dir help`. `--override` s'ajoute à commands/fill.py."
+
+[[conformite.hors_perimetre]]
+exclusion = "Réécrire un champ de type `list`, un champ `deprecated`, ou le champ `id`."
+etat = "respecté"
+constat = "Les trois sont refusés sous `--override` (store.py:463-479), et `toggle` refuse `deprecated` et tout type autre que `bool` (store.py:563-568) ; vérification C3 en code 1 sans écriture."
+
+[[conformite.hors_perimetre]]
+exclusion = "Ajouter un champ absent de l'élément : la liste se migre d'abord."
+etat = "respecté"
+constat = "La branche `elif actuel is not None and override` (store.py:499) exclut le champ absent, qui tombe dans le refus ; `toggle` le refuse par `isinstance(actuel, bool)`. Vérifications C3 (« reviewed » absent) et C5 (« pin » absent), code 1, rien d'écrit."
+
+[[conformite.hors_perimetre]]
+exclusion = "Basculer un champ qui n'est pas un booléen, ou un booléen resté au Marqueur."
+etat = "respecté"
+constat = "`decl.type != \"bool\"` refusé avant toute lecture, valeur non booléenne (Marqueur compris) refusée par élément avant `_poser` (store.py:565-593) ; vérification C5 sur un enum et sur un pin au Marqueur, code 1."
+
+[[conformite.hors_perimetre]]
+exclusion = "La touche de `:Dettes` qui appelle la bascule, et l'écart entre le Brief de ce Chantier, qui attend `list-dir set`, et la commande `toggle` livrée ici : ils se traitent à la reprise du Chantier `listdir-dettes-roadmap` de `~/.config/nvim`."
+etat = "respecté"
+constat = "Le diff ne porte que sur ~/.claude ; `git -C ~/.config/nvim status --short` vide, dernier commit « listdir-dettes-roadmap: passation — session 1, après AE0 », antérieur. Le Brief Neovim n'est pas touché."
+
+[[conformite.signal]]
+id = "S1"
+signal = "Le diff ajoute une commande `set`, ou un fichier `commands/set.py`."
+etat = "absent"
+constat = "`git diff --name-only master...3ec5803 | grep set.py` vide ; aucune commande `set` dans `list-dir help`."
+
+[[conformite.signal]]
+id = "S2"
+signal = "`toggle` ou `--override` écrit sans passer par le contrôle de type de `fill` (`typed_value`) ou sans reprojeter le front matter : un second chemin d'écriture."
+etat = "absent"
+constat = "Lu : `fill` et `toggle` finissent tous deux par `self._poser` (store.py:516, 594), seul lieu de `self.write(it.with_fields(...))` ; `toggle` passe la valeur inverse par `typed_value` (store.py:588-593). Diff réduit à la ligne `pin` en vérifications C1 et C5."
+
+[[conformite.signal]]
+id = "S3"
+signal = "Un test ou un appel combine `--override` et `--all` et attend un succès."
+etat = "absent"
+constat = "Les deux seuls appels qui combinent override et toute la liste (test_entree_cli.py:865, test_fill.py:305) attendent un échec en code 2. Aucune doc ni agent n'emploie la combinaison."
+
+[[conformite.signal]]
+id = "S4"
+signal = "Le diff touche `~/.config/nvim/`."
+etat = "absent"
+constat = "Le diff du Chantier est interne à ~/.claude (11 fichiers, aucun sous nvim) ; l'arbre de ~/.config/nvim est propre."
+
+[[conformite.signal]]
+id = "S5"
+signal = "`toggle` accepte `--all`, ou un type autre que `bool`."
+etat = "absent"
+constat = "commands/toggle.py ne déclare pas `--all` (argparse « unrecognized arguments: --all », code 2) ; `ListStore.toggle` refuse `decl.type != \"bool\"` (vérification C5 sur un enum ; test_toggle.py sur un int)."
+
+[conformite.symptome]
+symptome = "`list-dir` n'a aucune commande pour changer une valeur déjà écrite : `fill` ne pose une valeur que sur un champ resté au Marqueur, et refuse en le nommant un `--id` dont le champ est rempli ; le picker `:Dettes` de Neovim doit pourtant basculer le champ `pin` d'une dette (entrée de road-map `list-dir-set`). « `fill` et `set` font doublon » (dit)."
+etat = "disparu"
+constat = "`list-dir` change désormais une valeur écrite, par `fill --override --id` et par `toggle --id`, sans commande `set` en doublon. Sur le registre de dette réel (copie git), le `pin` d'une dette passe de false à true puis revient, chaque fois par la seule ligne `pin` (vérifications C1 et C5) : Neovim a de quoi basculer un pin sans écrire dans l'entrée. La touche de `:Dettes` est hors-périmètre."
+
+[[dette.actuelle]]
+id = "R1"
+nature = "style"
+emplacement = "skills/list-dir/references/extension.md:40"
+constat = "La surface Python documentée n'a pas suivi le Chantier : `lst.fill(champ, texte, ids=())` y est annoncé « champs au Marqueur seulement », sans l'argument `override`, qui réécrit justement une valeur écrite, et `lst.toggle(champ, ids)` manque à la liste des méthodes. operations.md renvoie à cette page pour « la surface Python qui les expose » : un appelant Python, Neovim compris s'il passait par la bibliothèque, y lit une règle que le code ne tient plus. C7 ne nommait pas ce fichier, d'où une dette de prose et pas d'alignement."
+trouvee = "01-3ec5803"
+solution = "Dans extension.md, réécrire la ligne en `lst.fill(champ, texte, ids=(), *, override=False)  # Result[list[Change]] — au Marqueur ; override réécrit une valeur écrite d'un élément désigné` et ajouter `lst.toggle(champ, ids)  # Result[list[Change]] — inverse un bool écrit`."
+severite = "avertissement"
+
+[[dette.actuelle]]
+id = "R2"
+nature = "style"
+emplacement = "skills/list-dir/SKILL.md:69, 140-141"
+constat = "Deux défauts de prose dans SKILL.md. L. 69 : la ligne `fill` gagne `[--override]`, mais son commentaire dit toujours « remplit un champ resté au Marqueur », alors que la DESCRIPTION de la commande a été mise à jour (« …ou la réécrit avec --override »). L. 140-141 : « Ni l'un ni l'autre ne s'emploie sans `--id` : `migrateur-de-liste` n'écrit que des Marqueurs… », les deux-points relient deux faits sans rapport de cause, et le lecteur cherche en vain le lien."
+trouvee = "01-3ec5803"
+solution = "Aligner le commentaire de la l. 69 sur la DESCRIPTION de commands/fill.py, et couper la phrase des l. 140-141 en deux : l'exigence de `--id` d'un côté, le fait que `migrateur-de-liste` reste sur `fill --id` sans `--override` de l'autre."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R3"
+nature = "qualité"
+emplacement = "skills/list-dir/scripts/tests/test_fill.py:316"
+constat = "`(liste / \"c.md\").write_text(...)` sans `encoding=\"utf-8\"`, alors que toutes les autres écritures de test_fill.py et de test_toggle.py le passent. Le contenu est en ASCII, donc sans effet aujourd'hui : c'est un écart au style du fichier."
+trouvee = "01-3ec5803"
+solution = "Ajouter `encoding=\"utf-8\"` à cet appel."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R4"
+nature = "dette induite"
+emplacement = "skills/list-dir/scripts/tests/test_toggle.py:15"
+constat = "`from test_fill import CONTRAT_FILL` : c'est le premier import d'un module de test par un autre dans skills/list-dir/scripts/tests, où les gabarits partagés vivent dans jouet.py. Une retouche de CONTRAT_FILL pour un test de fill peut désormais casser test_toggle.py, sans que le lien se voie dans test_fill.py."
+trouvee = "01-3ec5803"
+solution = "Déplacer CONTRAT_FILL dans jouet.py, à côté de CONTRAT, et l'importer de là dans test_fill.py et dans test_toggle.py ; ou bien donner à test_toggle.py son propre contrat."
+severite = "note"
+
+[verdict]
+valeur = "FAVORABLE"
+justification = "Les sept critères sont atteints. Je les ai rejoués de bout en bout sur une copie git du registre de dette réel, puis par la suite de tests, ruff et basedpyright comparés à l'arbre extrait de la Base. Les exclusions sont respectées, aucun signal ne s'est matérialisé, et le symptôme a disparu. Le seul chemin d'écriture `_poser` tient S2. La Dette actuelle porte un unique avertissement : R1, la surface Python d'extension.md, que le Chantier n'a pas mise à jour. C'est une prose en retard sur un code juste, rattrapable en deux lignes, qui ne fausse aucun contrôle et qu'aucun critère du Brief ne nommait. S'y ajoutent trois notes sans coût démontré (R2, R3, R4). Rien de cela ne demande de réserve sur la Clôture."

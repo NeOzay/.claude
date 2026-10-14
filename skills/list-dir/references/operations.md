@@ -1,7 +1,7 @@
 # Les opérations sur une liste
 
 Ce que fait chaque commande qui lit ou modifie des éléments : `validate`, `migrate`, `fill`,
-`move`, `list`, `derive`, `merge`. Le format qu'elles appliquent est décrit dans
+`toggle`, `move`, `list`, `derive`, `merge`. Le format qu'elles appliquent est décrit dans
 [Le format d'une liste](../references/format.md) ; la surface Python qui les expose, dans
 [Étendre `list-dir`](../references/extension.md).
 
@@ -90,7 +90,7 @@ raison dite plus bas.
 valeur est connue — la même pour tous, ou choisie élément par élément —, `fill` l'écrit :
 
 ```bash
-list-dir fill <liste> <champ> <valeur> (--id <id>… | --all) [--dry-run]
+list-dir fill <liste> <champ> <valeur> (--id <id>… | --all) [--override] [--dry-run]
 ```
 
 | Cas | Ce que fait `fill` |
@@ -103,6 +103,9 @@ list-dir fill <liste> <champ> <valeur> (--id <id>… | --all) [--dry-run]
 | valeur que le type refuse : hors `values`, date non ISO, `bool` autre que `true`/`false` | échec, rien n'est écrit |
 | valeur qui est elle-même un Marqueur | échec : un Marqueur ne remplit rien |
 | champ non déclaré, ou `deprecated` | échec |
+| champ déjà rempli, avec `--id --override` | la valeur est **réécrite** ; identique, aucun fichier touché |
+| `--override` avec `--all`, ou sans `--id` | erreur d'appel, code 2, rien n'est écrit |
+| `--override` sur un champ `list`, sur `id`, ou absent de l'élément | échec, rien n'est écrit |
 
 **La valeur est convertie comme un `text` de contrat** : `false` s'écrit en booléen, `3` en entier,
 `2026-10-07` en date nue — par la même conversion, qui accepte et refuse les mêmes formes
@@ -121,6 +124,36 @@ relançant le même appel, qui saute ce qu'il a déjà posé. `--dry-run` montre
 
 `fill` ne juge pas plus que `migrate` : la valeur vient de l'appelant. Il évite seulement d'éditer
 à la main chaque fichier, et donne à un agent un moyen d'écrire qui ne touche que le champ visé.
+
+**`--override` réécrit une valeur écrite, et se demande.** Il lève le seul refus de `--id` devant
+un champ rempli : le contrôle de type, la reprojection du front matter et la vérification de tout
+avant la première écriture restent ceux de `fill`. Il exige `--id` : réécrire toute une liste ne se
+fait pas par omission. Une valeur identique à celle qui est écrite ne touche aucun fichier, et la
+commande le dit. `id` vaut le nom du fichier, un champ `list` n'a pas de valeur que `<valeur>` dise,
+et un champ absent se pose par `migrate` : `--override` les refuse. `agents/migrateur-de-liste.md`
+n'emploie pas `--override` : il ne remplit que des Marqueurs.
+
+## Basculer un booléen
+
+Un `pin` ou un `archive` se bascule sans que l'appelant lise la valeur pour dire la contraire :
+
+```bash
+list-dir toggle <liste> <champ> --id <id>… [--dry-run]
+```
+
+`toggle` est `fill --override` pour un `bool` : il inverse la valeur écrite, et la passe par le
+même contrôle de type et le même chemin d'écriture. Le diff ne montre que la ligne du champ.
+
+| Cas | Ce que fait `toggle` |
+|---|---|
+| `bool` écrit, `true` ou `false` | la valeur est inversée |
+| `bool` resté au Marqueur, ou absent de l'élément | échec nommant l'élément, rien n'est écrit |
+| champ d'un autre type, non déclaré ou `deprecated` | échec, rien n'est écrit |
+| `--id` qui ne nomme aucun élément | échec, rien n'est écrit |
+| `--all`, ou pas de `--id` | erreur d'appel, code 2 : inverser toute une liste n'a pas de sens |
+
+`--id` se répète. Tout est vérifié avant la moindre écriture, et `--dry-run` montre ce qui serait
+basculé.
 
 ## Déplacer un élément
 

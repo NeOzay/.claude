@@ -16,6 +16,13 @@ directement dans une entrée : il appellerait `list-dir set`.
 contrôle du type que `fill` et la même reprojection du front matter — le diff ne montre que la
 ligne du champ.
 
+## Fait le
+
+2026-10-14, par le chantier `list-dir-fill-override`, sans commande `set` : `fill --override --id`
+réécrit la valeur écrite d'un élément désigné, et `toggle --id` inverse un booléen écrit, tous deux
+sous le contrôle de type de `fill`. Archive du chantier :
+`.claude/implementation/done/2026-10-14-list-dir-fill-override.md`.
+
 ## Références
 
 - `skills/list-dir/references/operations.md`, « Remplir un champ resté au Marqueur » : `fill`,
