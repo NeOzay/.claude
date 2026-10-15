@@ -31,3 +31,17 @@ lien vers `shadow-skills/<nom>/SKILL.md` ; `python3 scripts/check_pipeline.py` r
 ## Assumé
 
 <OPTIONNEL>
+
+## Soldé le
+
+**2026-10-15, chantier `solder-sept-dettes`** — la garde arrière de `CHEMIN_SKILL` exclut aussi
+`-` : `shadow-skills/x/…` ne se lit plus comme `skills/x/…`. Le lien vers `claude-code-mods` est
+rétabli dans `skills/mod-commun/SKILL.md`. Une citation `shadow-skills/…` qui n'est pas un lien
+`](../…)` n'est plus vérifiée par aucun contrôle, perte acceptée et dite dans le commentaire du
+motif.
+
+Établi par : avant le correctif, `python3 scripts/check_pipeline.py` → « ✗
+skills/mod-commun/SKILL.md:16 → chemin de skill inexistant : skills/claude-code-mods/SKILL.md » ;
+après → « ✓ 34 chemins de skill cités, tous existent ».
+`~/.claude/.venv/bin/python -m pytest scripts/tests/test_controle_7.py -k shadow` → `2 passed`, les
+deux tests échouant sur l'ancien motif.

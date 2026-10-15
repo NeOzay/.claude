@@ -114,11 +114,12 @@ def chemin_global() -> Path:
     return racine_globale() / FICHIER
 
 
-def racine_projet(depart: Path) -> Path:
+def racine_projet(depart: Path, fichier_global: Path) -> Path:
     """Le projet auquel appartient `depart` : la racine du dépôt git, ou `depart` hors dépôt.
 
-    Remonter jusqu'au premier `.claude/LEXIQUE.md` est exclu : au-dessus d'un projet rangé sous
-    le HOME, la remontée trouverait le lexique GLOBAL et le lirait comme local.
+    LA RACINE QUI PORTE LE LEXIQUE GLOBAL N'EST PAS UN PROJET : sous un HOME versionné par git,
+    un projet non versionné aurait le HOME pour racine, et son « local » serait le global. On
+    retombe alors sur `depart`, comme hors dépôt.
     """
     try:
         r = subprocess.run(
@@ -129,7 +130,10 @@ def racine_projet(depart: Path) -> Path:
         )
     except OSError:
         return depart
-    return Path(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip() else depart
+    if r.returncode != 0 or not r.stdout.strip():
+        return depart
+    racine = Path(r.stdout.strip())
+    return depart if _est_le_global(chemin_local(racine), fichier_global) else racine
 
 
 def chemin_local(projet: Path) -> Path:

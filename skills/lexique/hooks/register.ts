@@ -27,11 +27,11 @@ const signaler = ($: EngineInterface, echec: HookFailure) =>
 
 /** Pose les deux hooks du mod : la section de session, et le préfixe du prompt d'un sous-agent. */
 export const register: Register = on => {
-  // Une section du prompt système n'a pas de plafond, survit à `/clear`, à la compaction et à la
-  // reprise sans se dupliquer, et ne va pas aux sous-agents. Ni `prompt.context` (tous les
-  // sous-agents le reçoivent, isolés compris) ni `$.session.append` à `session.start` (perdu à
-  // `/clear`, dupliqué à chaque reprise) n'y suffisent. La commande est relancée tant qu'elle ne
-  // rend rien.
+  // Une section du prompt système n'a pas de plafond, survit à `/clear` et à la compaction sans se
+  // dupliquer, et ne va pas aux sous-agents. Une conversation reprise ne la recompose pas : elle
+  // garde celle de son début jusqu'à sa compaction. Ni `prompt.context` (tous les sous-agents le
+  // reçoivent, isolés compris) ni `$.session.append` à `session.start` (perdu à `/clear`, dupliqué
+  // à chaque reprise) n'y suffisent. La commande est relancée tant qu'elle ne rend rien.
   let local: string | undefined
   on('prompt.compose', async ($, e, next) => {
     const composition = await next(e)

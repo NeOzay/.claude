@@ -34,3 +34,12 @@ résoudre la commande sans le `PATH` de la session sans ancrage sur le `HOME` ;
 
 Prix assumé du solde de `chemins-de-la-configuration-ancres-sur-le-home-dans-le-mod`, décidé au
 Journal du Chantier ; laissé ouvert par choix de l'utilisateur.
+
+## Soldé le
+
+**2026-10-15, chantier `solder-sept-dettes`** — documenté dans `.claude/CLAUDE.md`, « Outillage »,
+et non dans `skills/lexique/SKILL.md`, comme l'entrée de road-map l'a décidé : les commandes de
+`bin/` supposent le `PATH` de la session, et ce qui manque sans lui.
+
+Établi par : `grep -n "lexique local" .claude/CLAUDE.md` → ligne 25, « un IDE, perd le lexique local
+que verse le mod `lexique` ».

@@ -12,45 +12,9 @@ import os
 import tomllib
 from pathlib import Path
 
-from jouet import ecrire
+from jouet import SEMENCE, ecrire, semer
 from listdir.contract import BACKUP, CONTRACT, LIST_DIR, PATRONS, SEED, load_contract
 from listdir.provenance import emit, flatten, reseed, warnings
-from listdir.store import init_list
-
-SEMENCE = """name = "jouet"
-description = "liste-jouet des tests"
-
-# Ce commentaire porte le pourquoi d'un champ : il doit survivre à une recopie.
-[origin]
-def = "jouet"
-version = 1
-
-[fields.id]
-type = "slug"
-description = ""
-
-[fields.title]
-type = "text"
-required = true
-description = "le titre"
-text = "titre par défaut"
-
-[sections."Constat"]
-required = true
-description = "ce qui a été observé"
-"""
-
-
-def semer(tmp_path: Path, contrat: str = SEMENCE, patron: str = "") -> tuple[Path, Path]:
-    """Une définition au rang 1, et la liste qu'elle vient de semer."""
-    definition = tmp_path / ".claude" / "list-dir" / "jouet"
-    _ = ecrire(definition, CONTRACT, contrat)
-    if patron:
-        _ = ecrire(definition, f"{PATRONS}/revue.md", patron)
-    cible = tmp_path / "liste"
-    _ = init_list(cible, definition=definition).unwrap()
-    os.chdir(tmp_path)
-    return definition, cible
 
 
 def contrat_de(liste: Path) -> str:

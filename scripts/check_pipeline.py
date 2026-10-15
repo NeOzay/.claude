@@ -571,9 +571,13 @@ def check_portabilite(root: Path) -> list[Finding]:
 # cette supposition, recopiée à chaque point d'usage, qui a fait passer le compte de 3 à
 # 8 points d'édition sans qu'aucun n'échoue bruyamment. La seconde est vérifiée, jamais
 # supposée. Le motif garde les deux : on ne peut refuser que ce qu'on sait reconnaître.
+# La garde arrière écarte aussi un nom qui se TERMINE par `skills/` : sans le `-`,
+# `shadow-skills/x/…` se lisait comme `skills/x/…`, et le contrôle jugeait un autre
+# fichier que celui cité. Une citation `shadow-skills/…` qui n'est pas un lien
+# `](../…)` n'est donc vérifiée par aucun contrôle : le contrôle 8 ne voit que les liens.
 CHEMIN_SKILL = re.compile(
     r"(?:(?:\$HOME|\$\{HOME\}|~)/\.claude/(?P<home>[^\"\s)`,;]+)"
-    r"|(?<![\w/.])(?P<rel>skills/[^\"\s)`,;]+))"
+    r"|(?<![\w/.-])(?P<rel>skills/[^\"\s)`,;]+))"
 )
 
 

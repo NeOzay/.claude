@@ -20,6 +20,12 @@ avant d'écrire ou de relire un fichier de skill.
 linters, tests, comparaison à la base, exposition d'un exécutable dans `bin/`. Le lire avant de
 lancer l'un de ces outils.
 
+Les commandes de `bin/` s'appellent par leur nom : elles supposent une session lancée depuis un
+shell dont le `PATH` porte `bin/`. Une session ouverte autrement, depuis un lanceur graphique ou
+un IDE, perd le lexique local que verse le mod `lexique`, et l'échec ne se lit que sur la ligne
+d'état. Neovim, lancé de même, ne trouve plus les commandes qu'il appelle. La ligne à ajouter au
+profil du shell : [Ce dont le dépôt dépend](../OUTILLAGE.md#ce-dont-le-dépôt-dépend).
+
 ## Le modèle d'une session
 
 Ce dépôt versionne `settings.json`, où `/model` enregistre le modèle choisi comme défaut : un

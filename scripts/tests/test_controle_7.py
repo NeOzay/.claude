@@ -94,3 +94,44 @@ def test_sans_bin_le_chemin_reste_licite(tmp_path: Path) -> None:
     _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
     _ = ecrire(tmp_path, "skills/x/SKILL.md", "```bash\nskills/x/scripts/outil.py list\n```\n")
     assert rouges(tmp_path) == []
+
+
+# --- `shadow-skills/` n'est pas `skills/` ------------------------------------
+
+
+def verts(root: Path) -> list[str]:
+    return [f.message for f in check_chemins_skill(root) if f.ok]
+
+
+def test_citation_shadow_skill_ignoree(tmp_path: Path) -> None:
+    """`shadow-skills/y/…` ne se lit plus comme `skills/y/…`, qui n'existe pas.
+
+    La citation valide de `skills/x/` évite le rouge « contrôle sans objet ».
+    """
+    _ = ecrire(tmp_path, "shadow-skills/y/SKILL.md", "Rien.\n")
+    _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
+    _ = ecrire(
+        tmp_path,
+        "skills/x/SKILL.md",
+        "Voir `shadow-skills/y/SKILL.md` et `skills/x/scripts/outil.py`.\n",
+    )
+    assert rouges(tmp_path) == []
+    assert verts(tmp_path) == ["1 chemins de skill cités, tous existent"]
+
+
+def test_citation_shadow_skill_homonyme(tmp_path: Path) -> None:
+    """`skills/x/` et `shadow-skills/x/` coexistent : la citation ne compte pas.
+
+    Avant le correctif, elle se lisait comme `skills/x/seul-la.md`, qui existe, et ne
+    rendait aucun constat : seul le compte du vert distingue l'avant de l'après.
+    """
+    _ = ecrire(tmp_path, "shadow-skills/x/SKILL.md", "Rien.\n")
+    _ = ecrire(tmp_path, "skills/x/seul-la.md", "Rien.\n")
+    _ = ecrire(tmp_path, "skills/x/scripts/outil.py", "x = 1\n")
+    _ = ecrire(
+        tmp_path,
+        "skills/x/SKILL.md",
+        "Voir `shadow-skills/x/seul-la.md` et `skills/x/scripts/outil.py`.\n",
+    )
+    assert rouges(tmp_path) == []
+    assert verts(tmp_path) == ["1 chemins de skill cités, tous existent"]

@@ -13,7 +13,8 @@ user-invocable: false
 
 Ce skill ne porte qu'un mod. Le mod se charge seul, depuis la racine du skill : aucun réglage ne le
 nomme. Ce que les mods permettent, leurs limites et leurs tests : le Shadow-skill
-`claude-code-mods` (`shadow-skill charge claude-code-mods`). Leur code :
+[claude-code-mods](../../shadow-skills/claude-code-mods/SKILL.md)
+(`shadow-skill charge claude-code-mods`). Leur code :
 `rules/claude-typescript-style.md`.
 
 **Pourquoi un mod commun** : un mod n'importe rien hors de son dossier, le chargement le refuse. Le

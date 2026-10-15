@@ -185,7 +185,7 @@ def main() -> int:
         return _session()
     if commande == "sous-agent":
         return _sous_agent(cast("str", args.agent_type))
-    projet = cast("Path | None", args.projet) or racine_projet(Path.cwd())
+    projet = cast("Path | None", args.projet) or racine_projet(Path.cwd(), chemin_global())
     if commande == "init":
         return _init(projet)
     if commande == "chemin":

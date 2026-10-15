@@ -32,3 +32,14 @@ Tronquer ou échapper la valeur dans le libellé du `Change` — première ligne
 ## Assumé
 
 <OPTIONNEL>
+
+## Soldé le
+
+**2026-10-15, chantier `solder-sept-dettes`** — `libelle` cite une valeur
+dans un `Change` par sa première ligne pleine, suivie de « … » s'il en reste une autre ; `migrate`
+et `fill` l'emploient, `forme_texte` ne change pas.
+
+Établi par : section à `command = "printf 'ligne1\nligne2\n'"`, `list-dir migrate` rendait « …
+ajoutée, ligne1 » puis « ligne2 » à part ; il rend « … ajoutée, ligne1 … » sur une ligne.
+`~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/test_store_ecriture.py skills/list-dir/scripts/tests/test_fill.py -k "multiligne or libelle or triple"`
+→ `12 passed`.

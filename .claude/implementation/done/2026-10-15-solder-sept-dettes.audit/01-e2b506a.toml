@@ -1,0 +1,274 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "solder-sept-dettes"
+audit = "01-e2b506a"
+rang = 1
+type = "clôture"
+date = 2026-10-15
+base = "master"
+commit = "e2b506a"
+suivi = ".claude/implementation/solder-sept-dettes.md"
+plan = ".claude/plans/robust-soaring-hejlsberg.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "~/.claude/.venv/bin/python -m pytest scripts/tests/test_controle_7.py scripts/tests/test_controle_8.py && python3 scripts/check_pipeline.py"
+statut = "passée"
+sortie = """4. Indépendance des sous-agents
+  ✓ 6 agents, aucun renvoi au contrat
+
+5. Chemins du frontmatter des chantiers archivés
+  ✓ 44 archives, tous les champs plan/brief/audit résolvent
+
+6. Portabilité des appels de script
+  ✓ 43 fichiers examinés, aucun appel relatif non gardé
+
+7. Chemins de skill cités : existence et forme
+  ✓ 34 chemins de skill cités, tous existent
+
+8. Renvois documentaires entre skills
+  ✓ 128 renvois entre skills, tous résolvent
+
+9. pyright n'est cité que pour être écarté
+  ✓ 6 mention(s) de « pyright », toutes des interdictions
+
+Pipeline conforme."""
+
+[[verification]]
+origine = "Étape 2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/shadow-skill/scripts/tests/ && uvx rumdl fmt --check skills/shadow-skill/SKILL.md"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 44 items
+
+skills/shadow-skill/scripts/tests/test_cli.py ...............            [ 34%]
+skills/shadow-skill/scripts/tests/test_lire.py ..............            [ 65%]
+skills/shadow-skill/scripts/tests/test_tags.py .....                     [ 77%]
+skills/shadow-skill/scripts/tests/test_verifier.py ..........            [100%]
+
+============================== 44 passed in 2.99s ==============================
+
+Success: No issues found in 1 file (34ms)"""
+
+[[verification]]
+origine = "Étape 3"
+commande = "~/.claude/.venv/bin/python -m pytest skills/lexique/scripts/tests/ && list-dir validate .claude/implementation/todo/technical-debt"
+statut = "passée"
+sortie = """: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/sections-de-categories-jamais-confrontees-au-contrat.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/semence-de-test-reseed-porte-un-preremplissage.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/shadow-skill-pose-erreur-trompeuse.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/source-verbatim-perd-italiques.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/statusline-hors-des-linters.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/suivi-commite-en-retard-sur-son-commit-d-etape.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/toml-value-type-date-sans-test-unitaire.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/typage-strict-non-tenu-dans-scripts-tests.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/validate-avertit-hors-machine-semeuse.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/version-de-definition-non-incrementee-apres-changement-de-contrat.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire.
+.claude/implementation/todo/technical-debt/version-de-gabarit-comparee-a-rien.md: champ « source » — déprécié : Remplacé par chantier et reference ; ne plus l'écrire."""
+
+[[verification]]
+origine = "Étape 4"
+commande = "~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/test_store_ecriture.py skills/list-dir/scripts/tests/test_fill.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 84 items
+
+skills/list-dir/scripts/tests/test_store_ecriture.py ................... [ 22%]
+.....................................                                    [ 66%]
+skills/list-dir/scripts/tests/test_fill.py ............................  [100%]
+
+============================== 84 passed in 0.62s =============================="""
+
+[[verification]]
+origine = "Étape 5"
+commande = "~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/test_entree_cli.py skills/list-dir/scripts/tests/test_reseed.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 114 items
+
+skills/list-dir/scripts/tests/test_entree_cli.py ....................... [ 20%]
+...................................................................      [ 78%]
+skills/list-dir/scripts/tests/test_reseed.py ........................    [100%]
+
+============================= 114 passed in 15.81s ============================="""
+
+[[verification]]
+origine = "Étape 6"
+commande = "grep -n \"lexique local\" .claude/CLAUDE.md && uvx rumdl fmt --check .claude/CLAUDE.md"
+statut = "passée"
+sortie = """25:un IDE, perd le lexique local que verse le mod `lexique`, et l'échec ne se lit que sur la ligne
+
+Success: No issues found in 1 file (17ms)"""
+
+[[verification]]
+origine = "Étape 7"
+commande = "npx --yes @biomejs/biome@2 format skills/lexique && claude plugin test skills/lexique && python3 scripts/check_pipeline.py"
+statut = "passée"
+sortie = """4. Indépendance des sous-agents
+  ✓ 6 agents, aucun renvoi au contrat
+
+5. Chemins du frontmatter des chantiers archivés
+  ✓ 44 archives, tous les champs plan/brief/audit résolvent
+
+6. Portabilité des appels de script
+  ✓ 43 fichiers examinés, aucun appel relatif non gardé
+
+7. Chemins de skill cités : existence et forme
+  ✓ 34 chemins de skill cités, tous existent
+
+8. Renvois documentaires entre skills
+  ✓ 128 renvois entre skills, tous résolvent
+
+9. pyright n'est cité que pour être écarté
+  ✓ 6 mention(s) de « pyright », toutes des interdictions
+
+Pipeline conforme."""
+
+[[verification]]
+origine = "C1"
+commande = "TMP=$(mktemp -d); git archive master | tar -x -C $TMP; (copie des quatre fichiers de tests de e2b506a dans $TMP); cd $TMP && ! pytest -q scripts/tests/test_controle_7.py -k shadow_skill && ! pytest -q skills/shadow-skill/scripts/tests/test_lire.py -k debut_de_mot && ! pytest -q skills/list-dir/scripts/tests/test_store_ecriture.py skills/list-dir/scripts/tests/test_fill.py -k multiligne"
+statut = "passée"
+sortie = """Les tests neufs échouent sur le code de la Base, ce qui prouve qu'ils distinguent l'avant de l'après :
+2 failed, 12 deselected in 0.07s
+1 failed, 13 deselected in 0.10s
+3 failed, 81 deselected in 0.20s
+rc=0"""
+
+[[verification]]
+origine = "C1"
+commande = "HOME git simulé (git init, skills/lexique copié sous .claude/, .claude/LEXIQUE.md global et proj/.claude/LEXIQUE.md non versionné qui redéfinissent « Semence »), depuis proj/ : lexique-cli.py liste ; lexique-cli.py chemin — sur la branche, puis avec le skill de la Base"
+statut = "passée"
+sortie = """== branche
+local : « Semence » (ligne 3) est déjà réservé au global (« Semence », ligne 3).
+global	Semence	[x](x.md)
+local	Semence	[y](y.md)
+liste rc=1
+home-branche/proj/.claude/LEXIQUE.md
+chemin rc=0
+== base
+local : home-base/.claude/LEXIQUE.md est le lexique global, ignoré comme local.
+global	Semence	[x](x.md)
+liste rc=0
+pas de lexique local : home-base/.claude/LEXIQUE.md est le lexique global.
+chemin rc=1"""
+
+[[verification]]
+origine = "C2"
+commande = "~/.claude/.venv/bin/python -m pytest -q scripts/tests/test_controle_7.py -k shadow_skill; … test_lire.py -k debut_de_mot; … test_projet.py -k home_versionne; … test_store_ecriture.py test_fill.py -k 'multiligne or une_ligne_garde'; … test_entree_cli.py -k reseed"
+statut = "passée"
+sortie = """2 passed, 12 deselected in 0.09s
+1 passed, 13 deselected in 0.10s
+1 passed, 3 deselected in 0.06s
+4 passed, 80 deselected in 0.14s
+5 passed, 85 deselected in 0.95s"""
+
+[[verification]]
+origine = "C3"
+commande = "grep -n \"claude-code-mods\" skills/mod-commun/SKILL.md"
+statut = "passée"
+sortie = """16:[claude-code-mods](../../shadow-skills/claude-code-mods/SKILL.md)
+17:(`shadow-skill charge claude-code-mods`). Leur code :
+60:`claude-code-mods`, « Tester »."""
+
+[[verification]]
+origine = "C4"
+commande = "set -o pipefail; ~/.claude/.venv/bin/python -m pytest -q skills/list-dir/scripts/tests/ | tail -1 && ~/.claude/.venv/bin/python -m pytest -q scripts/tests/ | tail -1 && ~/.claude/.venv/bin/python -m pytest -q skills/lexique/scripts/tests/ | tail -1 && ~/.claude/.venv/bin/python -m pytest -q skills/shadow-skill/scripts/tests/ | tail -1 && python3 scripts/check_pipeline.py | tail -1"
+statut = "passée"
+sortie = """534 passed in 18.16s
+143 passed in 1.02s
+91 passed in 2.71s
+44 passed in 2.88s
+Pipeline conforme.
+rc=0"""
+
+[[verification]]
+origine = "C4"
+commande = "uvx ruff check $(git diff --name-only master...e2b506a -- '*.py') && uvx ruff format --check ."
+statut = "passée"
+sortie = """All checks passed!
+126 files already formatted
+(Sur le dépôt entier, `uvx ruff check .` sort en 1 avec deux E501 dans skills/list-dir/scripts/tests/test_fusion.py:268,295. Ce fichier n'est pas touché par le Chantier, les deux erreurs sont identiques sur la Base extraite, et la dette ruff-echoue-sur-les-tests-de-list-dir les inscrit déjà au Registre.)"""
+
+[[verification]]
+origine = "C4"
+commande = "uvx rumdl fmt --check ."
+statut = "échouée"
+sortie = """Would fix: 11/39 issues in 2 files (345ms)
+rc=1
+(Les deux fichiers sont .claude/implementation/solder-sept-dettes.md et .claude/plans/robust-soaring-hejlsberg.md, en MD013. Sur la Base extraite, la même commande sort en 0. En les excluant, `--exclude '.claude/implementation/done,archive,<suivi>,<plan>'`, elle sort en 0 avec « 19 issues in 9/259 files », le même décompte non corrigeable que la Base.)"""
+dette = "R2"
+
+[[verification]]
+origine = "C4"
+commande = "D=(scripts skills/shadow-skill skills/lexique skills/list-dir); uvx --with pytest basedpyright $D > bpb.txt; (cd $TMP_BASE && uvx --with pytest basedpyright $D > bpa.txt); test $(grep -oE '^[0-9]+ errors' bpb.txt | cut -d' ' -f1) -le $(grep -oE '^[0-9]+ errors' bpa.txt | cut -d' ' -f1)"
+statut = "échouée"
+sortie = """branche=82 base=81
+rc=1
+(Fichier par fichier, le seul écart est skills/shadow-skill/scripts/tests/test_lire.py : 16 → 17.)"""
+dette = "R3"
+
+[[verification]]
+origine = "Étape 7"
+commande = "claude plugin test skills/lexique && npx --yes @biomejs/biome@2 format skills/lexique"
+statut = "passée"
+sortie = """ 8 pass
+ 0 fail
+Ran 8 tests across 1 file. [0.91s]
+Checked 3 files in 18ms. No fixes applied."""
+
+[conformite]
+
+[[dette.actuelle]]
+id = "R1"
+nature = "qualité"
+emplacement = "skills/list-dir/scripts/listdir/store.py:878-889"
+constat = """`libelle` ne tient pas toujours sa promesse « UN CHANGEMENT, UNE LIGNE ». Une valeur qui n'a qu'une ligne de contenu mais finit par un saut de ligne passe la garde `len(lignes) <= 1` et est rendue entière, `\\n` compris. Une valeur qui commence par une ligne vide est citée « … », sans rien de son contenu. Rejoué sur `migrate` avec un montage de `test_store_ecriture.py` : la section préremplie par `text = \"\"\"\\nSection posée.\\n\"\"\"`, l'idiome TOML d'une chaîne multi-lignes, rend « … — ajoutée, Section posée.\\n ». La sortie jointe porte donc une ligne vide. `text = "\\nSuite."` rend « ajoutée,  … ». Aucun contrat versionné n'écrit cette forme aujourd'hui (`git ls-files '*.toml' | xargs grep 'text = \"\"\"'` ne rend rien). Mais la dette `migrate-valeur-multilignes-casse-une-ligne-par-changement` serait soldée en laissant ouvert un cas plausible, et l'échec ne se voit pas. Les tests de l'Étape 4 ne couvrent ni l'une ni l'autre de ces entrées."""
+trouvee = "01-e2b506a"
+solution = "Faire travailler `libelle` sur le texte sans ses blancs de bord, `forme_texte(valeur).strip().splitlines()`, et rendre la première ligne non vide suivie de « … » dès qu'il en reste plusieurs. Ajouter à `test_store_ecriture.py` une section `text = \"\"\"\\n…\\n\"\"\"` et une valeur qui commence par une ligne vide, et vérifier qu'aucun libellé ne contient de `\\n`."
+severite = "avertissement"
+
+[[dette.actuelle]]
+id = "R2"
+nature = "style"
+emplacement = ".claude/implementation/solder-sept-dettes.md:65-78, .claude/plans/robust-soaring-hejlsberg.md:50-218"
+constat = """Le Suivi et le Plan ont été commités sans `uvx rumdl fmt`, alors qu'`OUTILLAGE.md` le demande avant de commiter du Markdown. Sur le commit audité, `uvx rumdl fmt --check .`, la commande de la « Vérification de fin » du Plan, sort en 1 : « Would fix: 11/39 issues in 2 files ». Ce sont ces deux fichiers seulement, en MD013 : les lignes d'Étape du Suivi font jusqu'à 356 colonnes, et le Plan a 10 lignes de plus de 100 colonnes. Sur la Base extraite (`git archive master`), la même commande sort en 0. Le critère C4 du Suivi, « rumdl vert », est donc faux sur la branche, et sa vérification `échouée` cote cette dette `bloquant` d'office. Sa gravité réelle est faible : une commande suffit à le corriger, et le défaut disparaît à l'aplatissement, puisque Suivi et Plan partent en `done/`, que `.rumdl.toml` exclut. Le précédent `done/2026-10-14-list-dir-fill-override.md` a ses Étapes enroulées, et `pose.py` les relit en joignant les lignes."""
+trouvee = "01-e2b506a"
+solution = "Lancer `uvx rumdl fmt .claude/implementation/solder-sept-dettes.md .claude/plans/robust-soaring-hejlsberg.md` avant la Clôture, puis vérifier que `uvx rumdl fmt --check .` sort en 0."
+severite = "bloquant"
+
+[[dette.actuelle]]
+id = "R3"
+nature = "alignement"
+emplacement = "skills/shadow-skill/scripts/tests/test_lire.py:92"
+constat = """Le Suivi pose comme critère que `basedpyright` ne régresse pas par rapport à la Base. Le décompte monte d'une erreur. `uvx --with pytest basedpyright scripts skills/shadow-skill skills/lexique skills/list-dir` rend 82 erreurs sur la branche et 81 sur la Base extraite. Comparées fichier par fichier, les deux sorties JSON ne diffèrent que sur `test_lire.py`, avec 16 erreurs contre 17. L'erreur de plus est « Type of parameter "poser" is unknown » sur le test neuf `test_chercher_en_debut_de_mot`. Sa cause existe déjà : `from conftest import Poser` ne se résout pas, et chacun des 12 tests existants qui prennent `poser` porte la même erreur. Il n'y a aucune cause nouvelle, mais le critère n'est pas tenu. Sa vérification `échouée` cote cette dette `bloquant` d'office, alors que sa gravité réelle est faible. La comparaison du dépôt entier (6588 contre 570) n'est pas significative : `skills/synced/`, non versionné, et l'environnement de résolution de l'arbre extrait la faussent."""
+trouvee = "01-e2b506a"
+solution = "Au choix de l'utilisateur. Une option est de faire tenir le critère sans sortir du Chantier : poser sur le paramètre `poser` du test neuf un `# pyright: ignore[reportUnknownParameterType]` qui renvoie à la cause, comme `rules/claude-python-style.md` l'admet. L'autre est de faire résoudre `Poser` dans `skills/shadow-skill/scripts/tests/`, ce qui retire les 17 erreurs. C'est hors des sept dettes, donc plutôt à inscrire au Registre. L'utilisateur peut aussi accepter le +1 et l'écrire en `## Dettes écartées` du Suivi."
+severite = "bloquant"
+
+[[dette.actuelle]]
+id = "R4"
+nature = "dette induite"
+emplacement = "skills/list-dir/scripts/tests/jouet.py:181-194, skills/list-dir/scripts/tests/test_entree_cli.py:1071-1143"
+constat = """`semer`, déplacé dans `jouet.py`, garde son `os.chdir(tmp_path)` sans jamais le rétablir. C'est voulu pour les tests de bibliothèque, et le Plan l'a décidé. Les quatre nouveaux tests CLI de `reseed` qui l'appellent n'en ont pas besoin, puisqu'ils passent `cwd=tmp_path` à `lancer`. Ils changent pourtant le répertoire courant du processus pytest pour tous les tests qui suivent dans la session. La fuite existait dans `test_reseed.py`. Le Chantier l'étend à `test_entree_cli.py` et en fait un comportement de `jouet`, le module partagé. Le coût futur : un test ajouté après ces quatre, et qui dépend d'un chemin relatif, verrait son résultat dépendre de l'ordre de collecte. Aujourd'hui, la suite est verte (534 passed)."""
+trouvee = "01-e2b506a"
+solution = "Faire prendre à `semer` le `monkeypatch` du test, ou séparer la pose (sans `chdir`) du changement de répertoire, pour que les tests CLI n'en héritent pas. Sinon, rétablir le répertoire par une fixture `monkeypatch.chdir` dans les tests de `test_reseed.py`."
+severite = "note"
+
+[verdict]
+valeur = "DÉFAVORABLE"
+justification = """Deux dettes `bloquant` d'office, R2 et R3, viennent de deux vérifications échouées du critère C4 du Suivi. `uvx rumdl fmt --check .` est rouge sur la branche, à cause du Suivi et du Plan, qui ne sont pas formatés. `basedpyright` compte 82 erreurs contre 81 sur la Base. Leur gravité réelle est faible et chacune se solde en une commande ou une ligne, ou s'écarte par l'utilisateur en `## Dettes écartées`. Le verdict suit la règle, pas cette gravité.
+
+Le fond est conforme à l'intention. Les sept dettes sont traitées comme l'entrée de road-map l'a décidé. Les tests neufs nommés par le Suivi existent, passent, et échouent sur le code de la Base (rejoué sur `git archive master`). Le scénario du HOME git, rejoué par la ligne de commande, passe de « liste rc=0, chemin rc=1 » à « liste rc=1, chemin rc=0 ». Le lien vers `claude-code-mods` est rétabli. Les quatre suites, `check_pipeline.py`, `claude plugin test` et `ruff` sur les fichiers touchés sont verts. Le `ruff .` du dépôt entier porte deux E501 qui existaient déjà dans `test_fusion.py`, identiques sur la Base et inscrites au Registre.
+
+Aucun Signal de dérive du Suivi ne s'est matérialisé. `register.ts` ne change que dans le commentaire. La documentation de la dette 1 est dans `.claude/CLAUDE.md`, et `forme_texte` est intacte. Aucune dette hors des sept n'est touchée : l'entrée de road-map `lexique-relu-a-chaque-composition` est une décision du journal. Les exclusions sont respectées.
+
+R1 (avertissement) est la réserve de fond. `libelle` laisse passer un `\\n` final et perd le contenu d'une valeur qui commence par une ligne vide, si bien que la dette `migrate-valeur-multilignes-…` serait soldée avec un cas résiduel plausible. R4 (note) est un `chdir` hérité par les tests CLI.
+
+Le critère C1, le passage des dettes en `technical-debt-solde/`, relève de la Clôture et n'est pas jugé ici."""

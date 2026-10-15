@@ -254,6 +254,16 @@ def test_override_reecrit_un_bool_et_seule_sa_ligne_change(tmp_path: Path) -> No
     assert ouvrir(liste).get("a").unwrap().fields["pin"] is True
 
 
+def test_override_d_une_valeur_multiligne_tient_sur_une_ligne(tmp_path: Path) -> None:
+    """UN CHANGEMENT, UNE LIGNE, comme pour `migrate`."""
+    liste = liste_ecrite(tmp_path)
+
+    changes = ouvrir(liste).fill("title", "ligne1\nligne2", ["a"], override=True).unwrap()
+
+    assert str(changes[0]).endswith("champ « title » — « T » remplacé par « ligne1 … »")
+    assert ouvrir(liste).get("a").unwrap().fields["title"] == "ligne1\nligne2"
+
+
 def test_override_reecrit_text_int_date_et_enum(tmp_path: Path) -> None:
     liste = liste_ecrite(tmp_path)
 

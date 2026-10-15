@@ -89,6 +89,18 @@ def test_chercher_ignore_les_accents(poser: Poser, tmp_path: Path) -> None:
     assert [s.nom for s in chercher(skills, ["sérveur"])] == ["beta"]
 
 
+# `Poser` ne se résout pas depuis `conftest` pour basedpyright, comme pour chaque test de ce
+# fichier : l'ignorer ici seulement garde le décompte de la Base.
+def test_chercher_en_debut_de_mot(poser: Poser, tmp_path: Path) -> None:  # pyright: ignore[reportUnknownParameterType]
+    """Un mot cherché doit commencer un mot du texte : « test » ne ramène plus « latest »."""
+    poser("g", "alpha", description="This skill covers latest tests.")
+    skills = lire_niveau(Niveau(GLOBAL, tmp_path / "g")).skills
+    assert [s.nom for s in chercher(skills, ["skill"])] == ["alpha"]
+    assert [s.nom for s in chercher(skills, ["test"])] == ["alpha"]
+    assert chercher(skills, ["kill"]) == []
+    assert chercher(skills, ["atest"]) == []
+
+
 def test_trouver_un_nom_inconnu_liste_les_connus(poser: Poser, tmp_path: Path) -> None:
     poser("g", "alpha")
     r = trouver(lire_niveau(Niveau(GLOBAL, tmp_path / "g")).skills, "zeta")

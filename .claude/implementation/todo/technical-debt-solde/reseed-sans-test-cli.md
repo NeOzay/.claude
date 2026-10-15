@@ -45,3 +45,14 @@ sous-processus.
 Le chantier a livré la couverture de bibliothèque et un seul test CLI, sur le défaut qui avait
 été constaté. L'utilisateur a arbitré de clore avec cette réserve plutôt que de compléter la
 couverture avant.
+
+## Soldé le
+
+**2026-10-15, chantier `solder-sept-dettes`** — cinq tests de `reseed` par la ligne de commande dans
+`test_entree_cli.py` : conflit, `--force` sur une liste gelée, `--dry-run`, nom discordant, liste
+sans provenance.
+
+Établi par :
+`~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/test_entree_cli.py -k reseed` →
+`5 passed`. Remettre `utils.fail(r.message)` sans le code dans `commands/reseed.py`, le défaut
+d'origine, fait échouer `test_reseed_nom_discordant_rend_le_code_2`.

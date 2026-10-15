@@ -82,9 +82,11 @@ travaille sur un mod, dans la session même.
   une commande (`$.process.run`) et lire l'environnement (`$.env.get`) avant d'appeler `next`.
 - **`prompt.compose`** : ajouter à `composition.sections` une section
   `{ id, text, scope: 'session' }` verse du texte au prompt système de la
-  **session principale seulement**. Elle survit à `/clear`, à `/compact` et à `--continue`, sans se
-  dupliquer. Elle n'a pas de plafond de taille (13 000 caractères versés entiers). Un sous-agent ne
-  la reçoit pas. L'`id` d'un plugin s'écrit `<plugin>:<nom>`.
+  **session principale seulement**. Elle survit à `/clear` et à `/compact` sans se dupliquer. Elle
+  n'a pas de plafond de taille (13 000 caractères versés entiers). Un sous-agent ne la reçoit pas.
+  L'`id` d'un plugin s'écrit `<plugin>:<nom>`. Une conversation reprise ne la recompose pas : elle
+  garde celle de son début, ou son absence, jusqu'à sa compaction (« Autres modes, essayés au
+  troisième audit »).
 - **Mémoriser entre deux appels** : une variable du module tient jusqu'au rechargement du mod,
   donc un calcul coûteux se mémorise (`local ??= await ...`). `prompt.compose` n'est pas rappelé à
   chaque requête (une fois observé pour quatre requêtes) : ne pas compter sur lui pour recalculer.

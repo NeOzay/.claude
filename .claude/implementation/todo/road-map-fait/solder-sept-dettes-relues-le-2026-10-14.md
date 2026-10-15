@@ -61,3 +61,17 @@ décidé à la relecture quand cela s'écarte du « Pour solder » de la dette.
 - `skills/list-dir/scripts/tests/test_reseed.py` : les montages réutilisables (`semer`, `SEMENCE`)
 - Entrées voisines, relues le même jour : `modes-de-defaillance-dans-la-prose`,
   `sous-agent-chercheur-de-shadow-skills`
+
+## Fait le
+
+**2026-10-15, chantier `solder-sept-dettes`** — les sept dettes sont soldées comme l'entrée l'a
+décidé, et chacune a sa preuve dans `technical-debt-solde/` : deux par documentation
+(`.claude/CLAUDE.md`, `skills/lexique/SKILL.md`), quatre par correctif testé, une par cinq tests
+de `reseed` à la ligne de commande. Le retrait du cache du lexique, écarté du chantier, est en
+road-map : `lexique-relu-a-chaque-composition`.
+
+Archive du chantier : `.claude/implementation/done/2026-10-15-solder-sept-dettes.md`
+
+Établi par : l'audit de clôture `51fb1a8`, FAVORABLE ;
+`grep -l "chantier .solder-sept-dettes." .claude/implementation/todo/technical-debt-solde/*.md | wc -l`
+→ `7`.

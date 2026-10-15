@@ -16,6 +16,7 @@ UN NIVEAU ABSENT N'EST PAS UNE ERREUR : un projet sans Shadow-skill local est l'
 Un `SKILL.md` mal formé est une faute nommée, et le reste du niveau est servi quand même.
 """
 
+import re
 import shutil
 import sys
 import tomllib
@@ -213,18 +214,21 @@ def _plier(texte: str) -> str:
 
 
 def chercher(skills: tuple[Skill, ...], mots: list[str]) -> list[Skill]:
-    """Les skills où figure chaque mot, sans casse ni accents.
+    """Les skills où chaque mot figure en début de mot, sans casse ni accents.
 
     Un mot se cherche dans le nom, la description, `when-to-load` et les tags.
+
+    EN DÉBUT DE MOT, PAS N'IMPORTE OÙ : en sous-chaîne, un mot court comme « test » ou « lua »
+    ramenait « latest » ou « evaluate », du bruit. Le début de mot garde le pluriel : « test »
+    trouve encore « tests ».
     """
-    voulus = [_plier(m) for m in mots]
-    return [
-        s
-        for s in skills
-        if all(
-            m in _plier(" ".join((s.nom, s.description, s.when_to_load, *s.tags))) for m in voulus
-        )
-    ]
+    motifs = [re.compile(rf"(?<!\w){re.escape(_plier(m))}") for m in mots]
+    retenus: list[Skill] = []
+    for s in skills:
+        texte = _plier(" ".join((s.nom, s.description, s.when_to_load, *s.tags)))
+        if all(motif.search(texte) for motif in motifs):
+            retenus.append(s)
+    return retenus
 
 
 def trouver(skills: tuple[Skill, ...], nom: str) -> Result[Skill]:

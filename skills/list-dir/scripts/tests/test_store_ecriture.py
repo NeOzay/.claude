@@ -22,9 +22,10 @@ import tomllib
 from pathlib import Path
 from typing import cast
 
+import pytest
 from jouet import CONTRAT, PATRON_MD, PATRON_TOML, ecrire, element, monter_liste
 from listdir import open_list
-from listdir.store import ListStore, init_list
+from listdir.store import ListStore, init_list, libelle
 from listdir.types import OPTIONAL, PLACEHOLDER, Change
 
 
@@ -216,6 +217,66 @@ def test_migrate_pose_la_valeur_preremplie_sur_un_champ_absent(tmp_path: Path) -
     assert posee.fields["date"] == datetime.date.today()
     assert posee.sections["Constat"] == "Section posée automatiquement."
     assert f"a.md: champ « date » — ajouté, {datetime.date.today().isoformat()}" in actes(changes)
+
+
+def _section_preremplie(tmp_path: Path, source: str) -> list[Change]:
+    """Migre un élément sans « Constat », section que le contrat préremplit par `source`."""
+    contrat = CONTRAT_PREREMPLI.replace('text = "Section posée automatiquement."', source)
+    liste = monter_liste(tmp_path / "jouet", contrat)
+    _ = element(liste, "a", 'id = "a"\ntitle = "T"\n', corps="")
+    return ouvrir(liste).migrate().unwrap()
+
+
+def _libelles_de_constat(changes: list[Change]) -> list[str]:
+    return [a for a in actes(changes) if "section « Constat »" in a]
+
+
+def test_migrate_section_text_multiligne_tient_sur_une_ligne(tmp_path: Path) -> None:
+    """UN CHANGEMENT, UNE LIGNE : la valeur se cite par sa première ligne, suivie de « … »."""
+    changes = _section_preremplie(tmp_path, r'text = "ligne1\nligne2"')
+
+    assert _libelles_de_constat(changes) == ["a.md: section « Constat » — ajoutée, ligne1 …"]
+    assert all("\n" not in str(c) for c in changes)
+
+
+def test_migrate_section_command_multiligne_tient_sur_une_ligne(tmp_path: Path) -> None:
+    changes = _section_preremplie(tmp_path, r"""command = 'printf "ligne1\nligne2\n"'""")
+
+    assert _libelles_de_constat(changes) == ["a.md: section « Constat » — ajoutée, ligne1 …"]
+    assert all("\n" not in str(c) for c in changes)
+
+
+@pytest.mark.parametrize(
+    ("valeur", "attendu"),
+    [
+        ("une ligne", "une ligne"),
+        ("  espaces gardés  ", "  espaces gardés  "),
+        ("ligne1\nligne2", "ligne1 …"),
+        ("ligne1\nligne2\n", "ligne1 …"),
+        ("ligne1\n", "ligne1"),
+        ("\n\nligne1\nligne2", "ligne1 …"),
+        ("\n \n", ""),
+    ],
+)
+def test_libelle_tient_sur_une_ligne_sans_ligne_vide(valeur: str, attendu: str) -> None:
+    """Un saut final, l'idiome TOML `\"\"\"…\"\"\"`, ou une ligne vide de tête ne passent pas."""
+    assert libelle(valeur) == attendu
+
+
+def test_migrate_section_text_en_triple_guillemets(tmp_path: Path) -> None:
+    """`text = \"\"\"` puis une ligne par ligne : la valeur finit par un saut de ligne."""
+    changes = _section_preremplie(tmp_path, 'text = """\nligne1\nligne2\n"""')
+
+    assert _libelles_de_constat(changes) == ["a.md: section « Constat » — ajoutée, ligne1 …"]
+    assert all("\n" not in str(c) for c in changes)
+
+
+def test_migrate_valeur_d_une_ligne_garde_son_libelle(tmp_path: Path) -> None:
+    changes = _section_preremplie(tmp_path, 'text = "Section posée automatiquement."')
+
+    assert _libelles_de_constat(changes) == [
+        "a.md: section « Constat » — ajoutée, Section posée automatiquement."
+    ]
 
 
 def test_migrate_ne_touche_pas_un_champ_deja_rempli_meme_preremplissable(tmp_path: Path) -> None:

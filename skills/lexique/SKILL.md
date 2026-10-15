@@ -58,7 +58,9 @@ lexique definitions [--projet DIR]         # chaque terme et sa définition, pou
 Sans `--projet`, le projet est la racine du dépôt git du répertoire courant, ou le répertoire
 courant hors dépôt : lancée depuis un sous-répertoire, la commande lit quand même le lexique du
 projet, au lieu de conclure à son absence. Dans un monodépôt dont un sous-projet porte son propre
-lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`.
+lexique, cette racine n'est pas le sous-projet : passer `--projet <sous-projet>`. Quand la racine
+git est celle qui porte le lexique global — un HOME versionné par git —, le projet est le répertoire
+courant, comme hors dépôt : le global ne se lit pas comme local.
 
 - `init` échoue fermé : **0** lexique posé, son chemin sur stdout ; **1** le fichier existe déjà,
   et rien n'est écrasé.
@@ -102,6 +104,13 @@ sortie au prompt système, en section de session, à chaque composition. Un hook
 plafonne son contexte à 10 000 caractères et n'en garde qu'un aperçu de 2 Ko ; une section du
 prompt système n'a pas ce plafond. Sans le mod chargé, la session ne reçoit aucun lexique local, et
 aucun hook n'est déclaré dans `settings.json` pour le suppléer.
+
+Le lexique local se lit une fois par processus : le mod garde le texte rendu par la commande, et
+ni `/clear` ni `/compact` ne relisent `.claude/LEXIQUE.md`. Une conversation reprise, par
+`--resume` ou `--continue`, réutilise en outre le prompt système qu'elle a enregistré jusqu'à sa
+prochaine compaction : elle garde le lexique local de son début, ou son absence. Un terme ajouté
+ou retiré depuis ne l'atteint pas, et rien ne le signale. Pour avoir le lexique à jour à coup sûr :
+relancer Claude Code, dans une nouvelle conversation.
 
 Deux autres voies ne conviennent pas :
 

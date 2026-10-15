@@ -15,7 +15,11 @@ jamais.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+
+from listdir.contract import CONTRACT, PATRONS
+from listdir.store import init_list
 
 CONTRAT = """name = "jouet"
 description = "liste-jouet des tests"
@@ -148,3 +152,43 @@ def monter_patron(
     _ = ecrire(liste, f".list/patrons/{nom}.toml", contrat)
     _ = ecrire(liste, f".list/patrons/{nom}.md", corps)
     return liste
+
+
+SEMENCE = """name = "jouet"
+description = "liste-jouet des tests"
+
+# Ce commentaire porte le pourquoi d'un champ : il doit survivre à une recopie.
+[origin]
+def = "jouet"
+version = 1
+
+[fields.id]
+type = "slug"
+description = ""
+
+[fields.title]
+type = "text"
+required = true
+description = "le titre"
+text = "titre par défaut"
+
+[sections."Constat"]
+required = true
+description = "ce qui a été observé"
+"""
+
+
+def semer(tmp_path: Path, contrat: str = SEMENCE, patron: str = "") -> tuple[Path, Path]:
+    """Une définition au rang 1, et la liste qu'elle vient de semer.
+
+    LE RÉPERTOIRE COURANT DEVIENT `tmp_path` : les tests de bibliothèque de `reseed` résolvent
+    la définition depuis là. Un test par la ligne de commande passe `cwd=tmp_path` à son tour.
+    """
+    definition = tmp_path / ".claude" / "list-dir" / "jouet"
+    _ = ecrire(definition, CONTRACT, contrat)
+    if patron:
+        _ = ecrire(definition, f"{PATRONS}/revue.md", patron)
+    cible = tmp_path / "liste"
+    _ = init_list(cible, definition=definition).unwrap()
+    os.chdir(tmp_path)
+    return definition, cible

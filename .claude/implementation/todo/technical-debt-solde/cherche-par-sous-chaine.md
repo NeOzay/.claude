@@ -30,3 +30,13 @@ Comparer mot à mot (frontières de mot, éventuellement préfixe), avec un test
 ## Assumé
 
 <OPTIONNEL>
+
+## Soldé le
+
+**2026-10-15, chantier `solder-sept-dettes`** — `shadow-skill cherche` compare en début de mot : «
+skill » trouve « This skill », « kill » ne le trouve plus.
+
+Établi par :
+`~/.claude/.venv/bin/python -m pytest skills/shadow-skill/scripts/tests/test_lire.py -k debut_de_mot`
+→ `1 passed`, en échec sur l'ancien code. Sur les Shadow-skills réels, `shadow-skill cherche kill`
+rendait `nvim-mini-test` et `skill-convention` ; il sort en 1, sans résultat.

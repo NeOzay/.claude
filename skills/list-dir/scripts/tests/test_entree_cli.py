@@ -26,11 +26,14 @@ from jouet import (
     CONTRAT,
     ELEMENT,
     PATRON_TOML,
+    SEMENCE,
     ecrire,
     element,
     monter_liste,
     monter_patron,
+    semer,
 )
+from listdir.contract import BACKUP, CONTRACT, LIST_DIR
 
 CLI = Path(__file__).resolve().parent.parent / "list-dir.py"
 
@@ -1063,3 +1066,78 @@ def test_contract_dit_la_regle_des_guillemets_sur_stderr_seulement(tmp_path: Pat
     assert "Règle des guillemets" not in complet.out
     assert valeurs.out.splitlines() == ["rouge", "vert"]
     assert valeurs.err == ""
+
+
+# --------------------------------------------------------------------- reseed
+# `reseed --def` et l'`origin.def` d'une liste se résolvent depuis le répertoire courant :
+# chaque appel passe `cwd=tmp_path`, où `semer` a posé la définition au rang projet.
+def contrat_de(liste: Path) -> str:
+    return (liste / LIST_DIR / CONTRACT).read_text(encoding="utf-8")
+
+
+def test_reseed_conflit_refuse_sans_rien_ecrire(tmp_path: Path) -> None:
+    """LE MODE DE DÉFAILLANCE DE LA DETTE : un conflit rendu 0 ferait croire à un
+    script appelant que la liste est rattrapée."""
+    definition, cible = semer(tmp_path)
+    avant = SEMENCE.replace('description = "le titre"', 'description = "l\'intitulé"')
+    _ = ecrire(cible, f"{LIST_DIR}/{CONTRACT}", avant)
+    _ = ecrire(
+        definition, CONTRACT, SEMENCE.replace('description = "le titre"', 'description = "le nom"')
+    )
+
+    r = lancer("reseed", str(cible), cwd=tmp_path)
+
+    assert r.code != 0
+    assert contrat_de(cible) == avant
+    assert not (cible / LIST_DIR / BACKUP).exists()
+
+
+def test_reseed_force_passe_une_liste_gelee(tmp_path: Path) -> None:
+    definition, cible = semer(tmp_path)
+    _ = ecrire(
+        cible,
+        f"{LIST_DIR}/{CONTRACT}",
+        SEMENCE.replace("version = 1", "version = 1\nfrozen = true"),
+    )
+    _ = ecrire(definition, CONTRACT, SEMENCE.replace("version = 1", "version = 2"))
+
+    sans = lancer("reseed", str(cible), cwd=tmp_path)
+    avec = lancer("reseed", str(cible), "--force", cwd=tmp_path)
+
+    assert sans.code == 1
+    assert avec.code == 0, avec.err
+
+
+def test_reseed_dry_run_n_ecrit_rien(tmp_path: Path) -> None:
+    definition, cible = semer(tmp_path)
+    avant = contrat_de(cible)
+    _ = ecrire(definition, CONTRACT, SEMENCE.replace("version = 1", "version = 2"))
+
+    r = lancer("reseed", str(cible), "--dry-run", cwd=tmp_path)
+
+    assert r.code == 0, r.err
+    assert "seraient appliqués" in r.out
+    assert contrat_de(cible) == avant
+    assert not (cible / LIST_DIR / BACKUP).exists()
+
+
+def test_reseed_nom_discordant_rend_le_code_2(tmp_path: Path) -> None:
+    """La définition `autre` existe, mais son contrat se nomme `jouet` : sans elle,
+    `--def autre` échouerait plus tôt, à la résolution, en code 1."""
+    _, cible = semer(tmp_path)
+    _ = ecrire(tmp_path / ".claude" / "list-dir" / "autre", CONTRACT, SEMENCE)
+
+    r = lancer("reseed", str(cible), "--def", "autre", cwd=tmp_path)
+
+    assert r.code == 2, r.err
+
+
+def test_reseed_sans_provenance_ni_option_est_un_echec_nomme(tmp_path: Path) -> None:
+    """Le `CONTRAT` du jouet déclare `def = false` : aucune semence à viser, et la
+    commande refuse de la deviner."""
+    liste = monter_liste(tmp_path / "jouet")
+
+    r = lancer("reseed", str(liste), cwd=tmp_path)
+
+    assert r.code == 1
+    assert "aucune semence à rattraper" in r.err

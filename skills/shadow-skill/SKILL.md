@@ -72,8 +72,9 @@ faire. `liste`, `cherche` et
 
 - `liste` : **0**, même si un `SKILL.md` est mal formé — la faute sort sur stderr ; **1** un niveau
   illisible, l'autre servi quand même.
-- `cherche` : **0** au moins un skill, où chaque mot figure, sans casse ni accents, dans le nom, la
-  description, `when-to-load` ou les tags ; **1** aucun.
+- `cherche` : **0** au moins un skill, où chaque mot figure en début de mot, sans casse ni
+  accents, dans le nom, la description, `when-to-load` ou les tags — « test » trouve « tests »,
+  pas « latest » ; **1** aucun.
 - `charge`, `chemin` : **0** ; **1** nom inconnu — les noms connus sont listés — ou défini aux deux
   niveaux.
 - `depuis-suivi` : lit le Suivi actif `.claude/implementation/<slug>.md` du projet. **0** ; **1**

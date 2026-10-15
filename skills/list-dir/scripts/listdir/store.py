@@ -336,7 +336,7 @@ class ListStore:
                         return Result(posee.status, None, posee.message)
                     valeur = posee.unwrap()
                 fields[name] = valeur
-                changes.append(Change(item.path, subject, f"ajouté, {forme_texte(valeur)}"))
+                changes.append(Change(item.path, subject, f"ajouté, {libelle(valeur)}"))
 
         for name, value in item.fields.items():
             if name in self.contract.fields:
@@ -373,7 +373,7 @@ class ListStore:
                         return Result(posee.status, None, posee.message)
                     corps = posee.unwrap()
                 sections[title] = corps
-                changes.append(Change(item.path, subject, f"ajoutée, {corps}"))
+                changes.append(Change(item.path, subject, f"ajoutée, {libelle(corps)}"))
 
         declared = set(self.contract.sections)
         for title, body in item.sections.items():
@@ -526,7 +526,7 @@ class ListStore:
             Change(
                 it.path,
                 f"champ « {name} »",
-                f"« {forme_texte(it.fields[name])} » remplacé par « {forme_texte(value)} »",
+                f"« {libelle(it.fields[name])} » remplacé par « {libelle(value)} »",
             )
             for it, value in cibles
         ]
@@ -873,6 +873,28 @@ def forme_texte(valeur: object) -> str:
     if isinstance(valeur, bool):
         return "true" if valeur else "false"
     return str(valeur)
+
+
+def libelle(valeur: object) -> str:
+    """La valeur telle qu'un `Change` la cite : sa première ligne pleine, « … » s'il en reste.
+
+    UN CHANGEMENT, UNE LIGNE : `migrate` et `fill` joignent leurs changements par des sauts de
+    ligne, et qui les lit compte les lignes. Une valeur multi-lignes citée telle quelle fausserait
+    ce compte sans qu'aucune commande n'échoue. `forme_texte` reste entière : les filtres et `list`
+    comparent et montrent la valeur, pas son libellé.
+
+    LES LIGNES VIDES NE SE CITENT PAS : une chaîne TOML multi-lignes finit souvent par un saut de
+    ligne, et une section peut s'ouvrir sur une ligne vide. Citer la première ligne brute rendrait
+    « … » sans rien devant, et garder le saut final casserait encore le compte.
+    """
+    texte = forme_texte(valeur)
+    lignes = texte.splitlines()
+    if "".join(lignes) == texte:  # aucun saut de ligne : la valeur se cite entière
+        return texte
+    pleines = [ligne for ligne in lignes if ligne.strip()]
+    if not pleines:
+        return ""
+    return pleines[0] if len(pleines) == 1 else f"{pleines[0]} …"
 
 
 def _reordering(

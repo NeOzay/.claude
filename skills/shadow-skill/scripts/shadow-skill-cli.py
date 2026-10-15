@@ -176,7 +176,9 @@ def _parser() -> argparse.ArgumentParser:
         "liste", parents=[projet], help="niveau, nom, description, when-to-load de chaque skill"
     )
     p = sub.add_parser(
-        "cherche", parents=[projet], help="les skills où figure chaque mot, sans casse ni accents"
+        "cherche",
+        parents=[projet],
+        help="les skills où chaque mot figure en début de mot, sans casse ni accents",
     )
     p.add_argument("mots", nargs="+", metavar="MOT")
     p = sub.add_parser("charge", parents=[projet], help="le fichier principal d'un skill")

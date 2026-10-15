@@ -34,3 +34,14 @@ mod ne le reçoit jamais avant sa compaction. Rien ne le signale.
 ## Assumé
 
 <OPTIONNEL>
+
+## Soldé le
+
+**2026-10-15, chantier `solder-sept-dettes`** — la limite est écrite dans
+« Ce que reçoit la session » de `skills/lexique/SKILL.md`, avec la lecture unique par processus et
+son remède, relancer Claude Code dans une nouvelle conversation ; « survit à `--continue` » et
+« survit à la reprise » sont corrigés dans `claude-code-mods` et `register.ts`. Retirer le cache du
+mod est inscrit en road-map, `lexique-relu-a-chaque-composition`.
+
+Établi par : `grep -n "Le lexique local se lit une fois" skills/lexique/SKILL.md` → ligne 108 ;
+`grep -n "jusqu'à sa compaction" shadow-skills/claude-code-mods/SKILL.md` → ligne 88.
