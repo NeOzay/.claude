@@ -110,5 +110,6 @@
   "editorMode": "normal",
   "verbose": false,
   "autoCompactEnabled": true,
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "remoteControlAtStartup": true
 }
