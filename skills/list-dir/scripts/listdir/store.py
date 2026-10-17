@@ -21,6 +21,7 @@ from typing import final, override
 from gabarit.check import check_item as check_file
 from gabarit.check import notes as notes_file
 from gabarit.prefill import compose, typed_value
+from gabarit.structure import is_section_untouched
 
 from .contract import (
     CONTRACT,
@@ -789,8 +790,16 @@ class ListStore:
             corps = [f"## {titre}", ""]
             for nom, texte in item.sections.items():
                 # Une section restée facultative a joué son rôle — guider — et n'a
-                # rien à dire ici. L'y laisser constellerait le rapport de vides.
-                if is_marker(texte.strip()):
+                # rien à dire ici. L'y laisser constellerait le rapport de vides. Le
+                # marqueur d'une section structurée porte son motif, se réenroule, ou
+                # se pose en squelette de labels : gabarit seul sait le reconnaître ;
+                # une section sans `type` garde `is_marker`, à l'identique.
+                declaree = self.contract.sections.get(nom)
+                if declaree is not None and declaree.type is not None:
+                    au_marqueur = is_section_untouched(declaree, texte)
+                else:
+                    au_marqueur = is_marker(texte.strip())
+                if au_marqueur:
                     continue
                 # Le corps d'une section PEUT contenir un « ## » — dans un bloc de
                 # code, où parse_sections n'a pas découpé. Le recomptage plus bas

@@ -6,9 +6,9 @@ Avec `filled`, plus aucun marqueur n'est toléré là où le contrat exige quelq
 mais les facultatifs restés à leur marqueur ne sont JAMAIS réclamés.
 
 LES NOTES NE SONT PAS DES MANQUEMENTS. `notes` dit ce qui est périmé sans être faux — un
-ancien marqueur générique sur un champ typé, un champ ou une section `deprecated` que le
-fichier porte encore — et sort sur le canal des avertissements : le verdict, lui, ne change
-pas.
+ancien marqueur générique sur un champ typé, un champ, une section ou un label `deprecated`
+que le fichier porte encore, une étiquette que le contrat ne déclare pas — et sort sur le
+canal des avertissements : le verdict, lui, ne change pas.
 
 `fixed` PORTE LES RÈGLES QU'UN APPELANT SUBSTITUE AU CONTRÔLE DE TYPE d'un champ
 déclaré. `listdir` y met la sienne — `id` vaut le nom du fichier —, qu'un gabarit seul
@@ -22,6 +22,7 @@ from collections.abc import Callable, Mapping
 
 from .contract import check_value, is_marker
 from .items import fence_ouverte
+from .structure import check_structure, is_section_marker, structure_notes
 from .types import OPTIONAL, PLACEHOLDER, TYPED_MARKER_TYPES, Contract, Item, Violation, marker
 
 type Rule = Callable[[Item, object], str]
@@ -65,6 +66,12 @@ def notes(contract: Contract, item: Item) -> list[str]:
     for title, s in contract.sections.items():
         if s.deprecated is not None and title in item.sections:
             out.append(f"{item.path}: section « {title} » — dépréciée : {s.deprecated}")
+        corps = item.sections.get(title)
+        if s.type is not None and corps is not None and not is_section_marker(corps):
+            out.extend(
+                f"{item.path}: {sujet} — {raison}"
+                for sujet, raison in structure_notes(s, corps, f"section « {title} »")
+            )
     return out
 
 
@@ -125,8 +132,22 @@ def check_sections(contract: Contract, item: Item, filled: bool) -> list[Violati
             out.append(Violation(item.path, subject, "manquante"))
             continue
         body = item.sections[title].strip()
+        # Une section sans `type` garde `is_marker`, à l'identique : seul le marqueur d'une
+        # section structurée porte un motif, ou se réenroule.
+        au_marqueur = is_section_marker(body) if contract.sections[title].type else is_marker(body)
         if not body:
             out.append(Violation(item.path, subject, "vide"))
-        elif filled and is_marker(body):
+        elif filled and au_marqueur:
             out.append(Violation(item.path, subject, "à remplir"))
+
+    # LA STRUCTURE NE SE JUGE QU'HORS MARQUEUR : une section restée à remplir n'a pas
+    # encore de puces, et `--filled` dit seul ce qu'il en est.
+    for title, s in contract.sections.items():
+        corps = item.sections.get(title)
+        if s.type is None or corps is None or not corps.strip() or is_section_marker(corps):
+            continue
+        out.extend(
+            Violation(item.path, sujet, raison)
+            for sujet, raison in check_structure(s, corps, f"section « {title} »", filled)
+        )
     return out

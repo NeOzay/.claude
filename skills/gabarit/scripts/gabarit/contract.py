@@ -25,13 +25,23 @@ from __future__ import annotations
 import datetime
 import tomllib
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
+from .motif import Trou, decoupe, trous
 from .types import (
     ALL_MARKERS,
+    DEBUT,
     FIELD_TYPES,
+    FIN,
+    FIN_LIGNE,
+    FORMES,
+    RANG_MAX,
+    RANG_SECTION,
+    SECTION_TYPES,
     TYPED_MARKER_TYPES,
+    Capture,
     Contract,
     Field,
     Result,
@@ -298,39 +308,298 @@ def declared_fields[F: Field](
     return ok(fields)
 
 
+_CLES_MOTIF = ("motif", "debut", "fin", "captures")
+"""Les clés qu'une section ne porte que si elle est de type « motif »."""
+
+_CLES_LABEL = ("forme", "labels", "prefix")
+"""Les clés qu'une section ne porte que si elle est de type « label »."""
+
+_CLES_CAPTURE = ("description", "required", "values", "min", "max", "sequence")
+"""Les seules clés d'une capture. Son type se déclare dans le motif, et nulle part ailleurs."""
+
+
 def parse_section(title: str, value: object, path: Path) -> Result[Section]:
-    """Une section déclarée."""
-    decl = table(value, path, f"section « {title} »")
+    """Une section déclarée, ses labels compris."""
+    return _section(title, value, path, f"section « {title} »", rang=RANG_SECTION + 1, label=False)
+
+
+def _section(
+    name: str, value: object, path: Path, sujet: str, *, rang: int, label: bool
+) -> Result[Section]:
+    """Une section ou un label, nommé dans les messages par `sujet` — son chemin.
+
+    `rang` est celui que prendraient ses propres labels s'ils étaient des titres : 3 sous
+    une section, un de plus à chaque label `title` qui en porte d'autres.
+    """
+    decl = table(value, path, sujet)
     if not decl:
         return fail(decl.message)
     body = decl.unwrap()
 
     if "description" not in body:
-        return fail(f"{path}: section « {title} » — « description » manquante")
-    description = texte(body.get("description"), path, f"section « {title} », « description »")
+        return fail(f"{path}: {sujet} — « description » manquante")
+    description = texte(body.get("description"), path, f"{sujet}, « description »")
     if not description:
         return fail(description.message)
 
-    prefill = _prefill(body, path, f"section « {title} »")
+    prefill = _prefill(body, path, sujet)
     if not prefill:
         return fail(prefill.message)
     text_val, command_val = prefill.unwrap()
 
     required = bool(body.get("required", False))
     deprecated = _deprecated(
-        body, path, f"section « {title} »", required=required, text=text_val, command=command_val
+        body, path, sujet, required=required, text=text_val, command=command_val
     )
     if not deprecated:
         return fail(deprecated.message)
 
+    if "order" in body and not label:
+        return fail(f"{path}: {sujet} — « order » réservé à un label")
+    order = _entier(body.get("order"), path, f"{sujet}, « order »")
+    if not order:
+        return fail(order.message)
+
+    section = Section(
+        name=name,
+        required=required,
+        description=description.unwrap(),
+        text=text_val,
+        command=command_val,
+        deprecated=deprecated.unwrap(),
+        order=order.unwrap(),
+    )
+
+    # SANS `type`, LE CHEMIN D'AVANT, À L'IDENTIQUE — une clé de structure y est refusée
+    # plutôt qu'ignorée : un `motif` sans `type` ne vérifierait rien, en silence.
+    type_ = body.get("type")
+    if type_ is not None and type_ not in SECTION_TYPES:
+        return fail(
+            f"{path}: {sujet} — type « {type_} » inconnu ; attendus : {', '.join(SECTION_TYPES)}"
+        )
+    for reserve, cles in (("motif", _CLES_MOTIF), ("label", _CLES_LABEL)):
+        etrangeres = [cle for cle in cles if cle in body]
+        if type_ != reserve and etrangeres:
+            # Pour un label, c'est le refus de DEUX FORMES À UN NIVEAU : la forme se déclare
+            # sur la table qui porte les labels, et un label qui en déclare une sans en
+            # porter lui-même en imposerait une seconde à ses voisins.
+            return fail(
+                f"{path}: {sujet} — « {etrangeres[0]} » réservé à une section "
+                f'de `type = "{reserve}"`'
+            )
+    if type_ is None:
+        return ok(section)
+    if type_ == "motif":
+        return _motif(section, body, path, sujet)
+    return _labels(section, body, path, sujet, rang)
+
+
+def _labels(
+    section: Section, body: dict[str, object], path: Path, sujet: str, rang: int
+) -> Result[Section]:
+    """La section, complétée de sa forme, de son préfixe et de ses labels, lus récursivement."""
+    forme = body.get("forme")
+    if forme is None:
+        return fail(f"{path}: {sujet} — « forme » manquante ; attendues : {', '.join(FORMES)}")
+    if forme not in FORMES:
+        return fail(
+            f"{path}: {sujet} — forme « {forme} » inconnue ; attendues : {', '.join(FORMES)}"
+        )
+    if forme == "title" and rang > RANG_MAX:
+        return fail(
+            f"{path}: {sujet} — des labels « title » y seraient de rang {rang}, "
+            f"au-delà de {RANG_MAX}"
+        )
+
+    prefix = texte(body.get("prefix"), path, f"{sujet}, « prefix »")
+    if not prefix:
+        return fail(prefix.message)
+    if "prefix" in body and not prefix.unwrap().strip():
+        return fail(f"{path}: {sujet} — « prefix » vide : il dit ce que la prose admise contient")
+
+    tables = table(body.get("labels"), path, f"{sujet}, « labels »")
+    if not tables:
+        return fail(tables.message)
+    if not tables.unwrap():
+        return fail(f"{path}: {sujet} — aucun label déclaré sous « labels »")
+
+    labels: dict[str, Section] = {}
+    precedent: tuple[str, int] | None = None  # le dernier label à porter un `order`
+    for nom, corps in tables.unwrap().items():
+        lu = _section(nom, corps, path, f"{sujet}, label « {nom} »", rang=rang + 1, label=True)
+        if not lu:
+            return fail(lu.message)
+        label = lu.unwrap()
+        if forme == "bold" and label.type == "label":
+            return fail(
+                f"{path}: {sujet}, label « {nom} » — un label « bold » ne porte pas de labels"
+            )
+        # L'ORDRE DÉCLARÉ EST L'ORDRE DE POSE : le squelette se pose dans l'ordre de
+        # déclaration, et doit passer `check`. Un `order` qui ne croît pas le ferait échouer.
+        if label.order is not None:
+            if precedent is not None and label.order <= precedent[1]:
+                return fail(
+                    f"{path}: {sujet}, label « {nom} » — « order » {label.order} ne croît "
+                    f"pas après celui de « {precedent[0]} » ({precedent[1]}) : les "
+                    "labels se déclarent dans leur ordre"
+                )
+            precedent = (nom, label.order)
+        labels[nom] = label
+
     return ok(
-        Section(
-            name=title,
+        replace(
+            section,
+            type="label",
+            forme="bold" if forme == "bold" else "title",
+            labels=labels,
+            prefix=prefix.unwrap() if "prefix" in body else None,
+        )
+    )
+
+
+def _motif(section: Section, body: dict[str, object], path: Path, sujet: str) -> Result[Section]:
+    """La section, complétée de son motif, de ses bornes et de ses captures."""
+    motif = texte(body.get("motif"), path, f"{sujet}, « motif »")
+    if not motif:
+        return fail(motif.message)
+    if not motif.unwrap().strip():
+        return fail(
+            f"{path}: {sujet} — « motif » manquant ou vide : une section à motif le déclare"
+        )
+
+    # UNE BORNE EST UN JETON : la puce s'ouvre sur `debut` suivi d'un blanc, et un blanc
+    # dans la borne rendrait ce découpage ambigu. Seule `fin` peut valoir le saut de ligne.
+    bornes: list[str] = []
+    for cle, defaut in (("debut", DEBUT), ("fin", FIN)):
+        borne = texte(body.get(cle), path, f"{sujet}, « {cle} »", default=defaut)
+        if not borne:
+            return fail(borne.message)
+        if cle == "fin" and borne.unwrap() == FIN_LIGNE:
+            bornes.append(FIN_LIGNE)
+            continue
+        if borne.unwrap().split() != [borne.unwrap()]:
+            return fail(
+                f"{path}: {sujet}, « {cle} » — ni vide ni blanc, trouvé « {borne.unwrap()} »"
+            )
+        bornes.append(borne.unwrap())
+
+    morceaux = decoupe(motif.unwrap())
+    if not morceaux:
+        return fail(f"{path}: {sujet}, « motif » — {morceaux.message}")
+
+    declarees = table(body.get("captures"), path, f"{sujet}, « captures »")
+    if not declarees:
+        return fail(declarees.message)
+    tables = declarees.unwrap()
+    attendus = trous(morceaux.unwrap())
+    noms = {t.nom for t in attendus}
+    for nom in tables:
+        if nom not in noms:
+            return fail(f"{path}: {sujet}, capture « {nom} » — déclarée mais absente du motif")
+
+    # UNE CAPTURE SIMPLE NE SE DÉCLARE PAS : sans table, elle est requise, sans contrainte,
+    # et prend la description de sa section ou de son label. Une `enum` sans table reste
+    # refusée, faute de `values`.
+    captures: dict[str, Capture] = {}
+    for t in attendus:
+        capture = parse_capture(sujet, t, tables.get(t.nom), path, repli=section.description)
+        if not capture:
+            return fail(capture.message)
+        captures[t.nom] = capture.unwrap()
+
+    debut, fin = bornes
+    return ok(
+        replace(
+            section, type="motif", motif=motif.unwrap(), debut=debut, fin=fin, captures=captures
+        )
+    )
+
+
+def _entier(value: object, path: Path, subject: str) -> Result[int | None]:
+    """La valeur si c'est un entier — un booléen n'en est pas un —, None si elle est absente."""
+    if value is None:
+        return ok(None)
+    if isinstance(value, bool) or not isinstance(value, int):
+        return fail(f"{path}: {subject} — un entier est attendu, trouvé {type(value).__name__}")
+    return ok(value)
+
+
+def parse_capture(
+    section: str, trou: Trou, value: object, path: Path, *, repli: str = ""
+) -> Result[Capture]:
+    """Une capture déclarée par `[….captures.<nom>]`, du type que le motif lui donne.
+    `section` est le chemin de la section ou du label qui la porte, pour les messages ;
+    `repli`, sa description, que prend une capture qui n'en déclare pas — table absente,
+    clé absente ou blanche.
+
+    L'ESPACE EST ADMISE DANS SES `values`, et là seulement : « [ ] » doit pouvoir valoir
+    `" "`. Les `values` d'un champ restent des jetons — `parse_field` n'est pas touchée.
+    La vide reste refusée : elle ne se distinguerait d'aucune absence.
+    """
+    sujet = f"{section}, capture « {trou.nom} »"
+    decl = table(value, path, sujet)
+    if not decl:
+        return fail(decl.message)
+    body = decl.unwrap()
+
+    refusees = sorted(set(body) - set(_CLES_CAPTURE))
+    if refusees:
+        return fail(
+            f"{path}: {sujet} — clé « {refusees[0]} » refusée : le type se déclare dans le "
+            f"motif, et une capture n'admet que {', '.join(_CLES_CAPTURE)}"
+        )
+
+    description = texte(body.get("description"), path, f"{sujet}, « description »")
+    if not description:
+        return fail(description.message)
+
+    required = body.get("required", True)
+    if not isinstance(required, bool):
+        return fail(
+            f"{path}: {sujet}, « required » — un booléen est attendu, "
+            f"trouvé {type(required).__name__}"
+        )
+
+    values = liste(body.get("values"), path, f"{sujet}, « values »")
+    if not values:
+        return fail(values.message)
+    if trou.type == "enum" and not values.unwrap():
+        return fail(f"{path}: {sujet} — un enum sans `values` n'admet rien")
+    if trou.type != "enum" and "values" in body:
+        return fail(f"{path}: {sujet} — « values » réservé à une capture enum")
+    if "" in values.unwrap():
+        return fail(f"{path}: {sujet}, « values » — une valeur ne peut être vide")
+
+    if trou.type != "int":
+        hors_type = [cle for cle in ("min", "max", "sequence") if cle in body]
+        if hors_type:
+            return fail(f"{path}: {sujet} — « {hors_type[0]} » réservé à une capture int")
+    bornes: list[int | None] = []
+    for cle in ("min", "max"):
+        borne = _entier(body.get(cle), path, f"{sujet}, « {cle} »")
+        if not borne:
+            return fail(borne.message)
+        bornes.append(borne.unwrap())
+    minimum, maximum = bornes
+    if minimum is not None and maximum is not None and minimum > maximum:
+        return fail(f"{path}: {sujet} — « min » ({minimum}) dépasse « max » ({maximum})")
+    sequence = body.get("sequence", False)
+    if not isinstance(sequence, bool):
+        return fail(
+            f"{path}: {sujet}, « sequence » — un booléen est attendu, "
+            f"trouvé {type(sequence).__name__}"
+        )
+
+    return ok(
+        Capture(
+            name=trou.nom,
+            type=trou.type,
             required=required,
-            description=description.unwrap(),
-            text=text_val,
-            command=command_val,
-            deprecated=deprecated.unwrap(),
+            description=description.unwrap() if description.unwrap().strip() else repli,
+            values=values.unwrap(),
+            min=minimum,
+            max=maximum,
+            sequence=sequence,
         )
     )
 
@@ -417,6 +686,12 @@ def is_marker(value: object) -> bool:
     return isinstance(value, str) and value in ALL_MARKERS
 
 
+def _lisible(valeur: str) -> str:
+    """La valeur telle qu'elle se lit dans une liste séparée par des virgules."""
+    # Une valeur vide ou bordée de blanc S'Y PERDRAIT sans guillemets : « x,  » cache « " " ».
+    return f'"{valeur}"' if not valeur or valeur != valeur.strip() else valeur
+
+
 def check_value(field: Field, value: object) -> str:
     """La raison du manquement, ou une chaîne vide si la valeur convient.
 
@@ -455,7 +730,8 @@ def check_value(field: Field, value: object) -> str:
                 return f"« {value} » n'est pas une date ISO (AAAA-MM-JJ)"
         case "enum":
             if not isinstance(value, str) or value not in field.values:
-                return f"« {value} » hors des valeurs déclarées : {', '.join(field.values)}"
+                declarees = ", ".join(_lisible(v) for v in field.values)
+                return f"« {value} » hors des valeurs déclarées : {declarees}"
         case "int":
             # `isinstance(True, int)` est vrai en Python : sans ce refus, `true` passerait
             # pour l'entier 1.

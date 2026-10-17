@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import datetime
 import os
-import re
 import subprocess
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -32,11 +31,19 @@ from pathlib import Path
 
 from .contract import check_value, is_marker
 from .gitcmd import git
-from .types import Contract, Field, FieldValue, Item, Result, Section, fail, ok
-
-ENTIER = re.compile(r"[+-]?[0-9]+")
-"""Un entier en base 10, tel qu'une commande ou un `text` l'écrit. `[0-9]` et non `\\d`,
-qui admettrait des chiffres d'autres écritures que `int()` convertirait sans broncher."""
+from .types import (
+    ENTIER,
+    RANG_SECTION,
+    Contract,
+    Field,
+    FieldValue,
+    Item,
+    Result,
+    Section,
+    fail,
+    marker,
+    ok,
+)
 
 type Environnement = Callable[[str], Mapping[str, str]]
 """Les variables à ajouter pour un champ ou une section, dont le nom est donné."""
@@ -191,13 +198,48 @@ def typed_value(f: Field, text: str, lieu: str, origine: str) -> Result[FieldVal
 
 
 def initial_section(s: Section, ctx: Contexte) -> Result[str]:
-    """La valeur initiale d'une section : `text` littéral, sortie de `command`, ou
-    son marqueur. Une section n'a pas de type déclaré : rien à confronter."""
+    """La valeur initiale d'une section : `text` littéral, sortie de `command`, son
+    squelette si elle est à labels, ou son marqueur — celui d'un motif le porte. Rien à
+    confronter : une sortie de `command` se juge à `check`, comme un texte écrit à la main.
+    """
+    return _initial_section(s, ctx, f"section « {s.name} »", RANG_SECTION + 1)
+
+
+def _initial_section(s: Section, ctx: Contexte, sujet: str, rang: int) -> Result[str]:
+    """Une section ou un label ; `rang` est celui que prennent ses labels `title`.
+
+    UN SQUELETTE, PAS UN MARQUEUR, pour une section à labels : le marqueur de son `prefix`
+    s'il en déclare un, puis ses labels non dépréciés, dans l'ordre de déclaration — que
+    l'`order` du contrat suit —, séparés d'une ligne vide, chacun à sa propre valeur initiale.
+    Qui remplit voit les étiquettes à écrire, et `check --filled` réclame chaque label requis
+    resté à son marqueur.
+    """
     if s.text is not None:
         return ok(s.text)
     if s.command is not None:
-        return _run(s.command, f"{ctx.lieu}: section « {s.name} »", s.name, ctx)
-    return ok(s.marker)
+        return _run(s.command, f"{ctx.lieu}: {sujet}", s.name, ctx)
+    if s.type != "label":
+        return ok(s.marker)
+
+    # LE `prefix` A SON MARQUEUR, du statut de sa table : une prose qu'on ne voit pas n'est
+    # jamais écrite, et `check --filled` la réclame quand la table est requise.
+    blocs: list[str] = [] if s.prefix is None else [marker(s.required)]
+    for nom, label in s.labels.items():
+        if label.deprecated is not None:
+            continue
+        pose = _initial_section(label, ctx, f"{sujet}, label « {nom} »", rang + 1)
+        if not pose:
+            return Result(pose.status, None, pose.message)
+        corps = pose.unwrap()
+        if s.forme == "title":
+            blocs.append(f"{'#' * rang} {nom}\n\n{corps}".rstrip())
+        elif "\n" in corps or label.type == "motif":
+            # Un motif se pose à la ligne : chaque puce s'ouvre en début de ligne, et son
+            # marqueur montre déjà où.
+            blocs.append(f"**{nom}** :\n{corps}")
+        else:
+            blocs.append(f"**{nom}** : {corps}".rstrip())
+    return ok("\n\n".join(blocs))
 
 
 def compose(

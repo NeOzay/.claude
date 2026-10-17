@@ -14,6 +14,7 @@ version vit dans les points d'entrée, avant tout import de ce paquet — un Syn
 from __future__ import annotations
 
 import datetime
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -164,6 +165,63 @@ class Field:
 
 
 @dataclass(frozen=True)
+class Capture(Field):
+    """Une capture du motif d'une section, déclarée par `[sections.X.captures.<nom>]`.
+
+    UN CHAMP, ET RIEN D'AUTRE À JUGER : sa valeur passe par `check_value` comme celle d'un
+    champ. `min`, `max` et `sequence` sont des contraintes EN PLUS du type, jamais une
+    seconde définition de l'entier. Requise par défaut, à l'inverse d'un champ : une
+    capture facultative est l'exception que le contrat doit dire.
+    """
+
+    required: bool = True
+    min: int | None = None  # int seulement
+    max: int | None = None  # int seulement
+    sequence: bool = False  # int seulement : la puce i vaut `min + i`, ou `1 + i` sans `min`
+
+
+type SectionType = Literal["motif", "label"]
+"""Les structures qu'une section peut déclarer par `type`. Sans `type`, la section est en
+prose libre et suit exactement le chemin d'avant."""
+
+# `__value__` d'un alias PEP 695 : voir FIELD_TYPES.
+SECTION_TYPES: tuple[SectionType, ...] = cast(
+    "tuple[SectionType, ...]",
+    get_args(SectionType.__value__),  # pyright: ignore[reportAny]
+)
+
+type Forme = Literal["bold", "title"]
+"""L'écriture des labels d'une section `label` : `**Nom** :`, ou un titre d'un rang de plus
+que la table qui les porte. Une seule par table : deux formes à un même niveau ne se
+déclarent pas."""
+
+# `__value__` d'un alias PEP 695 : voir FIELD_TYPES.
+FORMES: tuple[Forme, ...] = cast(
+    "tuple[Forme, ...]",
+    get_args(Forme.__value__),  # pyright: ignore[reportAny]
+)
+
+RANG_SECTION = 2
+"""Le rang du titre d'une section : ses labels `title` sont du rang suivant."""
+
+RANG_MAX = 6
+"""Le rang du plus petit titre Markdown : un label `title` ne descend pas plus bas."""
+
+ENTIER = re.compile(r"[+-]?[0-9]+")
+"""Un entier en base 10, tel qu'une commande, un `text` ou une capture l'écrit. `[0-9]` et
+non `\\d`, qui admettrait des chiffres d'autres écritures que `int()` convertirait sans
+broncher."""
+
+MOTIF_MARKER = "motif:"
+"""Ce qui suit le statut dans le marqueur d'une section à motif, avant le motif lui-même."""
+
+# Définis ici, et non dans motif.py qui les lit : `Section` en fait ses défauts.
+DEBUT = "-"  # ce qui ouvre une puce, suivi d'un blanc
+FIN = ";;"  # ce qui la ferme — « ; » seul paraît à l'intérieur de puces existantes
+FIN_LIGNE = "\n"  # la puce finit à la ligne ; sa suite s'écrit en retrait, comme en Markdown
+
+
+@dataclass(frozen=True)
 class Section:
     """Une section déclarée au contrat."""
 
@@ -173,11 +231,35 @@ class Section:
     text: str | None = None  # texte littéral posé à la place du marqueur
     command: str | None = None  # commande dont la sortie est posée à la place du marqueur
     deprecated: str | None = None  # la consigne : cette section n'est plus posée
+    type: SectionType | None = None  # None : prose libre
+    motif: str | None = None  # type « motif » seulement : le gabarit de ligne de chaque puce
+    debut: str = DEBUT
+    fin: str = FIN
+    captures: Mapping[str, Capture] = field(default_factory=dict[str, Capture])
+    forme: Forme | None = None  # type « label » seulement
+    labels: Mapping[str, Section] = field(
+        default_factory=dict[str, "Section"]
+    )  # type « label » seulement
+    prefix: str | None = None  # type « label » : ce que dit la prose admise avant le 1er label
+    order: int | None = None  # un label seulement : son rang parmi ceux qui en portent un
 
     @property
     def marker(self) -> str:
-        """Le marqueur que cette section reçoit à la création. Voir Field.marker."""
-        return marker(self.required)
+        """Le marqueur que cette section reçoit à la création. Voir Field.marker.
+
+        Une section à motif porte son motif dans son marqueur, bornes comprises —
+        `<À REMPLIR motif: - [{etat: enum}] {n: int}. {intitule} ;;>` : qui la remplit lit
+        la forme d'une puce là où il l'écrit. Construit depuis `marker`, rien n'est recopié.
+
+        `fin` SE COLLE AU MOTIF : `(gravité {g: int}).` ne prend pas d'espace avant son point,
+        et un motif qui en veut une la porte à sa fin. Une `fin` de ligne ne s'y écrit pas :
+        le marqueur tient sur une ligne.
+        """
+        base = marker(self.required)
+        if self.type != "motif" or self.motif is None:
+            return base
+        fin = "" if self.fin == FIN_LIGNE else self.fin
+        return f"{base[:-1]} {MOTIF_MARKER} {self.debut} {self.motif}{fin}>"
 
 
 @dataclass(frozen=True)

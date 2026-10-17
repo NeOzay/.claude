@@ -48,3 +48,8 @@ regex. Deux formes couvrent les cas actuels :
 - `~/.config/nvim/plugins/listdir/lua/listdir/contract.lua` : lit `.list/contract.toml`, une
   nouvelle clé de section ne doit pas le casser
 - Entrée `gabarit-type-object` : l'autre ajout tiré de la même discussion
+
+## Fait le
+
+2026-10-17, chantier `gabarit-sections-structurees` — archive :
+`.claude/implementation/done/2026-10-17-gabarit-sections-structurees.md`.

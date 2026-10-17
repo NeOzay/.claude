@@ -1,0 +1,528 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "gabarit-sections-structurees"
+audit = "02-33fe07e"
+rang = 2
+type = "clôture"
+date = 2026-10-17
+base = "master"
+commit = "33fe07e"
+precedent = "01-bdf5e5b"
+brief = ".claude/implementation/gabarit-sections-structurees.brief.md"
+suivi = ".claude/implementation/gabarit-sections-structurees.md"
+plan = ".claude/plans/bubbly-strolling-hanrahan.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_motif_contrat.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 49 items
+
+skills/gabarit/scripts/tests/test_motif_contrat.py ..................... [ 42%]
+............................                                             [100%]
+
+============================== 49 passed in 0.17s =============================="""
+
+[[verification]]
+origine = "Étape 2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_label_contrat.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 25 items
+
+skills/gabarit/scripts/tests/test_label_contrat.py ..................... [ 84%]
+....                                                                     [100%]
+
+============================== 25 passed in 0.10s =============================="""
+
+[[verification]]
+origine = "Étape 3"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_marqueur_structure.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 19 items
+
+skills/gabarit/scripts/tests/test_marqueur_structure.py ................ [ 84%]
+...                                                                      [100%]
+
+============================== 19 passed in 0.23s =============================="""
+
+[[verification]]
+origine = "Étape 4"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_motif.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 19 items
+
+skills/gabarit/scripts/tests/test_motif.py ...................           [100%]
+
+============================== 19 passed in 0.40s =============================="""
+
+[[verification]]
+origine = "Étape 5"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_label.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 22 items
+
+skills/gabarit/scripts/tests/test_label.py ......................        [100%]
+
+============================== 22 passed in 0.13s =============================="""
+
+[[verification]]
+origine = "Étape 6"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_pose_structure.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 7 items
+
+skills/gabarit/scripts/tests/test_pose_structure.py .......              [100%]
+
+============================== 7 passed in 0.13s ==============================="""
+
+[[verification]]
+origine = "Étape 7"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_section_values.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 7 items
+
+skills/gabarit/scripts/tests/test_section_values.py .......              [100%]
+
+============================== 7 passed in 0.11s ==============================="""
+
+[[verification]]
+origine = "Étape 8"
+commande = "~/.claude/.venv/bin/python -m pytest skills/list-dir/scripts/tests/test_structure.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 7 items
+
+skills/list-dir/scripts/tests/test_structure.py .......                  [100%]
+
+============================== 7 passed in 0.22s ==============================="""
+
+[[verification]]
+origine = "Étape 9"
+commande = "uvx rumdl fmt --check skills/gabarit/references/format.md skills/gabarit/SKILL.md skills/list-dir/references/format.md"
+statut = "passée"
+sortie = "Success: No issues found in 3 files (35ms)"
+
+[[verification]]
+origine = "Étape 10"
+commande = "la commande de C7 et les trois linters, sur la branche et sur l'arbre extrait de `master`"
+statut = "non-exécutée"
+sortie = "vérification en prose, pas une commande : à mener par l'auditeur"
+
+[[verification]]
+origine = "Étape 11"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_prefix.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 9 items
+
+skills/gabarit/scripts/tests/test_prefix.py .........                    [100%]
+
+============================== 9 passed in 0.09s ==============================="""
+
+[[verification]]
+origine = "Étape 12"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_pose_structure.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 7 items
+
+skills/gabarit/scripts/tests/test_pose_structure.py .......              [100%]
+
+============================== 7 passed in 0.14s ==============================="""
+
+[[verification]]
+origine = "Étape 13"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_motif_contrat.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 49 items
+
+skills/gabarit/scripts/tests/test_motif_contrat.py ..................... [ 42%]
+............................                                             [100%]
+
+============================== 49 passed in 0.19s =============================="""
+
+[[verification]]
+origine = "Étape 14"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/"
+statut = "passée"
+sortie = """skills/gabarit/scripts/tests/test_deprecated.py .................        [ 22%]
+skills/gabarit/scripts/tests/test_fin_de_ligne.py .............          [ 26%]
+skills/gabarit/scripts/tests/test_int.py ...................             [ 32%]
+skills/gabarit/scripts/tests/test_label.py ......................        [ 39%]
+skills/gabarit/scripts/tests/test_label_contrat.py ..................... [ 45%]
+....                                                                     [ 46%]
+skills/gabarit/scripts/tests/test_marqueur_structure.py ................ [ 51%]
+...                                                                      [ 52%]
+skills/gabarit/scripts/tests/test_marqueurs.py ......................... [ 60%]
+.................                                                        [ 65%]
+skills/gabarit/scripts/tests/test_motif.py ...................           [ 71%]
+skills/gabarit/scripts/tests/test_motif_contrat.py ..................... [ 78%]
+............................                                             [ 86%]
+skills/gabarit/scripts/tests/test_new.py ............                    [ 90%]
+skills/gabarit/scripts/tests/test_pose_structure.py .......              [ 92%]
+skills/gabarit/scripts/tests/test_prefix.py .........                    [ 95%]
+skills/gabarit/scripts/tests/test_section_values.py .......              [ 97%]
+skills/gabarit/scripts/tests/test_squelette.py ........                  [100%]
+
+============================= 323 passed in 4.25s =============================="""
+
+[[verification]]
+origine = "Étape 15"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_fin_de_ligne.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 13 items
+
+skills/gabarit/scripts/tests/test_fin_de_ligne.py .............          [100%]
+
+============================== 13 passed in 0.10s =============================="""
+
+[[verification]]
+origine = "Étape 16"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_squelette.py skills/list-dir/scripts/tests/test_structure.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 15 items
+
+skills/gabarit/scripts/tests/test_squelette.py ........                  [ 53%]
+skills/list-dir/scripts/tests/test_structure.py .......                  [100%]
+
+============================== 15 passed in 0.32s =============================="""
+
+[[verification]]
+origine = "C7"
+commande = "set -o pipefail; ~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/ skills/list-dir/scripts/tests/ scripts/tests/ -q | tail -2"
+statut = "passée"
+sortie = """.......                                                                  [100%]
+1015 passed in 26.21s
+rc=0 — sur l'arbre extrait de master (git archive master | tar -x), même commande : 830 passed, rc=0"""
+
+[[verification]]
+origine = "C7"
+commande = "! git diff master...33fe07e --name-status -- '*tests*' | grep -v '^A'"
+statut = "passée"
+sortie = """rc=0 — les 11 fichiers de test du diff sont tous en A (test_fin_de_ligne, test_label, test_label_contrat, test_marqueur_structure, test_motif, test_motif_contrat, test_pose_structure, test_prefix, test_section_values, test_squelette, list-dir/test_structure) : aucun test antérieur au Chantier touché"""
+
+[[verification]]
+origine = "C7"
+commande = "diff <(uvx ruff check . --output-format concise | grep -v '^Found' | sort) <(cd $TMP && uvx ruff check . --output-format concise | grep -v '^Found' | sort)   # $TMP = git archive master extrait"
+statut = "passée"
+sortie = """rc=0, aucune différence. Sur la branche, `uvx ruff check .` seul sort en 1 avec 2 erreurs, identiques sur la Base :
+skills/list-dir/scripts/tests/test_fusion.py:268:101: E501 Line too long (102 > 100)
+skills/list-dir/scripts/tests/test_fusion.py:295:101: E501 Line too long (112 > 100)
+Found 2 errors."""
+
+[[verification]]
+origine = "C7"
+commande = "uvx ruff format --check ."
+statut = "passée"
+sortie = "139 files already formatted (rc=0)"
+
+[[verification]]
+origine = "C7"
+commande = "uvx --with pytest basedpyright --outputjson $(git ls-files '*.py'), sur la branche et sur $TMP (master extrait, .venv lié), erreurs comptées par fichier"
+statut = "passée"
+sortie = """branche : 138 fichiers, 88 erreurs ; Base : 125 fichiers, 88 erreurs. Aucun fichier n'a plus d'erreurs que sur la Base, et aucun fichier du Chantier (skills/gabarit/scripts/, listdir/store.py, list-dir/tests/test_structure.py) n'en porte. basedpyright seul sort en 1 des deux côtés, sur les erreurs préexistantes (shadow-skill/tests, test_sante_skills.py, list-dir/test_prefill.py…). Sans le lien .venv, la Base compte 570 erreurs d'import tomlkit : la comparaison l'exige."""
+
+[[verification]]
+origine = "C1"
+commande = "gabarit new --from demo/sem f.md ; gabarit check ok.md --from demo/sem --filled ; gabarit check ko.md --from demo/sem   # Semence de démonstration du scratchpad : motif « [{etat: enum}] {n: int}. {intitule} — vérif: {verif} », n min 1 max 5 sequence"
+statut = "passée"
+sortie = """ok.md (puce sur deux lignes, « ; » et « ;; » intérieurs, [ ] valant \" \") : rempli et conforme, rc=0
+ko.md, rc=1 :
+section « Étapes » — texte hors puce : « texte hors puce » — une section à motif ne porte que des puces
+section « Étapes », puce 4 — « ;; » manquant avant la puce suivante — une puce se clôt avant qu'une autre s'ouvre, et ne s'imbrique pas
+section « Étapes », puce 6 — « ;; » final manquant
+section « Étapes », puce 1, capture « n » — 2 rompt la séquence — 1 attendu à cette puce
+section « Étapes », puce 2, capture « etat » — « ? » hors des valeurs déclarées : x, >, !, \" \"
+section « Étapes », puce 3, capture « n » — 9 dépasse le maximum 5"""
+
+[[verification]]
+origine = "C2"
+commande = "gabarit check ko.md --from demo/sem ; gabarit check abs.md --from demo/sem   # labels bold « État » (order 1, 2) et title « Plan » → « Détail » (title, rang 4) → motif"
+statut = "passée"
+sortie = """ko.md, rc=1 :
+section « État », label « Prochaine action » — non séparé de ce qui précède par une ligne vide
+section « État », label « Prochaine action » — « order » 1 placé après « Vérification » (2)
+section « Plan » — prose avant le premier label : « prose sans prefix » — sans « prefix », la section ne porte que des labels
+section « Plan », label « Approche » — « order » 1 placé après « Détail » (2)
+section « État », label « Inconnu » — étiquette non déclarée au contrat   (après le décompte, sur le canal des notes)
+abs.md, rc=1 : section « État », label « Prochaine action » — manquant"""
+
+[[verification]]
+origine = "C3"
+commande = "gabarit new --from <semence> … sur huit Contrats fautifs du scratchpad"
+statut = "passée"
+sortie = """enum sans values → rc=1 : contract.toml: section « S », capture « e » — un enum sans `values` n'admet rien
+type float → rc=1 : section « S », « motif » — capture « e », type « float » inconnu ; attendus : slug, text, date, enum, int
+type bool → rc=1 : idem, « bool » inconnu (amendement de C3)
+title sous bold → rc=1 : section « S », label « A » — un label « bold » ne porte pas de labels
+deux formes → rc=1 : section « S », label « A » — « forme » réservé à une section de `type = \"label\"`
+rang 6 → rc=0 ; rang 7 → rc=1 : section « S », label « L3 », label « L4 », label « L5 », label « L6 » — des labels « title » y seraient de rang 7, au-delà de 6
+captures.b hors motif → rc=1 : section « S », capture « b » — déclarée mais absente du motif"""
+
+[[verification]]
+origine = "C4"
+commande = "gabarit new --from demo/sem f.md ; gabarit check f.md --from demo/sem ; gabarit check f.md --from demo/sem --filled"
+statut = "passée"
+sortie = """f.md posé : section « Étapes » au Marqueur requis de motif, « À REMPLIR motif: - [{etat: enum}] {n: int}. {intitule} — vérif: {verif};; » entre chevrons ; squelette « **Prochaine action** : » au Marqueur requis, « **Vérification** : » au facultatif ; « #### Niveau4 » au Marqueur de motif « À REMPLIR motif: - {intitule};; »
+check → conforme, rc=0
+check --filled → rc=1, 3 manquements : section « Étapes » — à remplir ; section « État », label « Prochaine action » — à remplir ; section « Plan », label « Approche » — à remplir (« Détail », facultatif, laissé au squelette, n'est pas réclamé)"""
+
+[[verification]]
+origine = "C5"
+commande = "python -c '…section_values(contrat, read_item(ok.md|ko.md), titre)…' depuis skills/gabarit/scripts"
+statut = "passée"
+sortie = """ok.md Étapes OK [{'etat': 'x', 'n': 1, 'intitule': 'Déclarer le motif', 'verif': '`pytest; echo $?`'}, {'etat': ' ', 'n': 2, 'intitule': \"Une étape dont l'intitulé court sur deux lignes\", 'verif': None}, {'etat': '>', 'n': 3, 'intitule': 'Trois ;; intérieur suite', 'verif': 'a'}]
+ok.md État OK {'Prochaine action': 'Étape 3.', 'Vérification': '`pytest`'}
+ok.md Plan OK {'Approche': 'par étapes', 'Détail': {'Niveau4': [{'intitule': 'un'}]}}
+ko.md Étapes / État / Plan → ECHEC, chaque faute de check nommée"""
+
+[[verification]]
+origine = "C6"
+commande = "list-dir validate liste ; list-dir validate liste --filled ; list-dir merge liste   # Contrat de test_structure.py, Éléments du scratchpad"
+statut = "passée"
+sortie = """un.md fautif → rc=1 : un.md: section « Étapes », puce 2, capture « etat » — « ? » hors des valeurs déclarées : x, \" \" ; puce 2, capture « n » — 3 rompt la séquence — 2 attendu à cette puce
+un.md retiré → validate --filled : 1 élément(s) remplis et conformes, rc=0
+merge : « ### Annexe », laissée au squelette, omise de l'aggloméré"""
+
+[[conformite.critere]]
+id = "C1"
+critere = "Sur une section `type = \"motif\"`, `gabarit check` passe un fichier conforme et nomme section, puce et capture pour chaque faute : `fin` manquante, texte hors puce, puce imbriquée, valeur hors `values`, `int` hors min-max, `sequence` rompue ou mal partie. Une puce multiligne ou un « ; » intérieur ne fautent pas."
+etat = "atteint"
+constat = "Vérification C1 : un fichier conforme passe `check --filled` (puce sur deux lignes, « ; » et « ;; » intérieurs, `[ ]` lu `\" \"`), et un fichier fautif voit nommés section, puce et capture pour le texte hors puce, la `fin` manquante avant la suivante (la puce imbriquée y est couverte, puis « ne suit pas le motif » pour son contenu), le « ;; » final manquant, la valeur hors `values`, l'`int` au-delà de `max` et la `sequence` mal partie puis rompue. Étapes 4 et 15 (test_motif.py, test_fin_de_ligne.py), vertes. L'élargissement `fin = \"\\n\"` du Suivi y lève seulement la faute « `fin` manquante »."
+
+[[conformite.critere]]
+id = "C2"
+critere = "Sur une section `type = \"label\"`, en `bold` comme en `title` (rangs 3 à 6, imbrication, motif dans un label), `check` nomme : label `required` absent, `order` violé, prose avant le premier sans `prefix`, labels non séparés d'une ligne vide, étiquette non déclarée (en note)."
+etat = "atteint"
+constat = "Vérification C2 : `check` nomme, en `bold` (« État ») comme en `title` (« Plan »), le label requis manquant, l'`order` violé, la prose avant le premier label sans `prefix` et le label collé, et range l'étiquette non déclarée parmi les notes, après le décompte. L'imbrication `title` → `title` (rang 4) → motif se pose et se lit. Le rang 6 est admis au chargement, le 7 refusé (C3). Étapes 2 et 5 (test_label.py, 22 tests), vertes."
+
+[[conformite.critere]]
+id = "C3"
+critere = "Le chargement refuse, en nommant le chemin, un Contrat dont une capture n'a pas de `captures.x` ou de `description`, une `enum` sans `values`, un type de capture inconnu, un `title` dans un `bold`, deux formes à un niveau, un rang au-delà de 6."
+etat = "atteint"
+constat = "Jugé sur C3 tel que le Suivi l'amende (2026-10-16, `## Objectif et périmètre` l. 58-60) : `captures.x` et `description` y deviennent facultatives et les captures se limitent à cinq types. Vérification C3 : chaque refus est rejoué et nomme le chemin — `enum` sans `values`, type inconnu (`float`) ou retiré (`bool`), labels sous un `bold`, `forme` portée par un label qui n'est pas `label` (« deux formes à un niveau », Plan Q2), rang 7. Le rang 6 passe. Étapes 1, 2 et 13, vertes."
+
+[[conformite.critere]]
+id = "C4"
+critere = "`gabarit new` pose une section structurée au Marqueur portant son type et son motif ; `gabarit check --filled` la signale à remplir."
+etat = "atteint"
+constat = "Vérification C4 : `new` pose « <À REMPLIR motif: - … {verif};;> » pour la section à motif, et le squelette des labels avec le Marqueur de motif d'un label emboîté. `check` passe le fichier posé. `check --filled` dit « à remplir » de la section à motif et des labels requis des tables requises, et laisse le label facultatif « Détail », resté au squelette (R2). Étapes 3, 6, 12 et 14, vertes."
+
+[[conformite.critere]]
+id = "C5"
+critere = "Une fonction publique de gabarit rend les captures typées de chaque puce d'une section, ou les blocs d'une section `label`, testée."
+etat = "atteint"
+constat = "`gabarit.structure.section_values` (structure.py), vérification C5 : il rend une liste de dicts typés par puce (`n` en `int`, `verif` vide en `None`), un dict de labels emboîtés avec la liste d'un label à motif, et un échec nommé sur un fichier fautif. test_section_values.py (7 tests) est vert."
+
+[[conformite.critere]]
+id = "C6"
+critere = "`list-dir validate` signale une faute de structure dans un Élément."
+etat = "atteint"
+constat = "Vérification C6 : `list-dir validate` nomme section, puce et capture d'un Élément fautif (rc=1) et passe l'Élément conforme (rc=0). `merge` omet la section restée au squelette. test_structure.py (7 tests), vert. Le défaut de `merge` relevé en R6 tient à une autre règle, pas à la validation."
+
+[[conformite.critere]]
+id = "C7"
+critere = "Les Contrats sans `type` se comportent comme avant : `~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/ skills/list-dir/scripts/tests/ scripts/tests/` vert, tests existants inchangés ; `uvx ruff check .`, `uvx ruff format --check .` et `uvx --with pytest basedpyright` sans erreur ajoutée."
+etat = "atteint"
+constat = "Vérifications C7 : la suite nommée donne 1015 tests passés contre 830 sur `master` extrait. Les 11 fichiers de test du diff sont tous neufs (A). `ruff check` montre les 2 mêmes erreurs de part et d'autre (test_fusion.py, préexistantes). `ruff format --check` est propre. basedpyright compte 88 erreurs sur la branche comme sur la Base, aucun fichier n'en gagne, aucun fichier du Chantier n'en porte. `ruff check` et basedpyright sortent en 1 des deux côtés, sur l'existant : le critère dit « sans erreur ajoutée », il se juge donc à la comparaison."
+
+[[conformite.hors_perimetre]]
+exclusion = "L'adoption par les Semences `brief` et `suivi` : un Chantier à part, qui pourra toucher d'autres fichiers."
+etat = "respecté"
+constat = "`git diff master...33fe07e --stat -- skills/gabarit/gabarit/` est vide : aucune Semence livrée n'est touchée. `gabarit check` passe toujours le Brief (`--filled`) et le Suivi."
+
+[[conformite.hors_perimetre]]
+exclusion = "Le passage de `rapport_audit` (`pose.py`, `dettes.py`) au parseur commun : même Chantier à part."
+etat = "respecté"
+constat = "`git diff master...33fe07e --stat -- skills/implementation-tracker/scripts/rapport_audit/` est vide."
+
+[[conformite.hors_perimetre]]
+exclusion = "Les puces imbriquées dans une section à motif."
+etat = "respecté"
+constat = "Une puce en retrait reste une faute : « ;; » manquant avant la puce suivante, ou puce imbriquée sous `fin = \"\\n\"` (vérification C1, test_fin_de_ligne.py). Rien ne les admet."
+
+[[conformite.hors_perimetre]]
+exclusion = "La prose mêlée aux puces d'une section à motif."
+etat = "respecté"
+constat = "Le texte hors puce reste une faute : « texte hors puce … une section à motif ne porte que des puces » (vérification C1). `prefix` n'existe que sur une table de labels (format.md, Une section à labels)."
+
+[[conformite.signal]]
+id = "S1"
+signal = "Le diff touche les Semences `brief` ou `suivi`, ou `rapport_audit/` : c'est l'intégration, Chantier suivant."
+etat = "absent"
+constat = "Le diff ne touche ni `skills/gabarit/gabarit/` ni `rapport_audit/` (stat vide) ; il ne touche que les scripts et la prose de gabarit et de list-dir, et le Chantier lui-même."
+
+[[conformite.signal]]
+id = "S2"
+signal = "Une capture vérifiée hors `check_value`, ou un motif accepté en regex : une seconde définition d'un type, ou une seconde syntaxe."
+etat = "absent"
+constat = "Chaque capture passe par `check_value` (structure.py:243). `ENTIER` (types.py:210) ne sert qu'à convertir avant ce jugement : un `int` mal écrit part en chaîne, et `check_value` le refuse (structure.py:200-213, Plan Q3). `min`, `max` et `sequence` sont des contraintes en plus, pas une seconde définition du type. Le motif se compile depuis le gabarit de ligne (motif.py:143), et aucune clé n'accepte une regex écrite."
+
+[[conformite.signal]]
+id = "S3"
+signal = "L'espace admise dans les `values` d'un champ, au-delà des captures."
+etat = "absent"
+constat = "Rejoué : un champ `enum` aux `values = [\"x\", \" \"]` est toujours refusé (« une valeur ne peut être vide ni contenir d'espace »). `parse_field` n'est pas touchée : seule `parse_capture` admet l'espace."
+
+[[conformite.signal]]
+id = "S4"
+signal = "Un test existant modifié pour passer."
+etat = "absent"
+constat = "Aucun fichier de test antérieur au Chantier n'est modifié : tous les fichiers de test sont en A (vérification C7). E12, E13 et E16 modifient des tests du Chantier lui-même (test_pose_structure.py, test_prefix.py, test_motif_contrat.py) pour suivre des décisions inscrites au Journal. S4 vise les tests existants, ces tests-là n'en sont pas."
+
+[[conformite.signal]]
+id = "S5"
+signal = "Le diff touche `~/.config/nvim/`, ou introduit `table`, `object` ou Pydantic."
+etat = "absent"
+constat = "`git -C ~/.config/nvim status --short` est vide, comme au début du Chantier. Dans le diff, `grep -nE '^\\+.*(pydantic|Pydantic|\"table\"|\"object\")'` ne trouve que la prose du Brief, du Suivi et du Plan qui énonce S5 elle-même. Aucun code ne les introduit."
+
+[conformite.symptome]
+symptome = "le format de certaines sections (`Étapes`, `Dettes écartées`, critères du Brief, `État courant`, `Objectif et périmètre`, `Passation`) n'est déclaré qu'en prose, dans la `description` du Contrat, et parsé par des regex écrites hors de gabarit. Le format existe deux fois, et `gabarit check` ne voit pas une ligne mal formée : l'erreur n'apparaît qu'à `audit pose`, ou jamais quand la ligne est ignorée."
+etat = "persiste"
+dette = "R1"
+constat = "Comme à l'audit 01 : le mécanisme est livré (C1 à C6 atteints), mais aucune Semence livrée ne déclare de `type`. Les sections nommées par le symptôme restent en prose, et une ligne d'Étape mal formée du Suivi passe toujours `gabarit check`. Le Hors-périmètre renvoie cette adoption au Chantier suivant, c'est donc voulu. La bonne solution est bâtie, pour le bon problème : le motif de test (`[{etat: enum}] {n: int}. …`) est celui des Étapes."
+
+[[dette.precedente]]
+id = "R1"
+nature = "alignement"
+emplacement = "Brief, symptôme ; skills/gabarit/gabarit/brief/contract.toml, skills/gabarit/gabarit/suivi/contract.toml"
+constat = "Le symptôme d'origine persiste sur les sections qu'il nomme (`Étapes`, `Dettes écartées`, critères du Brief, `État courant`, `Objectif et périmètre`, `Passation`). Aucune Semence livrée ne déclare de `type`, et une ligne d'Étape mal formée passe encore `gabarit check`. C'est voulu : le Hors-périmètre renvoie l'adoption au Chantier suivant. Ce Chantier ne livre que le mécanisme."
+trouvee = "01-bdf5e5b"
+solution = "Solder au Chantier d'intégration : déclarer `type = \"motif\"` ou `\"label\"` sur ces sections des Semences `brief` et `suivi`, puis vérifier qu'une ligne d'Étape mal formée fait échouer `gabarit check`."
+severite = "note"
+
+[[dette.precedente]]
+id = "R2"
+nature = "qualité"
+emplacement = "skills/gabarit/scripts/gabarit/prefill.py:202-236, skills/gabarit/scripts/gabarit/structure.py:362-378, skills/list-dir/scripts/listdir/store.py:797-803"
+constat = "Un squelette de labels resté tel que `new` l'a posé n'est jamais reconnu comme laissé au Marqueur. D'où deux effets. (1) Une section ou un label `type = \"label\"` FACULTATIF qui porte un label requis rend `check --filled` en échec sur un fichier qu'on vient de poser. Rejoué : Semence `Annexe` facultative, son label `Source` requis ; `new`, la seule section requise remplie, puis `check --filled` → « section « Annexe », label « Source » — à remplir », code 1. On ne s'en sort qu'en supprimant la section. Cela contredit la règle « les facultatifs ne sont jamais réclamés » (format.md, Les deux verdicts), que le Journal applique déjà au `prefix` (2026-10-16 : une table facultative ne réclame rien). (2) `merge` n'omet que le corps entier au Marqueur. Un squelette dont les labels sont restés à `<OPTIONNEL>` passe donc tel quel dans l'aggloméré, alors que la règle de list-dir veut l'omettre. Aucun test ne couvre ces deux cas."
+trouvee = "01-bdf5e5b"
+solution = "Ne pas juger la structure d'une table facultative tant que tous ses labels sont restés au Marqueur, comme pour le `prefix` ; dans `merge`, omettre de même un squelette resté entier au Marqueur. Ajouter les deux tests ; corriger le tableau de « Les marqueurs » de format.md, qui dit aujourd'hui « chaque label requis resté au marqueur » sans condition."
+severite = "avertissement"
+
+[[dette.precedente]]
+id = "R3"
+nature = "dette induite"
+emplacement = "skills/list-dir/scripts/listdir/store.py:809"
+constat = "`merge` rend chaque section sous `### <titre>`. Les labels `title` d'une section, écrits en `###`, y deviennent des titres de même rang que leur section, et la hiérarchie de l'aggloméré se perd sans rien signaler. Le Plan l'a reconnu comme « Limite admise », « proposé en dette à la Clôture ». Rien ne l'a encore porté au Registre, et la prose de list-dir n'en dit rien. Le coût vient avec la première List-dir dont un Contrat déclare une section `forme = \"title\"`."
+trouvee = "01-bdf5e5b"
+solution = "Porter au Registre de dette, ou décaler dans `merge` les titres d'une section `title` d'un rang (hors blocs de code, comme le recomptage), avec un test. Au minimum, nommer la limite dans skills/list-dir/references/format.md."
+severite = "avertissement"
+
+[[dette.precedente]]
+id = "R4"
+nature = "dette induite"
+emplacement = "skills/gabarit/scripts/gabarit/structure.py:36, :41 ; skills/gabarit/scripts/gabarit/prefill.py:38 ; skills/gabarit/scripts/gabarit/contract.py:322"
+constat = "Deux constantes ont plus d'une définition. L'entier lexical existait en `prefill.ENTIER`, avec sa docstring qui justifie `[0-9]` contre `\\d` ; `structure._ENTIER` le recopie sans elle. Le rang des labels d'une section s'écrit `RANG_SECTION + 1` dans structure.py et prefill.py, mais `rang=3` en dur dans contract.py. La cause est l'ordre des imports : prefill importe structure, et structure importe contract. Un changement de l'une de ces règles devra se faire en deux ou trois endroits, sans que rien ne le rappelle."
+trouvee = "01-bdf5e5b"
+solution = "Ranger `ENTIER` et `RANG_SECTION` dans `types.py`, à côté de `RANG_MAX`, et les importer dans prefill.py, structure.py et contract.py."
+severite = "note"
+
+[[dette.precedente]]
+id = "R5"
+nature = "style"
+emplacement = ".claude/implementation/gabarit-sections-structurees.md:41-43, `## Objectif et périmètre`"
+constat = "La section `## Objectif et périmètre` du Suivi a reçu l'élargissement `fin = \"\\n\"`. En revanche, elle garde le texte de C3 tel que le Brief l'a figé (« une capture n'a pas de `captures.x` ou de `description` »), alors que le Journal (2026-10-16) rend ces deux exigences facultatives et réduit les captures à cinq types. Qui lit l'objectif sans le Journal juge sur une exigence abandonnée."
+trouvee = "01-bdf5e5b"
+solution = "Ajouter à `## Objectif et périmètre` une ligne datée qui amende C3, comme celle de l'élargissement du 2026-10-17."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R1"
+nature = "alignement"
+emplacement = "Brief, symptôme ; skills/gabarit/gabarit/brief/contract.toml, skills/gabarit/gabarit/suivi/contract.toml"
+constat = "Le symptôme d'origine persiste sur les sections qu'il nomme (`Étapes`, `Dettes écartées`, critères du Brief, `État courant`, `Objectif et périmètre`, `Passation`). Aucune Semence livrée ne déclare de `type`, et une ligne d'Étape mal formée passe encore `gabarit check`. C'est voulu : le Hors-périmètre renvoie l'adoption au Chantier suivant. Ce Chantier ne livre que le mécanisme."
+trouvee = "01-bdf5e5b"
+solution = "Solder au Chantier d'intégration : déclarer `type = \"motif\"` ou `\"label\"` sur ces sections des Semences `brief` et `suivi`, puis vérifier qu'une ligne d'Étape mal formée fait échouer `gabarit check`."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R3"
+nature = "dette induite"
+emplacement = "skills/list-dir/scripts/listdir/store.py:809"
+constat = "`merge` rend chaque section sous `### <titre>`. Les labels `title` d'une section, écrits en `###`, y deviennent des titres de même rang que leur section, et la hiérarchie de l'aggloméré se perd sans rien signaler. Le Plan l'a reconnu comme « Limite admise », « proposé en dette à la Clôture ». Rien ne l'a encore porté au Registre, et la prose de list-dir n'en dit rien. Le coût vient avec la première List-dir dont un Contrat déclare une section `forme = \"title\"`."
+trouvee = "01-bdf5e5b"
+solution = "Porter au Registre de dette, ou décaler dans `merge` les titres d'une section `title` d'un rang (hors blocs de code, comme le recomptage), avec un test. Au minimum, nommer la limite dans skills/list-dir/references/format.md."
+severite = "avertissement"
+
+[[dette.actuelle]]
+id = "R6"
+nature = "qualité"
+emplacement = "skills/gabarit/scripts/gabarit/structure.py:317-334 (`_squelette_au_marqueur`, le `continue` de la ligne 330-331) ; skills/list-dir/scripts/listdir/store.py:799"
+constat = "Un label prérempli par `text` ou `command` est sauté sans que son corps soit lu. Le correctif de R2 tient donc pour intacte une table facultative dont la seule chose écrite est la valeur réécrite d'un label prérempli. Deux effets silencieux en découlent. `merge` omet la section entière, et la valeur écrite disparaît de l'aggloméré sans rien signaler. `--filled` ne réclame pas non plus les labels requis de cette table. Rejoué sur une List-dir : table `Annexe` facultative, labels `Source` requis, `Note`, et `Outil` (`text = \"pytest\"`). Dans un Élément, `Outil` est réécrit « nox, choisi après comparaison » et les autres labels restent au Marqueur. `list-dir validate --filled` → conforme, code 0 ; `list-dir merge` → l'aggloméré ne contient ni `### Annexe` ni « nox ». La règle est voulue (Journal, 2026-10-17 ; format.md:300-301) : elle écarte la comparaison au squelette parce qu'une `command` varie. Un `text`, lui, est littéral et se compare sans risque, et c'est le cas que la règle laisse perdre. Le cas est rare : il faut une table facultative dont on ne touche qu'un label prérempli. Mais la perte ne se voit pas."
+trouvee = "02-33fe07e"
+solution = "Compter comme entamé un label `text` dont le corps rogné diffère de son `text` : la comparaison est sûre, puisque le `text` est littéral. Garder le saut pour une `command` seule, et nommer cette limite dans format.md, « Une table facultative laissée au squelette ». Ajouter à test_squelette.py et à test_structure.py le cas d'un `text` réécrit, ni omis par `merge` ni épargné par `--filled`."
+severite = "avertissement"
+
+[[dette.corrigee]]
+id = "R2"
+nature = "qualité"
+emplacement = "skills/gabarit/scripts/gabarit/prefill.py:202-236, skills/gabarit/scripts/gabarit/structure.py:362-378, skills/list-dir/scripts/listdir/store.py:797-803"
+constat = "Un squelette de labels resté tel que `new` l'a posé n'est jamais reconnu comme laissé au Marqueur. D'où deux effets. (1) Une section ou un label `type = \"label\"` FACULTATIF qui porte un label requis rend `check --filled` en échec sur un fichier qu'on vient de poser. Rejoué : Semence `Annexe` facultative, son label `Source` requis ; `new`, la seule section requise remplie, puis `check --filled` → « section « Annexe », label « Source » — à remplir », code 1. On ne s'en sort qu'en supprimant la section. Cela contredit la règle « les facultatifs ne sont jamais réclamés » (format.md, Les deux verdicts), que le Journal applique déjà au `prefix` (2026-10-16 : une table facultative ne réclame rien). (2) `merge` n'omet que le corps entier au Marqueur. Un squelette dont les labels sont restés à `<OPTIONNEL>` passe donc tel quel dans l'aggloméré, alors que la règle de list-dir veut l'omettre. Aucun test ne couvre ces deux cas."
+trouvee = "01-bdf5e5b"
+solution = "Ne pas juger la structure d'une table facultative tant que tous ses labels sont restés au Marqueur, comme pour le `prefix` ; dans `merge`, omettre de même un squelette resté entier au Marqueur. Ajouter les deux tests ; corriger le tableau de « Les marqueurs » de format.md, qui dit aujourd'hui « chaque label requis resté au marqueur » sans condition."
+severite = "avertissement"
+corrigee = "02-33fe07e"
+preuve = "gabarit new puis check --filled sur une Semence dont la table « Détail », facultative, porte un label requis : seuls les trois requis remplis sont réclamés, « Détail » ne l'est pas ; list-dir merge d'un Élément dont « Annexe » est restée au squelette l'omet (« ### Annexe » absent) ; tests skills/gabarit/scripts/tests/test_squelette.py et skills/list-dir/scripts/tests/test_structure.py:134-147, verts ; format.md:379-382 corrigé"
+
+[[dette.corrigee]]
+id = "R4"
+nature = "dette induite"
+emplacement = "skills/gabarit/scripts/gabarit/structure.py:36, :41 ; skills/gabarit/scripts/gabarit/prefill.py:38 ; skills/gabarit/scripts/gabarit/contract.py:322"
+constat = "Deux constantes ont plus d'une définition. L'entier lexical existait en `prefill.ENTIER`, avec sa docstring qui justifie `[0-9]` contre `\\d` ; `structure._ENTIER` le recopie sans elle. Le rang des labels d'une section s'écrit `RANG_SECTION + 1` dans structure.py et prefill.py, mais `rang=3` en dur dans contract.py. La cause est l'ordre des imports : prefill importe structure, et structure importe contract. Un changement de l'une de ces règles devra se faire en deux ou trois endroits, sans que rien ne le rappelle."
+trouvee = "01-bdf5e5b"
+solution = "Ranger `ENTIER` et `RANG_SECTION` dans `types.py`, à côté de `RANG_MAX`, et les importer dans prefill.py, structure.py et contract.py."
+severite = "note"
+corrigee = "02-33fe07e"
+preuve = "grep -n 'RANG_SECTION =\\|ENTIER =' skills/gabarit/scripts/gabarit/*.py → une seule définition chacune, types.py:204 et types.py:210 (docstring [0-9] gardée) ; contract.py:323 écrit RANG_SECTION + 1, plus aucun rang=3"
+
+[[dette.corrigee]]
+id = "R5"
+nature = "style"
+emplacement = ".claude/implementation/gabarit-sections-structurees.md:41-43, `## Objectif et périmètre`"
+constat = "La section `## Objectif et périmètre` du Suivi a reçu l'élargissement `fin = \"\\n\"`. En revanche, elle garde le texte de C3 tel que le Brief l'a figé (« une capture n'a pas de `captures.x` ou de `description` »), alors que le Journal (2026-10-16) rend ces deux exigences facultatives et réduit les captures à cinq types. Qui lit l'objectif sans le Journal juge sur une exigence abandonnée."
+trouvee = "01-bdf5e5b"
+solution = "Ajouter à `## Objectif et périmètre` une ligne datée qui amende C3, comme celle de l'élargissement du 2026-10-17."
+severite = "note"
+corrigee = "02-33fe07e"
+preuve = ".claude/implementation/gabarit-sections-structurees.md:58-60, « Amendement de C3, 2026-10-16 » en ## Objectif et périmètre"
+
+[verdict]
+valeur = "FAVORABLE"
+justification = "La Dette actuelle ne porte ni bloquant, ni critique, ni majeur : deux avertissements et une note. Les sept critères sont atteints et rejoués à la main ; le Hors-périmètre est respecté et aucun Signal ne s'est matérialisé. C7 est tenu contre `master` extrait : 1015 tests contre 830, aucun test antérieur touché, aucune erreur ruff ni basedpyright ajoutée. L'audit 01 avait émis des réserves sur R2, R4 et R5 ; E16 les a corrigées, preuves rejouées. Les deux avertissements restants ne demandent pas de réserve. R3 est une limite admise dès le Plan, que le Journal (2026-10-17) destine au Registre. R6 perd en silence une valeur écrite, mais seulement dans un cas rare : une table facultative dont seul un label prérempli a été réécrit. Aucune Semence livrée ne le présente encore, puisque l'adoption est au Chantier suivant. R1 note que le symptôme persiste, comme le veut le Hors-périmètre. Les trois dettes vont au Registre à la Clôture ; R6 se solde de préférence avant que le Chantier d'intégration ne déclare des labels `text` dans les Semences."

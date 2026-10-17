@@ -80,8 +80,10 @@ refs = ["R4"]
 
 `.list/contract.toml`, dans la liste elle-même. Il déclare ce qu'un élément doit contenir, et a la
 forme de celui d'une semence de gabarit — `name`, `description`, `[fields.*]`, `[sections.*]`, les
-sept types, `text`/`command`, `deprecated`, `description` exigée partout :
-[Le contrat](../../gabarit/references/format.md#le-contrat).
+sept types, `text`/`command`, `deprecated`, `description` exigée :
+[Le contrat](../../gabarit/references/format.md#le-contrat). Une section peut y déclarer un motif ou
+des labels, que `validate` juge dans chaque élément :
+[Les sections structurées](../../gabarit/references/format.md#les-sections-structurées).
 
 Quatre ajouts lui sont propres.
 
@@ -158,5 +160,6 @@ section, même facultatif. Ce qu'on ne voit pas n'est jamais rempli.
 C'est `list-dir contract <liste>` qui sert les descriptions du contrat — un marqueur dit qu'il faut
 écrire, jamais quoi écrire.
 
-**`merge` exige `--filled`** et omet de sa sortie les sections restées à `<OPTIONNEL>` : elles ont
-joué leur rôle de guide et n'ont rien à dire dans un document final.
+**`merge` exige `--filled`** et omet de sa sortie les sections restées à `<OPTIONNEL>`, au marqueur
+facultatif d'un motif, ou au squelette de leurs labels : elles ont joué leur rôle de guide et n'ont
+rien à dire dans un document final.

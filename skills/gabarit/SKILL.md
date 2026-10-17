@@ -42,14 +42,19 @@ marqueur générique sur un champ typé, champ ou section `deprecated` encore po
 
 **Un fichier posé ne dit pas ce qu'il attend.** Avant de le remplir, lire
 `gabarit contract <nom>` : chaque champ et chaque section y porte sa description. Un marqueur dit
-qu'il faut écrire, jamais quoi écrire, et celui d'un champ `int`, `date`, `bool` ou `list` dit son
-type (`<OPTIONNEL date>`) : seuls `slug`, `text` et `enum` gardent leurs guillemets, les autres
+qu'il faut écrire, jamais quoi écrire ; il en dit au plus la forme. Celui d'une section à motif
+porte le motif d'une puce. Celui d'un champ `int`, `date`, `bool` ou `list` dit son type
+(`<OPTIONNEL date>`) : seuls `slug`, `text` et `enum` gardent leurs guillemets, les autres
 s'écrivent sans — [Les marqueurs](references/format.md#les-marqueurs).
 
 **Deux verdicts.** Sans `--filled`, la structure seule : les marqueurs sont légitimes. Avec, plus
 aucun `<À REMPLIR>`, typé ou non, là où le contrat exige quelque chose — les facultatifs restés
 `<OPTIONNEL>` ne sont jamais réclamés. `list-dir validate` rend les mêmes, en les tenant d'ici :
 [Les deux verdicts](references/format.md#les-deux-verdicts).
+
+**Une section peut déclarer sa structure** — des puces qui suivent un motif, ou des blocs
+étiquetés —, et `check` en juge chaque puce ou chaque label ; `section_values` en rend le contenu
+aux consommateurs : [Les sections structurées](references/format.md#les-sections-structurées).
 
 **Rien n'est écrasé ni écrit à moitié** : `new` refuse un fichier existant, et une commande de
 préremplissage qui échoue n'écrit rien.
@@ -65,7 +70,7 @@ Deux références, une par sujet — à lire au moment d'en avoir besoin, pas d'
 
 | Fichier | Ce qu'il porte | Lire quand |
 |---|---|---|
-| [`references/format.md`](references/format.md) | le fichier et son front matter, le contrat, les sept types, `deprecated`, le préremplissage, les marqueurs, les deux verdicts | on écrit une semence, ou on juge un fichier posé |
+| [`references/format.md`](references/format.md) | le fichier et son front matter, le contrat, les sept types, `deprecated`, les sections structurées, le préremplissage, les marqueurs, les deux verdicts | on écrit une semence, ou on juge un fichier posé |
 | [`references/semences.md`](references/semences.md) | forme d'une semence, les quatre rangs, l'estampille, l'environnement du préremplissage | on range une semence, ou on cherche pourquoi un nom se résout ailleurs |
 
 ## Les semences livrées
@@ -95,10 +100,12 @@ new(Path("mon-suivi.md"), semence).unwrap()
 
 | Module | Ce qu'il porte |
 |---|---|
-| `types` | `Result`, marqueurs, `Field`, `Section`, `Contract`, `Item`, `Violation` |
+| `types` | `Result`, marqueurs, `Field`, `Capture`, `Section`, `Contract`, `Item`, `Violation` |
 | `items` | lecture et écriture d'un fichier : front matter reprojeté, sections, fences |
 | `contract` | lecture et jugement d'un contrat, `check_value` |
 | `check` | un fichier confronté à un contrat |
+| `motif` | le motif d'une section, découpé en littéraux et captures |
+| `structure` | une section à motif ou à labels jugée, `section_values` |
 | `prefill` | `text`/`command`, à environnement fourni par l'appelant |
 | `definitions` | les quatre racines, paramétrées par le nom de répertoire |
 | `commandes` | `new`, `check`, `contract`, `defs`, l'estampille |
