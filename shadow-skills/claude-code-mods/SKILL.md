@@ -67,6 +67,9 @@ travaille sur un mod, dans la session même.
   (2.1.296 : `type root of <mod> at … wrote …`). À défaut, le skill `plugin-authoring`, chargé,
   donne le chemin de `types/claude-code.d.ts`, que le `tsconfig.json` temporaire nomme dans son
   `include` (2.1.296, recette dans `pipeline-v2/README.md`).
+- **Biome hors de ce dépôt** : `--config-path` sur le `biome.json` de ce dépôt, depuis un autre
+  dépôt, plante (« path is expected to be under the root », par son bloc `vcs`) ; une copie
+  sans `vcs` ni `files`, posée dans le scratchpad, formate (Biome 2.6.2).
 - **`tsc`**, absent du `PATH`, passe par `npx`. Aucun `tsconfig.json` n'est versionné : ils
   étendent des types que le moteur pose et que git ignore. Un `tsconfig.json` temporaire, hors du
   mod, étend celui d'un mod qui a déjà ses types, avec son `typeRoots` en chemin absolu, et nomme
@@ -121,9 +124,26 @@ travaille sur un mod, dans la session même.
   `[object Object]`). Établi au banc : sans fond pour `env.get`, le sous-agent passe intact et la
   ligne d'état dit « no implementation for env.get », seulement avec le `.catch`. Un fond du test
   qui lève est lui-même sauté, avec le même effet (2.1.291, mod lexique).
+- `claude plugin validate` tient aussi `classic.SubagentStop` pour une garde (« gating hook with
+  .catch: classic.SubagentStop ») (2.1.306).
 - `claude plugin validate` tient un hook `agent.spawn` pour une garde, et avertit sans échouer
   quand il n'attache pas de `.catch` (« gating hook without .catch: agent.spawn »), même s'il
   attrape ses erreurs lui-même ; un `.catch` attaché lève l'avertissement (2.1.291).
+- **Le cycle de vie d'un sous-agent** (2.1.304, sonde jetable `sonde-verrou`, `claude -p`) :
+  - `agent.spawn` refuse un lancement en rendant `{ deny: '<raison>' }` avant `next` : l'outil
+    Agent échoue, et le modèle lit la raison (« un plugin a refusé la création du sous-agent avec
+    le message … »). Le `.catch` conseillé : `next.called ? next(e) : { deny: … }`.
+  - `next(e)` rend `{ model, agentId }` dès le démarrage, en avant-plan comme en arrière-plan ;
+    `classic.SubagentStart` arrive entre les deux, avec le même `agent_id`.
+  - `classic.SubagentStop` arrive à la fin normale d'un sous-agent, en avant-plan comme en
+    arrière-plan, avec le même `agent_id` que l'`agentId` de `agent.spawn` ; le `turn.complete`
+    du sous-agent suit, portant son `agentId`.
+  - **Un sous-agent arrêté par TaskStop ne déclenche pas `classic.SubagentStop`** ; `$.agent.list()`
+    le rend `killed` dès le `turn.complete` suivant, le sien comme celui de la boucle principale.
+  - **Un processus Claude Code tué ne déclenche rien** : ni `SubagentStop`, ni `session.end`.
+  - Le parent d'un processus lancé par `$.process.run` est le processus Claude Code lui-même
+    (`$PPID`, dont `/proc/<pid>/cmdline` porte la ligne `claude …`) : un mod peut en noter le PID
+    pour qu'un tiers constate sa mort.
 
 ### Limites constatées
 
@@ -153,6 +173,8 @@ travaille sur un mod, dans la session même.
   d'`agentId` à nommer, la boucle du sous-agent n'existe pas (« no running loop »). Appelé **après**
   `next(e)`, avec l'`agentId` rendu, il est accepté, en avant-plan comme en arrière-plan : la ligne
   arrive dans la conversation du sous-agent avant sa première requête.
+- **`$.agent.list()` à `session.end` sous `claude -p`** lève « not available in this mode: no session
+  is bound in this process », et le hook est sauté (2.1.304).
 - **Verser du contexte à un sous-agent** : deux voies, le `prompt` réécrit avant `next` (celle du
   mod `lexique`) ou `$.session.append` après `next`. Ni l'une ni l'autre n'est essayée
   sur un sous-agent `fork`, refusé dans cette configuration.
@@ -238,6 +260,12 @@ a vu.
 - `prompt.compose` se teste à plein : fond `on('prompt.compose', () => ({ sections: [...] }))`,
   appel `$['prompt'].compose(<entrée>)`, assertion sur les sections rendues.
 - Un événement s'appelle par `$['agent'].spawn(...)`, `$['prompt'].compose(...)`.
+- **Le fond d'un appel sur `$` rend `{ value }`, celui d'un événement son propre résultat** :
+  `on('process.run', () => ({ value: { exitCode, stdout, … } }))`, `on('agent.list', () => ({
+  value: [...] }))`, `on('session.root', () => ({ value: '/projet' }))` ; mais
+  `on('turn.complete', () => ({ text: '' }))` — sans `text`, le fond est sauté (« returned no
+  { text } ») et l'appel échoue. `$.classic.SubagentStop({ agent_id, … })` lance l'événement
+  classique, son fond rendant `{}` (2.1.306, mod `verrou` de claude-translator).
 - **Le `$` d'un test ne porte que les événements du moteur** (`tool`, `command`, `config`,
   `prompt`, `skill`, `agent`, `session`, `turn`, `ui`…) : ni `env`, ni `process`, ni les noms
   qu'un plugin ajoute. Un hook du test ne peut rien appeler sur `$` : son appel est refusé
