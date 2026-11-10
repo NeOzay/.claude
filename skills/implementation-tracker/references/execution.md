@@ -10,8 +10,8 @@ Déclencheurs d'écriture :
 | Travail d'une étape commencé | La passer en `[>]` |
 | Étape terminée | Cocher `[x]`, **mesurer le contexte** (voir ci-dessous), puis **proposer le commit d'étape**, qui pose le tag `<L>E<n>`, avec ses choix |
 | Modification après le commit de l'étape N, N+1 non commencée | Retouche : **mesurer le contexte** (voir ci-dessous), puis **proposer le commit de Retouche**, qui pose le tag `<L>E<N>.<k>`, avec ses choix |
-| Blocage | Passer l'étape en `[!]` + raison, `statut = "bloqué"` |
-| Déblocage | Repasser en `[>]`, `statut = "en-cours"` |
+| Blocage | Passer l'étape en `[!]`, sa raison en `**Notes**` de l'État courant, `statut = "bloqué"` |
+| Déblocage | Repasser en `[>]`, retirer la raison des `**Notes**`, `statut = "en-cours"` |
 | Décision d'architecture arrêtée | Ligne dans le journal (voir règle ci-dessous) |
 | Le plan ne colle plus au réel | **Modifier les étapes** et le dire. Ne jamais bricoler en silence |
 | **Signal de dérive du brief déclenché** | **S'arrêter**, le nommer, en reparler avant de continuer |
@@ -21,9 +21,10 @@ Déclencheurs d'écriture :
 
 ## Quand le périmètre change
 
-Un élargissement accepté par l'utilisateur s'écrit dans `## Objectif et périmètre` du **suivi** —
-daté, avec une entrée au journal — et jamais dans le brief. C'est la seule exception au « repris du
-brief, pas reformulé » : [Autorité et divergence](contrat.md#autorité-et-divergence).
+Un élargissement accepté par l'utilisateur s'écrit dans `## Objectif et périmètre` du **suivi**,
+une puce datée sous le label `**Élargissements**`, avec une entrée au journal — et jamais dans le
+brief. C'est la seule exception au « repris du brief, pas reformulé » :
+[Autorité et divergence](contrat.md#autorité-et-divergence).
 
 ## Retouche
 

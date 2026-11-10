@@ -3,7 +3,8 @@
 CE QUE CE FICHIER PROUVE (C6) : `validate` — bibliothèque et ligne de commande — signale
 une puce fautive d'un élément en nommant section, puce et capture, et accepte un élément
 conforme ; `merge` omet une section facultative restée au marqueur de son motif, même
-réenroulé, ou au squelette de ses labels, et garde une section remplie ou entamée.
+réenroulé, ou au squelette de ses labels, et garde une section remplie ou entamée — un
+label `text` réécrit compris.
 """
 
 from __future__ import annotations
@@ -117,11 +118,15 @@ forme = "bold"
 description = "x"
 required = true
 
+[sections."Annexe".labels."Outil"]
+description = "x"
+text = "pytest"
+
 [sections."Annexe".labels."Note"]
 description = "x"
 """
 
-SQUELETTE = "**Source** : <À REMPLIR>\n\n**Note** : <OPTIONNEL>"
+SQUELETTE = "**Source** : <À REMPLIR>\n\n**Outil** : pytest\n\n**Note** : <OPTIONNEL>"
 
 
 def annexe(tmp_path: Path, corps: str) -> ListStore:
@@ -145,3 +150,11 @@ def test_merge_garde_un_squelette_entame(tmp_path: Path) -> None:
     corps = SQUELETTE.replace("<À REMPLIR>", "le rapport")
     document = annexe(tmp_path, corps).merge_text().unwrap()
     assert "### Annexe\n\n**Source** : le rapport" in document
+
+
+def test_un_text_reecrit_entame_la_table(tmp_path: Path) -> None:
+    """Seul `Outil` réécrit : la table entamée réclame `Source`, et `merge` refuse
+    l'élément au lieu d'omettre la section, et la valeur écrite avec elle."""
+    store = annexe(tmp_path, SQUELETTE.replace("pytest", "nox"))
+    assert raisons(store, filled=True) == ["section « Annexe », label « Source » — à remplir"]
+    assert not store.merge_text()

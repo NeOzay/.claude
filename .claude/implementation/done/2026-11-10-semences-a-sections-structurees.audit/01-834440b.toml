@@ -1,0 +1,326 @@
+# Posé par `audit new`. L'auditeur remplit chaque <À REMPLIR>, range chaque dette précédente
+# par `audit range`, ajoute les siennes par `audit dette`, et écrit le verdict en dernier.
+slug = "semences-a-sections-structurees"
+audit = "01-834440b"
+rang = 1
+type = "clôture"
+date = 2026-11-10
+base = "master"
+commit = "834440b"
+brief = ".claude/implementation/semences-a-sections-structurees.brief.md"
+suivi = ".claude/implementation/semences-a-sections-structurees.md"
+plan = ".claude/plans/delightful-riding-tome.md"
+
+[[verification]]
+origine = "Étape 1"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_squelette.py skills/list-dir/scripts/tests/test_structure.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 17 items
+
+skills/gabarit/scripts/tests/test_squelette.py .........                 [ 52%]
+skills/list-dir/scripts/tests/test_structure.py ........                 [100%]
+
+============================== 17 passed in 0.40s =============================="""
+
+[[verification]]
+origine = "Étape 2"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_semences.py && gabarit check .claude/implementation/semences-a-sections-structurees.brief.md --filled"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 10 items
+
+skills/gabarit/scripts/tests/test_semences.py ..........                 [100%]
+
+============================== 10 passed in 0.51s ==============================
+.claude/implementation/semences-a-sections-structurees.brief.md : rempli et conforme à la semence « brief »"""
+
+[[verification]]
+origine = "Étape 3"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_semences.py && gabarit check .claude/implementation/semences-a-sections-structurees.md --filled"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 10 items
+
+skills/gabarit/scripts/tests/test_semences.py ..........                 [100%]
+
+============================== 10 passed in 0.42s ==============================
+.claude/implementation/semences-a-sections-structurees.md : rempli et conforme à la semence « suivi »"""
+
+[[verification]]
+origine = "Étape 4"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_semences.py && rc=0; for f in shadow-skills/*/SKILL.md; do gabarit check \"$f\" --filled || rc=1; done; test $rc = 0"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 10 items
+
+skills/gabarit/scripts/tests/test_semences.py ..........                 [100%]
+
+============================== 10 passed in 0.18s ==============================
+shadow-skills/claude-code-mods/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/emmylua-ls/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/nvim-mini-test/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/skill-convention/SKILL.md : rempli et conforme à la semence « shadow-skill »"""
+
+[[verification]]
+origine = "Étape 5"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 98 items
+
+skills/implementation-tracker/scripts/tests/test_contexte.py ........... [ 11%]
+..............                                                           [ 25%]
+skills/implementation-tracker/scripts/tests/test_dettes.py ............  [ 37%]
+skills/implementation-tracker/scripts/tests/test_export.py .......       [ 44%]
+skills/implementation-tracker/scripts/tests/test_fiche.py .............  [ 58%]
+skills/implementation-tracker/scripts/tests/test_modele.py ............. [ 71%]
+........                                                                 [ 79%]
+skills/implementation-tracker/scripts/tests/test_pose.py ............... [ 94%]
+.....                                                                    [100%]
+
+============================== 98 passed in 5.53s =============================="""
+
+[[verification]]
+origine = "Étape 6"
+commande = "~/.claude/.venv/bin/python -m pytest skills/implementation-tracker/scripts/tests/ && ! grep -nE 'COCHEE|NUMEROTEE|ECARTEE' skills/implementation-tracker/scripts/rapport_audit/*.py"
+statut = "passée"
+sortie = """============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/debian/.claude
+collected 98 items
+
+skills/implementation-tracker/scripts/tests/test_contexte.py ........... [ 11%]
+..............                                                           [ 25%]
+skills/implementation-tracker/scripts/tests/test_dettes.py ............  [ 37%]
+skills/implementation-tracker/scripts/tests/test_export.py .......       [ 44%]
+skills/implementation-tracker/scripts/tests/test_fiche.py .............  [ 58%]
+skills/implementation-tracker/scripts/tests/test_modele.py ............. [ 71%]
+........                                                                 [ 79%]
+skills/implementation-tracker/scripts/tests/test_pose.py ............... [ 94%]
+.....                                                                    [100%]
+
+============================== 98 passed in 5.47s =============================="""
+
+[[verification]]
+origine = "Étape 7"
+commande = "uvx rumdl fmt --check skills/intent-brief skills/implementation-tracker/references"
+statut = "passée"
+sortie = "Success: No issues found in 9 files (60ms)"
+
+[[verification]]
+origine = "Étape 8"
+commande = "rc=0; for f in shadow-skills/*/SKILL.md; do gabarit check \"$f\" --filled || rc=1; done; gabarit check .claude/implementation/compaction-de-la-prose.brief.md || rc=1; test $rc = 0"
+statut = "passée"
+sortie = """shadow-skills/claude-code-mods/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/emmylua-ls/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/nvim-mini-test/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/skill-convention/SKILL.md : rempli et conforme à la semence « shadow-skill »
+.claude/implementation/compaction-de-la-prose.brief.md : conforme à la semence « brief »"""
+
+[[verification]]
+origine = "Étape 9"
+commande = "C2, C5, C7, puis les quatre linters sur la branche et sur l'arbre extrait de `master`"
+statut = "non-exécutée"
+sortie = "vérification en prose, pas une commande : à mener par l'auditeur"
+
+[[verification]]
+origine = "C1"
+commande = "S=<scratch>/c1; sed 's/^- \\[x\\] 3\\. Semence `suivi` structurée — /- [x] 3. Semence suivi structurée sans fichiers /' <suivi> > $S/etape.md; sed 's/^<OPTIONNEL>$/- R4 — écartée sans date/' <suivi> > $S/ecartee.md; sed 's/^- \\*\\*C3\\*\\* — /- **C4** — /' <brief> > $S/critere.md; sed 's/^- \\*\\*S2\\*\\* — /- S2 — /' <brief> > $S/signal.md; (première puce de Références de shadow-skills/nvim-mini-test/SKILL.md privée de son lien) > $S/ref.md; for f in etape ecartee critere signal ref; do gabarit check $S/$f.md; done"
+statut = "passée"
+sortie = """etape.md: section « Étapes », puce 3 — « [x] 3. Semence suivi structurée sans fichiers `suivi/contract.toml`, … » ne suit pas le motif « [{etat: enum}] {n: int}. {intitule} — {fichiers} — vérif: {verif} » — rc=1
+ecartee.md: section « Dettes écartées », puce 1 — « R4 — écartée sans date » ne suit pas le motif « R{n: int} — {justificatif} — {date: date} » — rc=1
+critere.md: section « Critères de réussite », puce 3, capture « n » — 4 rompt la séquence — 3 attendu à cette puce — rc=1
+signal.md: section « Signaux de dérive », puce 2 — « S2 — Le diff touche … » ne suit pas le motif « **S{n: int}** — {signal} » — rc=1
+ref.md: section « Références », puce 1 — « `references/mini-test-api.md` : the full API, … » ne suit pas le motif « [`{chemin}`]({lien}) : {quand} » — rc=1
+(chaque variante mal formée échoue, comme le critère l'attend)"""
+
+[[verification]]
+origine = "C2"
+commande = "! grep -nE 'COCHEE|NUMEROTEE|ECARTEE' skills/implementation-tracker/scripts/rapport_audit/*.py"
+statut = "passée"
+sortie = "aucune ligne ; grep rc=1"
+
+[[verification]]
+origine = "C3"
+commande = "rc=0; for s in suivi brief shadow-skill; do gabarit new $s <scratch>/c3/$s.md || rc=1; gabarit check <scratch>/c3/$s.md || rc=1; done; test $rc = 0"
+statut = "passée"
+sortie = """<scratch>/c3/suivi.md : conforme à la semence « suivi »
+<scratch>/c3/brief.md : conforme à la semence « brief »
+<scratch>/c3/shadow-skill.md : conforme à la semence « shadow-skill »
+rc=0 — sections posées au Marqueur de leur forme, ex. `<À REMPLIR motif: - [{etat: enum}] {n: int}. {intitule} — {fichiers} — vérif: {verif}>`, `<À REMPLIR motif: - **C{n: int}** — {critere}>`, `<OPTIONNEL motif: - [`{chemin}`]({lien}) : {quand}>`"""
+
+[[verification]]
+origine = "C4"
+commande = "rc=0; for f in shadow-skills/*/SKILL.md; do gabarit check \"$f\" --filled || rc=1; done; gabarit check .claude/implementation/compaction-de-la-prose.brief.md || rc=1; test $rc = 0"
+statut = "passée"
+sortie = """shadow-skills/claude-code-mods/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/emmylua-ls/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/nvim-mini-test/SKILL.md : rempli et conforme à la semence « shadow-skill »
+shadow-skills/skill-convention/SKILL.md : rempli et conforme à la semence « shadow-skill »
+.claude/implementation/compaction-de-la-prose.brief.md : conforme à la semence « brief »
+rc=0"""
+
+[[verification]]
+origine = "C5"
+commande = "git diff --stat master -- .claude/implementation/done/"
+statut = "passée"
+sortie = "aucune sortie ; rc=0"
+
+[[verification]]
+origine = "C6"
+commande = "~/.claude/.venv/bin/python -m pytest skills/gabarit/scripts/tests/test_squelette.py skills/list-dir/scripts/tests/test_structure.py -q -p no:cacheprovider"
+statut = "passée"
+sortie = "17 passed in 0.33s"
+
+[[verification]]
+origine = "C7"
+commande = "~/.claude/.venv/bin/python -m pytest skills/ scripts/tests/"
+statut = "échouée"
+sortie = """ERROR skills/session-dump/scripts/tests/test_cli.py
+ERROR skills/shadow-skill/scripts/tests/test_cli.py
+ERROR skills/shadow-skill/scripts/tests/test_lire.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
+3 errors in 1.23s
+rc=2 (même sortie, rc=2, sur l'arbre extrait de master)"""
+dette = "R1"
+
+[[conformite.critere]]
+id = "C1"
+critere = "Une ligne d'Étape mal formée dans un Suivi fait échouer `gabarit check`, qui nomme la section et la puce ; de même une ligne mal formée de `Dettes écartées`, un critère ou un signal mal numéroté d'un Brief, une puce de `Références` d'un Shadow-skill."
+etat = "atteint"
+constat = "Vérification C1 : cinq variantes mal formées des fichiers vivants (Étape sans séparateur de fichiers, `Dettes écartées` sans date, critère hors séquence, signal sans gras, Référence sans lien) font chacune échouer `gabarit check` (rc=1), le message nommant la section et la puce. Les motifs sont déclarés dans `brief/contract.toml`, `suivi/contract.toml` et `shadow-skill/contract.toml` ; `test_semences.py` (nouveau) assère les mêmes messages (`test_brief_puce_mal_formee`, `test_suivi_puce_mal_formee`, `test_suivi_critere_mal_numerote_dans_l_objectif`, `test_shadow_skill_reference_sans_lien`)."
+
+[[conformite.critere]]
+id = "C2"
+critere = "`grep -nE 'COCHEE|NUMEROTEE|ECARTEE' skills/implementation-tracker/scripts/rapport_audit/*.py` ne rend rien ; `rapport_audit` lit ces sections par `section_values`."
+etat = "atteint"
+constat = "Vérification C2 : le grep ne rend rien. Lu au diff : `pose.py` lit Intention, critères, hors-périmètre, signaux et Étapes par `puces`/`_labels`, qui appellent `section_values` sur le Contrat résolu depuis l'estampille (`contrat`, `trouver_semence`) ; `dettes.py:ecartee` lit `Dettes écartées` de même. `_numerotees`, `_symptome` et l'ancien `puces()` ont disparu. Ce rapport-ci a été posé par ce code sur le Brief et le Suivi du Chantier."
+
+[[conformite.critere]]
+id = "C3"
+critere = "`gabarit new suivi`, `brief` et `shadow-skill` posent leurs sections structurées au Marqueur de leur forme, et `gabarit check` juge le fichier posé conforme."
+etat = "atteint"
+constat = "Vérification C3 : `gabarit new` des trois Semences dans un répertoire temporaire, puis `gabarit check` : « conforme » pour chacune, rc=0. Les sections structurées sont posées au Marqueur portant leur motif (`<À REMPLIR motif: …>`, `<OPTIONNEL motif: …>`), les sections à labels au squelette de leurs labels."
+
+[[conformite.critere]]
+id = "C4"
+critere = "`gabarit check --filled` passe sur les quatre `shadow-skills/*/SKILL.md`, et `gabarit check` sur `.claude/implementation/compaction-de-la-prose.brief.md`."
+etat = "atteint"
+constat = "Vérification C4 : les quatre `SKILL.md` « rempli et conforme », le brief « conforme », rc=0. Aucun de ces fichiers n'a eu à changer (le commit E8 ne touche que le Suivi) ; `compaction-de-la-prose.brief.md` reste non suivi par git, comme le dit la Passation."
+
+[[conformite.critere]]
+id = "C5"
+critere = "`git diff --stat master -- .claude/implementation/done/` ne rend rien."
+etat = "atteint"
+constat = "Vérification C5 : aucune sortie, rc=0. `git diff --name-only master...834440b` ne nomme aucun fichier de `done/`."
+
+[[conformite.critere]]
+id = "C6"
+critere = "Une table de labels facultative dont seul un label `text` a été réécrit n'est plus tenue au Marqueur, et `merge` ne l'omet plus ; le cas est ajouté à `test_squelette.py` et à `test_structure.py`."
+etat = "atteint"
+constat = "Vérification C6 : 17 passed. `structure.py:_squelette_au_marqueur` compare désormais le corps d'un label `text`, blancs réduits, à son `text` : réécrit, il entame la table ; une `command` reste exemptée, limite nommée dans `format.md`. `test_squelette.py::test_un_text_reecrit_entame_la_table` montre `--filled` réclamant `Source` ; `test_structure.py::test_un_text_reecrit_entame_la_table` montre `merge_text` refusant l'élément au lieu d'omettre la section, et le réenroulement d'un `text` intact reste sans effet."
+
+[[conformite.critere]]
+id = "C7"
+critere = "`~/.claude/.venv/bin/python -m pytest skills/ scripts/tests/` passe, les tests de `rapport_audit` réécrits pour le format à motifs."
+etat = "non-atteint"
+constat = "Vérification C7 : la commande telle qu'écrite sort en 2, trois erreurs de collecte par collision de noms de modules de test, déjà présentes sur l'arbre extrait de `master`. Le code du Chantier passe : chaque répertoire de tests lancé seul est vert (gabarit 334, implementation-tracker 98, list-dir 550, scripts/tests 143… 1366 au total, 0 échec), et les tests de `rapport_audit` sont réécrits au format à motifs (`test_pose.py`, `test_dettes.py`). Mais le critère dit « passe », et le journal ne fait que ranger la correction hors périmètre, sans reformuler C7 : non atteint tel qu'écrit."
+dette = "R1"
+
+[[conformite.hors_perimetre]]
+exclusion = "Les Contrats des registres `road-map*` et `technical-debt*` : les toucher entraînerait la migration de toutes les listes."
+etat = "respecté"
+constat = "`git diff --name-only master...834440b | grep -E 'road-map|technical-debt'` ne rend rien : aucun Contrat ni Élément de registre touché. Les deux dettes à solder restent à la Clôture, comme le journal (2026-11-08) le décide."
+
+[[conformite.hors_perimetre]]
+exclusion = "La mise à niveau des archives de `done/`."
+etat = "respecté"
+constat = "Vérification C5 : aucun fichier de `done/` au diff. `rapport_audit` ne lit que le Brief et le Suivi du Chantier en cours, jamais une archive."
+
+[[conformite.hors_perimetre]]
+exclusion = "La dette `merge-aplatit-les-labels-title`, propre à `list-dir merge`."
+etat = "respecté"
+constat = "Côté list-dir, le diff ne touche que `skills/list-dir/scripts/tests/test_structure.py` (le cas C6) ; `listdir/` et `merge_text` sont intacts, l'aplatissement des labels `title` n'est pas abordé."
+
+[[conformite.signal]]
+id = "S1"
+signal = "Le diff touche un Contrat `road-map*` ou `technical-debt*`, ou un Élément de registre."
+etat = "absent"
+constat = "Aucun chemin `road-map*`, `technical-debt*` ni de registre dans `git diff --name-only master...834440b`."
+
+[[conformite.signal]]
+id = "S2"
+signal = "Le diff touche un fichier de `.claude/implementation/done/`."
+etat = "absent"
+constat = "Vérification C5 : diff vide sur `done/`."
+
+[[conformite.signal]]
+id = "S3"
+signal = "Une regex de format de section reste ou apparaît dans `rapport_audit`, y compris en repli sur l'ancien format."
+etat = "absent"
+constat = "Aucun `re.compile` ajouté au diff de `rapport_audit`. `NUMEROTEE`, `COCHEE`, `ECARTEE` et la lecture ad hoc de `**Symptôme** :` sont retirés, sans repli. Restent `RAPPORT`, `COMMANDE`, `ANSI`, `CONTROLE` et `SOURCE`, qui jugent un nom de fichier, une capture ou une sortie, pas le format d'une ligne de section ; `SOURCE` est exclu de S3 par le journal (2026-11-08, réponse de l'utilisateur à Q5)."
+
+[[conformite.signal]]
+id = "S4"
+signal = "Le moteur de `gabarit` change — nouvelle syntaxe de motif, nouveau type de capture — hors du correctif de la dette `squelette-ignore-un-label-text-reecrit` : l'outil plié à une Semence."
+etat = "absent"
+constat = "Seul `skills/gabarit/scripts/gabarit/structure.py` change dans le moteur, et seulement `_squelette_au_marqueur` (+10 −3), le correctif de `squelette-ignore-un-label-text-reecrit`. Ni `motif.py` ni les types de capture ne bougent ; la limite du motif sur « — » dans un justificatif est consignée au journal (2026-11-08) plutôt que contournée dans le moteur."
+
+[[conformite.signal]]
+id = "S5"
+signal = "Le diff touche `list-dir merge` (`merge_text`) ou `~/.config/nvim/`."
+etat = "absent"
+constat = "Aucun fichier de `skills/list-dir/scripts/listdir/` au diff ; `git -C ~/.config/nvim status --short` ne rend rien."
+
+[[conformite.signal]]
+id = "S6"
+signal = "Un test existant modifié pour passer, hors de sa réécriture au format à motifs."
+etat = "absent"
+constat = "Diff des tests lu : `test_pose.py::test_un_critere_sans_numero_est_nomme` change son assertion pour le message de `section_values`, ce qui est la réécriture au format à motifs ; `test_squelette.py` et `test_dettes.py` ne font qu'ajouter des cas ; `test_structure.py` étend la fixture `SQUELETTE` d'un label `Outil` prérempli, ce qui durcit les tests existants (ils restent verts avec un `text` intact) au lieu de les assouplir. `conftest.py` n'a pas eu à changer."
+
+[conformite.symptome]
+symptome = "les Semences `brief`, `suivi` et `shadow-skill` n'emploient pas les motifs et labels livrés par f100580. Le format de leurs sections reste écrit en prose dans la `description`, et redit par les regex de `rapport_audit` : une ligne d'Étape mal formée passe `gabarit check` (dépôt: `.claude/implementation/todo/technical-debt/semences-sans-sections-structurees.md`)."
+etat = "disparu"
+constat = "Vérification C1 : une ligne d'Étape mal formée dans le Suivi vivant fait échouer `gabarit check`, en nommant section et puce. Les trois Contrats déclarent leurs sections par `type = \"motif\"` ou `\"label\"`, leurs `description` ne redisent plus le format d'une ligne ; vérification C2 : `rapport_audit` n'a plus ses regex de format et lit par `section_values`, ce que ce rapport, posé depuis le Brief et le Suivi au nouveau format, montre à l'usage."
+
+[[dette.actuelle]]
+id = "R1"
+nature = "alignement"
+emplacement = "Brief, C7"
+constat = "La commande de C7, `~/.claude/.venv/bin/python -m pytest skills/ scripts/tests/`, sort en 2 : trois erreurs de collecte (`skills/session-dump/scripts/tests/test_cli.py`, `skills/shadow-skill/scripts/tests/test_cli.py`, `test_lire.py`, même nom de module que leurs homologues de `skills/lexique/`), « Interrupted: 3 errors during collection ». Le défaut est antérieur au Chantier : la même commande sur l'arbre extrait de `master` sort aussi en 2, avec les mêmes trois erreurs. Le code du Chantier n'est pas en cause : chaque répertoire de tests lancé seul passe (1366 tests, 0 échec), et `--continue-on-collection-errors` rend 1320 passed, 3 errors sur la branche contre 8 failed, 1297 passed, 3 errors sur `master` extrait. Le journal du Suivi (2026-11-08) range la correction hors périmètre, sans accord de l'utilisateur consigné ni C7 reformulé dans `Objectif et périmètre` : le critère, tel qu'écrit, n'est pas atteint."
+trouvee = "01-834440b"
+solution = "Soit l'utilisateur écarte R1 en `## Dettes écartées` du Suivi, le justificatif disant la collision de noms de modules antérieure à `master` et la suite verte répertoire par répertoire ; soit la collision se corrige (noms de modules de test uniques, ou `__init__.py` dans les répertoires de tests en conflit) pour que la commande de C7 sorte en 0 telle qu'écrite, dans ce Chantier par élargissement daté ou dans un Chantier à part, et R1 se range corrigée sur la sortie de la commande."
+severite = "bloquant"
+
+[[dette.actuelle]]
+id = "R2"
+nature = "qualité"
+emplacement = "skills/implementation-tracker/scripts/rapport_audit/dettes.py:89-91"
+constat = "`ecartee` lit `## Dettes écartées` par `puces` (donc `section_values`), qui échoue sur une section absente du fichier (`gabarit/structure.py:485-486`, « absente du fichier »). L'ancienne lecture, `sections.get(DETTES_ECARTEES, \"\")`, traitait l'absence comme une section vide et rendait le message qui guide l'utilisateur (« R<n> n'est pas en `## Dettes écartées` … l'utilisateur l'y écrit, `R<n> — justificatif — date` »). La section est facultative au Contrat : un Suivi qui l'a supprimée reçoit désormais un échec moins parlant. Le refus reste fermé et nommé ; aucun test ne couvre ce cas."
+trouvee = "01-834440b"
+solution = "Dans `ecartee`, traiter une section `Dettes écartées` absente comme vide (vérifier `SECTION_DETTES in fiche.sections` avant `puces`) pour retomber sur le message de guidage, et ajouter le cas à `test_dettes.py`."
+severite = "note"
+
+[[dette.actuelle]]
+id = "R3"
+nature = "style"
+emplacement = "skills/implementation-tracker/references/execution.md:24-27"
+constat = "La réécriture de « Quand le périmètre change » laisse un paragraphe mal enroulé : la ligne 26 s'arrête à 47 caractères (« brief. C'est la seule exception au « repris du »), et la phrase reprend à la ligne 27. `rumdl fmt --check` ne le relève pas, mais le paragraphe tranche avec l'enroulement à 100 colonnes du reste du fichier."
+trouvee = "01-834440b"
+solution = "Réenrouler le paragraphe des lignes 24 à 27 à 100 colonnes, sans changer le texte."
+severite = "note"
+
+[verdict]
+valeur = "DÉFAVORABLE"
+justification = "Une seule dette bloquante, R1, et elle ne tient pas au code livré : la commande de C7 sort en 2 sur une collision de noms de modules de test déjà présente sur `master`, alors que chaque répertoire de tests passe seul (1366 tests, 0 échec). Tel qu'écrit, le critère n'est pas atteint, et le journal range la correction hors périmètre sans que l'utilisateur ait écarté l'écart : la cote d'office s'applique. Le reste est acquis. C1 à C6 sont vérifiés par commande, aucune exclusion n'est entamée, aucun signal n'est matérialisé, le symptôme a disparu. Rejoués contre l'arbre extrait de `master` : ruff check (2 E501 de `test_fusion.py`, identiques), ruff format, basedpyright (88 erreurs identiques hors `skills/synced/`, ignoré par git) n'ajoutent rien ; rumdl n'ajoute que les MD013 du Brief, du Plan et du Suivi du Chantier, consignés au journal (2026-11-09), et ceux de `compaction-de-la-prose.brief.md`, non suivi par git. R2 et R3 sont des notes. Pour lever le verdict : écarter R1 en `## Dettes écartées` du Suivi, ou corriger la collision, puis relancer l'audit."

@@ -296,12 +296,16 @@ entier ou ne croît pas. `forme`, `labels` et `prefix` sont refusés hors d'une 
   avec `--filled`, quand la table est requise ;
 - les fautes du motif d'un label.
 
-**Une table facultative laissée au squelette n'est pas jugée** : tant que sa prose et chacun de
-ses labels sont à leur marqueur, `--filled` n'y réclame rien, pas même un label requis. Un label
-prérempli par `text` ou `command` ne l'entame pas ; une prose écrite, un label rempli ou vidé, une
-étiquette non déclarée, si. Sans cette règle, un fichier qu'on vient de poser échouerait à
-`--filled`, et l'on n'en sortirait qu'en supprimant la section. Entamée, la table réclame ses
-labels requis ; une table requise les réclame dès le squelette.
+**Une table facultative laissée au squelette n'est pas jugée** : tant que sa prose et chacun de ses
+labels sont à leur marqueur, `--filled` n'y réclame rien, pas même un label requis. Sans cette
+règle, un fichier qu'on vient de poser échouerait à `--filled`, et l'on n'en sortirait qu'en
+supprimant la section. Entamée, la table réclame ses labels requis ; une table requise les réclame
+dès le squelette.
+
+Une prose écrite, un label rempli ou vidé, une étiquette non déclarée entament la table ; un label
+prérempli tel que `new` l'a posé, non. Un `text` est littéral : réécrit, il entame la table, un
+réenroulement non. **Une `command` ne se rejoue pas** : sa sortie réécrite n'entame jamais la
+table, et ce qu'on y a écrit disparaît de `merge` si rien d'autre ne l'entame.
 
 Une étiquette que le contrat ne déclare pas n'est pas une faute, mais le signe d'un contrat
 incomplet : `check` la note sur stderr, comme un label `deprecated` encore présent, sans changer son

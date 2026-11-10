@@ -139,7 +139,30 @@ def test_un_critere_sans_numero_est_nomme(chantier: Path) -> None:
     )
     r = poser(chantier, SLUG, "clôture", DATE)
     assert not r
-    assert "Critères de réussite : puce sans numéro" in r.message
+    assert "section « Critères de réussite », puce 1 — " in r.message
+    assert "ne suit pas le motif « **C{n: int}** — {critere} »" in r.message
+
+
+def test_un_brief_sans_estampille_est_refuse(chantier: Path) -> None:
+    brief = chantier / ".claude" / "implementation" / f"{SLUG}.brief.md"
+    brief.write_text(
+        brief.read_text(encoding="utf-8").replace('gabarit = "brief"\n', ""), encoding="utf-8"
+    )
+    r = poser(chantier, SLUG, "clôture", DATE)
+    assert not r
+    assert r.message == f"Brief de {SLUG} : aucune estampille « gabarit »"
+
+
+def test_une_etape_mal_formee_est_nommee(chantier: Path) -> None:
+    suivi = chantier / ".claude" / "implementation" / f"{SLUG}.md"
+    suivi.write_text(
+        suivi.read_text(encoding="utf-8").replace(" — `b.txt` — vérif: `test -f b.txt`", ""),
+        encoding="utf-8",
+    )
+    r = poser(chantier, SLUG, "clôture", DATE)
+    assert not r
+    assert "section « Étapes », puce 2 — " in r.message
+    assert not _dossier(chantier).exists()
 
 
 def test_new_affiche_le_chemin_du_rapport(chantier: Path) -> None:

@@ -19,6 +19,16 @@ Brief, `État courant`, `Objectif et périmètre` et `Passation` gardent leur fo
 `skills/gabarit/gabarit/suivi/contract.toml`. Une ligne d'Étape mal formée dans un Suivi passe
 encore `gabarit check` (rejoué à l'audit 01, code 0).
 
+## Soldé le
+
+**2026-11-10, chantier `semences-a-sections-structurees`** — les Semences `brief`, `suivi` et
+`shadow-skill` déclarent leurs sections structurées par motif ou labels, et `rapport_audit` les lit
+par `section_values`. Établi par : `gabarit check` sur une copie du Suivi du Chantier dont la
+ligne de l'Étape 1 perd un « — » → code 1, « section « Étapes », puce 1 — … ne suit pas le motif
+« [{etat: enum}] {n: int}. {intitule} — {fichiers} — vérif: {verif} » » ; puis
+`grep -nE 'COCHEE|NUMEROTEE|ECARTEE' skills/implementation-tracker/scripts/rapport_audit/*.py` →
+code 1, aucune ligne.
+
 ## Pourquoi c'est gênant
 
 Le symptôme d'origine reste entier sur les fichiers réels : une ligne mal formée n'échoue qu'à

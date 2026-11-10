@@ -142,11 +142,10 @@ La divergence entre brief et réel est une **information** : l'effacer la détru
 
 ## Format d'étape
 
-```
-- [état] N. Intitulé — <fichier(s)> — vérif: <commande>
-```
-
-`[ ]` à faire · `[>]` en cours · `[x]` fait · `[!]` bloqué
+Le motif de la section `Étapes` de la Semence `suivi` déclare la forme d'une étape et ses états :
+`gabarit contract suivi` le rend, `gabarit check` le vérifie, `audit new` le lit. La raison d'une
+étape `[!]` s'écrit en `**Notes**` de l'État courant : après `vérif:`, elle se lirait comme une
+vérification.
 
 `[>]` se pose quand le travail de l'étape commence, pas au commit de la précédente : entre les deux,
 une modification est une Retouche de l'étape livrée

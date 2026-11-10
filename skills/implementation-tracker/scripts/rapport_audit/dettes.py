@@ -12,7 +12,6 @@ commentaires d'un tableau de dettes ne survivent pas, ses valeurs si.
 """
 
 import datetime as dt
-import re
 from pathlib import Path
 from typing import Literal
 
@@ -22,16 +21,15 @@ from gabarit.prefill import racine_git
 from gabarit.types import PLACEHOLDER, Result, fail, ok
 
 from rapport_audit.modele import Audit, Dette, Nature, Severite, valider
-from rapport_audit.pose import puces, table_toml
+from rapport_audit.pose import contrat, puces, table_toml
 
 type Tableau = Literal["actuelle", "corrigee", "ecartee"]
 
 # Les tableaux de dettes, dans l'ordre du modèle et de l'écriture.
 TABLEAUX = ("precedente", "actuelle", "corrigee", "ecartee")
-# La section du Suivi d'où se lit une dette écartée, déclarée par la Semence `suivi`, et sa ligne :
-# `R<n> — justificatif — date`, une puce par dette.
-DETTES_ECARTEES = "Dettes écartées"
-ECARTEE = re.compile(r"^(R[1-9][0-9]*)\s+—\s+(.+)\s+—\s+([0-9]{4}-[0-9]{2}-[0-9]{2})$")
+# La section du Suivi d'où se lit une dette écartée : son motif, `R{n} — {justificatif} — {date}`,
+# est déclaré par la Semence `suivi`, et lu par `section_values`.
+SECTION_DETTES = "Dettes écartées"
 
 
 def _lire(fichier: Path) -> Result[tuple[str, Audit]]:
@@ -85,15 +83,20 @@ def ecartee(fichier: Path, suivi: str, id_: str) -> Result[tuple[str, dt.date]]:
     lu = read_item(racine / suivi)
     if not lu:
         return fail(f"Suivi : {lu.message}")
-    for puce in puces(lu.unwrap().sections.get(DETTES_ECARTEES, "")):
-        m = ECARTEE.match(puce)
-        if m is not None and m.group(1) == id_:
-            try:
-                return ok((m.group(2).strip(), dt.date.fromisoformat(m.group(3))))
-            except ValueError:
-                return fail(f"{suivi}, {DETTES_ECARTEES} : date invalide pour {id_}")
+    fiche = lu.unwrap()
+    c = contrat(racine, fiche, "Suivi")
+    if not c:
+        return fail(c.message)
+    # LA SECTION EST FACULTATIVE : absente, elle n'écarte rien, et le refus dit comment l'écrire.
+    lues = puces(c.unwrap(), fiche, SECTION_DETTES) if SECTION_DETTES in fiche.sections else ok([])
+    if not lues:
+        return fail(f"Suivi :\n{lues.message}")
+    for puce in lues.unwrap():
+        if f"R{puce['n']}" == id_:
+            # LA DATE EST DÉJÀ JUGÉE : `section_values` ne rend rien que `check` refuserait.
+            return ok((str(puce["justificatif"]), dt.date.fromisoformat(str(puce["date"]))))
     return fail(
-        f"{id_} n'est pas en `## {DETTES_ECARTEES}` de {suivi} : l'utilisateur l'y écrit, "
+        f"{id_} n'est pas en `## {SECTION_DETTES}` de {suivi} : l'utilisateur l'y écrit, "
         f"`{id_} — justificatif — date`, avant qu'elle ne s'écarte"
     )
 

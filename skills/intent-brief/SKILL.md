@@ -48,7 +48,8 @@ Le cadrage a un coût. Il ne se justifie pas pour :
 Dans ces cas : le dire en une ligne et renvoyer directement à `/implementation-tracker`, qui sait
 ouvrir un chantier sans brief. **Sortie anticipée** également si, au terme des échanges, aucune
 ambiguïté n'est ouverte et que l'utilisateur n'a rien à ajouter : écrire un brief minimal —
-intention et hors-périmètre, les autres sections à `— non abordé` — et passer à la Phase 6.
+intention et hors-périmètre, les autres sections à « non abordé », sous la forme de leur motif
+([Règle du sourçage](#règle-du-sourçage)) — et passer à la Phase 6.
 
 ## Règle du sourçage
 
@@ -61,7 +62,9 @@ plus rien ne remettra en cause.
 
 - Les puces de `## Contraintes connues` et `## Signaux de dérive` portent leur source :
   `(dit)` ou `(dépôt: <chemin ou sha>)`. Une puce sans marqueur est une supposition — la retirer.
-- Un trou se déclare `— non abordé`, ou part en `## Incertitudes à lever en plan`.
+- Un trou se déclare « non abordé », sous la forme que le motif de sa section admet —
+  `- **C1** — non abordé`, `- **S1** — non abordé`, `- **Non abordé** : —`, `- non abordé` en
+  hors-périmètre —, ou part en `## Incertitudes à lever en plan`.
 - **Combler un trou par plausibilité est interdit**, même quand la réponse paraît évidente.
 - **Pas de comblement rétroactif** : une question restée sans réponse ne se résout pas d'elle-même
   trois tours plus tard. La reposer, ou la reporter en incertitude.
@@ -201,7 +204,8 @@ Puis :
    ```
 
    Un échec nomme ce qui reste à remplir : le brief ne se propose pas à la validation tant qu'il
-   n'est pas conforme. Un axe resté vide s'écrit `— non abordé`, jamais une supposition.
+   n'est pas conforme. Un axe resté vide s'écrit « non abordé », sous la forme de son motif, jamais
+   une supposition.
 2. **Proposer la validation**, dans un message à elle seule : le chemin du brief, et le fait que
    rien n'y sera plus ajouté. Deux choix :
    1. **Valider le Brief et passer au Plan** ;

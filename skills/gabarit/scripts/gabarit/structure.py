@@ -317,8 +317,11 @@ def _corps_au_marqueur(label: Section, corps: str, rang: int) -> bool:
 def _squelette_au_marqueur(section: Section, corps: str, rang: int) -> bool:
     """Vrai si la prose et chaque label présent d'une table sont restés au marqueur.
 
-    UN LABEL PRÉREMPLI N'Y COMPTE PAS : `new` le pose plein, et sa valeur ne dit pas que
-    la table a été entamée. Une étiquette non déclarée, si : quelqu'un l'a écrite.
+    UN LABEL PRÉREMPLI TEL QUE POSÉ N'Y COMPTE PAS : `new` le pose plein, et sa valeur ne
+    dit pas que la table a été entamée. Un `text` est littéral : réécrit, il l'entame, blancs
+    réduits pour qu'un réenroulement n'y suffise pas. Une `command` ne se rejoue pas : sa
+    sortie, réécrite ou non, ne l'entame jamais. Une étiquette non déclarée, si : quelqu'un
+    l'a écrite.
     """
     avant, blocs = decoupe_labels(section, corps, rang)
     if (avant and not is_marker(avant)) or not (avant or blocs):
@@ -327,7 +330,11 @@ def _squelette_au_marqueur(section: Section, corps: str, rang: int) -> bool:
         label = section.labels.get(bloc.nom)
         if label is None:
             return False
-        if label.text is not None or label.command is not None:
+        if label.text is not None:
+            if reduit_blancs(bloc.corps).strip() != reduit_blancs(label.text).strip():
+                return False
+            continue
+        if label.command is not None:
             continue
         if not _corps_au_marqueur(label, bloc.corps, rang + 1):
             return False

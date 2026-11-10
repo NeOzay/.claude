@@ -43,7 +43,17 @@ résolvent depuis le répertoire du skill."""
 
 [sections."Références"]
 description = """
-Une puce par fichier de référence du skill — un lien relatif, puis quand le lire :
-  - [`references/<fichier>.md`](references/<fichier>.md) : <quand le lire>
+Une puce par fichier de référence du skill, et quand le lire. Absente quand le skill n'a pas de
+référence."""
+type = "motif"
+motif = "[`{chemin}`]({lien}) : {quand}"
+fin = "\n"
 
-Absente quand le skill n'a pas de référence."""
+[sections."Références".captures.chemin]
+description = "Le chemin du fichier, relatif au répertoire du skill : `references/<fichier>.md`."
+
+[sections."Références".captures.lien]
+description = "Le même chemin, relatif, en cible du lien."
+
+[sections."Références".captures.quand]
+description = "La situation où le lire."

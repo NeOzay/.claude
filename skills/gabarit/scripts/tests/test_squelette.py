@@ -3,8 +3,9 @@
 CE QUE CE FICHIER PROUVE (R2 de l'audit 01) : une table de labels facultative, telle que
 `new` la pose, passe `check --filled` même si elle déclare un label requis ; entamée, elle
 réclame ses labels requis ; requise, elle les réclame au squelette même. Un label
-prérempli ne l'entame pas ; une étiquette non déclarée, un label vidé ou une prose écrite
-l'entament. `is_section_untouched` le dit pour une section, à motif comme à labels.
+prérempli laissé tel quel ne l'entame pas, même réenroulé ; un `text` réécrit (R6 de
+l'audit 02), une étiquette non déclarée, un label vidé ou une prose écrite l'entament.
+`is_section_untouched` le dit pour une section, à motif comme à labels.
 """
 
 from __future__ import annotations
@@ -120,6 +121,17 @@ def test_un_label_prerempli_n_entame_pas(tmp_path: Path) -> None:
     c, sections = poser(tmp_path)
     assert "**Outil** : pytest" in sections["Annexe"]
     assert is_section_untouched(c.sections["Annexe"], sections["Annexe"])
+    reenroule = sections["Annexe"].replace("**Outil** : pytest", "**Outil** :\n  pytest")
+    assert is_section_untouched(c.sections["Annexe"], reenroule)
+
+
+def test_un_text_reecrit_entame_la_table(tmp_path: Path) -> None:
+    c, sections = poser(tmp_path)
+    annexe = sections["Annexe"].replace("**Outil** : pytest", "**Outil** : nox")
+    assert not is_section_untouched(c.sections["Annexe"], annexe)
+    assert fautes(c, remplie(sections) | {"Annexe": annexe}) == [
+        "section « Annexe », label « Source » — à remplir",
+    ]
 
 
 def test_ce_qui_entame_une_table(tmp_path: Path) -> None:

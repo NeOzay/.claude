@@ -18,6 +18,18 @@ label prérempli a été réécrit est donc tenue pour laissée au Marqueur. Rej
 `Annexe` facultative, `Source` requis, `Outil` à `text = "pytest"` réécrit « nox » ;
 `list-dir validate --filled` rend conforme, et `list-dir merge` omet la section entière.
 
+## Soldé le
+
+**2026-11-10, chantier `semences-a-sections-structurees`** — un label `text` réécrit entame la table
+facultative ; seule une `command` reste sautée, limite nommée dans
+`skills/gabarit/references/format.md`. Établi par la commande ci-dessous →
+`2 passed, 15 deselected`.
+
+```bash
+~/.claude/.venv/bin/python -m pytest -q skills/gabarit/scripts/tests/test_squelette.py \
+  skills/list-dir/scripts/tests/test_structure.py -k text_reecrit
+```
+
 ## Pourquoi c'est gênant
 
 Défaillance silencieuse : la valeur écrite disparaît de l'aggloméré, et les labels requis de la

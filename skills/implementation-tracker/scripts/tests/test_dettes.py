@@ -77,6 +77,30 @@ def test_range_vers_ecartee_sans_ligne_au_suivi_est_refuse(chantier: Path) -> No
     assert _audit(rapport).dette.ecartee == []
 
 
+def test_range_vers_ecartee_sur_une_ligne_mal_formee_est_refuse(chantier: Path) -> None:
+    suivi = chantier / ".claude" / "implementation" / f"{SLUG}.md"
+    suivi.write_text(
+        suivi.read_text(encoding="utf-8").replace("l'utilisateur. — 2026-10-04", "l'utilisateur."),
+        encoding="utf-8",
+    )
+    rapport = _second(chantier)
+    r = ranger(rapport, "R8", "ecartee", None)
+    assert not r
+    assert "section « Dettes écartées », puce 1 — " in r.message
+    assert _audit(rapport).dette.ecartee == []
+
+
+def test_range_vers_ecartee_sans_section_au_suivi_dit_comment_l_ecrire(chantier: Path) -> None:
+    suivi = chantier / ".claude" / "implementation" / f"{SLUG}.md"
+    texte = suivi.read_text(encoding="utf-8")
+    suivi.write_text(texte[: texte.index("## Dettes écartées")], encoding="utf-8")
+    rapport = _second(chantier)
+    r = ranger(rapport, "R8", "ecartee", None)
+    assert not r
+    assert "R8 n'est pas en `## Dettes écartées`" in r.message, r.message
+    assert _audit(rapport).dette.ecartee == []
+
+
 def test_range_d_une_dette_qui_n_est_pas_precedente(chantier: Path) -> None:
     r = ranger(_second(chantier), "R3", "actuelle", None)
     assert not r

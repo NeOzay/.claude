@@ -8,6 +8,10 @@ aucun verdict : ce sont les jugements de l'auditeur.
 UN SEUL PRÉCÉDENT : le dernier rapport du répertoire, lu et exigé rempli. Les plus anciens ne se
 lisent pas — le précédent porte déjà leurs cumuls.
 
+LES SECTIONS SE LISENT PAR LEUR SEMENCE : le Contrat vient de l'estampille du Suivi et du Brief,
+et `section_values` rend ce que porte chaque section structurée, ou un échec qui nomme la puce
+fautive. Aucune regex ne redit ici le format d'une ligne : il est déclaré une fois, au Contrat.
+
 LES VÉRIFICATIONS S'EXÉCUTENT D'AVANCE : la commande `— vérif:` de chaque Étape cochée du Suivi
 est lancée depuis la racine, et son résultat consigné. L'auditeur juge, et rejoue au besoin ; les
 commandes des critères du Brief restent les siennes.
@@ -24,11 +28,15 @@ from pathlib import Path
 from typing import Literal, cast
 
 import tomlkit
+from gabarit.commandes import ESTAMPILLE, trouver_semence
 from gabarit.contract import is_marker
+from gabarit.definitions import DEFS, roots
 from gabarit.gitcmd import git
 from gabarit.items import read_item, toml_value
 from gabarit.prefill import racine_git
-from gabarit.types import PLACEHOLDER, Result, fail, ok
+from gabarit.structure import Captures, Valeur, section_values
+from gabarit.types import PLACEHOLDER, Contract, Result, fail, ok
+from gabarit.types import Item as Fiche
 from pydantic import ValidationError
 from tomlkit.items import AoT, Item, Table
 
@@ -41,24 +49,19 @@ type Type = Literal["intermédiaire", "clôture"]
 IMPLEMENTATION = Path(".claude") / "implementation"
 RAPPORT = re.compile(r"^([0-9]{2})-[0-9a-f]{7,40}\.toml$")
 
-# Les sections du Brief que la revue reprend, déclarées par la Semence `brief`.
-INTENTION = "Intention"
+# Les sections du Brief que la revue reprend, et les captures de leurs motifs : la Semence `brief`.
+INTENTION, SYMPTOME = "Intention", "Symptôme"
 CRITERES = "Critères de réussite"
 HORS_PERIMETRE = "Hors-périmètre"
 SIGNAUX = "Signaux de dérive"
-
-# Une puce numérotée du Brief : `**C1** — …`, `**S2** — …`.
-NUMEROTEE = re.compile(r"^\*\*([CS][1-9][0-9]*)\*\*\s+—\s+(.+)$")
-# La source qui clôt une puce, `(dit)`, `(dit ; dépôt: …)`, `(dépôt: …)`, point final compris : la
-# Semence `brief` la déclare, et le rapport cite le texte sans elle, point gardé.
+# La source qui clôt la capture de texte d'une puce, `(dit)`, `(dit ; dépôt: …)`, `(dépôt: …)`,
+# point final compris : le rapport cite le texte sans elle, point gardé. Elle juge une valeur
+# capturée, pas le format d'une ligne : le motif laisse la source dans la capture.
 SOURCE = re.compile(r"\s*\((?:dit|dépôt\s*:)[^()]*\)(\.?)$")
-SYMPTOME = "**Symptôme** :"
 
-# La section du Suivi qui porte les Étapes, et la forme d'une Étape cochée, puce ôtée :
-# `contrat.md`, « Format d'étape ». Une Étape enroulée par le formateur se lit en joignant ses
-# lignes de suite.
+# La section du Suivi qui porte les Étapes, et l'état d'une Étape faite : la Semence `suivi`.
 ETAPES = "Étapes"
-COCHEE = re.compile(r"^\[x\] ([1-9][0-9]*)\. .* — vérif: (.+)$")
+FAITE = "x"
 # Une commande est une seule portée de code ; toute autre forme est une vérification en prose.
 COMMANDE = re.compile(r"^`([^`]+)`$")
 # Ce que le rapport garde de la sortie : la fin, où se lisent le décompte et l'erreur.
@@ -77,65 +80,72 @@ ENTETE = (
 )
 
 
-def puces(section: str) -> list[str]:
-    """Les puces de premier niveau d'une section, chacune sur une ligne."""
-    puces: list[str] = []
-    for ligne in section.splitlines():
-        if ligne.startswith("- "):
-            puces.append(ligne[2:].strip())
-        elif puces and ligne.startswith("  ") and ligne.strip():
-            puces[-1] += " " + ligne.strip()
-    return puces
+def _sans_source(texte: object) -> str:
+    return SOURCE.sub(r"\1", str(texte)).strip()
 
 
-def _sans_source(texte: str) -> str:
-    return SOURCE.sub(r"\1", texte).strip()
+def contrat(racine: Path, fiche: Fiche, quoi: str) -> Result[Contract]:
+    """Le Contrat de la Semence qu'estampille `fiche`, résolue depuis le dépôt `racine`."""
+    estampille = fiche.fields.get(ESTAMPILLE)
+    if not isinstance(estampille, str):
+        return fail(f"{quoi} : aucune estampille « {ESTAMPILLE} »")
+    semence = trouver_semence(estampille, None, roots(DEFS, cwd=racine))
+    if not semence:
+        return fail(f"{quoi} : {semence.message}")
+    return ok(semence.unwrap().contrat)
 
 
-def _numerotees(section: str, prefixe: str, nom: str) -> Result[list[tuple[str, str]]]:
-    """Les puces `**<prefixe><n>** — texte`, ou un échec qui nomme la puce sans numéro."""
-    points: list[tuple[str, str]] = []
-    for puce in puces(section):
-        m = NUMEROTEE.match(puce)
-        if m is None or not m.group(1).startswith(prefixe):
-            return fail(f"Brief, {nom} : puce sans numéro `**{prefixe}<n>**` — {puce[:60]}")
-        points.append((m.group(1), _sans_source(m.group(2))))
-    return ok(points)
+def puces(c: Contract, fiche: Fiche, titre: str) -> Result[list[Captures]]:
+    """Les captures de chaque puce d'une section à motif."""
+    lu = section_values(c, fiche, titre)
+    if not lu:
+        return Result(lu.status, None, lu.message)
+    valeurs = lu.unwrap()
+    if not isinstance(valeurs, list):
+        return fail(f"{fiche.path}: section « {titre} » — des labels, pas un motif")
+    return ok(valeurs)
 
 
-def _symptome(intention: str) -> str | None:
-    """Le paragraphe `**Symptôme** :` de l'Intention, sur une ligne."""
-    lignes: list[str] = []
-    for ligne in intention.splitlines():
-        if ligne.startswith(SYMPTOME):
-            lignes.append(ligne.removeprefix(SYMPTOME).strip())
-        elif lignes and ligne.strip() and not ligne.startswith("**"):
-            lignes.append(ligne.strip())
-        elif lignes:
-            break
-    return " ".join(lignes) or None
+def _labels(c: Contract, fiche: Fiche, titre: str) -> Result[dict[str, Valeur]]:
+    """Les labels d'une section à labels."""
+    lu = section_values(c, fiche, titre)
+    if not lu:
+        return Result(lu.status, None, lu.message)
+    valeurs = lu.unwrap()
+    if not isinstance(valeurs, dict):
+        return fail(f"{fiche.path}: section « {titre} » — un motif, pas des labels")
+    return ok(valeurs)
 
 
-def revue(sections: Mapping[str, str]) -> Result[dict[str, object]]:
+def revue(c: Contract, brief: Fiche) -> Result[dict[str, object]]:
     """Les points de la revue, posés depuis les sections du Brief, `etat` et `constat` à remplir."""
     a_remplir = {"etat": PLACEHOLDER, "constat": PLACEHOLDER}
-    criteres = _numerotees(sections.get(CRITERES, ""), "C", CRITERES)
-    if not criteres:
-        return fail(criteres.message)
-    signaux = _numerotees(sections.get(SIGNAUX, ""), "S", SIGNAUX)
-    if not signaux:
-        return fail(signaux.message)
+    intention = _labels(c, brief, INTENTION)
+    if not intention:
+        return fail(intention.message)
+    lues: dict[str, list[Captures]] = {}
+    for titre in (CRITERES, HORS_PERIMETRE, SIGNAUX):
+        puces_lues = puces(c, brief, titre)
+        if not puces_lues:
+            return fail(puces_lues.message)
+        lues[titre] = puces_lues.unwrap()
     conformite: dict[str, object] = {
-        "critere": [{"id": i, "critere": t, **a_remplir} for i, t in criteres.unwrap()],
-        "hors_perimetre": [
-            {"exclusion": _sans_source(p), **a_remplir}
-            for p in puces(sections.get(HORS_PERIMETRE, ""))
+        "critere": [
+            {"id": f"C{p['n']}", "critere": _sans_source(p["critere"]), **a_remplir}
+            for p in lues[CRITERES]
         ],
-        "signal": [{"id": i, "signal": t, **a_remplir} for i, t in signaux.unwrap()],
+        "hors_perimetre": [
+            {"exclusion": _sans_source(p["exclusion"]), **a_remplir} for p in lues[HORS_PERIMETRE]
+        ],
+        "signal": [
+            {"id": f"S{p['n']}", "signal": _sans_source(p["signal"]), **a_remplir}
+            for p in lues[SIGNAUX]
+        ],
     }
-    symptome = _symptome(sections.get(INTENTION, ""))
-    if symptome is not None:
-        conformite["symptome"] = {"symptome": symptome, **a_remplir}
+    symptome = intention.unwrap().get(SYMPTOME)
+    if isinstance(symptome, str):
+        # UNE LIGNE : le formateur enroule le label, le rapport le cite d'un tenant.
+        conformite["symptome"] = {"symptome": " ".join(symptome.split()), **a_remplir}
     return ok(conformite)
 
 
@@ -185,13 +195,18 @@ def executer(racine: Path, origine: str, verif: str) -> dict[str, object]:
     return {**verification, "statut": "passée", "sortie": sortie}
 
 
-def verifications(racine: Path, etapes: str) -> list[dict[str, object]]:
-    """Les vérifications des Étapes cochées de la section `## Étapes`, dans leur ordre."""
-    return [
-        executer(racine, f"Étape {m.group(1)}", m.group(2))
-        for etape in puces(etapes)
-        if (m := COCHEE.match(etape)) is not None
-    ]
+def verifications(racine: Path, c: Contract, suivi: Fiche) -> Result[list[dict[str, object]]]:
+    """Les vérifications des Étapes faites de la section `## Étapes`, dans leur ordre."""
+    etapes = puces(c, suivi, ETAPES)
+    if not etapes:
+        return fail(etapes.message)
+    return ok(
+        [
+            executer(racine, f"Étape {e['n']}", str(e["verif"]))
+            for e in etapes.unwrap()
+            if e["etat"] == FAITE
+        ]
+    )
 
 
 def _texte(champs: Mapping[str, object], nom: str) -> str | None:
@@ -258,8 +273,8 @@ def poser(cwd: Path, slug: str, type_: Type, date: dt.date) -> Result[Path]:
     lu = read_item(racine / suivi)
     if not lu:
         return fail(f"Suivi de {slug} : {lu.message}")
-    champs = lu.unwrap().fields
-    sections = lu.unwrap().sections
+    fiche_suivi = lu.unwrap()
+    champs = fiche_suivi.fields
     branche, base, plan = (_texte(champs, n) for n in ("branche", "base", "plan"))
     if branche is None or base is None or plan is None:
         return fail(f"{suivi} : `branche`, `base` et `plan` sont requis")
@@ -304,12 +319,21 @@ def poser(cwd: Path, slug: str, type_: Type, date: dt.date) -> Result[Path]:
         lu_brief = read_item(racine / brief)
         if not lu_brief:
             return fail(f"Brief de {slug} : {lu_brief.message}")
-        points = revue(lu_brief.unwrap().sections)
+        c_brief = contrat(racine, lu_brief.unwrap(), f"Brief de {slug}")
+        if not c_brief:
+            return fail(c_brief.message)
+        points = revue(c_brief.unwrap(), lu_brief.unwrap())
         if not points:
-            return fail(points.message)
+            return fail(f"Brief de {slug} :\n{points.message}")
         donnees["brief"] = brief
         donnees["conformite"] = points.unwrap()
-    donnees["verification"] = verifications(racine, sections.get(ETAPES, ""))
+    c_suivi = contrat(racine, fiche_suivi, f"Suivi de {slug}")
+    if not c_suivi:
+        return fail(c_suivi.message)
+    faites = verifications(racine, c_suivi.unwrap(), fiche_suivi)
+    if not faites:
+        return fail(f"Suivi de {slug} :\n{faites.message}")
+    donnees["verification"] = faites.unwrap()
 
     try:
         audit = Audit.model_validate(donnees, strict=True, context=Mode(rempli=False))

@@ -93,66 +93,173 @@ command = "date +%F"
 [sections."Objectif et périmètre"]
 required = true
 description = """
-Repris du brief, pas reformulé, en cinq blocs :
-- `**Symptôme** :`
-- `**But** :`
-- `**Critères de réussite** :`
-- `**Hors-périmètre** :`
-- `**Signaux de dérive** :`
+Repris du brief, pas reformulé. Sans symptôme, la section a perdu le lien avec l'intention
+d'origine : c'est lui qui montre qu'on a construit la bonne solution au mauvais problème."""
+type = "label"
+forme = "bold"
 
-Sans symptôme, la section a perdu le lien avec l'intention d'origine : c'est lui qui montre
-qu'on a construit la bonne solution au mauvais problème.
-Un élargissement accepté s'y ajoute, daté."""
+[sections."Objectif et périmètre".labels."Symptôme"]
+required = true
+order = 1
+description = "Le symptôme du brief."
+
+[sections."Objectif et périmètre".labels.But]
+required = true
+order = 2
+description = "Le but du brief."
+
+[sections."Objectif et périmètre".labels."Critères de réussite"]
+required = true
+order = 3
+description = "Les critères de réussite du brief, leurs numéros compris."
+type = "motif"
+motif = "**C{n: int}** — {critere}"
+fin = "\n"
+
+[sections."Objectif et périmètre".labels."Critères de réussite".captures.n]
+description = "Le numéro du critère au brief."
+min = 1
+sequence = true
+
+[sections."Objectif et périmètre".labels."Hors-périmètre"]
+required = true
+order = 4
+description = "Les exclusions du brief."
+type = "motif"
+motif = "{exclusion}"
+fin = "\n"
+
+[sections."Objectif et périmètre".labels."Signaux de dérive"]
+required = true
+order = 5
+description = "Les signaux de dérive du brief, leurs numéros et leurs sources compris."
+type = "motif"
+motif = "**S{n: int}** — {signal}"
+fin = "\n"
+
+[sections."Objectif et périmètre".labels."Signaux de dérive".captures.n]
+description = "Le numéro du signal au brief."
+min = 1
+sequence = true
+
+[sections."Objectif et périmètre".labels."Élargissements"]
+order = 6
+description = """
+Un élargissement du périmètre accepté par l'utilisateur, une puce par élargissement, avec son
+entrée au journal. Le brief, figé, ne change pas."""
+type = "motif"
+motif = "{date: date} — {elargissement}"
+fin = "\n"
+
+[sections."Objectif et périmètre".labels."Élargissements".captures.date]
+description = "La date de l'accord de l'utilisateur."
 
 [sections."Étapes"]
 required = true
 description = """
-Les étapes du plan, une par ligne :
-  - [état] N. Intitulé — <fichiers> — vérif: <commande>
+Les étapes du plan, une puce par étape. Le suivi porte l'intitulé et l'état, le plan porte le
+contenu. La dernière étape, sans fichier, écrit `aucun fichier`."""
+type = "motif"
+motif = "[{etat: enum}] {n: int}. {intitule} — {fichiers} — vérif: {verif}"
+fin = "\n"
 
-État :
-- `[ ]` à faire ;
-- `[>]` en cours ;
-- `[x]` fait ;
-- `[!]` bloqué, suivi de la raison.
+[sections."Étapes".captures.etat]
+description = """
+Une espace : à faire ; `>` en cours ; `x` fait ; `!` bloqué, la raison écrite en `**Notes**` de
+l'état courant."""
+values = [" ", ">", "x", "!"]
 
-Le suivi porte l'intitulé et l'état, le plan porte le contenu."""
+[sections."Étapes".captures.n]
+description = "Le numéro de l'étape, cité par les commits et les tags."
+min = 1
+sequence = true
+
+[sections."Étapes".captures.fichiers]
+description = "Les fichiers que l'étape touche, ou `aucun fichier`."
+
+[sections."Étapes".captures.verif]
+description = "La commande qui vérifie l'étape, entre accents graves ; à défaut, ce qu'elle rejoue."
 
 [sections."État courant"]
 required = true
 description = """
-Écrit pour une reprise à froid, en quatre lignes :
-- `**Prochaine action** :` lisible sans relire le plan ;
-- `**Vérification** :` la commande d'ensemble, distincte de celles des étapes ;
-- `**Dernier audit** :` `<sha> — <VERDICT> — <date>`, ou `aucun` ;
-- `**Notes** :`
+Écrit pour une reprise à froid. Le raisonnement de l'audit vit dans son rapport, pas ici."""
+type = "label"
+forme = "bold"
 
-Un verdict sans SHA ne se rattache à rien : le code a bougé depuis. Le raisonnement de l'audit
-vit dans son rapport, pas ici."""
+[sections."État courant".labels."Prochaine action"]
+required = true
+order = 1
+description = "La prochaine action, lisible sans relire le plan."
+
+[sections."État courant".labels."Vérification"]
+required = true
+order = 2
+description = "La commande d'ensemble, distincte de celles des étapes."
+
+[sections."État courant".labels."Dernier audit"]
+required = true
+order = 3
+description = """
+`<sha> — <VERDICT> — <date>`, ou `aucun`. Un verdict sans SHA ne se rattache à rien : le code a
+bougé depuis."""
+
+[sections."État courant".labels.Notes]
+order = 4
+description = "Ce que la reprise doit savoir de plus, dont la raison d'une étape `[!]`."
 
 [sections."Passation"]
 description = """
 Ce que la session qui s'arrête transmet à la suivante à la Passation, et qu'aucun autre fichier
-ne dit, en trois blocs :
-- `**Écrite** :` `session <N>, après <tag>` — la session qui l'écrit et le dernier tag posé,
-  d'Étape ou de Retouche ;
-- `**En cours** :` le travail entamé, dans son état exact, ou « rien » ;
-- `**À savoir** :` ce que la session a appris, absent du Suivi, du Plan et du code.
+ne dit. Réécrite à chaque Passation, jamais complétée. Quand elle est à jour, c'est la reprise
+d'implementation-tracker qui le juge, et elle seule. Tant qu'aucune Passation n'a eu lieu, elle
+reste au squelette."""
+type = "label"
+forme = "bold"
 
-Réécrite à chaque Passation, jamais complétée ; `**Écrite** :` dit de quand elle date. Quand elle
-est à jour, c'est la reprise d'implementation-tracker qui le juge, et elle seule. Tant qu'aucune
-Passation n'a eu lieu, la section reste à son marqueur."""
+[sections."Passation".labels."Écrite"]
+required = true
+order = 1
+description = """
+`session <N>, après <tag>` — la session qui l'écrit et le dernier tag posé, d'Étape ou de
+Retouche : ce qui dit de quand elle date."""
+
+[sections."Passation".labels."En cours"]
+required = true
+order = 2
+description = "Le travail entamé, dans son état exact, ou « rien »."
+
+[sections."Passation".labels."À savoir"]
+required = true
+order = 3
+description = "Ce que la session a appris, absent du Suivi, du Plan et du code."
 
 [sections."Dettes écartées"]
 description = """
-Les dettes d'audit que l'utilisateur écarte, une puce par dette :
-  - R<n> — justificatif — date
+Les dettes d'audit que l'utilisateur écarte, une puce par dette. L'orchestrateur l'écrit sur accord
+de l'utilisateur, jamais l'auditeur ; l'audit suivant range chaque dette écrite ici en Dette
+écartée, par `audit range`, qui en lit justificatif et date."""
+type = "motif"
+motif = "R{n: int} — {justificatif} — {date: date}"
+fin = "\n"
 
-L'orchestrateur l'écrit sur accord de l'utilisateur, jamais l'auditeur ; l'audit suivant range
-chaque dette écrite ici en Dette écartée, par `audit range`, qui en lit justificatif et date."""
+[sections."Dettes écartées".captures.n]
+description = "Le numéro de la dette au rapport d'audit."
+min = 1
+
+[sections."Dettes écartées".captures.justificatif]
+description = """
+Pourquoi l'utilisateur l'écarte. Sans « — » entouré d'espaces : la capture s'arrête au premier,
+et la date ne se lirait plus."""
+
+[sections."Dettes écartées".captures.date]
+description = "La date de l'accord de l'utilisateur."
 
 [sections."Journal de décisions"]
 description = """
 Ce qui contraint la suite — choix d'architecture, trade-offs, dépendances, verdict d'audit
-défavorable —, jamais les micro-choix. Une entrée de deux à trois lignes :
-  - **<date>** — décision. *Pourquoi* : … *Rejeté* : …"""
+défavorable —, jamais les micro-choix. Une entrée de deux à trois lignes, la décision suivie de
+*Pourquoi* : … *Rejeté* : …"""
+type = "motif"
+motif = "**{date: date}** — {decision}"
+fin = "\n"
